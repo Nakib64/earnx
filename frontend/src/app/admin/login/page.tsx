@@ -19,19 +19,18 @@ export default function AdminLoginPage() {
     setError(null);
     setLoading(true);
 
-    try {
-      const res = await apiFetch<{ accessToken: string; admin: any }>('/admin/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password }),
-      });
+    const res = await apiFetch<{ accessToken: string; admin: any }>('/admin/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
 
-      loginAdmin(res.accessToken, res.admin);
+    if (res.success && res.data) {
+      loginAdmin(res.data.accessToken, res.data.admin);
       router.push('/admin/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Admin authentication failed.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(res.error?.message || 'Admin authentication failed.');
     }
+    setLoading(false);
   };
 
   return (

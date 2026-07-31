@@ -24,6 +24,9 @@ enum TransactionType {
   WITHDRAW
   COMMISSION
   ADMIN_ADJUSTMENT
+  PREMIUM_WEEKLY_PAYOUT
+  INVESTMENT_DEPOSIT
+  INVESTMENT_PAYOUT
 }
 
 enum CommissionType {
@@ -41,15 +44,22 @@ model Admin {
 }
 
 model User {
-  id             String      @id @default(uuid())
-  phone          String      @unique
-  password_hash  String
-  full_name      String?
-  referral_code  String      @unique
-  referred_by_id String?
-  status         UserStatus  @default(DISABLED)
-  wallet_balance Decimal     @default(0.00) @db.Decimal(12, 2)
-  designation_id String?
+  id                     String            @id @default(uuid())
+  phone                  String            @unique
+  password_hash          String
+  full_name              String?
+  referral_code          String            @unique
+  referred_by_id         String?
+  status                 UserStatus        @default(DISABLED)
+  wallet_balance         Decimal           @default(0.00) @db.Decimal(12, 2)
+  designation_id         String?
+
+  // Premium status fields (Weekly payouts for 1 year / 52 weeks max)
+  is_premium             Boolean           @default(false)
+  premium_started_at     DateTime?
+  premium_expires_at     DateTime?
+  premium_payout_count   Int               @default(0)
+  last_premium_payout_at DateTime?
 
   referred_by         User?               @relation("ReferralTree", fields: [referred_by_id], references: [id], onDelete: SetNull)
   referrals           User[]              @relation("ReferralTree")
@@ -58,6 +68,7 @@ model User {
   activation_requests ActivationRequest[]  @relation("UserActivationRequests")
   premium_requests    PremiumRequest[]     @relation("UserPremiumRequests")
   withdrawal_requests WithdrawalRequest[]
+  investments         UserInvestment[]
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
 
@@ -154,4 +165,60 @@ model Offer {
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+}
+
+model SystemConfig {
+  id         String   @id @default(uuid())
+  key        String   @unique
+  value      String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model InvestmentPlan {
+  id                     String           @id @default(uuid())
+  title                  String
+  min_amount             Decimal          @db.Decimal(12, 2)
+  max_amount             Decimal          @db.Decimal(12, 2)
+  monthly_return_percent Decimal          @db.Decimal(5, 2)
+  duration_months        Int              @default(12)
+  is_active              Boolean          @default(true)
+  investments            UserInvestment[]
+  created_at             DateTime         @default(now())
+  updated_at             DateTime         @updatedAt
+}
+
+model UserInvestment {
+  id                     String          @id @default(uuid())
+  user_id                String
+  plan_id                String?
+  amount                 Decimal         @db.Decimal(12, 2)
+  monthly_return_percent Decimal         @db.Decimal(5, 2)
+  monthly_payout_amount  Decimal         @db.Decimal(12, 2)
+  status                 RequestStatus   @default(PENDING)
+  total_payouts_made     Int             @default(0)
+  max_payouts            Int             @default(12)
+  last_payout_at         DateTime?
+  next_payout_at         DateTime?
+  user                   User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  plan                   InvestmentPlan? @relation(fields: [plan_id], references: [id], onDelete: SetNull)
+  created_at             DateTime        @default(now())
+  updated_at             DateTime        @updatedAt
+
+  @@index([user_id])
+  @@index([plan_id])
+}
+
+model LeaderboardEntry {
+  id              String   @id @default(uuid())
+  rank            Int      @unique
+  name            String
+  phone           String?
+  invested_amount Decimal  @db.Decimal(12, 2)
+  profit_earned   Decimal  @db.Decimal(12, 2)
+  photo_url       String?
+  badge           String?
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }

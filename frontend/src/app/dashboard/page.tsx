@@ -17,6 +17,9 @@ import {
   Star,
   Award,
   AlertTriangle,
+  TrendingUp,
+  Trophy,
+  Sparkles,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -34,9 +37,10 @@ export default function DashboardPage() {
     );
   }
 
-  const referralLink = typeof window !== 'undefined'
-    ? `${window.location.origin}/register?ref=${user.referral_code}`
-    : `https://earnx.com/register?ref=${user.referral_code}`;
+  const referralLink =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/register?ref=${user.referral_code}`
+      : `https://earnx.com/register?ref=${user.referral_code}`;
 
   const copyReferral = () => {
     navigator.clipboard.writeText(referralLink);
@@ -78,6 +82,9 @@ export default function DashboardPage() {
     }
   };
 
+  const isPremium = (user as any).is_premium;
+  const payoutCount = (user as any).premium_payout_count || 0;
+
   return (
     <div className="space-y-6">
       {/* Top Welcome Header */}
@@ -90,6 +97,12 @@ export default function DashboardPage() {
             <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
               {user.status}
             </span>
+            {isPremium && (
+              <span className="bg-amber-400 text-slate-900 px-3 py-1 rounded-full text-xs font-extrabold flex items-center space-x-1">
+                <Star className="w-3.5 h-3.5 fill-slate-900" />
+                <span>PREMIUM</span>
+              </span>
+            )}
           </div>
           <p className="text-sky-100 text-sm">
             {user.status === 'ACTIVE'
@@ -110,7 +123,7 @@ export default function DashboardPage() {
           </button>
         )}
 
-        {user.status === 'ACTIVE' && (
+        {user.status === 'ACTIVE' && !isPremium && (
           <button
             onClick={handlePremiumRequest}
             disabled={requestLoading}
@@ -121,6 +134,27 @@ export default function DashboardPage() {
           </button>
         )}
       </div>
+
+      {/* Premium Weekly Payout Banner */}
+      {isPremium && (
+        <div className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-5 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-lg">Active Premium Membership</h3>
+              <p className="text-xs text-amber-100">
+                You receive automated weekly dividend payouts directly into your wallet.
+              </p>
+            </div>
+          </div>
+          <div className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl text-right">
+            <p className="text-xs font-semibold text-amber-100">Weekly Payout Progress</p>
+            <p className="text-lg font-black">{payoutCount} / 52 Weeks</p>
+          </div>
+        </div>
+      )}
 
       {/* Alert Messages */}
       {message && (
@@ -154,7 +188,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <div className="text-3xl font-extrabold text-slate-900">
-              ${Number(user.wallet_balance).toFixed(2)}
+              ৳{Number(user.wallet_balance).toFixed(2)}
             </div>
             <p className="text-xs text-slate-500 mt-1">Backed by ACID transaction ledger</p>
           </div>
@@ -209,7 +243,9 @@ export default function DashboardPage() {
               {user.referred_by?.full_name || user.referred_by?.phone || 'Direct Signup / Admin'}
             </div>
             <p className="text-xs font-mono text-slate-400 mt-1">
-              {user.referred_by?.referral_code ? `Code: ${user.referred_by.referral_code}` : 'Root Level Node'}
+              {user.referred_by?.referral_code
+                ? `Code: ${user.referred_by.referral_code}`
+                : 'Root Level Node'}
             </p>
           </div>
           <span className="text-xs text-slate-400">Direct upline node</span>
@@ -248,12 +284,32 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Access Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <Link
+          href="/dashboard/investments"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-300 transition-colors"
+        >
+          <div className="p-3 bg-sky-50 text-sky-600 rounded-xl">
+            <TrendingUp className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold text-slate-800">Investments</span>
+        </Link>
+
+        <Link
+          href="/dashboard/leaderboard"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-amber-300 transition-colors"
+        >
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+            <Trophy className="w-6 h-6" />
+          </div>
+          <span className="text-xs font-bold text-slate-800">Top 100</span>
+        </Link>
+
         <Link
           href="/dashboard/referral"
           className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-300 transition-colors"
         >
-          <div className="p-3 bg-sky-50 text-sky-600 rounded-xl">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
             <Users className="w-6 h-6" />
           </div>
           <span className="text-xs font-bold text-slate-800">Referral Tree</span>
@@ -266,7 +322,7 @@ export default function DashboardPage() {
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
             <Wallet className="w-6 h-6" />
           </div>
-          <span className="text-xs font-bold text-slate-800">Wallet & Withdraw</span>
+          <span className="text-xs font-bold text-slate-800">Wallet</span>
         </Link>
 
         <Link
@@ -276,17 +332,17 @@ export default function DashboardPage() {
           <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
             <Gift className="w-6 h-6" />
           </div>
-          <span className="text-xs font-bold text-slate-800">Offers & Tasks</span>
+          <span className="text-xs font-bold text-slate-800">Offers</span>
         </Link>
 
         <Link
           href="/dashboard/approvals"
           className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-300 transition-colors"
         >
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
             <Clock className="w-6 h-6" />
           </div>
-          <span className="text-xs font-bold text-slate-800">Approve Downlines</span>
+          <span className="text-xs font-bold text-slate-800">Approvals</span>
         </Link>
       </div>
     </div>

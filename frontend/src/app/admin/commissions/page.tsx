@@ -3,28 +3,29 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { Layers, Plus, Trash2, Save, Check } from 'lucide-react';
+import { CommissionRule, CommissionType } from '../../../types';
+import { DataTable, ColumnDef } from '../../../components/common/DataTable';
+import { StatusBadge } from '../../../components/common/StatusBadge';
+import { Plus, Trash2, Save } from 'lucide-react';
 
 export default function AdminCommissionsPage() {
   const { admin } = useAuth();
-  const [rules, setRules] = useState<any[]>([]);
+  const [rules, setRules] = useState<CommissionRule[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form State
-  const [type, setType] = useState<'ACTIVATION' | 'PREMIUM'>('ACTIVATION');
+  const [type, setType] = useState<CommissionType>(CommissionType.ACTIVATION);
   const [level, setLevel] = useState(1);
   const [amount, setAmount] = useState('');
   const [saving, setSaving] = useState(false);
 
   const fetchRules = async () => {
-    try {
-      const data = await apiFetch('/admin/commissions/rules', { isAdmin: true });
-      setRules(data || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const res = await apiFetch<CommissionRule[]>('/admin/commissions/rules', { isAdmin: true });
+    if (res.success && res.data) {
+      setRules(res.data);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -34,37 +35,72 @@ export default function AdminCommissionsPage() {
   const handleSaveRule = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    try {
-      await apiFetch('/admin/commissions/rules', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({
-          type,
-          level: Number(level),
-          amount: parseFloat(amount),
-        }),
-      });
+    const res = await apiFetch('/admin/commissions/rules', {
+      method: 'POST',
+      isAdmin: true,
+      body: JSON.stringify({
+        type,
+        level: Number(level),
+        amount: parseFloat(amount),
+      }),
+    });
+
+    if (res.success) {
       setAmount('');
       await fetchRules();
-    } catch (e: any) {
-      alert(e.message || 'Failed to save rule');
-    } finally {
-      setSaving(false);
+    } else {
+      alert(res.error?.message || 'Failed to save rule');
     }
+    setSaving(false);
   };
 
   const handleDeleteRule = async (id: string) => {
     if (!confirm('Are you sure you want to delete this commission rule?')) return;
-    try {
-      await apiFetch(`/admin/commissions/rules/${id}`, { method: 'DELETE', isAdmin: true });
+    const res = await apiFetch(`/admin/commissions/rules/${id}`, {
+      method: 'DELETE',
+      isAdmin: true,
+    });
+    if (res.success) {
       await fetchRules();
-    } catch (e: any) {
-      alert(e.message || 'Failed to delete rule');
+    } else {
+      alert(res.error?.message || 'Failed to delete rule');
     }
   };
 
+  const columns: ColumnDef<CommissionRule>[] = [
+    {
+      key: 'type',
+      header: 'Type',
+      render: (r) => <StatusBadge status={r.type} />,
+    },
+    {
+      key: 'level',
+      header: 'Level Depth',
+      render: (r) => <span className="font-bold font-mono text-slate-900">Level {r.level}</span>,
+    },
+    {
+      key: 'amount',
+      header: 'Reward Payout',
+      render: (r) => <span className="font-extrabold text-emerald-600 font-mono text-sm">৳{Number(r.amount).toFixed(2)}</span>,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (r) => (
+        <button
+          onClick={() => handleDeleteRule(r.id)}
+          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100"
+          title="Delete Rule"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Commission Rules Matrix</h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -73,7 +109,7 @@ export default function AdminCommissionsPage() {
       </div>
 
       {/* Add / Edit Form */}
-      <div className="glass-card rounded-2xl p-6 space-y-4">
+      <div className="glass-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200">
         <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
           <Plus className="w-4 h-4 text-sky-500" />
           <span>Add or Update Commission Rule</span>
@@ -86,11 +122,11 @@ export default function AdminCommissionsPage() {
             </label>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as any)}
+              onChange={(e) => setType(e.target.value as CommissionType)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"
             >
-              <option value="ACTIVATION">ACTIVATION</option>
-              <option value="PREMIUM">PREMIUM</option>
+              <option value={CommissionType.ACTIVATION}>ACTIVATION</option>
+              <option value={CommissionType.PREMIUM}>PREMIUM</option>
             </select>
           </div>
 
@@ -111,7 +147,7 @@ export default function AdminCommissionsPage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Payout Amount ($)
+              Payout Amount (৳)
             </label>
             <input
               type="number"
@@ -136,60 +172,17 @@ export default function AdminCommissionsPage() {
         </form>
       </div>
 
-      {/* Rules Display Table */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
+      {/* Rules Display Table using DataTable */}
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200">
         <h3 className="font-bold text-slate-900 text-sm">Active Rules Configured</h3>
 
-        {loading ? (
-          <div className="text-xs text-slate-400 py-4 text-center">Loading rules...</div>
-        ) : rules.length === 0 ? (
-          <div className="text-xs text-slate-400 py-4 text-center">No commission rules defined yet</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="pb-3 px-2">Type</th>
-                  <th className="pb-3 px-2">Level Depth</th>
-                  <th className="pb-3 px-2">Reward Payout</th>
-                  <th className="pb-3 px-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {rules.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-2 font-bold">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] ${
-                          r.type === 'ACTIVATION'
-                            ? 'bg-sky-100 text-sky-800'
-                            : 'bg-purple-100 text-purple-800'
-                        }`}
-                      >
-                        {r.type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-2 font-bold font-mono text-slate-900">
-                      Level {r.level}
-                    </td>
-                    <td className="py-3 px-2 font-extrabold text-emerald-600 font-mono text-sm">
-                      ${Number(r.amount).toFixed(2)}
-                    </td>
-                    <td className="py-3 px-2 text-right">
-                      <button
-                        onClick={() => handleDeleteRule(r.id)}
-                        className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100"
-                        title="Delete Rule"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable<CommissionRule>
+          data={rules}
+          columns={columns}
+          keyExtractor={(r) => r.id}
+          loading={loading}
+          emptyMessage="No commission rules defined yet."
+        />
       </div>
     </div>
   );

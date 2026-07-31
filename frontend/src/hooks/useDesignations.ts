@@ -36,14 +36,12 @@ export function useDesignations(isAdmin = true) {
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false);
 
   const fetchDesignations = useCallback(async () => {
-    try {
-      const data = await apiFetch<DesignationItem[]>('/admin/designations', { isAdmin });
-      setDesignations(data || []);
-    } catch (e) {
-      console.error('Failed to fetch designations:', e);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const res = await apiFetch<DesignationItem[]>('/admin/designations', { isAdmin });
+    if (res.success && res.data) {
+      setDesignations(res.data);
     }
+    setLoading(false);
   }, [isAdmin]);
 
   useEffect(() => {
@@ -66,9 +64,8 @@ export function useDesignations(isAdmin = true) {
 
   const saveDesignation = async () => {
     setSaving(true);
-    try {
-      if (editingId) {
-        await apiFetch(`/admin/designations/${editingId}`, {
+    const res = editingId
+      ? await apiFetch(`/admin/designations/${editingId}`, {
           method: 'PATCH',
           isAdmin,
           body: JSON.stringify({
@@ -76,9 +73,8 @@ export function useDesignations(isAdmin = true) {
             stars: Number(stars),
             max_level: Number(maxLevel),
           }),
-        });
-      } else {
-        await apiFetch('/admin/designations', {
+        })
+      : await apiFetch('/admin/designations', {
           method: 'POST',
           isAdmin,
           body: JSON.stringify({
@@ -87,37 +83,34 @@ export function useDesignations(isAdmin = true) {
             max_level: Number(maxLevel),
           }),
         });
-      }
 
+    if (res.success) {
       resetForm();
       await fetchDesignations();
-    } catch (err: any) {
-      throw new Error(err.message || 'Failed to save designation');
-    } finally {
+    } else {
       setSaving(false);
+      throw new Error(res.error?.message || 'Failed to save designation');
     }
+    setSaving(false);
   };
 
   const deleteDesignation = async (id: string) => {
-    try {
-      await apiFetch(`/admin/designations/${id}`, { method: 'DELETE', isAdmin });
+    const res = await apiFetch(`/admin/designations/${id}`, { method: 'DELETE', isAdmin });
+    if (res.success) {
       await fetchDesignations();
-    } catch (err: any) {
-      throw new Error(err.message || 'Failed to delete designation');
+    } else {
+      throw new Error(res.error?.message || 'Failed to delete designation');
     }
   };
 
   const openAssignModal = async (des: DesignationItem) => {
     setSelectedDesignation(des);
     setLoadingUsers(true);
-    try {
-      const usersRes = await apiFetch<{ data: any[] }>('/admin/users?limit=100', { isAdmin });
-      setAllUsers(usersRes.data || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingUsers(false);
+    const res = await apiFetch<any>('/admin/users?limit=100', { isAdmin });
+    if (res.success && res.data) {
+      setAllUsers(res.data.data || res.data || []);
     }
+    setLoadingUsers(false);
   };
 
   const closeAssignModal = () => {
@@ -128,17 +121,17 @@ export function useDesignations(isAdmin = true) {
   const toggleUserDesignation = async (userId: string, currentDesId: string | null) => {
     if (!selectedDesignation) return;
     const newDesId = currentDesId === selectedDesignation.id ? null : selectedDesignation.id;
-    try {
-      await apiFetch(`/admin/users/${userId}/designation`, {
-        method: 'PATCH',
-        isAdmin,
-        body: JSON.stringify({ designation_id: newDesId }),
-      });
+    const res = await apiFetch(`/admin/users/${userId}/designation`, {
+      method: 'PATCH',
+      isAdmin,
+      body: JSON.stringify({ designation_id: newDesId }),
+    });
 
+    if (res.success) {
       await openAssignModal(selectedDesignation);
       await fetchDesignations();
-    } catch (err: any) {
-      throw new Error(err.message || 'Failed to update user designation');
+    } else {
+      throw new Error(res.error?.message || 'Failed to update user designation');
     }
   };
 

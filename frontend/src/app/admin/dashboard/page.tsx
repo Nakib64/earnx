@@ -4,48 +4,40 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { ShieldCheck, Users, Wallet, Clock, ArrowUpRight, Award, Layers } from 'lucide-react';
+import { ShieldCheck, Users, Wallet, Clock, ArrowUpRight, Award, Layers, TrendingUp, Trophy } from 'lucide-react';
 
 export default function AdminDashboardPage() {
   const { admin } = useAuth();
   const [stats, setStats] = useState({
     totalUsers: 0,
-    activeUsers: 0,
     pendingApprovals: 0,
-    totalBalance: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAdminStats = async () => {
-      try {
-        const [usersRes, approvalsRes] = await Promise.all([
-          apiFetch('/admin/users?limit=1', { isAdmin: true }),
-          apiFetch('/admin/requests/pending', { isAdmin: true }),
-        ]);
+      setLoading(true);
+      const [usersRes, approvalsRes] = await Promise.all([
+        apiFetch<any>('/admin/users?limit=1', { isAdmin: true }),
+        apiFetch<any>('/admin/requests/pending', { isAdmin: true }),
+      ]);
 
-        const totalU = usersRes.meta?.total || 0;
-        const pendingActivations = approvalsRes.activations?.length || 0;
-        const pendingWithdrawals = approvalsRes.withdrawals?.length || 0;
+      const totalU = usersRes.success && usersRes.data ? (usersRes.data.meta?.total || usersRes.data.length || 0) : 0;
+      const pendingActivations = approvalsRes.success && approvalsRes.data ? (approvalsRes.data.activations?.length || 0) : 0;
+      const pendingWithdrawals = approvalsRes.success && approvalsRes.data ? (approvalsRes.data.withdrawals?.length || 0) : 0;
 
-        setStats({
-          totalUsers: totalU,
-          activeUsers: totalU, // dynamically estimated
-          pendingApprovals: pendingActivations + pendingWithdrawals,
-          totalBalance: 0,
-        });
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
+      setStats({
+        totalUsers: totalU,
+        pendingApprovals: pendingActivations + pendingWithdrawals,
+      });
+      setLoading(false);
     };
 
     if (admin) fetchAdminStats();
   }, [admin]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex items-center justify-between">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
@@ -60,7 +52,7 @@ export default function AdminDashboardPage() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="glass-card rounded-2xl p-5 space-y-3">
+        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400 uppercase">Registered Users</span>
             <Users className="w-5 h-5 text-sky-600" />
@@ -72,7 +64,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 space-y-3">
+        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400 uppercase">Pending Approvals</span>
             <Clock className="w-5 h-5 text-amber-500" />
@@ -84,7 +76,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 space-y-3">
+        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-400 uppercase">Commission Matrix</span>
             <Layers className="w-5 h-5 text-purple-600" />
@@ -98,10 +90,26 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Admin Quick Action Navigation Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 pt-2">
+        <Link
+          href="/admin/investments"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+        >
+          <TrendingUp className="w-6 h-6 text-sky-600" />
+          <span className="text-xs font-bold text-slate-800">Investment Plans</span>
+        </Link>
+
+        <Link
+          href="/admin/leaderboard"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-amber-400 transition-colors bg-white border border-slate-200"
+        >
+          <Trophy className="w-6 h-6 text-amber-500" />
+          <span className="text-xs font-bold text-slate-800">Top 100 Leaderboard</span>
+        </Link>
+
         <Link
           href="/admin/users"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
           <Users className="w-6 h-6 text-sky-600" />
           <span className="text-xs font-bold text-slate-800">Users List</span>
@@ -109,7 +117,7 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/admin/approvals"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
           <Clock className="w-6 h-6 text-amber-500" />
           <span className="text-xs font-bold text-slate-800">Approvals Queue</span>
@@ -117,7 +125,7 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/admin/commissions"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
           <Award className="w-6 h-6 text-purple-600" />
           <span className="text-xs font-bold text-slate-800">Commission Rules</span>
@@ -125,7 +133,7 @@ export default function AdminDashboardPage() {
 
         <Link
           href="/admin/wallet"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors"
+          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
           <Wallet className="w-6 h-6 text-emerald-600" />
           <span className="text-xs font-bold text-slate-800">Ledger & Adjust</span>

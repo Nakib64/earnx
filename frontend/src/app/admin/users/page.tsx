@@ -3,34 +3,34 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { Search, Shield, Award, Edit, CheckCircle, XCircle, Slash, RefreshCw } from 'lucide-react';
+import { User, Designation, UserStatus } from '../../../types';
+import { DataTable, ColumnDef } from '../../../components/common/DataTable';
+import { StatusBadge } from '../../../components/common/StatusBadge';
+import { Search, Award, RefreshCw } from 'lucide-react';
 
 export default function AdminUsersPage() {
   const { admin } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
-  const [designations, setDesignations] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [designations, setDesignations] = useState<Designation[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   // Designation Modal
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [targetDesignation, setTargetDesignation] = useState<string>('');
   const [saving, setSaving] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
-    try {
-      const [usersRes, desRes] = await Promise.all([
-        apiFetch(`/admin/users?page=1&limit=50${search ? `&search=${search}` : ''}`, { isAdmin: true }),
-        apiFetch('/admin/designations', { isAdmin: true }),
-      ]);
-      setUsers(usersRes.data || []);
-      setDesignations(desRes || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
+    const [usersRes, desRes] = await Promise.all([
+      apiFetch<User[]>(`/admin/users?page=1&limit=50${search ? `&search=${search}` : ''}`, {
+        isAdmin: true,
+      }),
+      apiFetch<Designation[]>('/admin/designations', { isAdmin: true }),
+    ]);
+    if (usersRes.success && usersRes.data) setUsers(usersRes.data);
+    if (desRes.success && desRes.data) setDesignations(desRes.data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -42,39 +42,126 @@ export default function AdminUsersPage() {
     loadData();
   };
 
-  const handleStatusChange = async (userId: string, newStatus: string) => {
-    try {
-      await apiFetch(`/admin/users/${userId}/status`, {
-        method: 'PATCH',
-        isAdmin: true,
-        body: JSON.stringify({ status: newStatus }),
-      });
+  const handleStatusChange = async (userId: string, newStatus: UserStatus) => {
+    const res = await apiFetch(`/admin/users/${userId}/status`, {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (res.success) {
       await loadData();
-    } catch (e: any) {
-      alert(e.message || 'Status update failed');
+    } else {
+      alert(res.error?.message || 'Status update failed');
     }
   };
 
   const handleAssignDesignation = async () => {
     if (!selectedUser) return;
     setSaving(true);
-    try {
-      await apiFetch(`/admin/users/${selectedUser.id}/designation`, {
-        method: 'PATCH',
-        isAdmin: true,
-        body: JSON.stringify({ designation_id: targetDesignation || null }),
-      });
+    const res = await apiFetch(`/admin/users/${selectedUser.id}/designation`, {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify({ designation_id: targetDesignation || null }),
+    });
+    if (res.success) {
       setSelectedUser(null);
       await loadData();
-    } catch (e: any) {
-      alert(e.message || 'Designation assignment failed');
-    } finally {
-      setSaving(false);
+    } else {
+      alert(res.error?.message || 'Designation assignment failed');
     }
+    setSaving(false);
   };
 
+  const userColumns: ColumnDef<User>[] = [
+    {
+      key: 'member',
+      header: 'Member',
+      render: (u) => (
+        <div>
+          <div className="font-bold text-slate-900">{u.full_name || u.phone}</div>
+          <div className="text-[11px] text-slate-500 font-mono">{u.phone}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'referral_code',
+      header: 'Referral Code',
+      render: (u) => <span className="font-mono font-bold text-sky-600">{u.referral_code}</span>,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (u) => <StatusBadge status={u.status} />,
+    },
+    {
+      key: 'wallet_balance',
+      header: 'Wallet Balance',
+      render: (u) => <span className="font-mono font-bold text-slate-800">৳{Number(u.wallet_balance).toFixed(2)}</span>,
+    },
+    {
+      key: 'designation',
+      header: 'Designation Badge',
+      render: (u) => (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[11px] border border-purple-200">
+          <Award className="w-3 h-3 mr-1 text-purple-500" />
+          {u.designation?.name || 'None'}
+        </span>
+      ),
+    },
+    {
+      key: 'sponsor',
+      header: 'Sponsor',
+      render: (u) => <span className="text-slate-500 text-[11px]">{u.referred_by?.phone || 'Direct Admin'}</span>,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'right',
+      render: (u) => (
+        <div className="flex items-center justify-end space-x-1">
+          <button
+            onClick={() => {
+              setSelectedUser(u);
+              setTargetDesignation(u.designation_id || '');
+            }}
+            className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg font-bold text-[11px] hover:bg-purple-200"
+          >
+            Assign Badge
+          </button>
+
+          {u.status === UserStatus.DISABLED && (
+            <button
+              onClick={() => handleStatusChange(u.id, UserStatus.ACTIVE)}
+              className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[11px]"
+            >
+              Activate
+            </button>
+          )}
+
+          {u.status === UserStatus.ACTIVE && (
+            <button
+              onClick={() => handleStatusChange(u.id, UserStatus.BLOCKED)}
+              className="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[11px]"
+            >
+              Block
+            </button>
+          )}
+
+          {u.status === UserStatus.BLOCKED && (
+            <button
+              onClick={() => handleStatusChange(u.id, UserStatus.ACTIVE)}
+              className="px-2 py-1 bg-sky-100 text-sky-800 rounded-lg font-bold text-[11px]"
+            >
+              Unblock
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">User Accounts & Designations</h1>
@@ -109,107 +196,15 @@ export default function AdminUsersPage() {
         </button>
       </form>
 
-      {/* Users Table */}
-      <div className="glass-card rounded-2xl p-5 overflow-x-auto">
-        {loading ? (
-          <div className="text-center py-8 text-xs text-slate-400">Loading user database...</div>
-        ) : users.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-400">No users found</div>
-        ) : (
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                <th className="pb-3 px-2">Member</th>
-                <th className="pb-3 px-2">Referral Code</th>
-                <th className="pb-3 px-2">Status</th>
-                <th className="pb-3 px-2">Wallet Balance</th>
-                <th className="pb-3 px-2">Designation Badge</th>
-                <th className="pb-3 px-2">Sponsor</th>
-                <th className="pb-3 px-2 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {users.map((u) => (
-                <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="py-3 px-2">
-                    <div className="font-bold text-slate-900">{u.full_name || u.phone}</div>
-                    <div className="text-[11px] text-slate-500 font-mono">{u.phone}</div>
-                  </td>
-
-                  <td className="py-3 px-2 font-mono font-bold text-sky-600">{u.referral_code}</td>
-
-                  <td className="py-3 px-2">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        u.status === 'ACTIVE'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : u.status === 'BLOCKED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-amber-100 text-amber-800'
-                      }`}
-                    >
-                      {u.status}
-                    </span>
-                  </td>
-
-                  <td className="py-3 px-2 font-mono font-bold text-slate-800">
-                    ${Number(u.wallet_balance).toFixed(2)}
-                  </td>
-
-                  <td className="py-3 px-2">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[11px] border border-purple-200">
-                      <Award className="w-3 h-3 mr-1 text-purple-500" />
-                      {u.designation?.name || 'None'}
-                    </span>
-                  </td>
-
-                  <td className="py-3 px-2 text-slate-500 text-[11px]">
-                    {u.referred_by?.phone || 'Direct Admin'}
-                  </td>
-
-                  <td className="py-3 px-2 text-right space-x-1">
-                    <button
-                      onClick={() => {
-                        setSelectedUser(u);
-                        setTargetDesignation(u.designation?.id || '');
-                      }}
-                      className="px-2.5 py-1 bg-purple-100 text-purple-800 rounded-lg font-bold text-[11px] hover:bg-purple-200"
-                    >
-                      Assign Badge
-                    </button>
-
-                    {u.status === 'DISABLED' && (
-                      <button
-                        onClick={() => handleStatusChange(u.id, 'ACTIVE')}
-                        className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg font-bold text-[11px]"
-                      >
-                        Activate
-                      </button>
-                    )}
-
-                    {u.status === 'ACTIVE' && (
-                      <button
-                        onClick={() => handleStatusChange(u.id, 'BLOCKED')}
-                        className="px-2 py-1 bg-red-100 text-red-800 rounded-lg font-bold text-[11px]"
-                      >
-                        Block
-                      </button>
-                    )}
-
-                    {u.status === 'BLOCKED' && (
-                      <button
-                        onClick={() => handleStatusChange(u.id, 'ACTIVE')}
-                        className="px-2 py-1 bg-sky-100 text-sky-800 rounded-lg font-bold text-[11px]"
-                      >
-                        Unblock
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+      {/* Users Table using DataTable */}
+      <div className="glass-card rounded-2xl p-5 bg-white border border-slate-200">
+        <DataTable<User>
+          data={users}
+          columns={userColumns}
+          keyExtractor={(u) => u.id}
+          loading={loading}
+          emptyMessage="No matching users found."
+        />
       </div>
 
       {/* Assign Designation Modal */}
@@ -226,7 +221,7 @@ export default function AdminUsersPage() {
             <select
               value={targetDesignation}
               onChange={(e) => setTargetDesignation(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 font-bold"
             >
               <option value="">No Designation (Level 1 Direct Only)</option>
               {designations.map((des) => (

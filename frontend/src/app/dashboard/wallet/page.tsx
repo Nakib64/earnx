@@ -3,20 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import {
-  Wallet,
-  ArrowDownLeft,
-  ArrowUpRight,
-  PlusCircle,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Send,
-} from 'lucide-react';
+import { WalletTransaction } from '../../../types';
+import { DataTable, ColumnDef } from '../../../components/common/DataTable';
+import { StatusBadge } from '../../../components/common/StatusBadge';
+import { AlertBanner } from '../../../components/common/AlertBanner';
+import { Wallet, Send } from 'lucide-react';
 
 export default function WalletPage() {
   const { user, refreshUserProfile } = useAuth();
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Withdrawal Form State
@@ -27,14 +22,12 @@ export default function WalletPage() {
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchTransactions = async () => {
-    try {
-      const res = await apiFetch('/wallet/transactions?page=1&limit=50');
-      setTransactions(res.data || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const res = await apiFetch<WalletTransaction[]>('/wallet/transactions?page=1&limit=50');
+    if (res.success && res.data) {
+      setTransactions(res.data);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -46,15 +39,15 @@ export default function WalletPage() {
     setSubmitting(true);
     setStatusMsg(null);
 
-    try {
-      await apiFetch('/requests/withdrawal', {
-        method: 'POST',
-        body: JSON.stringify({
-          amount: parseFloat(amount),
-          payment_details: paymentDetails,
-        }),
-      });
+    const res = await apiFetch('/requests/withdrawal', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: parseFloat(amount),
+        payment_details: paymentDetails,
+      }),
+    });
 
+    if (res.success) {
       setStatusMsg({
         type: 'success',
         text: 'Withdrawal request submitted! Sent to Admin approval queue.',
@@ -64,12 +57,51 @@ export default function WalletPage() {
       setShowWithdrawModal(false);
       await refreshUserProfile();
       await fetchTransactions();
-    } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to submit withdrawal request' });
-    } finally {
-      setSubmitting(false);
+    } else {
+      setStatusMsg({ type: 'error', text: res.error?.message || 'Failed to submit withdrawal request' });
     }
+    setSubmitting(false);
   };
+
+  const columns: ColumnDef<WalletTransaction>[] = [
+    {
+      key: 'type',
+      header: 'Type',
+      render: (tx) => <StatusBadge status={tx.type} />,
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      render: (tx) => {
+        const isCredit = Number(tx.amount) > 0;
+        return (
+          <span className={`font-bold font-mono text-sm ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
+            {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'balance',
+      header: 'Before / After',
+      render: (tx) => (
+        <span className="font-mono text-slate-500 text-[11px]">
+          ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
+        </span>
+      ),
+    },
+    {
+      key: 'description',
+      header: 'Description',
+      render: (tx) => <span className="text-slate-700 font-medium max-w-xs truncate">{tx.description || '-'}</span>,
+    },
+    {
+      key: 'created_at',
+      header: 'Date',
+      align: 'right',
+      render: (tx) => <span className="text-slate-400 text-[11px]">{new Date(tx.created_at).toLocaleString()}</span>,
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -90,22 +122,7 @@ export default function WalletPage() {
         </button>
       </div>
 
-      {statusMsg && (
-        <div
-          className={`p-4 rounded-xl text-sm font-medium flex items-center space-x-2 border ${
-            statusMsg.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-red-50 text-red-800 border-red-200'
-          }`}
-        >
-          {statusMsg.type === 'success' ? (
-            <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          ) : (
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-          )}
-          <span>{statusMsg.text}</span>
-        </div>
-      )}
+      {statusMsg && <AlertBanner type={statusMsg.type} message={statusMsg.text} onClose={() => setStatusMsg(null)} />}
 
       {/* Withdrawal Form Modal / Box */}
       {showWithdrawModal && (
@@ -124,14 +141,14 @@ export default function WalletPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Withdrawal Amount ($)
+                  Withdrawal Amount (৳)
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   min="1"
                   required
-                  placeholder="50.00"
+                  placeholder="500.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
@@ -169,7 +186,7 @@ export default function WalletPage() {
         <div className="space-y-1">
           <span className="text-xs font-bold text-slate-400 uppercase">Available Wallet Balance</span>
           <div className="text-3xl font-extrabold text-slate-900">
-            ${Number(user?.wallet_balance || 0).toFixed(2)}
+            ৳{Number(user?.wallet_balance || 0).toFixed(2)}
           </div>
         </div>
         <div className="w-12 h-12 rounded-2xl sky-gradient-bg flex items-center justify-center text-white shadow-lg">
@@ -181,62 +198,13 @@ export default function WalletPage() {
       <div className="glass-card rounded-2xl p-5 space-y-4">
         <h3 className="font-bold text-slate-900 text-sm">Ledger Audit History</h3>
 
-        {loading ? (
-          <div className="text-center py-8 text-xs text-slate-400">Loading ledger records...</div>
-        ) : transactions.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-400">No transactions recorded yet</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                  <th className="pb-3 px-2">Type</th>
-                  <th className="pb-3 px-2">Amount</th>
-                  <th className="pb-3 px-2">Before / After</th>
-                  <th className="pb-3 px-2">Description</th>
-                  <th className="pb-3 px-2">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {transactions.map((tx) => {
-                  const isCredit = Number(tx.amount) > 0;
-                  return (
-                    <tr key={tx.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-2">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                            tx.type === 'COMMISSION'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : tx.type === 'WITHDRAW'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-sky-100 text-sky-800'
-                          }`}
-                        >
-                          {tx.type}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2 font-bold font-mono text-sm">
-                        <span className={isCredit ? 'text-emerald-600' : 'text-red-600'}>
-                          {isCredit ? '+' : ''}
-                          ${Number(tx.amount).toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="py-3 px-2 font-mono text-slate-500 text-[11px]">
-                        ${Number(tx.balance_before).toFixed(2)} → ${Number(tx.balance_after).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-2 text-slate-700 font-medium max-w-xs truncate">
-                        {tx.description || '-'}
-                      </td>
-                      <td className="py-3 px-2 text-slate-400 text-[11px]">
-                        {new Date(tx.created_at).toLocaleString()}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <DataTable<WalletTransaction>
+          data={transactions}
+          columns={columns}
+          keyExtractor={(tx) => tx.id}
+          loading={loading}
+          emptyMessage="No transactions recorded yet in your wallet ledger."
+        />
       </div>
     </div>
   );

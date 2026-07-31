@@ -2,42 +2,16 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
-
-export interface UserProfile {
-  id: string;
-  phone: string;
-  full_name: string | null;
-  referral_code: string;
-  status: 'DISABLED' | 'ACTIVE' | 'BLOCKED';
-  wallet_balance: number | string;
-  designation_id?: string | null;
-  designation?: {
-    id: string;
-    name: string;
-    max_level: number;
-  } | null;
-  referred_by?: {
-    id: string;
-    phone: string;
-    full_name: string | null;
-    referral_code: string;
-  } | null;
-}
-
-export interface AdminProfile {
-  id: string;
-  email: string;
-  name: string;
-}
+import { User, Admin } from '../types';
 
 interface AuthContextType {
-  user: UserProfile | null;
-  admin: AdminProfile | null;
+  user: User | null;
+  admin: Admin | null;
   userToken: string | null;
   adminToken: string | null;
   isLoading: boolean;
-  loginUser: (token: string, userData: UserProfile) => void;
-  loginAdmin: (token: string, adminData: AdminProfile) => void;
+  loginUser: (token: string, userData: User) => void;
+  loginAdmin: (token: string, adminData: Admin) => void;
   logoutUser: () => void;
   logoutAdmin: () => void;
   refreshUserProfile: () => Promise<void>;
@@ -46,8 +20,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [admin, setAdmin] = useState<AdminProfile | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [admin, setAdmin] = useState<Admin | null>(null);
   const [userToken, setUserToken] = useState<string | null>(null);
   const [adminToken, setAdminToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -56,11 +30,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = userToken || localStorage.getItem('earnx_user_token');
     if (!token) return;
 
-    try {
-      const data = await apiFetch<UserProfile>('/auth/me', { token });
-      setUser(data);
-    } catch (e) {
-      console.error('Failed to refresh user profile:', e);
+    const res = await apiFetch<User>('/auth/me', { token });
+    if (res.success && res.data) {
+      setUser(res.data);
+    } else {
+      console.error('Failed to refresh user profile:', res.error?.message);
       logoutUser();
     }
   };
@@ -72,20 +46,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (uToken) {
         setUserToken(uToken);
-        try {
-          const userData = await apiFetch<UserProfile>('/auth/me', { token: uToken });
-          setUser(userData);
-        } catch {
+        const res = await apiFetch<User>('/auth/me', { token: uToken });
+        if (res.success && res.data) {
+          setUser(res.data);
+        } else {
           localStorage.removeItem('earnx_user_token');
         }
       }
 
       if (aToken) {
         setAdminToken(aToken);
-        try {
-          const adminData = await apiFetch<AdminProfile>('/admin/auth/me', { token: aToken, isAdmin: true });
-          setAdmin(adminData);
-        } catch {
+        const res = await apiFetch<Admin>('/admin/auth/me', { token: aToken, isAdmin: true });
+        if (res.success && res.data) {
+          setAdmin(res.data);
+        } else {
           localStorage.removeItem('earnx_admin_token');
         }
       }
@@ -96,13 +70,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, []);
 
-  const loginUser = (token: string, userData: UserProfile) => {
+  const loginUser = (token: string, userData: User) => {
     localStorage.setItem('earnx_user_token', token);
     setUserToken(token);
     setUser(userData);
   };
 
-  const loginAdmin = (token: string, adminData: AdminProfile) => {
+  const loginAdmin = (token: string, adminData: Admin) => {
     localStorage.setItem('earnx_admin_token', token);
     setAdminToken(token);
     setAdmin(adminData);

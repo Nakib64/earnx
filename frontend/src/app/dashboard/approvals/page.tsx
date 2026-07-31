@@ -3,26 +3,31 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { UserCheck, Check, X, Clock, AlertCircle } from 'lucide-react';
+import { ActivationRequest, PremiumRequest } from '../../../types';
+import { AlertBanner } from '../../../components/common/AlertBanner';
+import { Check, X, Clock } from 'lucide-react';
+
+interface DownlinesPendingResponse {
+  activations: ActivationRequest[];
+  premiums: PremiumRequest[];
+}
 
 export default function UserApprovalsPage() {
   const { user } = useAuth();
-  const [activations, setActivations] = useState<any[]>([]);
-  const [premiums, setPremiums] = useState<any[]>([]);
+  const [activations, setActivations] = useState<ActivationRequest[]>([]);
+  const [premiums, setPremiums] = useState<PremiumRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchPending = async () => {
-    try {
-      const data = await apiFetch('/requests/downlines/pending');
-      setActivations(data.activations || []);
-      setPremiums(data.premiums || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    setLoading(true);
+    const res = await apiFetch<DownlinesPendingResponse>('/requests/downlines/pending');
+    if (res.success && res.data) {
+      setActivations(res.data.activations || []);
+      setPremiums(res.data.premiums || []);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -32,47 +37,44 @@ export default function UserApprovalsPage() {
   const handleApproveActivation = async (id: string) => {
     setActionLoading(id);
     setMsg(null);
-    try {
-      await apiFetch(`/requests/activation/${id}/approve`, { method: 'POST' });
-      setMsg({ type: 'success', text: `Approved activation! Distributed level commissions to upline chain.` });
+    const res = await apiFetch(`/requests/activation/${id}/approve`, { method: 'POST' });
+    if (res.success) {
+      setMsg({ type: 'success', text: 'Approved activation! Distributed level commissions to upline chain.' });
       await fetchPending();
-    } catch (err: any) {
-      setMsg({ type: 'error', text: err.message || 'Approval failed' });
-    } finally {
-      setActionLoading(null);
+    } else {
+      setMsg({ type: 'error', text: res.error?.message || 'Approval failed' });
     }
+    setActionLoading(null);
   };
 
   const handleRejectActivation = async (id: string) => {
     setActionLoading(id);
     setMsg(null);
-    try {
-      await apiFetch(`/requests/activation/${id}/reject`, { method: 'POST' });
+    const res = await apiFetch(`/requests/activation/${id}/reject`, { method: 'POST' });
+    if (res.success) {
       setMsg({ type: 'success', text: 'Activation request rejected.' });
       await fetchPending();
-    } catch (err: any) {
-      setMsg({ type: 'error', text: err.message || 'Rejection failed' });
-    } finally {
-      setActionLoading(null);
+    } else {
+      setMsg({ type: 'error', text: res.error?.message || 'Rejection failed' });
     }
+    setActionLoading(null);
   };
 
   const handleApprovePremium = async (id: string) => {
     setActionLoading(id);
     setMsg(null);
-    try {
-      await apiFetch(`/requests/premium/${id}/approve`, { method: 'POST' });
+    const res = await apiFetch(`/requests/premium/${id}/approve`, { method: 'POST' });
+    if (res.success) {
       setMsg({ type: 'success', text: 'Approved premium request!' });
       await fetchPending();
-    } catch (err: any) {
-      setMsg({ type: 'error', text: err.message || 'Approval failed' });
-    } finally {
-      setActionLoading(null);
+    } else {
+      setMsg({ type: 'error', text: res.error?.message || 'Approval failed' });
     }
+    setActionLoading(null);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Downline Approvals Queue</h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -80,21 +82,10 @@ export default function UserApprovalsPage() {
         </p>
       </div>
 
-      {msg && (
-        <div
-          className={`p-4 rounded-xl text-sm font-medium flex items-center space-x-2 border ${
-            msg.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-red-50 text-red-800 border-red-200'
-          }`}
-        >
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <span>{msg.text}</span>
-        </div>
-      )}
+      {msg && <AlertBanner type={msg.type} message={msg.text} onClose={() => setMsg(null)} />}
 
       {/* Activation Requests */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200">
         <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
           <Clock className="w-4 h-4 text-amber-500" />
           <span>Pending Activation Requests ({activations.length})</span>
@@ -146,7 +137,7 @@ export default function UserApprovalsPage() {
       </div>
 
       {/* Premium Requests */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200">
         <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
           <Clock className="w-4 h-4 text-purple-500" />
           <span>Pending Premium Requests ({premiums.length})</span>

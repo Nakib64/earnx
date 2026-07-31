@@ -4,35 +4,34 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { Gift, Lock, DollarSign, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Offer, UserStatus } from '../../../types';
+import { Gift, Lock, DollarSign, CheckCircle2 } from 'lucide-react';
 
 export default function OffersPage() {
   const { user } = useAuth();
-  const [offers, setOffers] = useState<any[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchOffers = async () => {
-      try {
-        const data = await apiFetch('/offers');
-        setOffers(data || []);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
+      setLoading(true);
+      const res = await apiFetch<Offer[]>('/offers');
+      if (res.success && res.data) {
+        setOffers(res.data);
       }
+      setLoading(false);
     };
 
-    if (user && user.status === 'ACTIVE') {
+    if (user && user.status === UserStatus.ACTIVE) {
       fetchOffers();
     } else {
       setLoading(false);
     }
   }, [user]);
 
-  if (user?.status !== 'ACTIVE') {
+  if (user?.status !== UserStatus.ACTIVE) {
     return (
-      <div className="glass-card rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto mt-10">
+      <div className="glass-card rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto mt-10 bg-white border border-slate-200 shadow-sm">
         <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
           <Lock className="w-8 h-8" />
         </div>
@@ -53,7 +52,7 @@ export default function OffersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Active Offers & Tasks</h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -64,7 +63,7 @@ export default function OffersPage() {
       {loading ? (
         <div className="text-center py-10 text-xs text-slate-400">Loading active promotions...</div>
       ) : offers.length === 0 ? (
-        <div className="glass-card rounded-2xl p-8 text-center space-y-2">
+        <div className="glass-card rounded-2xl p-8 text-center space-y-2 bg-white border border-slate-200">
           <Gift className="w-10 h-10 text-slate-300 mx-auto" />
           <h3 className="text-sm font-bold text-slate-700">No active offers available right now</h3>
           <p className="text-xs text-slate-400">Check back soon for new task promotions from admins.</p>
@@ -72,7 +71,7 @@ export default function OffersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {offers.map((offer) => (
-            <div key={offer.id} className="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
+            <div key={offer.id} className="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 bg-white border border-slate-200">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-bold">

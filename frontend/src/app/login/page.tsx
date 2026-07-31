@@ -20,19 +20,18 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    try {
-      const res = await apiFetch<{ accessToken: string; user: any }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ phone, password }),
-      });
+    const res = await apiFetch<{ accessToken: string; user: any }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ phone, password }),
+    });
 
-      loginUser(res.accessToken, res.user);
+    if (res.success && res.data) {
+      loginUser(res.data.accessToken, res.data.user);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(res.error?.message || 'Login failed. Please check your credentials.');
     }
+    setLoading(false);
   };
 
   return (

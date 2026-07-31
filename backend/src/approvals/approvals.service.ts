@@ -184,6 +184,22 @@ export class ApprovalsService {
         },
       });
 
+      // Update user premium status fields (1 year / 365 days expiration)
+      const now = new Date();
+      const expiresAt = new Date();
+      expiresAt.setDate(now.getDate() + 365);
+
+      await tx.user.update({
+        where: { id: request.user_id },
+        data: {
+          is_premium: true,
+          premium_started_at: now,
+          premium_expires_at: expiresAt,
+          premium_payout_count: 0,
+          last_premium_payout_at: null,
+        },
+      });
+
       // Distribute Premium commissions payout
       const payouts = await this.commissionService.distributeCommissions(
         request.user_id,

@@ -29,24 +29,23 @@ function RegisterForm() {
     setError(null);
     setLoading(true);
 
-    try {
-      const res = await apiFetch<{ accessToken: string; user: any }>('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          phone,
-          password,
-          full_name: fullName || undefined,
-          referral_code: referralCode ? referralCode.toUpperCase() : undefined,
-        }),
-      });
+    const res = await apiFetch<{ accessToken: string; user: any }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        phone,
+        password,
+        full_name: fullName || undefined,
+        referral_code: referralCode ? referralCode.toUpperCase() : undefined,
+      }),
+    });
 
-      loginUser(res.accessToken, res.user);
+    if (res.success && res.data) {
+      loginUser(res.data.accessToken, res.data.user);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(res.error?.message || 'Registration failed. Please try again.');
     }
+    setLoading(false);
   };
 
   return (

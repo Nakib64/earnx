@@ -8,6 +8,10 @@ import { WalletsModule } from './wallets/wallets.module';
 import { CommissionsModule } from './commissions/commissions.module';
 import { ApprovalsModule } from './approvals/approvals.module';
 import { OffersModule } from './offers/offers.module';
+import { SystemConfigModule } from './system-config/system-config.module';
+import { PremiumModule } from './premium/premium.module';
+import { InvestmentsModule } from './investments/investments.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -20,6 +24,10 @@ import { OffersModule } from './offers/offers.module';
     CommissionsModule,
     ApprovalsModule,
     OffersModule,
+    SystemConfigModule,
+    PremiumModule,
+    InvestmentsModule,
+    LeaderboardModule,
   ],
 })
 export class AppModule {}

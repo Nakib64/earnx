@@ -13,8 +13,8 @@ import {
   Settings,
   DollarSign,
   Layers,
-  ArrowDownRight,
-  Star,
+  TrendingUp,
+  Trophy,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,14 +26,19 @@ export default function Sidebar() {
 
   const userItems = [
     { href: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
+    { href: '/dashboard/investments', label: 'Invest & Grow', icon: TrendingUp },
+    { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet & Ledger', icon: Wallet },
     { href: '/dashboard/offers', label: 'Offers & Tasks', icon: Gift },
-    { href: '/dashboard/approvals', label: 'Downline Approvals Queue', icon: UserCheck },
+    { href: '/dashboard/approvals', label: 'Downline Approvals', icon: UserCheck },
   ];
 
   const adminItems = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
+    { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
+    { href: '/admin/settings', label: 'Global Settings', icon: Settings },
     { href: '/admin/users', label: 'Users & Designations', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
     { href: '/admin/approvals', label: 'Pending Approvals Queue', icon: UserCheck },
@@ -64,7 +69,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;

@@ -1,3 +1,5 @@
+import { ApiResponse, ApiError } from '../types';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export interface ApiFetchOptions extends RequestInit {
@@ -5,10 +7,13 @@ export interface ApiFetchOptions extends RequestInit {
   isAdmin?: boolean;
 }
 
+/**
+ * Core generic fetch wrapper producing standardized ApiResponse<T>
+ */
 export async function apiFetch<T = any>(
   endpoint: string,
   options: ApiFetchOptions = {},
-): Promise<T> {
+): Promise<ApiResponse<T>> {
   const { token, isAdmin, headers: customHeaders, ...rest } = options;
 
   const headers: Record<string, string> = {
@@ -26,17 +31,71 @@ export async function apiFetch<T = any>(
     headers['Authorization'] = `Bearer ${storedToken}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`, {
-    headers,
-    ...rest,
-  });
+  const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
 
-  const data = await response.json().catch(() => ({}));
+  try {
+    const response = await fetch(url, {
+      headers,
+      ...rest,
+    });
 
-  if (!response.ok) {
-    const errorMsg = data.message || `Request failed with status ${response.status}`;
-    throw new Error(Array.isArray(errorMsg) ? errorMsg.join(', ') : errorMsg);
+    const rawData = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const errorMsg = rawData.message || `Request failed with status ${response.status}`;
+      const formattedMessage = Array.isArray(errorMsg) ? errorMsg.join(', ') : String(errorMsg);
+
+      return {
+        success: false,
+        data: null,
+        error: {
+          message: formattedMessage,
+          code: String(response.status),
+          details: rawData,
+        },
+        statusCode: response.status,
+      };
+    }
+
+    // Direct return of data if response itself is array or object
+    return {
+      success: true,
+      data: rawData as T,
+      error: null,
+      statusCode: response.status,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      data: null,
+      error: {
+        message: err?.message || 'Network communication error',
+      },
+    };
   }
-
-  return data as T;
 }
+
+/**
+ * Helper client object for strongly typed CRUD calls
+ */
+export const apiClient = {
+  get: <T>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { method: 'GET', ...options }),
+
+  post: <T, B = any>(endpoint: string, body?: B, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+      ...options,
+    }),
+
+  put: <T, B = any>(endpoint: string, body?: B, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined,
+      ...options,
+    }),
+
+  delete: <T>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { method: 'DELETE', ...options }),
+};
