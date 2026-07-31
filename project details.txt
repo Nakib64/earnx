@@ -1,0 +1,162 @@
+================================================================================
+PROJECT BLUEPRINT & GENERATION PROMPT: MLM PLATFORM
+================================================================================
+
+1. DETAILED EXPLANATION OF CORE LOGIC & WORKFLOWS
+--------------------------------------------------------------------------------
+To build a successful MLM (Multi-Level Marketing) system, the backend must perfectly handle recursive relationships (the referral tree) and transactional integrity (the money). Here is how the core systems must operate:
+
+A. The Status State Machine & Separated Auth
+Users and Admins are completely isolated. 
+- Admin Auth: Admins log in via email and password checking against the `Admin` table.
+- User Auth: Users register/log in via phone and password checking against the `User` table.
+Users follow a strict lifecycle:
+- DISABLED: The user has registered but cannot see offers or earn money.
+- PENDING (Activation/Premium): The user has requested an upgrade. The system is waiting for manual approval from either the direct referrer or an Admin.
+- ACTIVE: The user is approved. They can now see offers and earn Level 1 commissions.
+
+B. Multi-Level Tree & Commission Traversal
+The system uses an "Adjacency List" pattern. Every user only stores their immediate parent (`referred_by_id`). The system calculates levels dynamically by walking up the tree. 
+Example Scenario (Premium Commission):
+- User A refers User B. User B refers User C. User C refers User D.
+- User D requests Premium and is approved.
+- LEVEL 1: User C is the direct parent. User C gets the Level 1 commission amount.
+- LEVEL 2: User B is the grandparent. The system checks User B's Designation. If User B has a "1 Star" badge (which unlocks 2 levels), User B gets the Level 2 commission. 
+- LEVEL 3: User A is the great-grandparent. If User A only has a "1 Star" badge, they do NOT get the Level 3 commission. If User A has a "2 Star" badge (unlocks 3 levels), they receive the Level 3 commission.
+
+C. Designations as "Depth Keys"
+Designations (like 1 Star, 2 Star) are security keys that unlock deeper levels of the commission tree. A user without a designation might only get direct (Level 1) commissions. Admins assign these designations to reward top referrers.
+
+D. The Immutable Wallet Ledger
+Never update a user's wallet balance directly. The `wallet_balance` field on the User table is only a "cached" reflection. The absolute source of truth is the `WalletTransaction` table. 
+- When a commission is earned, an ACID database transaction opens.
+- Inserts a row into `WalletTransaction` (Type: COMMISSION, Amount: +500).
+- Calculates the new balance and updates the `User.wallet_balance`.
+- Commits the transaction.
+
+
+2. DATABASE SCHEMA (PRISMA)
+--------------------------------------------------------------------------------
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Completely isolated Admin table
+model Admin {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  password_hash   String
+  name            String
+  created_at      DateTime @default(now())
+}
+
+// User accounts and cached balance
+model User {
+  id                     String             @id @default(uuid())
+  phone                  String             @unique
+  password_hash          String
+  full_name              String?
+  referral_code          String             @unique
+  referred_by_id         String?
+  status                 String             @default("DISABLED") // DISABLED, ACTIVE, BLOCKED
+  wallet_balance         Decimal            @default(0.00) 
+  designation_id         String?
+  
+  referred_by            User?              @relation("ReferralTree", fields: [referred_by_id], references: [id])
+  referrals              User[]             @relation("ReferralTree")
+  designation            Designation?       @relation(fields: [designation_id], references: [id])
+  transactions           WalletTransaction[]
+}
+
+// Defines badges and how deep into the tree a user can earn
+model Designation {
+  id              String   @id @default(uuid())
+  name            String   // e.g., "1 Star", "2 Star"
+  max_level       Int      // e.g., 2 (unlocks up to level 2 commissions)
+  users           User[]
+}
+
+// Requests to become ACTIVE
+model ActivationRequest {
+  id              String   @id @default(uuid())
+  user_id         String
+  referrer_id     String?
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  approved_by     String?  // Can be a User ID or Admin ID
+}
+
+// Requests to get PREMIUM features
+model PremiumRequest {
+  id              String   @id @default(uuid())
+  user_id         String
+  referrer_id     String?
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  approved_by     String?  // Can be a User ID or Admin ID
+}
+
+// Immutable ledger for all money movement
+model WalletTransaction {
+  id              String   @id @default(uuid())
+  user_id         String
+  type            String   // DEPOSIT, WITHDRAW, COMMISSION, ADMIN_ADJUSTMENT
+  amount          Decimal
+  balance_before  Decimal
+  balance_after   Decimal
+  description     String?
+  user            User     @relation(fields: [user_id], references: [id])
+  created_at      DateTime @default(now())
+}
+
+// Admin-defined rules for how much money each level gets
+model CommissionRule {
+  id              String   @id @default(uuid())
+  type            String   // ACTIVATION, PREMIUM
+  level           Int      // 1, 2, 3, etc.
+  amount          Decimal
+}
+
+
+3. ANTIGRAVITY WORKSPACE PROMPT
+--------------------------------------------------------------------------------
+[COPY EVERYTHING BELOW THIS LINE INTO ANTIGRAVITY WORKSPACE]
+
+Build a production-ready MLM web application using Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, React Hook Form, and Zod for the frontend. For the backend, use NestJS with Prisma ORM, PostgreSQL, JWT authentication, and strict route guards. 
+
+This system requires strict financial integrity, recursive tree traversal, and completely isolated Admin and User roles.
+
+CORE BUSINESS LOGIC & WORKFLOWS:
+1. Dual Authentication: 
+   - Admins exist in an isolated `Admin` table (email/password). Build a specific auth endpoint and JWT strategy for admins.
+   - Users exist in the `User` table (phone/password). Build a separate auth endpoint and JWT strategy for users.
+   - Users default to a "DISABLED" status upon registration.
+2. Approvals: A DISABLED user submits an ActivationRequest with an optional referrer code. If provided, that specific referrer OR an Admin can approve it. If blank, only an Admin can approve. Upon approval, status changes to "ACTIVE". Only ACTIVE users can view "Offers" or submit a "PremiumRequest".
+3. The Referral Tree: Managed via an adjacency list (`referred_by_id`).
+4. Multi-Level Commission Engine: 
+   - When an Activation or Premium request is approved, trigger the commission distribution service.
+   - The service must traverse upward from the newly approved user through their parents (Level 1, Level 2, Level 3, etc.).
+   - At each level, fetch the parent's `Designation`. The Designation defines their `max_level` of earning depth. 
+   - Pay them the amount defined in the `CommissionRule` table only if their Designation allows that specific level depth.
+5. Immutable Wallet Ledger: 
+   - `WalletTransaction` is the absolute source of truth. 
+   - `User.wallet_balance` is strictly a cached reflection. 
+   - Every balance change (commission payout, admin addition/subtraction) MUST be executed within a single ACID database transaction that inserts the ledger record and updates the user cache simultaneously.
+
+FRONTEND UI/UX DESIGN (Mobile-First):
+- The vast majority of users are on mobile. Build a bottom navigation bar for primary routes (Home, Wallet, Referral, Profile) and a hamburger menu that triggers a sidebar drawer for secondary routes.
+- On desktop sizes, convert the drawer into a permanent left sidebar.
+- Theme: Strictly Light Theme.
+- Color Palette: Premium sky-blue primary (`#38BDF8`), with subtle gradients (`from-sky-400 to-sky-500`) for primary buttons and active states. Background should be a very soft tinted white (`#F8FBFF`) with solid `#FFFFFF` cards.
+- Styling Details: Apply soft shadows (`shadow-md`), slightly rounded corners (`rounded-lg` / 8-10px radius) for buttons and cards. Clean typography (Inter/Geist) with generous padding for touch targets (min 44px height).
+
+BACKEND REQUIREMENTS:
+- NestJS modular architecture (AdminAuth, UserAuth, Users, Wallets, Commissions, Offers).
+- Strict separate JWT guards (AdminGuard vs UserGuard).
+- Database transactions strictly enforced for the Commission Engine and Wallet adjustments to prevent race conditions.
+- DTO validation via class-validator and Swagger/OpenAPI documentation.
+
+DELIVERABLES:
+Generate the scalable folder structure, Prisma schema (Admin, User, Designation, ActivationRequest, PremiumRequest, WalletTransaction, CommissionRule, Offer), REST endpoints, DTOs, NestJS services (especially the recursive commission distributor), controllers, Next.js mobile-first pages, layouts, shared UI components, and the dual authentication flow.

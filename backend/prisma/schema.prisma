@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  DISABLED
+  ACTIVE
+  BLOCKED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  COMMISSION
+  ADMIN_ADJUSTMENT
+}
+
+enum CommissionType {
+  ACTIVATION
+  PREMIUM
+}
+
+model Admin {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model User {
+  id             String      @id @default(uuid())
+  phone          String      @unique
+  password_hash  String
+  full_name      String?
+  referral_code  String      @unique
+  referred_by_id String?
+  status         UserStatus  @default(DISABLED)
+  wallet_balance Decimal     @default(0.00) @db.Decimal(12, 2)
+  designation_id String?
+
+  referred_by         User?               @relation("ReferralTree", fields: [referred_by_id], references: [id], onDelete: SetNull)
+  referrals           User[]              @relation("ReferralTree")
+  designation         Designation?        @relation(fields: [designation_id], references: [id], onDelete: SetNull)
+  transactions        WalletTransaction[]
+  activation_requests ActivationRequest[]  @relation("UserActivationRequests")
+  premium_requests    PremiumRequest[]     @relation("UserPremiumRequests")
+  withdrawal_requests WithdrawalRequest[]
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+
+  @@index([referral_code])
+  @@index([referred_by_id])
+}
+
+model Designation {
+  id         String   @id @default(uuid())
+  name       String   // e.g. "1 Star", "2 Star Leader", "VIP Diamond"
+  stars      Int      @default(1) // Star count (1, 2, 3, 4, 5)
+  max_level  Int      // Unlocked tree level depth (e.g. 1, 2, 3, 5)
+  users      User[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model ActivationRequest {
+  id               String        @id @default(uuid())
+  user_id          String
+  referrer_id      String?
+  status           RequestStatus @default(PENDING)
+  approved_by      String?
+  rejection_reason String?
+  user             User          @relation("UserActivationRequests", fields: [user_id], references: [id], onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  @@index([user_id])
+  @@index([referrer_id])
+}
+
+model PremiumRequest {
+  id               String        @id @default(uuid())
+  user_id          String
+  referrer_id      String?
+  status           RequestStatus @default(PENDING)
+  approved_by      String?
+  rejection_reason String?
+  user             User          @relation("UserPremiumRequests", fields: [user_id], references: [id], onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  @@index([user_id])
+  @@index([referrer_id])
+}
+
+model WithdrawalRequest {
+  id               String        @id @default(uuid())
+  user_id          String
+  amount           Decimal       @db.Decimal(12, 2)
+  payment_details  String
+  status           RequestStatus @default(PENDING)
+  approved_by      String?
+  rejection_reason String?
+  user             User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  @@index([user_id])
+}
+
+model WalletTransaction {
+  id             String          @id @default(uuid())
+  user_id        String
+  type           TransactionType
+  amount         Decimal         @db.Decimal(12, 2)
+  balance_before Decimal         @db.Decimal(12, 2)
+  balance_after  Decimal         @db.Decimal(12, 2)
+  description    String?
+  user           User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at     DateTime        @default(now())
+
+  @@index([user_id])
+}
+
+model CommissionRule {
+  id         String         @id @default(uuid())
+  type       CommissionType
+  level      Int            // 1, 2, 3...
+  amount     Decimal        @db.Decimal(12, 2)
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+
+  @@unique([type, level])
+}
+
+model Offer {
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  reward_amount Decimal  @db.Decimal(12, 2)
+  banner_url    String?
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
