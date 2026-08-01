@@ -1,50 +1,54 @@
 'use client';
 
-import React from 'react';
-import { X, Search, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Search, ChevronRight, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { DesignationItem, DesignationUser } from '../../hooks/useDesignations';
 
 interface AssignUsersModalProps {
-  selectedDesignation: {
-    id: string;
-    name: string;
-    max_level: number;
-  } | null;
-  allUsers: any[];
-  userSearch: string;
-  loadingUsers: boolean;
+  selectedDesignation: DesignationItem | null;
   onClose: () => void;
-  onSearchChange: (val: string) => void;
-  onToggleUserDesignation: (userId: string, currentDesId: string | null) => void;
 }
 
 export default function AssignUsersModal({
   selectedDesignation,
-  allUsers,
-  userSearch,
-  loadingUsers,
   onClose,
-  onSearchChange,
-  onToggleUserDesignation,
 }: AssignUsersModalProps) {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
+
   if (!selectedDesignation) return null;
 
-  const filteredUsers = allUsers.filter(
-    (u) =>
-      u.phone.includes(userSearch) ||
-      (u.full_name && u.full_name.toLowerCase().includes(userSearch.toLowerCase())) ||
-      u.referral_code.toLowerCase().includes(userSearch.toLowerCase()),
-  );
+  const members = selectedDesignation.users || [];
+
+  const filteredMembers = members.filter((u) => {
+    const q = searchTerm.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      u.phone.toLowerCase().includes(q) ||
+      (u.full_name && u.full_name.toLowerCase().includes(q)) ||
+      (u.referral_code && u.referral_code.toLowerCase().includes(q))
+    );
+  });
+
+  const handleRowClick = (user: DesignationUser) => {
+    const name = user.full_name || user.phone || 'User';
+    onClose();
+    router.push(`/admin/users?parentId=${user.id}&parentName=${encodeURIComponent(name)}`);
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-6 max-w-xl w-full space-y-4 shadow-2xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col border border-slate-100">
+        {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div>
-            <h3 className="font-extrabold text-slate-900 text-base">
-              Setup Users for ({selectedDesignation.name})
+            <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              <span>Assigned Members ({members.length})</span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Click to assign or unassign members to unlock Level {selectedDesignation.max_level} earning depth
+            <p className="text-xs text-slate-500 mt-0.5">
+              Badge: <span className="font-bold text-slate-700">{selectedDesignation.name}</span> — Click any row to view downlines table
             </p>
           </div>
           <button
@@ -57,61 +61,59 @@ export default function AssignUsersModal({
 
         {/* Search filter */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
           <input
             type="text"
-            placeholder="Search user by phone or name..."
-            value={userSearch}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-sky-400"
+            placeholder="Search member by phone, name, or referral code..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </div>
 
-        {/* User List */}
-        <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-80">
-          {loadingUsers ? (
-            <div className="text-center py-6 text-xs text-slate-400">Loading user database...</div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="text-center py-6 text-xs text-slate-400">No matching users found</div>
+        {/* Members List */}
+        <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-96">
+          {filteredMembers.length === 0 ? (
+            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <p className="text-xs font-semibold text-slate-400">
+                {searchTerm.trim()
+                  ? `No members found matching "${searchTerm.trim()}"`
+                  : 'No members assigned to this badge yet.'}
+              </p>
+            </div>
           ) : (
-            filteredUsers.map((u) => {
-              const isAssigned = u.designation_id === selectedDesignation.id;
-              return (
-                <div
-                  key={u.id}
-                  className={`p-3 rounded-xl border flex items-center justify-between text-xs transition-colors ${
-                    isAssigned
-                      ? 'bg-purple-50/80 border-purple-200'
-                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
-                  }`}
-                >
+            filteredMembers.map((user) => (
+              <div
+                key={user.id}
+                onClick={() => handleRowClick(user)}
+                className="group p-3.5 bg-slate-50 hover:bg-sky-50/80 border border-slate-200 hover:border-sky-300 rounded-xl flex items-center justify-between text-xs transition-all cursor-pointer shadow-xs"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                    {(user.full_name || user.phone || 'U').charAt(0).toUpperCase()}
+                  </div>
                   <div>
-                    <div className="font-bold text-slate-900">{u.full_name || u.phone}</div>
-                    <div className="text-[11px] text-slate-500 font-mono">
-                      Phone: {u.phone} | Code: {u.referral_code}
+                    <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                      {user.full_name || user.phone}
+                    </div>
+                    <div className="text-[11px] text-slate-500 flex items-center space-x-2 mt-0.5">
+                      <span>Phone: <strong className="text-slate-700">{user.phone}</strong></span>
+                      {user.referral_code && (
+                        <>
+                          <span>•</span>
+                          <span>Code: <strong className="text-slate-700">{user.referral_code}</strong></span>
+                        </>
+                      )}
                     </div>
                   </div>
-
-                  <button
-                    onClick={() => onToggleUserDesignation(u.id, u.designation_id)}
-                    className={`px-3 py-1.5 rounded-lg font-bold text-[11px] flex items-center space-x-1 transition-colors ${
-                      isAssigned
-                        ? 'bg-purple-600 text-white hover:bg-purple-700'
-                        : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                    }`}
-                  >
-                    {isAssigned ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Assigned</span>
-                      </>
-                    ) : (
-                      <span>Assign User</span>
-                    )}
-                  </button>
                 </div>
-              );
-            })
+
+                <div className="flex items-center space-x-1 text-slate-400 group-hover:text-sky-600 font-bold text-[11px] transition-colors">
+                  <span>View Table</span>
+                  <ChevronRight className="w-4 h-4" />
+                </div>
+              </div>
+            ))
           )}
         </div>
       </div>

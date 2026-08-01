@@ -1,18 +1,21 @@
 'use client';
 
-import React from 'react';
-import { useDesignations } from '../../../hooks/useDesignations';
+import React, { useState } from 'react';
+import { useDesignations, DesignationItem } from '../../../hooks/useDesignations';
 import DesignationStats from '../../../components/designations/DesignationStats';
 import DesignationForm from '../../../components/designations/DesignationForm';
 import DesignationCard from '../../../components/designations/DesignationCard';
 import AssignUsersModal from '../../../components/designations/AssignUsersModal';
+import EditDesignationModal from '../../../components/designations/EditDesignationModal';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
+import { apiFetch } from '../../../lib/api';
+import { toast } from 'sonner';
 
 export default function AdminDesignationsPage() {
   const {
     designations,
     loading,
     saving,
-    editingId,
     name,
     stars,
     maxLevel,
@@ -27,42 +30,91 @@ export default function AdminDesignationsPage() {
     setMaxLevel,
     setUserSearch,
     resetForm,
-    handleEditClick,
     saveDesignation,
     deleteDesignation,
     openAssignModal,
     closeAssignModal,
     toggleUserDesignation,
+    refreshDesignations,
   } = useDesignations(true);
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  // Edit Modal State
+  const [editingDesignation, setEditingDesignation] = useState<DesignationItem | null>(null);
+  const [modalSaving, setModalSaving] = useState(false);
+
+  // Delete Confirmation Modal State
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Create Form Submit handler
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await saveDesignation();
+      toast.success('Designation badge created successfully!');
     } catch (err: any) {
-      alert(err.message || 'Failed to save designation');
+      toast.error(err.message || 'Failed to create designation');
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this designation badge?')) return;
-    try {
-      await deleteDesignation(id);
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete designation');
+  // Open Edit Modal
+  const handleEditClick = (des: DesignationItem) => {
+    setEditingDesignation(des);
+  };
+
+  // Save Edit Modal Changes
+  const handleSaveModalEdit = async (id: string, editName: string, editStars: number, editMaxLevel: number) => {
+    setModalSaving(true);
+    const res = await apiFetch(`/admin/designations/${id}`, {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify({
+        name: editName,
+        stars: Number(editStars),
+        max_level: Number(editMaxLevel),
+      }),
+    });
+
+    if (res.success) {
+      toast.success('Designation badge updated successfully!');
+      setEditingDesignation(null);
+      await refreshDesignations();
+    } else {
+      toast.error(res.error?.message || 'Failed to update designation');
     }
+    setModalSaving(false);
+  };
+
+  // Open Delete Confirmation
+  const handleDeletePrompt = (id: string) => {
+    setDeletingId(id);
+  };
+
+  // Execute Delete
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    setDeleting(true);
+    try {
+      await deleteDesignation(deletingId);
+      toast.success('Designation badge deleted successfully');
+      setDeletingId(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete designation');
+    }
+    setDeleting(false);
   };
 
   const handleToggleUser = async (userId: string, currentDesId: string | null) => {
     try {
       await toggleUserDesignation(userId, currentDesId);
+      toast.success('Member designation assignment updated!');
     } catch (err: any) {
-      alert(err.message || 'User assignment failed');
+      toast.error(err.message || 'User assignment failed');
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Designation & Star Badges</h1>
         <p className="text-xs text-slate-500 mt-1">
@@ -77,9 +129,9 @@ export default function AdminDesignationsPage() {
         totalAssignedMembers={totalAssignedMembers}
       />
 
-      {/* Reusable Form Component */}
+      {/* Create Designation Form Component */}
       <DesignationForm
-        editingId={editingId}
+        editingId={null}
         name={name}
         stars={stars}
         maxLevel={maxLevel}
@@ -87,7 +139,7 @@ export default function AdminDesignationsPage() {
         onNameChange={setName}
         onStarsChange={setStars}
         onMaxLevelChange={setMaxLevel}
-        onSubmit={handleFormSubmit}
+        onSubmit={handleCreateSubmit}
         onCancelEdit={resetForm}
       />
 
@@ -108,7 +160,7 @@ export default function AdminDesignationsPage() {
                 key={des.id}
                 designation={des}
                 onEdit={handleEditClick}
-                onDelete={handleDelete}
+                onDelete={handleDeletePrompt}
                 onOpenAssignModal={openAssignModal}
               />
             ))}
@@ -116,15 +168,31 @@ export default function AdminDesignationsPage() {
         )}
       </div>
 
-      {/* Reusable Assign Users Modal Component */}
+      {/* Edit Designation Modal Dialog Component */}
+      <EditDesignationModal
+        designation={editingDesignation as any}
+        isOpen={!!editingDesignation}
+        saving={modalSaving}
+        onClose={() => setEditingDesignation(null)}
+        onSave={handleSaveModalEdit}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deletingId}
+        title="Delete Designation Badge"
+        message="Are you sure you want to delete this designation badge? This action cannot be undone."
+        confirmText="Delete Badge"
+        variant="danger"
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeletingId(null)}
+      />
+
+      {/* View Assigned Members Modal Component */}
       <AssignUsersModal
         selectedDesignation={selectedDesignation}
-        allUsers={filteredUsers}
-        userSearch={userSearch}
-        loadingUsers={loadingUsers}
         onClose={closeAssignModal}
-        onSearchChange={setUserSearch}
-        onToggleUserDesignation={handleToggleUser}
       />
     </div>
   );

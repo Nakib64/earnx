@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Star, Edit2, Trash2, Users } from 'lucide-react';
+import { Star, Edit2, Trash2, Users, ChevronRight } from 'lucide-react';
+import { DesignationUser } from '../../hooks/useDesignations';
 
 interface DesignationCardProps {
   designation: {
@@ -9,6 +10,7 @@ interface DesignationCardProps {
     name: string;
     stars: number;
     max_level: number;
+    users?: DesignationUser[];
     _count?: {
       users: number;
     };
@@ -24,6 +26,8 @@ export default function DesignationCard({
   onDelete,
   onOpenAssignModal,
 }: DesignationCardProps) {
+  const memberCount = designation._count?.users ?? designation.users?.length ?? 0;
+
   return (
     <div className="glass-card rounded-2xl p-5 space-y-4 flex flex-col justify-between hover:border-sky-300 transition-colors">
       <div className="space-y-3">
@@ -70,7 +74,7 @@ export default function DesignationCard({
               Assigned Members
             </span>
             <div className="font-extrabold text-purple-700 mt-0.5">
-              {designation._count?.users || 0} Members
+              {memberCount} Members
             </div>
           </div>
         </div>
@@ -78,10 +82,13 @@ export default function DesignationCard({
 
       <button
         onClick={() => onOpenAssignModal(designation)}
-        className="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors"
+        className="w-full bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 py-2.5 rounded-xl font-bold text-xs flex items-center justify-between px-4 transition-all shadow-xs group"
       >
-        <Users className="w-4 h-4" />
-        <span>Setup / Assign Users</span>
+        <div className="flex items-center space-x-2">
+          <Users className="w-4 h-4 text-purple-600" />
+          <span>View Assigned Members ({memberCount})</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-purple-400 group-hover:translate-x-0.5 transition-transform" />
       </button>
     </div>
   );

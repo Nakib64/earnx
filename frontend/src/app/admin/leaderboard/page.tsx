@@ -17,10 +17,13 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
+import { useDebounce } from '../../../hooks/useDebounce';
+
 export default function AdminLeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -166,7 +169,7 @@ export default function AdminLeaderboardPage() {
   };
 
   const filteredEntries = entries.filter((e) =>
-    e.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    e.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
   const leaderboardColumns: ColumnDef<LeaderboardEntry>[] = [

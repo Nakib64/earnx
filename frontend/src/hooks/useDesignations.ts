@@ -8,11 +8,20 @@ import {
   filterUsersByQuery,
 } from '../lib/utils';
 
+export interface DesignationUser {
+  id: string;
+  phone: string;
+  full_name?: string;
+  referral_code?: string;
+  status?: string;
+}
+
 export interface DesignationItem {
   id: string;
   name: string;
   stars: number;
   max_level: number;
+  users?: DesignationUser[];
   _count?: {
     users: number;
   };
@@ -27,7 +36,7 @@ export function useDesignations(isAdmin = true) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState<string>('');
   const [stars, setStars] = useState<number>(1);
-  const [maxLevel, setMaxLevel] = useState<number>(1);
+  const [maxLevel, setMaxLevel] = useState<number>(2);
 
   // User Assignment Modal state
   const [selectedDesignation, setSelectedDesignation] = useState<DesignationItem | null>(null);
@@ -52,7 +61,7 @@ export function useDesignations(isAdmin = true) {
     setEditingId(null);
     setName('');
     setStars(1);
-    setMaxLevel(1);
+    setMaxLevel(2);
   };
 
   const handleEditClick = (des: DesignationItem) => {
@@ -136,7 +145,7 @@ export function useDesignations(isAdmin = true) {
   };
 
   const filteredUsers = filterUsersByQuery(allUsers, userSearch);
-  const maxDepthLevel = getMaxLevelFromDesignations(designations);
+  const maxDepthLevel = 5;
   const totalAssignedMembers = getTotalAssignedUsersFromDesignations(designations);
 
   return {

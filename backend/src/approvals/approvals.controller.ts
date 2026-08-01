@@ -77,9 +77,8 @@ export class ApprovalsController {
   async submitWithdrawal(
     @Request() req: any,
     @Body('amount') amount: number,
-    @Body('payment_details') paymentDetails: string,
   ) {
-    return this.approvalsService.submitWithdrawalRequest(req.user.id, amount, paymentDetails);
+    return this.approvalsService.submitWithdrawalRequest(req.user.id, amount);
   }
 
   // ADMIN APPROVAL QUEUE & CONTROLS

@@ -58,17 +58,40 @@ export class UsersService {
   }
 
   // Admin User Management
-  async getAllUsers(page = 1, limit = 50, search?: string, status?: UserStatus) {
+  async getAllUsers(
+    page = 1,
+    limit = 50,
+    search?: string,
+    status?: UserStatus,
+    hasDesignation?: boolean,
+    referredById?: string,
+  ) {
     const skip = (page - 1) * limit;
     const where: any = {};
 
     if (status) where.status = status;
-    if (search) {
+
+    if (referredById) {
       where.OR = [
+        { referred_by_id: referredById },
+        { referred_by: { referral_code: referredById } },
+      ];
+    } else if (hasDesignation) {
+      where.designation_id = { not: null };
+    }
+
+    if (search) {
+      const searchFilter = [
         { phone: { contains: search, mode: 'insensitive' } },
         { full_name: { contains: search, mode: 'insensitive' } },
         { referral_code: { contains: search, mode: 'insensitive' } },
       ];
+      if (where.OR) {
+        where.AND = [{ OR: where.OR }, { OR: searchFilter }];
+        delete where.OR;
+      } else {
+        where.OR = searchFilter;
+      }
     }
 
     const [users, total] = await Promise.all([
@@ -118,21 +141,68 @@ export class UsersService {
     });
   }
 
-  async assignDesignation(userId: string, designationId: string | null) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+  async assignDesignation(
+    userId: string,
+    designationId: string | null,
+    referredById?: string | null,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        designation: true,
+        referred_by: {
+          include: { designation: true },
+        },
+      },
+    });
     if (!user) throw new NotFoundException('User not found');
 
+    let targetDesignation: any = null;
     if (designationId) {
-      const designation = await this.prisma.designation.findUnique({
+      targetDesignation = await this.prisma.designation.findUnique({
         where: { id: designationId },
       });
-      if (!designation) throw new BadRequestException('Invalid designation ID');
+      if (!targetDesignation) throw new BadRequestException('Invalid designation ID');
+    }
+
+    // Determine target sponsor ID
+    const newSponsorId = referredById !== undefined ? referredById : user.referred_by_id;
+
+    if (targetDesignation && newSponsorId) {
+      if (newSponsorId === userId) {
+        throw new BadRequestException('A user cannot be their own sponsor');
+      }
+
+      const sponsor = await this.prisma.user.findUnique({
+        where: { id: newSponsorId },
+        include: { designation: true },
+      });
+
+      if (!sponsor) {
+        throw new BadRequestException('Invalid sponsor ID');
+      }
+
+      if (!sponsor.designation || sponsor.designation.stars <= targetDesignation.stars) {
+        throw new BadRequestException(
+          `Hierarchy violation: A member with '${targetDesignation.name}' (${targetDesignation.stars} Stars) must be under a sponsor with a strictly higher designation (greater than ${targetDesignation.stars} Stars). Please select a higher-badged sponsor or set as Top of Tree.`,
+        );
+      }
+    }
+
+    const dataToUpdate: any = { designation_id: designationId };
+    if (referredById !== undefined) {
+      dataToUpdate.referred_by_id = referredById;
     }
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { designation_id: designationId },
-      include: { designation: true },
+      data: dataToUpdate,
+      include: {
+        designation: true,
+        referred_by: {
+          include: { designation: true },
+        },
+      },
     });
   }
 
@@ -140,6 +210,15 @@ export class UsersService {
   async getDesignations() {
     return this.prisma.designation.findMany({
       include: {
+        users: {
+          select: {
+            id: true,
+            phone: true,
+            full_name: true,
+            referral_code: true,
+            status: true,
+          },
+        },
         _count: {
           select: { users: true },
         },

@@ -10,7 +10,9 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  if (!user || pathname?.startsWith('/admin')) return null;
+  const isDashboardRoute = pathname?.startsWith('/dashboard');
+
+  if (!user || !isDashboardRoute) return null;
 
   const navItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },

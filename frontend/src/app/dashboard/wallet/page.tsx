@@ -17,15 +17,23 @@ export default function WalletPage() {
   // Withdrawal Form State
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [amount, setAmount] = useState('');
-  const [paymentDetails, setPaymentDetails] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchTransactions = async () => {
     setLoading(true);
-    const res = await apiFetch<WalletTransaction[]>('/wallet/transactions?page=1&limit=50');
+    const res = await apiFetch<any>('/wallet/transactions?page=1&limit=50');
     if (res.success && res.data) {
-      setTransactions(res.data);
+      // Backend may return paginated shape { data: [...] } or { transactions: [...] } or a raw array
+      const raw = res.data;
+      const list: WalletTransaction[] = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.data)
+        ? raw.data
+        : Array.isArray(raw?.transactions)
+        ? raw.transactions
+        : [];
+      setTransactions(list);
     }
     setLoading(false);
   };
@@ -43,7 +51,6 @@ export default function WalletPage() {
       method: 'POST',
       body: JSON.stringify({
         amount: parseFloat(amount),
-        payment_details: paymentDetails,
       }),
     });
 
@@ -53,7 +60,6 @@ export default function WalletPage() {
         text: 'Withdrawal request submitted! Sent to Admin approval queue.',
       });
       setAmount('');
-      setPaymentDetails('');
       setShowWithdrawModal(false);
       await refreshUserProfile();
       await fetchTransactions();
@@ -139,7 +145,7 @@ export default function WalletPage() {
 
           <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+            <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Withdrawal Amount (৳)
                 </label>
@@ -151,20 +157,6 @@ export default function WalletPage() {
                   placeholder="500.00"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Payment Account Details (bKash / Nagad / Bank)
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. bKash Personal 01700000000"
-                  value={paymentDetails}
-                  onChange={(e) => setPaymentDetails(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
               </div>

@@ -76,6 +76,7 @@ export interface UserSummary {
   full_name: string | null;
   referral_code: string;
   wallet_balance?: number | string;
+  referred_by?: UserSummary | null;
 }
 
 export interface Admin {
@@ -134,7 +135,6 @@ export interface WithdrawalRequest {
   id: string;
   user_id: string;
   amount: number | string;
-  payment_details: string;
   status: RequestStatus;
   approved_by?: string | null;
   rejection_reason?: string | null;

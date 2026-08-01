@@ -66,7 +66,7 @@ export class WalletService {
       return runner(externalTx);
     }
 
-    return this.prisma.$transaction(async (tx) => runner(tx));
+    return this.prisma.$transaction(async (tx) => runner(tx), { maxWait: 10000, timeout: 30000 });
   }
 
   async getUserTransactions(userId: string, page = 1, limit = 20) {

@@ -35,12 +35,16 @@ export class UsersController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('status') status?: UserStatus,
+    @Query('has_designation') hasDesignation?: string,
+    @Query('referred_by_id') referredById?: string,
   ) {
     return this.usersService.getAllUsers(
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 50,
       search,
       status,
+      hasDesignation === 'true',
+      referredById,
     );
   }
 
@@ -62,8 +66,9 @@ export class UsersController {
   async assignDesignation(
     @Param('id') id: string,
     @Body('designation_id') designationId: string | null,
+    @Body('referred_by_id') referredById?: string | null,
   ) {
-    return this.usersService.assignDesignation(id, designationId);
+    return this.usersService.assignDesignation(id, designationId, referredById);
   }
 
   // Admin Designation Management CRUD

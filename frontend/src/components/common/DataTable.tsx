@@ -15,6 +15,7 @@ export interface DataTableProps<T> {
   loading?: boolean;
   emptyMessage?: string;
   className?: string;
+  onRowClick?: (item: T) => void;
 }
 
 export function DataTable<T>({
@@ -24,6 +25,7 @@ export function DataTable<T>({
   loading = false,
   emptyMessage = 'No records found.',
   className = '',
+  onRowClick,
 }: DataTableProps<T>) {
   if (loading) {
     return (
@@ -45,13 +47,13 @@ export function DataTable<T>({
 
   return (
     <div className={`overflow-x-auto rounded-2xl border border-slate-200 ${className}`}>
-      <table className="w-full text-left text-sm text-slate-600">
-        <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
+      <table className="w-full text-left text-[11px] sm:text-sm text-slate-600">
+        <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider text-[9px] sm:text-[11px]">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''}`}
+                className={`p-2 sm:p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''}`}
               >
                 {col.header}
               </th>
@@ -60,11 +62,15 @@ export function DataTable<T>({
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
           {data.map((item, idx) => (
-            <tr key={keyExtractor(item, idx)} className="hover:bg-slate-50/80 transition-colors">
+            <tr
+              key={keyExtractor(item, idx)}
+              onClick={() => onRowClick && onRowClick(item)}
+              className={`transition-colors ${onRowClick ? 'cursor-pointer hover:bg-sky-50/70' : 'hover:bg-slate-50/80'}`}
+            >
               {columns.map((col) => (
                 <td
                   key={`${keyExtractor(item, idx)}-${col.key}`}
-                  className={`p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                  className={`p-2 sm:p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                 >
                   {col.render ? col.render(item, idx) : (item as any)[col.key]}
                 </td>

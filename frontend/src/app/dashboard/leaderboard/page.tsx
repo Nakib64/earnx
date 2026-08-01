@@ -8,9 +8,12 @@ import { Trophy, Crown, Medal, Search } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
+import { useDebounce } from '../../../hooks/useDebounce';
+
 export default function UserLeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export default function UserLeaderboardPage() {
 
   const filteredEntries = leaderboard
     .filter((item) => item.rank > 3)
-    .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    .filter((item) => item.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
 
   const leaderboardColumns: ColumnDef<LeaderboardEntry>[] = [
     {

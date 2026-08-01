@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { apiFetch } from '../lib/api';
+import { setCookie, getCookie, deleteCookie } from '../lib/cookies';
 import { User, Admin } from '../types';
 
 interface AuthContextType {
@@ -27,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const refreshUserProfile = async () => {
-    const token = userToken || localStorage.getItem('earnx_user_token');
+    const token = userToken || getCookie('earnx_user_token') || localStorage.getItem('earnx_user_token');
     if (!token) return;
 
     const res = await apiFetch<User>('/auth/me', { token });
@@ -41,8 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const initAuth = async () => {
-      const uToken = localStorage.getItem('earnx_user_token');
-      const aToken = localStorage.getItem('earnx_admin_token');
+      const uToken = getCookie('earnx_user_token') || localStorage.getItem('earnx_user_token');
+      const aToken = getCookie('earnx_admin_token') || localStorage.getItem('earnx_admin_token');
 
       if (uToken) {
         setUserToken(uToken);
@@ -50,7 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.success && res.data) {
           setUser(res.data);
         } else {
+          deleteCookie('earnx_user_token');
           localStorage.removeItem('earnx_user_token');
+          setUserToken(null);
         }
       }
 
@@ -60,7 +63,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (res.success && res.data) {
           setAdmin(res.data);
         } else {
+          deleteCookie('earnx_admin_token');
           localStorage.removeItem('earnx_admin_token');
+          setAdminToken(null);
         }
       }
 
@@ -71,24 +76,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const loginUser = (token: string, userData: User) => {
+    setCookie('earnx_user_token', token, 7);
     localStorage.setItem('earnx_user_token', token);
     setUserToken(token);
     setUser(userData);
   };
 
   const loginAdmin = (token: string, adminData: Admin) => {
+    setCookie('earnx_admin_token', token, 7);
     localStorage.setItem('earnx_admin_token', token);
     setAdminToken(token);
     setAdmin(adminData);
   };
 
   const logoutUser = () => {
+    deleteCookie('earnx_user_token');
     localStorage.removeItem('earnx_user_token');
     setUserToken(null);
     setUser(null);
   };
 
   const logoutAdmin = () => {
+    deleteCookie('earnx_admin_token');
     localStorage.removeItem('earnx_admin_token');
     setAdminToken(null);
     setAdmin(null);

@@ -6,7 +6,9 @@ import { apiFetch } from '../../../lib/api';
 import { CommissionRule, CommissionType } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
+import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { Plus, Trash2, Save } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminCommissionsPage() {
   const { admin } = useAuth();
@@ -18,6 +20,10 @@ export default function AdminCommissionsPage() {
   const [level, setLevel] = useState(1);
   const [amount, setAmount] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // Deletion Modal State
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchRules = async () => {
     setLoading(true);
@@ -34,54 +40,80 @@ export default function AdminCommissionsPage() {
 
   const handleSaveRule = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const levelNum = Number(level);
+    if (type === CommissionType.ACTIVATION && levelNum > 1) {
+      toast.warning('Account activation registration reward is single-level direct only (Level 1)');
+      setLevel(1);
+      return;
+    }
+
+    if (levelNum < 1 || levelNum > 5) {
+      toast.warning('Tree level depth must be between Level 1 and Level 5');
+      return;
+    }
+
     setSaving(true);
     const res = await apiFetch('/admin/commissions/rules', {
       method: 'POST',
       isAdmin: true,
       body: JSON.stringify({
         type,
-        level: Number(level),
+        level: levelNum,
         amount: parseFloat(amount),
       }),
     });
 
     if (res.success) {
+      toast.success(`${type} Level ${levelNum} commission rule saved!`);
       setAmount('');
       await fetchRules();
     } else {
-      alert(res.error?.message || 'Failed to save rule');
+      toast.error(res.error?.message || 'Failed to save commission rule');
     }
     setSaving(false);
   };
 
-  const handleDeleteRule = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this commission rule?')) return;
-    const res = await apiFetch(`/admin/commissions/rules/${id}`, {
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    setDeleting(true);
+    const res = await apiFetch(`/admin/commissions/rules/${deletingId}`, {
       method: 'DELETE',
       isAdmin: true,
     });
     if (res.success) {
+      toast.success('Commission rule deleted successfully');
+      setDeletingId(null);
       await fetchRules();
     } else {
-      alert(res.error?.message || 'Failed to delete rule');
+      toast.error(res.error?.message || 'Failed to delete rule');
     }
+    setDeleting(false);
   };
 
   const columns: ColumnDef<CommissionRule>[] = [
     {
       key: 'type',
-      header: 'Type',
+      header: 'Commission Type',
       render: (r) => <StatusBadge status={r.type} />,
     },
     {
       key: 'level',
       header: 'Level Depth',
-      render: (r) => <span className="font-bold font-mono text-slate-900">Level {r.level}</span>,
+      render: (r) => (
+        <span className="font-bold font-mono text-slate-900">
+          Level {r.level} {r.type === CommissionType.ACTIVATION ? '(Direct Only)' : '(Tree Level)'}
+        </span>
+      ),
     },
     {
       key: 'amount',
       header: 'Reward Payout',
-      render: (r) => <span className="font-extrabold text-emerald-600 font-mono text-sm">৳{Number(r.amount).toFixed(2)}</span>,
+      render: (r) => (
+        <span className="font-extrabold text-emerald-600 font-mono text-sm">
+          ৳{Number(r.amount).toFixed(2)}
+        </span>
+      ),
     },
     {
       key: 'actions',
@@ -89,8 +121,8 @@ export default function AdminCommissionsPage() {
       align: 'right',
       render: (r) => (
         <button
-          onClick={() => handleDeleteRule(r.id)}
-          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100"
+          onClick={() => setDeletingId(r.id)}
+          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition-colors"
           title="Delete Rule"
         >
           <Trash2 className="w-4 h-4" />
@@ -100,16 +132,16 @@ export default function AdminCommissionsPage() {
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
+    <div className="space-y-6 w-full">
       <div>
         <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Commission Rules Matrix</h1>
         <p className="text-xs text-slate-500 mt-1">
-          Define multi-level tree commission payout amounts per depth level for Activation & Premium upgrades
+          Define commission rewards for Activation (Direct Referrer Level 1) & Premium Package upgrades (Up to 5 Upper Levels).
         </p>
       </div>
 
       {/* Add / Edit Form */}
-      <div className="glass-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200">
+      <div className="glass-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 w-full">
         <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
           <Plus className="w-4 h-4 text-sky-500" />
           <span>Add or Update Commission Rule</span>
@@ -122,26 +154,31 @@ export default function AdminCommissionsPage() {
             </label>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as CommissionType)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"
+              onChange={(e) => {
+                const newType = e.target.value as CommissionType;
+                setType(newType);
+                if (newType === CommissionType.ACTIVATION) setLevel(1);
+              }}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
-              <option value={CommissionType.ACTIVATION}>ACTIVATION</option>
-              <option value={CommissionType.PREMIUM}>PREMIUM</option>
+              <option value={CommissionType.ACTIVATION}>ACTIVATION (Direct Only)</option>
+              <option value={CommissionType.PREMIUM}>PREMIUM (Up to 5 Levels)</option>
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Tree Level Depth (1, 2, 3...)
+              Tree Level Depth (1 - 5)
             </label>
             <input
               type="number"
               min="1"
-              max="20"
+              max="5"
+              disabled={type === CommissionType.ACTIVATION}
               required
               value={level}
               onChange={(e) => setLevel(parseInt(e.target.value, 10))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60"
             />
           </div>
 
@@ -157,7 +194,7 @@ export default function AdminCommissionsPage() {
               placeholder="100.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -172,8 +209,8 @@ export default function AdminCommissionsPage() {
         </form>
       </div>
 
-      {/* Rules Display Table using DataTable */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200">
+      {/* Rules Display Table */}
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
         <h3 className="font-bold text-slate-900 text-sm">Active Rules Configured</h3>
 
         <DataTable<CommissionRule>
@@ -184,6 +221,18 @@ export default function AdminCommissionsPage() {
           emptyMessage="No commission rules defined yet."
         />
       </div>
+
+      {/* Delete Rule Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deletingId}
+        title="Delete Commission Rule"
+        message="Are you sure you want to delete this commission rule? Tree payout calculations for this level will revert to ৳0."
+        confirmText="Delete Rule"
+        variant="danger"
+        loading={deleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeletingId(null)}
+      />
     </div>
   );
 }

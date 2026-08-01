@@ -1,4 +1,5 @@
 import { ApiResponse, ApiError } from '../types';
+import { getCookie } from './cookies';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -21,10 +22,11 @@ export async function apiFetch<T = any>(
     ...(customHeaders as Record<string, string>),
   };
 
+  const keyName = isAdmin ? 'earnx_admin_token' : 'earnx_user_token';
   const storedToken =
     token ||
     (typeof window !== 'undefined'
-      ? localStorage.getItem(isAdmin ? 'earnx_admin_token' : 'earnx_user_token')
+      ? getCookie(keyName) || localStorage.getItem(keyName)
       : null);
 
   if (storedToken) {

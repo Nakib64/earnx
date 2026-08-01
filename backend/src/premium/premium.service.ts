@@ -81,8 +81,8 @@ export class PremiumService {
             balance_after: new Prisma.Decimal(balanceAfter),
             description: `Weekly Premium Payout (${newPayoutCount}/52 weeks)`,
           },
-        });
       });
+      }, { maxWait: 10000, timeout: 30000 });
 
       processedCount++;
     }

@@ -154,7 +154,7 @@ export class InvestmentsService {
         },
         include: { plan: true },
       });
-    });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async getUserInvestments(userId: string) {
@@ -244,7 +244,7 @@ export class InvestmentsService {
             next_payout_at: isCompleted ? null : nextDate,
           },
         });
-      });
+      }, { maxWait: 10000, timeout: 30000 });
 
       count++;
     }

@@ -22,9 +22,8 @@ export function filterUsersByQuery<T extends { phone: string; full_name?: string
   );
 }
 
-export function getMaxLevelFromDesignations(designations: Array<{ max_level: number }>): number {
-  if (!designations || designations.length === 0) return 1;
-  return Math.max(...designations.map((d) => d.max_level));
+export function getMaxLevelFromDesignations(designations?: Array<{ max_level: number }>): number {
+  return 5;
 }
 
 export function getTotalAssignedUsersFromDesignations(

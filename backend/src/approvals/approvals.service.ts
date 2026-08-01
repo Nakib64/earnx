@@ -108,7 +108,7 @@ export class ApprovalsService {
       );
 
       return { request: updatedRequest, payouts };
-    });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async rejectActivationRequest(requestId: string, approverId: string, reason?: string, isAdmin = false) {
@@ -208,7 +208,7 @@ export class ApprovalsService {
       );
 
       return { request: updatedRequest, payouts };
-    });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async rejectPremiumRequest(requestId: string, approverId: string, reason?: string, isAdmin = false) {
@@ -236,7 +236,7 @@ export class ApprovalsService {
   // WITHDRAWAL REQUESTS (Direct to Admin)
   // ==========================================
 
-  async submitWithdrawalRequest(userId: string, amount: number, paymentDetails: string) {
+  async submitWithdrawalRequest(userId: string, amount: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     if (user.status !== UserStatus.ACTIVE) {
@@ -255,7 +255,6 @@ export class ApprovalsService {
       data: {
         user_id: userId,
         amount: new Prisma.Decimal(amount),
-        payment_details: paymentDetails,
         status: RequestStatus.PENDING,
       },
     });
@@ -265,7 +264,11 @@ export class ApprovalsService {
     return this.prisma.$transaction(async (tx) => {
       const request = await tx.withdrawalRequest.findUnique({
         where: { id: requestId },
-        include: { user: true },
+        include: {
+          user: {
+            include: { referred_by: true },
+          },
+        },
       });
 
       if (!request) throw new NotFoundException('Withdrawal request not found');
@@ -274,15 +277,28 @@ export class ApprovalsService {
       }
 
       const amountToDeduct = Number(request.amount);
+      const requester = request.user;
+      const referrer = requester.referred_by;
 
-      // Execute wallet deduction inside transaction
+      // 1. Deduct from the requesting user
       await this.walletService.processTransaction(
         request.user_id,
         TransactionType.WITHDRAW,
         -amountToDeduct,
-        `Approved Withdrawal to (${request.payment_details})`,
+        `Withdrawal approved by admin`,
         tx,
       );
+
+      // 2. Credit the direct referrer (if exists) with the same amount
+      if (referrer) {
+        await this.walletService.processTransaction(
+          referrer.id,
+          TransactionType.COMMISSION,
+          amountToDeduct,
+          `Withdrawal commission from ${requester.full_name || requester.phone}`,
+          tx,
+        );
+      }
 
       const updatedRequest = await tx.withdrawalRequest.update({
         where: { id: requestId },
@@ -293,7 +309,7 @@ export class ApprovalsService {
       });
 
       return updatedRequest;
-    });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async rejectWithdrawalRequest(requestId: string, adminId: string, reason?: string) {
@@ -330,18 +346,27 @@ export class ApprovalsService {
   }
 
   async getAllPendingAdminApprovals() {
+    const userSelect = {
+      id: true,
+      phone: true,
+      full_name: true,
+      referral_code: true,
+      wallet_balance: true,
+      referred_by: { select: { id: true, phone: true, full_name: true } },
+    };
+
     const [activations, premiums, withdrawals] = await Promise.all([
       this.prisma.activationRequest.findMany({
-        where: { status: RequestStatus.PENDING },
-        include: { user: { select: { id: true, phone: true, full_name: true, referral_code: true } } },
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: userSelect } },
       }),
       this.prisma.premiumRequest.findMany({
-        where: { status: RequestStatus.PENDING },
-        include: { user: { select: { id: true, phone: true, full_name: true, referral_code: true } } },
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: userSelect } },
       }),
       this.prisma.withdrawalRequest.findMany({
-        where: { status: RequestStatus.PENDING },
-        include: { user: { select: { id: true, phone: true, full_name: true, referral_code: true, wallet_balance: true } } },
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: userSelect } },
       }),
     ]);
 
