@@ -52,24 +52,22 @@ async function main() {
 
   // 2. Designations
   const dDiamond = await prisma.designation.create({
-    data: { name: 'VIP Diamond Leader', stars: 5, max_level: 10 },
+    data: { name: 'Diamond Leader', stars: 5, max_level: 10 },
   });
   const d3Star = await prisma.designation.create({
-    data: { name: '3 Star Executive', stars: 3, max_level: 5 },
+    data: { name: 'Executive', stars: 3, max_level: 5 },
   });
   const d2Star = await prisma.designation.create({
-    data: { name: '2 Star Director', stars: 2, max_level: 3 },
+    data: { name: 'Director', stars: 2, max_level: 3 },
   });
   const d1Star = await prisma.designation.create({
-    data: { name: '1 Star Leader', stars: 1, max_level: 2 },
+    data: { name: 'Leader', stars: 1, max_level: 2 },
   });
 
   // 3. Commission Rules
   await prisma.commissionRule.createMany({
     data: [
       { type: CommissionType.ACTIVATION, level: 1, amount: 100.00 },
-      { type: CommissionType.ACTIVATION, level: 2, amount: 50.00 },
-      { type: CommissionType.ACTIVATION, level: 3, amount: 25.00 },
       { type: CommissionType.PREMIUM, level: 1, amount: 500.00 },
       { type: CommissionType.PREMIUM, level: 2, amount: 250.00 },
       { type: CommissionType.PREMIUM, level: 3, amount: 100.00 },
@@ -79,94 +77,94 @@ async function main() {
   const defaultPasswordHash = await bcrypt.hash('Password123!', 10);
   const userMap: Record<number, any> = {};
 
-  // EXACTLY 6 BADGED USERS:
-  // User 1: VIP Diamond (5 Stars) -> Root Level 0
+  // EXACTLY 6 BADGED USERS (All badged users have is_premium = true):
+  // User 1: Diamond Leader (5 Stars) -> Root Level 0
   userMap[1] = await prisma.user.create({
     data: {
       phone: '01710000001',
       password_hash: defaultPasswordHash,
-      full_name: 'Rahim Ahmed (Root VIP Diamond)',
+      full_name: 'Rahim Ahmed',
       referral_code: 'REF001',
       referred_by_id: null,
       designation_id: dDiamond.id,
       status: UserStatus.ACTIVE,
       is_premium: true,
-      wallet_balance: 12500.00,
+      wallet_balance: 0.00,
     },
   });
 
-  // User 2: 3 Star Executive (3 Stars) -> Under User 1
+  // User 2: Executive (3 Stars) -> Under User 1
   userMap[2] = await prisma.user.create({
     data: {
       phone: '01710000002',
       password_hash: defaultPasswordHash,
-      full_name: 'Karim Chowdhury (3 Star)',
+      full_name: 'Karim Chowdhury',
       referral_code: 'REF002',
       referred_by_id: userMap[1].id,
       designation_id: d3Star.id,
       status: UserStatus.ACTIVE,
       is_premium: true,
-      wallet_balance: 6200.00,
+      wallet_balance: 0.00,
     },
   });
 
-  // User 3: 2 Star Director (2 Stars) -> Under User 1
+  // User 3: Director (2 Stars) -> Under User 1
   userMap[3] = await prisma.user.create({
     data: {
       phone: '01710000003',
       password_hash: defaultPasswordHash,
-      full_name: 'Sumaiya Islam (2 Star)',
+      full_name: 'Sumaiya Islam',
       referral_code: 'REF003',
       referred_by_id: userMap[1].id,
       designation_id: d2Star.id,
       status: UserStatus.ACTIVE,
-      is_premium: false,
-      wallet_balance: 3400.00,
+      is_premium: true,
+      wallet_balance: 0.00,
     },
   });
 
-  // User 4: 1 Star Leader (1 Star) -> Under User 2 (Layer 2)
+  // User 4: Leader (1 Star) -> Under User 2 (Layer 2)
   userMap[4] = await prisma.user.create({
     data: {
       phone: '01710000004',
       password_hash: defaultPasswordHash,
-      full_name: 'Tanvir Hossain (1 Star)',
+      full_name: 'Tanvir Hossain',
       referral_code: 'REF004',
       referred_by_id: userMap[2].id,
       designation_id: d1Star.id,
       status: UserStatus.ACTIVE,
-      is_premium: false,
-      wallet_balance: 1800.00,
+      is_premium: true,
+      wallet_balance: 0.00,
     },
   });
 
-  // User 5: 1 Star Leader (1 Star) -> Under User 3 (Layer 2)
+  // User 5: Leader (1 Star) -> Under User 3 (Layer 2)
   userMap[5] = await prisma.user.create({
     data: {
       phone: '01710000005',
       password_hash: defaultPasswordHash,
-      full_name: 'Nusrat Jahan (1 Star)',
+      full_name: 'Nusrat Jahan',
       referral_code: 'REF005',
       referred_by_id: userMap[3].id,
       designation_id: d1Star.id,
       status: UserStatus.ACTIVE,
-      is_premium: false,
-      wallet_balance: 1500.00,
+      is_premium: true,
+      wallet_balance: 0.00,
     },
   });
 
-  // User 6: 1 Star Leader (1 Star) -> Under User 4 (Layer 3)
+  // User 6: Leader (1 Star) -> Under User 4 (Layer 3)
   userMap[6] = await prisma.user.create({
     data: {
       phone: '01710000006',
       password_hash: defaultPasswordHash,
-      full_name: 'Shakib Al Hasan (1 Star)',
+      full_name: 'Shakib Al Hasan',
       referral_code: 'REF006',
       referred_by_id: userMap[4].id,
       designation_id: d1Star.id,
       status: UserStatus.ACTIVE,
-      is_premium: false,
-      wallet_balance: 950.00,
+      is_premium: true,
+      wallet_balance: 0.00,
     },
   });
 
