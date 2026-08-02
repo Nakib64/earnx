@@ -39,9 +39,11 @@ export default function Sidebar() {
   // Default open when already on an approvals sub-route
   const [approvalsOpen, setApprovalsOpen] = useState(!!isApprovalsSection);
 
-  // Hide sidebar on public pages (like Homepage, About, Contact, Login, Register)
+  // Hide sidebar on public pages, or if user/admin isn't logged in for their respective section
+  if (isAdminRoute && !admin) return null;
+  if (isDashboardRoute && !user) return null;
   if (!isDashboardRoute && !isAdminRoute) return null;
-  if (!user && !admin) return null;
+
 
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
