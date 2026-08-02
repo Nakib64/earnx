@@ -7,7 +7,7 @@ import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { UserBreadcrumbs } from '../../../components/users/UserBreadcrumbs';
 import { AdjustWalletModal } from '../../../components/users/AdjustWalletModal';
 import { AssignDesignationModal } from '../../../components/users/AssignDesignationModal';
-import { UserDetailsModal } from '../../../components/users/UserDetailsModal';
+import { UserDetailCards } from '../../../components/users/UserDetailCards';
 import { useAdminUsersPage } from '../../../hooks/useAdminUsersPage';
 import { Search, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -32,7 +32,7 @@ function AdminUsersContent() {
     userColumns,
     deleteConfirmTarget,
     deletingUser,
-    detailModalUser,
+    selectedUserForCards,
     setSearchTerm,
     setTargetDesignation,
     setTargetSponsorId,
@@ -40,13 +40,14 @@ function AdminUsersContent() {
     setAdjustUser,
     setSelectedUserForBadge,
     setDeleteConfirmTarget,
-    setDetailModalUser,
     handleDeleteUserConfirm,
     handleRowClick,
     handleBreadcrumbClick,
     handleStatusChangeConfirm,
     handleBalanceAdjustSubmit,
     handleAssignDesignation,
+    openBadgeModal,
+    openStatusConfirmModal,
     loadData,
   } = useAdminUsersPage();
 
@@ -59,7 +60,7 @@ function AdminUsersContent() {
             Badged Leaders & Referral Network
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Displaying badged leaders. Click any member row or Details button to view their downlines and full transaction history.
+            Displaying referral tree network. Click any member row to explore their downlines in-place. Select Details to view profile & transaction history cards below.
           </p>
         </div>
 
@@ -127,7 +128,7 @@ function AdminUsersContent() {
           columns={userColumns}
           keyExtractor={(u) => u.id}
           loading={loading}
-          onRowClick={(u) => setDetailModalUser(u)}
+          onRowClick={handleRowClick}
           emptyMessage={
             searchTerm.trim()
               ? `No members found matching "${searchTerm.trim()}" across the database.`
@@ -138,12 +139,13 @@ function AdminUsersContent() {
         />
       </div>
 
-      {/* User Details & Transaction History Modal */}
-      <UserDetailsModal
-        user={detailModalUser}
-        isOpen={!!detailModalUser}
-        onClose={() => setDetailModalUser(null)}
-        onExploreTree={(u) => handleRowClick(u)}
+      {/* Selected Member Details & Transaction History Cards (Shown AFTER / BELOW the Table) */}
+      <UserDetailCards
+        user={selectedUserForCards}
+        onAdjustBalance={(user) => setAdjustUser(user)}
+        onAssignBadge={(user) => openBadgeModal(user)}
+        onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
+        onDeleteUser={(user) => setDeleteConfirmTarget(user)}
       />
 
       {/* Delete User Confirmation Modal */}

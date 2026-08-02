@@ -8,7 +8,8 @@ import { ColumnDef } from '../components/common/DataTable';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { BreadcrumbItem } from '../components/users/UserBreadcrumbs';
 import { useDebounce } from './useDebounce';
-import { Award, ChevronRight, DollarSign, Users, Trash2 } from 'lucide-react';
+import { RowActionsMenu } from '../components/users/RowActionsMenu';
+import { Award } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -32,6 +33,7 @@ export interface UseAdminUsersPageReturn {
   deleteConfirmTarget: User | null;
   deletingUser: boolean;
   detailModalUser: User | null;
+  selectedUserForCards: User | null;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   setTargetDesignation: React.Dispatch<React.SetStateAction<string>>;
   setTargetSponsorId: React.Dispatch<React.SetStateAction<string>>;
@@ -40,12 +42,15 @@ export interface UseAdminUsersPageReturn {
   setSelectedUserForBadge: React.Dispatch<React.SetStateAction<User | null>>;
   setDeleteConfirmTarget: React.Dispatch<React.SetStateAction<User | null>>;
   setDetailModalUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setSelectedUserForCards: React.Dispatch<React.SetStateAction<User | null>>;
   handleDeleteUserConfirm: () => Promise<void>;
   handleRowClick: (user: User) => void;
   handleBreadcrumbClick: (index: number) => void;
   handleStatusChangeConfirm: () => Promise<void>;
   handleBalanceAdjustSubmit: (user: User, rawAmount: number, type: 'ADD' | 'SUBTRACT', reason: string) => Promise<void>;
   handleAssignDesignation: () => Promise<void>;
+  openBadgeModal: (user: User) => void;
+  openStatusConfirmModal: (e: React.MouseEvent, user: User, newStatus: UserStatus) => void;
   loadData: () => Promise<void>;
 }
 
@@ -72,6 +77,9 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
 
   // User Detail & Transactions Modal State
   const [detailModalUser, setDetailModalUser] = useState<User | null>(null);
+
+  // Selected User For Cards View Below Table State
+  const [selectedUserForCards, setSelectedUserForCards] = useState<User | null>(null);
 
   const searchParams = useSearchParams();
   const queryParentId = searchParams ? searchParams.get('parentId') : null;
@@ -128,41 +136,26 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     ]);
 
     if (usersRes.success && usersRes.data) {
-      const userList = Array.isArray(usersRes.data)
-        ? usersRes.data
-        : (usersRes.data as any).data || [];
-      setUsers(userList);
-    } else {
-      setUsers([]);
-      if (usersRes.error) {
-        toast.error(usersRes.error.message);
-      }
+      const dataArr = (usersRes.data as any).data || (Array.isArray(usersRes.data) ? usersRes.data : []);
+      setUsers(dataArr);
     }
-
     if (desRes.success && desRes.data) {
-      const desList = Array.isArray(desRes.data)
-        ? desRes.data
-        : (desRes.data as any).data || [];
-      setDesignations(desList);
+      setDesignations(desRes.data);
     }
-
     setLoading(false);
-  }, [debouncedSearch, currentParent.id]);
+  }, [currentParent.id, debouncedSearch]);
 
   useEffect(() => {
-    if (admin) {
-      loadData();
-    }
+    if (admin) loadData();
   }, [admin, loadData]);
 
   // Fetch badged leaders for sponsor dropdown
   const fetchAllBadgedLeaders = useCallback(async () => {
-    const res = await apiFetch<User[]>('/admin/users?page=1&limit=200&has_designation=true', {
+    const res = await apiFetch<User[]>('/admin/users?has_designation=true&limit=100', {
       isAdmin: true,
     });
     if (res.success && res.data) {
-      const list = Array.isArray(res.data) ? res.data : (res.data as any).data || [];
-      setAllBadgedLeaders(list);
+      setAllBadgedLeaders((res.data as any).data || (Array.isArray(res.data) ? res.data : []));
     }
   }, []);
 
@@ -177,6 +170,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
   );
 
   const handleRowClick = useCallback((user: User) => {
+    setSelectedUserForCards(user);
     setBreadcrumbs((prev) => [
       ...prev,
       { id: user.id, name: user.full_name || user.phone || 'User' },
@@ -210,13 +204,16 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)),
       );
+      if (selectedUserForCards?.id === user.id) {
+        setSelectedUserForCards((prev) => (prev ? { ...prev, status: newStatus } : null));
+      }
       toast.success(`User ${user.full_name || user.phone} status updated to ${newStatus}`);
       setStatusConfirmTarget(null);
     } else {
       toast.error(res.error?.message || 'Status update failed');
     }
     setUpdatingStatus(false);
-  }, [statusConfirmTarget]);
+  }, [statusConfirmTarget, selectedUserForCards]);
 
   const handleAssignDesignation = useCallback(async () => {
     if (!selectedUserForBadge) return;
@@ -252,19 +249,30 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             : u,
         ),
       );
+      if (selectedUserForCards?.id === selectedUserForBadge.id) {
+        setSelectedUserForCards((prev) =>
+          prev
+            ? {
+                ...prev,
+                designation_id: targetDesignation || null,
+                designation: newDesObj || null,
+              }
+            : null,
+        );
+      }
       toast.success(`Designation badge updated for ${selectedUserForBadge.full_name || selectedUserForBadge.phone}`);
       setSelectedUserForBadge(null);
     } else {
       toast.error(res.error?.message || 'Designation assignment failed');
     }
     setSavingBadge(false);
-  }, [selectedUserForBadge, targetDesignation, targetSponsorId, designations]);
+  }, [selectedUserForBadge, targetDesignation, targetSponsorId, designations, selectedUserForCards]);
 
   const handleBalanceAdjustSubmit = useCallback(
     async (user: User, rawAmount: number, type: 'ADD' | 'SUBTRACT', reason: string) => {
+      setAdjusting(true);
       const finalAmount = type === 'ADD' ? rawAmount : -rawAmount;
 
-      setAdjusting(true);
       const res = await apiFetch('/admin/wallet/adjust', {
         method: 'POST',
         isAdmin: true,
@@ -286,6 +294,13 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             return u;
           }),
         );
+        if (selectedUserForCards?.id === targetId) {
+          setSelectedUserForCards((prev) =>
+            prev
+              ? { ...prev, wallet_balance: Number(prev.wallet_balance || 0) + finalAmount }
+              : null,
+          );
+        }
         toast.success(
           `${type === 'ADD' ? 'Added' : 'Subtracted'} ৳${rawAmount} ${
             type === 'ADD' ? 'to' : 'from'
@@ -297,7 +312,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
       }
       setAdjusting(false);
     },
-    [],
+    [selectedUserForCards],
   );
 
   const handleDeleteUserConfirm = async () => {
@@ -309,6 +324,9 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     });
     if (res.success) {
       toast.success(`User ${deleteConfirmTarget.full_name || deleteConfirmTarget.phone} deleted successfully`);
+      if (selectedUserForCards?.id === deleteConfirmTarget.id) {
+        setSelectedUserForCards(null);
+      }
       setDeleteConfirmTarget(null);
       await loadData();
     } else {
@@ -371,81 +389,14 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
         header: 'Operations',
         align: 'right',
         render: (u) => (
-          <div className="flex items-center justify-end space-x-1 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setDetailModalUser(u);
-              }}
-              className="p-1 sm:px-2 sm:py-1 bg-sky-100 text-sky-800 hover:bg-sky-200 rounded-md font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 transition-colors"
-              title="View details & downlines"
-            >
-              <Users className="w-3 h-3 text-sky-600" />
-              <span className="hidden sm:inline">Details</span>
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setAdjustUser(u);
-              }}
-              className="p-1 sm:px-2 sm:py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-md font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 transition-colors"
-              title="Adjust balance"
-            >
-              <DollarSign className="w-3 h-3 text-emerald-600" />
-              <span className="hidden sm:inline">Adjust</span>
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                openBadgeModal(u);
-              }}
-              className="px-1.5 sm:px-2 py-1 bg-purple-100 text-purple-800 hover:bg-purple-200 rounded-md font-bold text-[8px] sm:text-[11px] transition-colors"
-              title="Badge"
-            >
-              Badge
-            </button>
-
-            {u.status === UserStatus.DISABLED && (
-              <button
-                onClick={(e) => openStatusConfirmModal(e, u, UserStatus.ACTIVE)}
-                className="px-1.5 sm:px-2 py-1 bg-emerald-500 text-white rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-emerald-600 transition-colors"
-              >
-                Activate
-              </button>
-            )}
-
-            {u.status === UserStatus.ACTIVE && (
-              <button
-                onClick={(e) => openStatusConfirmModal(e, u, UserStatus.BLOCKED)}
-                className="px-1.5 sm:px-2 py-1 bg-rose-100 text-rose-800 rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-rose-200 transition-colors"
-              >
-                Block
-              </button>
-            )}
-
-            {u.status === UserStatus.BLOCKED && (
-              <button
-                onClick={(e) => openStatusConfirmModal(e, u, UserStatus.ACTIVE)}
-                className="px-1.5 sm:px-2 py-1 bg-sky-100 text-sky-800 rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-sky-200 rounded-md transition-colors"
-              >
-                Unblock
-              </button>
-            )}
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteConfirmTarget(u);
-              }}
-              className="p-1 sm:px-2 sm:py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-md font-bold text-[8px] sm:text-[11px] transition-colors"
-              title="Delete user profile"
-            >
-              <Trash2 className="w-3 h-3 text-red-600 sm:hidden" />
-              <span className="hidden sm:inline">Delete</span>
-            </button>
-          </div>
+          <RowActionsMenu
+            user={u}
+            onSelectDetails={(user) => setSelectedUserForCards(user)}
+            onAdjustBalance={(user) => setAdjustUser(user)}
+            onAssignBadge={(user) => openBadgeModal(user)}
+            onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
+            onDeleteUser={(user) => setDeleteConfirmTarget(user)}
+          />
         ),
       },
     ],
@@ -472,6 +423,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     deleteConfirmTarget,
     deletingUser,
     detailModalUser,
+    selectedUserForCards,
     setSearchTerm,
     setTargetDesignation,
     setTargetSponsorId,
@@ -480,12 +432,15 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     setSelectedUserForBadge,
     setDeleteConfirmTarget,
     setDetailModalUser,
+    setSelectedUserForCards,
     handleDeleteUserConfirm,
     handleRowClick,
     handleBreadcrumbClick,
     handleStatusChangeConfirm,
     handleBalanceAdjustSubmit,
     handleAssignDesignation,
+    openBadgeModal,
+    openStatusConfirmModal,
     loadData,
   };
 }
