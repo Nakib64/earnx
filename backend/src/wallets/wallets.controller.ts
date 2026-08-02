@@ -39,12 +39,18 @@ export class WalletsController {
     @Query('limit') limit?: string,
     @Query('user_id') userId?: string,
     @Query('type') type?: TransactionType,
+    @Query('search') search?: string,
+    @Query('start_date') startDate?: string,
+    @Query('end_date') endDate?: string,
   ) {
     return this.walletService.getAllTransactions(
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 20,
       userId,
       type,
+      search,
+      startDate,
+      endDate,
     );
   }
 

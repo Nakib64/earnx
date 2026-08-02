@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WalletService } from '../wallets/wallet.service';
 import { CommissionType, TransactionType, UserStatus, Prisma } from '@prisma/client';
@@ -56,7 +56,9 @@ export class CommissionService {
         return payoutSummary; // No referrer to pay
       }
 
-      const maxAllowedTreeDepth = 5;
+      // Business Rule 1: ACTIVATION is single-level direct referrer ONLY (maxDepth = 1).
+      // Business Rule 2: PREMIUM is up to 5 levels deep (maxDepth = 5).
+      const maxAllowedTreeDepth = commissionType === CommissionType.ACTIVATION ? 1 : 5;
 
       let currentParentId: string | null = sourceUser.referred_by_id;
       let currentLevel = 1;
@@ -92,7 +94,8 @@ export class CommissionService {
               reason: `Upline user (${parent.phone}) at level ${currentLevel} is not ACTIVE`,
             });
           }
-          // Rule 2: For PREMIUM commissions beyond Level 1, upline parent must be a Premium subscriber
+          // Rule 2: For PREMIUM commissions beyond Level 1:
+          // Upline parent must be a Premium subscriber (is_premium === true)
           else if (commissionType === CommissionType.PREMIUM && currentLevel > 1 && !parent.is_premium) {
             payoutSummary.push({
               level: currentLevel,
@@ -103,14 +106,14 @@ export class CommissionService {
               reason: `Upline user (${parent.phone}) at level ${currentLevel} is not an active Premium Package subscriber`,
             });
           } else {
-            // Unlocked Level Depth:
-            // - If user has a Designation: use designation.max_level
-            // - If user is Premium (or Level 1 direct referrer): defaults to unlocked
-            const maxUnlockedLevel = parent.designation
-              ? parent.designation.max_level
-              : (parent.is_premium ? 5 : 1);
+            // Rule 3: Designation + Premium Package level check for upper levels (level 2 to 5):
+            // - Level 1 (Direct Referrer): Qualified if active
+            // - Level 2-5: Qualified ONLY IF parent is Premium AND has a Designation where designation.max_level >= currentLevel
+            const maxUnlockedLevel = (commissionType === CommissionType.PREMIUM && currentLevel > 1)
+              ? (parent.designation ? parent.designation.max_level : 0)
+              : 1;
 
-            const isQualified = maxUnlockedLevel >= currentLevel;
+            const isQualified = currentLevel === 1 || (parent.is_premium && maxUnlockedLevel >= currentLevel);
 
             if (isQualified) {
               const description = `${commissionType === CommissionType.PREMIUM ? 'Premium' : 'Activation'} Level ${currentLevel} Commission from user (${sourceUser.phone})`;
@@ -166,6 +169,9 @@ export class CommissionService {
   }
 
   async upsertCommissionRule(type: CommissionType, level: number, amount: number) {
+    if (type === CommissionType.ACTIVATION && level > 1) {
+      throw new BadRequestException('Activation commission is single-level direct referrer only (Level 1)');
+    }
     return this.prisma.commissionRule.upsert({
       where: {
         type_level: { type, level },

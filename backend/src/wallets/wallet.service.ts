@@ -94,11 +94,42 @@ export class WalletService {
     };
   }
 
-  async getAllTransactions(page = 1, limit = 20, userId?: string, type?: TransactionType) {
+  async getAllTransactions(
+    page = 1,
+    limit = 20,
+    userId?: string,
+    type?: TransactionType,
+    search?: string,
+    startDate?: string,
+    endDate?: string,
+  ) {
     const skip = (page - 1) * limit;
     const where: Prisma.WalletTransactionWhereInput = {};
+
     if (userId) where.user_id = userId;
     if (type) where.type = type;
+
+    if (startDate || endDate) {
+      where.created_at = {};
+      if (startDate) where.created_at.gte = new Date(startDate);
+      if (endDate) where.created_at.lte = new Date(endDate);
+    }
+
+    if (search && search.trim()) {
+      const q = search.trim();
+      const searchConditions: Prisma.WalletTransactionWhereInput[] = [
+        { description: { contains: q, mode: 'insensitive' } },
+        { user: { phone: { contains: q, mode: 'insensitive' } } },
+        { user: { full_name: { contains: q, mode: 'insensitive' } } },
+        { user: { referral_code: { contains: q, mode: 'insensitive' } } },
+      ];
+      if (where.OR) {
+        where.AND = [{ OR: where.OR }, { OR: searchConditions }];
+        delete where.OR;
+      } else {
+        where.OR = searchConditions;
+      }
+    }
 
     const [transactions, total] = await Promise.all([
       this.prisma.walletTransaction.findMany({

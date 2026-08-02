@@ -7,6 +7,7 @@ import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { UserBreadcrumbs } from '../../../components/users/UserBreadcrumbs';
 import { AdjustWalletModal } from '../../../components/users/AdjustWalletModal';
 import { AssignDesignationModal } from '../../../components/users/AssignDesignationModal';
+import { UserDetailsModal } from '../../../components/users/UserDetailsModal';
 import { useAdminUsersPage } from '../../../hooks/useAdminUsersPage';
 import { Search, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,12 +30,18 @@ function AdminUsersContent() {
     allBadgedLeaders,
     savingBadge,
     userColumns,
+    deleteConfirmTarget,
+    deletingUser,
+    detailModalUser,
     setSearchTerm,
     setTargetDesignation,
     setTargetSponsorId,
     setStatusConfirmTarget,
     setAdjustUser,
     setSelectedUserForBadge,
+    setDeleteConfirmTarget,
+    setDetailModalUser,
+    handleDeleteUserConfirm,
     handleRowClick,
     handleBreadcrumbClick,
     handleStatusChangeConfirm,
@@ -52,7 +59,7 @@ function AdminUsersContent() {
             Badged Leaders & Referral Network
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Displaying badged leaders. Click any row to explore that member's referral downlines in-place.
+            Displaying badged leaders. Click any member row or Details button to view their downlines and full transaction history.
           </p>
         </div>
 
@@ -91,7 +98,7 @@ function AdminUsersContent() {
           columns={userColumns}
           keyExtractor={(u) => u.id}
           loading={loading}
-          onRowClick={handleRowClick}
+          onRowClick={(u) => setDetailModalUser(u)}
           emptyMessage={
             searchTerm.trim()
               ? `No members found matching "${searchTerm.trim()}" across the database.`
@@ -101,6 +108,30 @@ function AdminUsersContent() {
           }
         />
       </div>
+
+      {/* User Details & Transaction History Modal */}
+      <UserDetailsModal
+        user={detailModalUser}
+        isOpen={!!detailModalUser}
+        onClose={() => setDetailModalUser(null)}
+        onExploreTree={(u) => handleRowClick(u)}
+      />
+
+      {/* Delete User Confirmation Modal */}
+      {deleteConfirmTarget && (
+        <ConfirmModal
+          isOpen={!!deleteConfirmTarget}
+          title="Delete User Profile"
+          message={`Are you sure you want to permanently delete user ${
+            deleteConfirmTarget.full_name || deleteConfirmTarget.phone
+          }? All associated data will be removed.`}
+          confirmText="Yes, Delete User"
+          variant="danger"
+          loading={deletingUser}
+          onConfirm={handleDeleteUserConfirm}
+          onClose={() => setDeleteConfirmTarget(null)}
+        />
+      )}
 
       {/* Account Status Change Confirmation Modal */}
       {statusConfirmTarget && (

@@ -1,18 +1,32 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { WalletTransaction } from '../../../types';
+import { WalletTransaction, TransactionType } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { AlertBanner } from '../../../components/common/AlertBanner';
-import { DollarSign } from 'lucide-react';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { DollarSign, Search, Filter, Calendar, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminWalletPage() {
   const { admin } = useAuth();
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination & Filtering State
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 350);
+
+  const [selectedType, setSelectedType] = useState<string>('ALL');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   // Manual Adjustment Form State
   const [userId, setUserId] = useState('');
@@ -21,20 +35,39 @@ export default function AdminWalletPage() {
   const [adjusting, setAdjusting] = useState(false);
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     setLoading(true);
-    const res = await apiFetch<{ data: WalletTransaction[] }>('/admin/wallet/transactions?page=1&limit=50', {
+
+    const queryParts = [`page=${page}`, `limit=25`];
+    if (debouncedSearch.trim()) queryParts.push(`search=${encodeURIComponent(debouncedSearch.trim())}`);
+    if (selectedType && selectedType !== 'ALL') queryParts.push(`type=${selectedType}`);
+    if (startDate) queryParts.push(`start_date=${startDate}`);
+    if (endDate) queryParts.push(`end_date=${endDate}`);
+
+    const res = await apiFetch<any>(`/admin/wallet/transactions?${queryParts.join('&')}`, {
       isAdmin: true,
     });
+
     if (res.success && res.data) {
-      setTransactions((res.data as any).data || (Array.isArray(res.data) ? res.data : []));
+      const txData = res.data.data || (Array.isArray(res.data) ? res.data : []);
+      const meta = res.data.meta || {};
+      setTransactions(txData);
+      setTotalPages(meta.totalPages || 1);
+      setTotalRecords(meta.total || txData.length);
+    } else {
+      setTransactions([]);
     }
     setLoading(false);
-  };
+  }, [page, debouncedSearch, selectedType, startDate, endDate]);
 
   useEffect(() => {
     if (admin) fetchTransactions();
-  }, [admin]);
+  }, [admin, fetchTransactions]);
+
+  // Reset page when search or filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, selectedType, startDate, endDate]);
 
   const handleAdjustSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +85,14 @@ export default function AdminWalletPage() {
     });
 
     if (res.success) {
+      toast.success('Wallet adjustment executed successfully!');
       setMsg({ type: 'success', text: 'Wallet adjusted successfully!' });
       setUserId('');
       setAmount('');
       setDescription('');
       await fetchTransactions();
     } else {
+      toast.error(res.error?.message || 'Adjustment failed');
       setMsg({ type: 'error', text: res.error?.message || 'Adjustment failed' });
     }
     setAdjusting(false);
@@ -66,11 +101,11 @@ export default function AdminWalletPage() {
   const columns: ColumnDef<WalletTransaction>[] = [
     {
       key: 'user',
-      header: 'User',
+      header: 'Member / User',
       render: (tx) => (
         <div>
-          <div className="font-bold text-slate-900">{tx.user?.phone || 'N/A'}</div>
-          <div className="text-[10px] text-slate-400">{tx.user?.full_name || '-'}</div>
+          <div className="font-bold text-slate-900 text-xs">{tx.user?.phone || tx.user_id}</div>
+          <div className="text-[10px] text-slate-400">{tx.user?.full_name || tx.user?.referral_code || '-'}</div>
         </div>
       ),
     },
@@ -85,7 +120,7 @@ export default function AdminWalletPage() {
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
-          <span className={`font-mono font-bold ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
+          <span className={`font-mono font-extrabold text-xs ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
             {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
           </span>
         );
@@ -93,7 +128,7 @@ export default function AdminWalletPage() {
     },
     {
       key: 'balance',
-      header: 'Before / After',
+      header: 'Before → After',
       render: (tx) => (
         <span className="font-mono text-[11px] text-slate-500">
           ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
@@ -102,30 +137,45 @@ export default function AdminWalletPage() {
     },
     {
       key: 'description',
-      header: 'Description',
-      render: (tx) => <span className="text-slate-700 font-medium max-w-xs truncate">{tx.description || '-'}</span>,
+      header: 'Description / Audit Note',
+      render: (tx) => <span className="text-slate-700 text-xs font-medium max-w-xs truncate">{tx.description || '-'}</span>,
     },
     {
       key: 'created_at',
-      header: 'Date',
+      header: 'Date & Time',
       align: 'right',
       render: (tx) => <span className="text-slate-400 text-[11px]">{new Date(tx.created_at).toLocaleString()}</span>,
     },
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Ledger & Adjustments</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Audit global wallet transactions across all members or issue manual balance adjustments
-        </p>
+    <div className="space-y-6 w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Audit & Transaction History</h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Complete audit trail of all member wallet transactions with debounced search and filtering.
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            fetchTransactions();
+            toast.info('Refreshed transaction log');
+          }}
+          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors self-start flex items-center space-x-1.5 text-xs font-bold"
+          title="Refresh Data"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Refresh</span>
+        </button>
       </div>
 
       {msg && <AlertBanner type={msg.type} message={msg.text} onClose={() => setMsg(null)} />}
 
       {/* Manual Balance Adjustment Form */}
-      <div className="glass-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200">
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
         <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
           <DollarSign className="w-4 h-4 text-emerald-600" />
           <span>Issue Manual User Wallet Adjustment</span>
@@ -134,7 +184,7 @@ export default function AdminWalletPage() {
         <form onSubmit={handleAdjustSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              User ID
+              User ID / Target
             </label>
             <input
               type="text"
@@ -142,7 +192,7 @@ export default function AdminWalletPage() {
               placeholder="UUID of target user"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -157,7 +207,7 @@ export default function AdminWalletPage() {
               placeholder="e.g. 500 or -500"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -170,7 +220,7 @@ export default function AdminWalletPage() {
               placeholder="Reason for adjustment"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -184,17 +234,144 @@ export default function AdminWalletPage() {
         </form>
       </div>
 
-      {/* Global Transactions Audit Table using DataTable */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200">
-        <h3 className="font-bold text-slate-900 text-sm">Global System Transaction Audit Trail</h3>
+      {/* Audit Filters Bar */}
+      <div className="glass-card rounded-2xl p-4 bg-white border border-slate-200 space-y-3 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+          {/* Debounced Search */}
+          <div className="sm:col-span-5 relative">
+            <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by phone, name, referral code, or note..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-sky-400"
+            />
+          </div>
+
+          {/* Type Selector */}
+          <div className="sm:col-span-3">
+            <select
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
+            >
+              <option value="ALL">All Transaction Types</option>
+              <option value={TransactionType.DEPOSIT}>DEPOSIT</option>
+              <option value={TransactionType.WITHDRAW}>WITHDRAW</option>
+              <option value={TransactionType.COMMISSION}>COMMISSION</option>
+              <option value={TransactionType.PREMIUM_WEEKLY_PAYOUT}>PREMIUM_WEEKLY_PAYOUT</option>
+              <option value={TransactionType.INVESTMENT_DEPOSIT}>INVESTMENT_DEPOSIT</option>
+              <option value={TransactionType.INVESTMENT_PAYOUT}>INVESTMENT_PAYOUT</option>
+              <option value={TransactionType.ADMIN_ADJUSTMENT}>ADMIN_ADJUSTMENT</option>
+            </select>
+          </div>
+
+          {/* Date Range Pickers */}
+          <div className="sm:col-span-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              title="Start Date"
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              title="End Date"
+            />
+          </div>
+        </div>
+
+        {/* Active Filters Summary & Reset */}
+        {(searchTerm || selectedType !== 'ALL' || startDate || endDate) && (
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+            <span className="text-slate-500 font-medium">
+              Filtered Result Count: <strong className="text-slate-900">{totalRecords}</strong> transactions
+            </span>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedType('ALL');
+                setStartDate('');
+                setEndDate('');
+              }}
+              className="text-xs text-sky-600 font-bold hover:underline"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Global Transactions Audit Table */}
+      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 text-sm">Transaction Logs ({totalRecords})</h3>
+          <span className="text-xs text-slate-400 font-mono">
+            Page {page} of {totalPages}
+          </span>
+        </div>
 
         <DataTable<WalletTransaction>
           data={transactions}
           columns={columns}
           keyExtractor={(tx) => tx.id}
           loading={loading}
-          emptyMessage="No system transactions recorded yet."
+          emptyMessage="No transaction logs match the selected filter criteria."
         />
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-xs rounded-xl flex items-center space-x-1 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
+
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const pageNum = i + 1;
+                // Show pages near current page
+                if (pageNum === 1 || pageNum === totalPages || Math.abs(pageNum - page) <= 1) {
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`w-7 h-7 rounded-lg text-xs font-extrabold ${
+                        page === pageNum
+                          ? 'bg-sky-500 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                }
+                return null;
+              })}
+            </div>
+
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-xs rounded-xl flex items-center space-x-1 transition-colors"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

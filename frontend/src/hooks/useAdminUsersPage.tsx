@@ -29,12 +29,18 @@ export interface UseAdminUsersPageReturn {
   allBadgedLeaders: User[];
   savingBadge: boolean;
   userColumns: ColumnDef<User>[];
+  deleteConfirmTarget: User | null;
+  deletingUser: boolean;
+  detailModalUser: User | null;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   setTargetDesignation: React.Dispatch<React.SetStateAction<string>>;
   setTargetSponsorId: React.Dispatch<React.SetStateAction<string>>;
   setStatusConfirmTarget: React.Dispatch<React.SetStateAction<{ user: User; newStatus: UserStatus } | null>>;
   setAdjustUser: React.Dispatch<React.SetStateAction<User | null>>;
   setSelectedUserForBadge: React.Dispatch<React.SetStateAction<User | null>>;
+  setDeleteConfirmTarget: React.Dispatch<React.SetStateAction<User | null>>;
+  setDetailModalUser: React.Dispatch<React.SetStateAction<User | null>>;
+  handleDeleteUserConfirm: () => Promise<void>;
   handleRowClick: (user: User) => void;
   handleBreadcrumbClick: (index: number) => void;
   handleStatusChangeConfirm: () => Promise<void>;
@@ -59,6 +65,13 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     newStatus: UserStatus;
   } | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
+
+  // Delete User Confirmation Modal State
+  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<User | null>(null);
+  const [deletingUser, setDeletingUser] = useState(false);
+
+  // User Detail & Transactions Modal State
+  const [detailModalUser, setDetailModalUser] = useState<User | null>(null);
 
   const searchParams = useSearchParams();
   const queryParentId = searchParams ? searchParams.get('parentId') : null;
@@ -95,13 +108,6 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
   // Inline Wallet Adjustment Modal State
   const [adjustUser, setAdjustUser] = useState<User | null>(null);
   const [adjusting, setAdjusting] = useState(false);
-
-  // Redirect to admin login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !admin) {
-      router.push('/admin/login');
-    }
-  }, [admin, authLoading, router]);
 
   // Load Users & Designations
   const loadData = useCallback(async () => {
@@ -294,6 +300,23 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     [],
   );
 
+  const handleDeleteUserConfirm = async () => {
+    if (!deleteConfirmTarget) return;
+    setDeletingUser(true);
+    const res = await apiFetch(`/admin/users/${deleteConfirmTarget.id}`, {
+      method: 'DELETE',
+      isAdmin: true,
+    });
+    if (res.success) {
+      toast.success(`User ${deleteConfirmTarget.full_name || deleteConfirmTarget.phone} deleted successfully`);
+      setDeleteConfirmTarget(null);
+      await loadData();
+    } else {
+      toast.error(res.error?.message || 'Failed to delete user');
+    }
+    setDeletingUser(false);
+  };
+
   const userColumns = useMemo<ColumnDef<User>[]>(
     () => [
       {
@@ -346,6 +369,18 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             <button
               onClick={(e) => {
                 e.stopPropagation();
+                setDetailModalUser(u);
+              }}
+              className="px-1.5 sm:px-2.5 py-1 bg-sky-100 text-sky-800 hover:bg-sky-200 rounded-lg font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 sm:space-x-1 transition-colors"
+              title="View downlines and transaction history"
+            >
+              <Users className="w-3 h-3 text-sky-600" />
+              <span>Details</span>
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
                 setAdjustUser(u);
               }}
               className="px-1.5 sm:px-2.5 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-lg font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 sm:space-x-1 transition-colors"
@@ -391,6 +426,17 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
                 Unblock
               </button>
             )}
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDeleteConfirmTarget(u);
+              }}
+              className="px-1.5 sm:px-2.5 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-bold text-[9px] sm:text-[11px] transition-colors"
+              title="Delete user profile"
+            >
+              Delete
+            </button>
           </div>
         ),
       },
@@ -415,12 +461,18 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     allBadgedLeaders,
     savingBadge,
     userColumns,
+    deleteConfirmTarget,
+    deletingUser,
+    detailModalUser,
     setSearchTerm,
     setTargetDesignation,
     setTargetSponsorId,
     setStatusConfirmTarget,
     setAdjustUser,
     setSelectedUserForBadge,
+    setDeleteConfirmTarget,
+    setDetailModalUser,
+    handleDeleteUserConfirm,
     handleRowClick,
     handleBreadcrumbClick,
     handleStatusChangeConfirm,

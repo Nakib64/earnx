@@ -71,6 +71,12 @@ export class UsersController {
     return this.usersService.assignDesignation(id, designationId, referredById);
   }
 
+  @UseGuards(AdminJwtGuard)
+  @Delete('admin/users/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
+  }
+
   // Admin Designation Management CRUD
   @UseGuards(AdminJwtGuard)
   @Get('admin/designations')
