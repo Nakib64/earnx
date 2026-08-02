@@ -80,6 +80,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('earnx_user_token', token);
     setUserToken(token);
     setUser(userData);
+    // Fetch live user profile to guarantee immediate synchronization of is_premium and all fields
+    apiFetch<User>('/auth/me', { token }).then((res) => {
+      if (res.success && res.data) {
+        setUser(res.data);
+      }
+    });
   };
 
   const loginAdmin = (token: string, adminData: Admin) => {

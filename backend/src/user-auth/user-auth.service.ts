@@ -69,24 +69,28 @@ export class UserAuthService {
 
     const payload = { sub: user.id, phone: user.phone, role: 'user' };
     const accessToken = this.jwtService.sign(payload);
+    const { password_hash, ...sanitizedUser } = user;
 
     return {
       accessToken,
-      user: {
-        id: user.id,
-        phone: user.phone,
-        full_name: user.full_name,
-        referral_code: user.referral_code,
-        status: user.status,
-        wallet_balance: user.wallet_balance,
-      },
+      user: sanitizedUser,
     };
   }
 
   async login(dto: UserLoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { phone: dto.phone.trim() },
-      include: { designation: true },
+      include: {
+        designation: true,
+        referred_by: {
+          select: {
+            id: true,
+            phone: true,
+            full_name: true,
+            referral_code: true,
+          },
+        },
+      },
     });
 
     if (!user) {
@@ -105,17 +109,11 @@ export class UserAuthService {
     const payload = { sub: user.id, phone: user.phone, role: 'user' };
     const accessToken = this.jwtService.sign(payload);
 
+    const { password_hash, ...sanitizedUser } = user;
+
     return {
       accessToken,
-      user: {
-        id: user.id,
-        phone: user.phone,
-        full_name: user.full_name,
-        referral_code: user.referral_code,
-        status: user.status,
-        wallet_balance: user.wallet_balance,
-        designation: user.designation,
-      },
+      user: sanitizedUser,
     };
   }
 
