@@ -37,52 +37,53 @@ export default function AdminDashboardPage() {
   }, [admin]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
-      <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl flex items-center justify-between">
+    <div className="space-y-5 sm:space-y-6 max-w-7xl mx-auto w-full">
+      {/* Welcome Banner */}
+      <div className="bg-slate-900 rounded-2xl p-4 sm:p-6 text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-6 h-6 text-sky-400" />
-            <h1 className="text-2xl font-extrabold">Admin Control Center</h1>
+            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-sky-400 shrink-0" />
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Admin Control Center</h1>
           </div>
           <p className="text-xs text-slate-400">
-            Welcome back, {admin?.phone}. Manage users, approve withdrawals, and configure tree commissions.
+            Welcome back, <strong className="text-slate-200">{admin?.phone}</strong>. Manage users, approve withdrawals, and configure tree commissions.
           </p>
         </div>
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Registered Users</span>
-            <Users className="w-5 h-5 text-sky-600" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Registered Users</span>
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-sky-600 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900">{stats.totalUsers}</div>
-          <Link href="/admin/users" className="text-xs font-bold text-sky-600 flex items-center">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900">{stats.totalUsers}</div>
+          <Link href="/admin/users" className="text-xs font-bold text-sky-600 flex items-center hover:underline">
             <span>Manage Users & Designations</span>
             <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
           </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Pending Approvals</span>
-            <Clock className="w-5 h-5 text-amber-500" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Approvals</span>
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-amber-600">{stats.pendingApprovals}</div>
-          <Link href="/admin/approvals" className="text-xs font-bold text-sky-600 flex items-center">
+          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600">{stats.pendingApprovals}</div>
+          <Link href="/admin/approvals" className="text-xs font-bold text-sky-600 flex items-center hover:underline">
             <span>Review Pending Queue</span>
             <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
           </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 space-y-3 bg-white border border-slate-200">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase">Commission Matrix</span>
-            <Layers className="w-5 h-5 text-purple-600" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Commission Matrix</span>
+            <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 shrink-0" />
           </div>
           <div className="text-base font-bold text-slate-800">Multi-Level Rules</div>
-          <Link href="/admin/commissions" className="text-xs font-bold text-sky-600 flex items-center">
+          <Link href="/admin/commissions" className="text-xs font-bold text-sky-600 flex items-center hover:underline">
             <span>Configure Payout Levels</span>
             <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
           </Link>
@@ -90,53 +91,53 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Admin Quick Action Navigation Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 pt-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 pt-1">
         <Link
           href="/admin/investments"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
-          <TrendingUp className="w-6 h-6 text-sky-600" />
-          <span className="text-xs font-bold text-slate-800">Investment Plans</span>
+          <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-sky-600" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Investment Plans</span>
         </Link>
 
         <Link
           href="/admin/leaderboard"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-amber-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-amber-400 transition-colors bg-white border border-slate-200"
         >
-          <Trophy className="w-6 h-6 text-amber-500" />
-          <span className="text-xs font-bold text-slate-800">Top 100 Leaderboard</span>
+          <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Top 100</span>
         </Link>
 
         <Link
           href="/admin/users"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
-          <Users className="w-6 h-6 text-sky-600" />
-          <span className="text-xs font-bold text-slate-800">Users List</span>
+          <Users className="w-5 h-5 sm:w-6 sm:h-6 text-sky-600" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Users List</span>
         </Link>
 
         <Link
           href="/admin/approvals"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
-          <Clock className="w-6 h-6 text-amber-500" />
-          <span className="text-xs font-bold text-slate-800">Approvals Queue</span>
+          <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Approvals</span>
         </Link>
 
         <Link
           href="/admin/commissions"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
-          <Award className="w-6 h-6 text-purple-600" />
-          <span className="text-xs font-bold text-slate-800">Commission Rules</span>
+          <Award className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Commissions</span>
         </Link>
 
         <Link
           href="/admin/wallet"
-          className="glass-card p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
+          className="glass-card p-3.5 sm:p-4 rounded-xl flex flex-col items-center justify-center text-center space-y-2 hover:border-sky-400 transition-colors bg-white border border-slate-200"
         >
-          <Wallet className="w-6 h-6 text-emerald-600" />
-          <span className="text-xs font-bold text-slate-800">Ledger & Adjust</span>
+          <Wallet className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" />
+          <span className="text-[11px] sm:text-xs font-bold text-slate-800">Ledger & Adjust</span>
         </Link>
       </div>
     </div>
