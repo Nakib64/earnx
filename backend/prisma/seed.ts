@@ -342,7 +342,7 @@ async function main() {
   console.log('  Total Badged Leaders: 6');
   console.log('  Total Unbadged Members: 94');
   console.log('  Tree Depth: 5 Deep Layers');
-  console.log('  Admin Credentials: admin@earnx.com / Admin123!');
+  console.log('  Admin Credentials: 01700000000 / Admin123!');
   console.log('======================================================\n');
 }
 
