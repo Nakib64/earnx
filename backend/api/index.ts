@@ -3,18 +3,20 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
-import type { Request, Response } from 'express';
+import express, { Express, Request, Response } from 'express';
 
-const server = express();
+let cachedServer: Express;
 
-let isInitialized = false;
+async function bootstrapServer(): Promise<Express> {
+  if (cachedServer) {
+    return cachedServer;
+  }
 
-// Singleton promise — created once per cold start
-const initPromise = (async () => {
+  const server = express();
   const app = await NestFactory.create(
     AppModule,
     new ExpressAdapter(server),
+    { logger: ['error', 'warn', 'log'] },
   );
 
   app.enableCors({
@@ -33,13 +35,22 @@ const initPromise = (async () => {
   );
 
   await app.init();
-  isInitialized = true;
-})();
-
-// Vercel serverless handler — awaits initialization on cold start
-export default async function handler(req: Request, res: Response) {
-  if (!isInitialized) {
-    await initPromise;
-  }
-  server(req, res);
+  cachedServer = server;
+  return cachedServer;
 }
+
+export default async function handler(req: Request, res: Response) {
+  try {
+    const server = await bootstrapServer();
+    server(req, res);
+  } catch (error: any) {
+    console.error('NestJS Serverless Cold-Start Error:', error);
+    res.status(500).json({
+      statusCode: 500,
+      message: 'Serverless initialization failed',
+      error: error?.message || String(error),
+      details: 'Check Vercel environment variables (DATABASE_URL, JWT_USER_SECRET, JWT_ADMIN_SECRET)',
+    });
+  }
+}
+
