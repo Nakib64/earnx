@@ -107,7 +107,7 @@ export default function Navbar() {
 
         {/* Navigation List */}
         <nav className="flex-1 space-y-1 overflow-y-auto py-3">
-          {(isAdminRoute ? adminItems : isDashboardRoute ? userItems : publicItems).map((item) => {
+          {((isAdminRoute && admin) ? adminItems : (isDashboardRoute && user) ? userItems : publicItems).map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
@@ -340,7 +340,7 @@ export default function Navbar() {
                 </div>
               )}
 
-              {!user && !admin && (
+              {(!user && !admin) || (isAdminRoute && !admin) ? (
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
@@ -355,7 +355,7 @@ export default function Navbar() {
                     Sign Up
                   </Link>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
