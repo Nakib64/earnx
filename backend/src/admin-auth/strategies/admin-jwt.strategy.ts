@@ -17,14 +17,14 @@ export class AdminJwtStrategy extends PassportStrategy(Strategy, 'admin-jwt') {
     });
   }
 
-  async validate(payload: { sub: string; email: string; role: string }) {
+  async validate(payload: { sub: string; phone: string; role: string }) {
     if (payload.role !== 'admin') {
       throw new UnauthorizedException('Invalid admin authentication token');
     }
 
     const admin = await this.prisma.admin.findUnique({
       where: { id: payload.sub },
-      select: { id: true, email: true, name: true },
+      select: { id: true, phone: true, name: true },
     });
 
     if (!admin) {

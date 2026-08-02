@@ -81,7 +81,7 @@ export interface UserSummary {
 
 export interface Admin {
   id: string;
-  email: string;
+  phone: string;
   name: string;
   created_at?: string;
 }

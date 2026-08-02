@@ -13,28 +13,29 @@ export class AdminAuthService {
 
   async login(dto: AdminLoginDto) {
     const admin = await this.prisma.admin.findUnique({
-      where: { email: dto.email.toLowerCase() },
+      where: { phone: dto.phone.trim() },
     });
 
     if (!admin) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid phone number or password');
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, admin.password_hash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Invalid phone number or password');
     }
 
-    const payload = { sub: admin.id, email: admin.email, role: 'admin' };
+    const payload = { sub: admin.id, phone: admin.phone, role: 'admin' };
     const accessToken = this.jwtService.sign(payload);
 
     return {
       accessToken,
       admin: {
         id: admin.id,
-        email: admin.email,
+        phone: admin.phone,
         name: admin.name,
       },
     };
   }
 }
+

@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
             <h1 className="text-2xl font-extrabold">Admin Control Center</h1>
           </div>
           <p className="text-xs text-slate-400">
-            Welcome back, {admin?.email}. Manage users, approve withdrawals, and configure tree commissions.
+            Welcome back, {admin?.phone}. Manage users, approve withdrawals, and configure tree commissions.
           </p>
         </div>
       </div>

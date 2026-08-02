@@ -130,7 +130,7 @@ export default function Sidebar() {
             {isAdminRoute ? 'Admin Control' : user?.full_name || user?.phone}
           </span>
           <span className="text-[10px] font-semibold text-sky-600 truncate">
-            {isAdminRoute ? admin?.email : user?.designation?.name || 'Starter Member'}
+            {isAdminRoute ? admin?.phone : user?.designation?.name || 'Starter Member'}
           </span>
         </div>
         {isDashboardRoute && user && (

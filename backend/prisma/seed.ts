@@ -43,12 +43,12 @@ async function main() {
   const adminPasswordHash = await bcrypt.hash('Admin123!', 10);
   const admin = await prisma.admin.create({
     data: {
-      email: 'admin@earnx.com',
+      phone: '01700000000',
       password_hash: adminPasswordHash,
       name: 'Super Admin',
     },
   });
-  console.log(`Admin created: ${admin.email}`);
+  console.log(`Admin created with Phone: ${admin.phone}`);
 
   // 2. Designations
   const dDiamond = await prisma.designation.create({

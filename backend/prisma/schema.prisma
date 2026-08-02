@@ -37,7 +37,7 @@ enum CommissionType {
 
 model Admin {
   id            String   @id @default(uuid())
-  email         String   @unique
+  phone         String   @unique
   password_hash String
   name          String
   created_at    DateTime @default(now())

@@ -318,7 +318,7 @@ export default function Navbar() {
               {admin && (
                 <div className="flex items-center space-x-2">
                   <span className="text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full hidden sm:inline">
-                    Admin: {admin.email}
+                    Admin: {admin.phone}
                   </span>
                   {/* Admin dashboard button on public pages */}
                   {isPublicRoute && (

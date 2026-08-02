@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { Mail, Lock, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
+import { Phone, Lock, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const { loginAdmin } = useAuth();
-  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function AdminLoginPage() {
 
     const res = await apiFetch<{ accessToken: string; admin: any }>('/admin/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ phone, password }),
     });
 
     if (res.success && res.data) {
@@ -59,18 +59,18 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                Admin Email
+                Admin Phone Number
               </label>
               <div className="relative rounded-xl shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <Mail className="h-5 w-5" />
+                  <Phone className="h-5 w-5" />
                 </div>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  placeholder="admin@earnx.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="01700000000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   className="block w-full pl-11 pr-4 py-3 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
                 />
               </div>
@@ -109,3 +109,4 @@ export default function AdminLoginPage() {
     </div>
   );
 }
+
