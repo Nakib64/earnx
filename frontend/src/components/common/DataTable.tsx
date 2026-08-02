@@ -70,7 +70,7 @@ export function DataTable<T>({
               {columns.map((col) => (
                 <td
                   key={`${keyExtractor(item, idx)}-${col.key}`}
-                  className={`p-2 sm:p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                  className={`p-1.5 sm:p-3.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''}`}
                 >
                   {col.render ? col.render(item, idx) : (item as any)[col.key]}
                 </td>

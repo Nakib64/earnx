@@ -8,7 +8,7 @@ import { ColumnDef } from '../components/common/DataTable';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { BreadcrumbItem } from '../components/users/UserBreadcrumbs';
 import { useDebounce } from './useDebounce';
-import { Award, ChevronRight, DollarSign, Users } from 'lucide-react';
+import { Award, ChevronRight, DollarSign, Users, Trash2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -321,61 +321,67 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     () => [
       {
         key: 'member',
-        header: 'Member',
+        header: 'Member Name & Phone',
         render: (u) => (
           <div>
-            <div className="font-bold text-slate-900 text-xs sm:text-sm flex items-center space-x-1.5">
-              <span>{u.full_name || u.phone}</span>
+            <div className="font-extrabold text-slate-900 text-[10px] sm:text-xs leading-tight flex items-center space-x-1">
+              <span className="truncate max-w-[110px] sm:max-w-none">{u.full_name || u.phone}</span>
             </div>
-            <div className="text-[9px] sm:text-[11px] text-slate-500 font-mono">{u.phone}</div>
+            <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
+              <span>{u.phone}</span>
+              <span className="sm:hidden text-sky-600 font-bold">• {u.referral_code}</span>
+            </div>
           </div>
         ),
       },
       {
-        key: 'referral_code',
-        header: 'Referral Code',
-        render: (u) => <span className="font-mono font-bold text-sky-600 text-xs sm:text-sm">{u.referral_code}</span>,
-      },
-      {
-        key: 'status',
-        header: 'Status',
-        render: (u) => <StatusBadge status={u.status} />,
-      },
-      {
-        key: 'wallet_balance',
-        header: 'Wallet Balance',
+        key: 'designation',
+        header: 'Designation',
         render: (u) => (
-          <span className="font-mono font-bold text-slate-800 text-xs sm:text-sm">
-            ৳{Number(u.wallet_balance).toFixed(2)}
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold text-[8px] sm:text-[10px] border border-purple-200 whitespace-nowrap">
+            <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 text-purple-500 shrink-0" />
+            <span className="truncate max-w-[70px] sm:max-w-none">{u.designation?.name || 'Unbadged'}</span>
           </span>
         ),
       },
       {
-        key: 'designation',
-        header: 'Designation Badge',
+        key: 'referral_code',
+        header: 'Ref Code',
+        className: 'hidden sm:table-cell',
+        render: (u) => <span className="font-mono font-bold text-sky-600 text-xs">{u.referral_code}</span>,
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        className: 'hidden sm:table-cell',
+        render: (u) => <StatusBadge status={u.status} />,
+      },
+      {
+        key: 'wallet_balance',
+        header: 'Wallet',
+        className: 'hidden sm:table-cell',
         render: (u) => (
-          <span className="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[9px] sm:text-[11px] border border-purple-200 whitespace-nowrap">
-            <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5 sm:mr-1 text-purple-500" />
-            {u.designation?.name || 'None'}
+          <span className="font-mono font-extrabold text-slate-800 text-xs">
+            ৳{Number(u.wallet_balance || 0).toFixed(2)}
           </span>
         ),
       },
       {
         key: 'actions',
-        header: 'Actions',
+        header: 'Operations',
         align: 'right',
         render: (u) => (
-          <div className="flex items-center justify-end space-x-1 sm:space-x-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-end space-x-1 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setDetailModalUser(u);
               }}
-              className="px-1.5 sm:px-2.5 py-1 bg-sky-100 text-sky-800 hover:bg-sky-200 rounded-lg font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 sm:space-x-1 transition-colors"
-              title="View downlines and transaction history"
+              className="p-1 sm:px-2 sm:py-1 bg-sky-100 text-sky-800 hover:bg-sky-200 rounded-md font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 transition-colors"
+              title="View details & downlines"
             >
               <Users className="w-3 h-3 text-sky-600" />
-              <span>Details</span>
+              <span className="hidden sm:inline">Details</span>
             </button>
 
             <button
@@ -383,11 +389,11 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
                 e.stopPropagation();
                 setAdjustUser(u);
               }}
-              className="px-1.5 sm:px-2.5 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-lg font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 sm:space-x-1 transition-colors"
-              title="Add or subtract balance"
+              className="p-1 sm:px-2 sm:py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-md font-bold text-[9px] sm:text-[11px] flex items-center space-x-0.5 transition-colors"
+              title="Adjust balance"
             >
               <DollarSign className="w-3 h-3 text-emerald-600" />
-              <span>Adjust</span>
+              <span className="hidden sm:inline">Adjust</span>
             </button>
 
             <button
@@ -395,7 +401,8 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
                 e.stopPropagation();
                 openBadgeModal(u);
               }}
-              className="px-1.5 sm:px-2.5 py-1 bg-purple-100 text-purple-800 hover:bg-purple-200 rounded-lg font-bold text-[9px] sm:text-[11px] transition-colors"
+              className="px-1.5 sm:px-2 py-1 bg-purple-100 text-purple-800 hover:bg-purple-200 rounded-md font-bold text-[8px] sm:text-[11px] transition-colors"
+              title="Badge"
             >
               Badge
             </button>
@@ -403,7 +410,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             {u.status === UserStatus.DISABLED && (
               <button
                 onClick={(e) => openStatusConfirmModal(e, u, UserStatus.ACTIVE)}
-                className="px-1.5 sm:px-2.5 py-1 bg-emerald-500 text-white rounded-lg font-bold text-[9px] sm:text-[11px] hover:bg-emerald-600 transition-colors"
+                className="px-1.5 sm:px-2 py-1 bg-emerald-500 text-white rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-emerald-600 transition-colors"
               >
                 Activate
               </button>
@@ -412,7 +419,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             {u.status === UserStatus.ACTIVE && (
               <button
                 onClick={(e) => openStatusConfirmModal(e, u, UserStatus.BLOCKED)}
-                className="px-1.5 sm:px-2.5 py-1 bg-rose-100 text-rose-800 rounded-lg font-bold text-[9px] sm:text-[11px] hover:bg-rose-200 transition-colors"
+                className="px-1.5 sm:px-2 py-1 bg-rose-100 text-rose-800 rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-rose-200 transition-colors"
               >
                 Block
               </button>
@@ -421,7 +428,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             {u.status === UserStatus.BLOCKED && (
               <button
                 onClick={(e) => openStatusConfirmModal(e, u, UserStatus.ACTIVE)}
-                className="px-1.5 sm:px-2.5 py-1 bg-sky-100 text-sky-800 rounded-lg font-bold text-[9px] sm:text-[11px] hover:bg-sky-200 transition-colors"
+                className="px-1.5 sm:px-2 py-1 bg-sky-100 text-sky-800 rounded-md font-bold text-[8px] sm:text-[11px] hover:bg-sky-200 rounded-md transition-colors"
               >
                 Unblock
               </button>
@@ -432,10 +439,11 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
                 e.stopPropagation();
                 setDeleteConfirmTarget(u);
               }}
-              className="px-1.5 sm:px-2.5 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg font-bold text-[9px] sm:text-[11px] transition-colors"
+              className="p-1 sm:px-2 sm:py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-md font-bold text-[8px] sm:text-[11px] transition-colors"
               title="Delete user profile"
             >
-              Delete
+              <Trash2 className="w-3 h-3 text-red-600 sm:hidden" />
+              <span className="hidden sm:inline">Delete</span>
             </button>
           </div>
         ),

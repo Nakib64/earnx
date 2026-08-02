@@ -79,6 +79,35 @@ function AdminUsersContent() {
       {/* Breadcrumb Trail for In-Place Tree Exploration */}
       <UserBreadcrumbs breadcrumbs={breadcrumbs} onBreadcrumbClick={handleBreadcrumbClick} />
 
+      {/* Summary Metrics Bar (Shown Before Table) */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase text-slate-400">Total Members</div>
+          <div className="text-base sm:text-xl font-extrabold text-slate-900 mt-0.5">{users.length}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase text-slate-400">Badged Leaders</div>
+          <div className="text-base sm:text-xl font-extrabold text-purple-600 mt-0.5">
+            {users.filter((u) => !!u.designation).length}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase text-slate-400">Active Accounts</div>
+          <div className="text-base sm:text-xl font-extrabold text-emerald-600 mt-0.5">
+            {users.filter((u) => u.status === 'ACTIVE').length}
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
+          <div className="text-[10px] font-bold uppercase text-slate-400">Network Balance</div>
+          <div className="text-base sm:text-xl font-extrabold text-sky-600 font-mono mt-0.5 truncate">
+            ৳{users.reduce((acc, u) => acc + Number(u.wallet_balance || 0), 0).toFixed(0)}
+          </div>
+        </div>
+      </div>
+
       {/* Debounced Search Bar */}
       <div className="relative">
         <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
