@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:seed": "prisma db seed",
     "prisma:migrate": "prisma migrate dev",
+    "prebuild": "node -e \"fs.rmSync('dist', {recursive:true, force:true}); fs.rmSync('tsconfig.tsbuildinfo', {force:true});\"",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
