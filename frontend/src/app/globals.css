@@ -66,3 +66,113 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* ─── Landing Page Styles ────────────────────────────────────────────────── */
+
+/* Remove default padding for landing page root */
+.lp-root {
+  margin-top: -1rem;
+}
+
+/* Hero */
+.hero-bg {
+  background: linear-gradient(150deg, #0f172a 0%, #0c4a6e 45%, #075985 100%);
+}
+
+.hero-cta-primary {
+  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+.hero-cta-primary:hover {
+  box-shadow: 0 8px 28px rgba(56, 189, 248, 0.55);
+  transform: translateY(-1px);
+}
+
+.hero-cta-secondary {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 1rem;
+  width: 100%;
+  transition: background 0.2s;
+}
+.hero-cta-secondary:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+/* Floating card animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+.floating-card {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Stats bar */
+.stats-bar {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+.stats-card {
+  background: #F8FBFF;
+  border: 1px solid #E2E8F0;
+}
+
+/* Ticker / infinite scroll */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-wrapper {
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+.ticker-track {
+  animation: ticker 20s linear infinite;
+  width: max-content;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* How-it-works cards */
+.how-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.how-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0,0,0,0.08);
+}
+
+/* Plan cards */
+.plan-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -6px rgba(0,0,0,0.12);
+}
+
+/* CTA gradient */
+.cta-gradient {
+  background: linear-gradient(150deg, #0f172a 0%, #0c4a6e 50%, #0369a1 100%);
+}
+
+/* FAQ item */
+.faq-item {
+  transition: box-shadow 0.2s;
+}
+.faq-item:hover {
+  box-shadow: 0 4px 16px -4px rgba(56,189,248,0.18);
+}

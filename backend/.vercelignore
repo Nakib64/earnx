@@ -1,0 +1,19 @@
+# Vercel deployment exclusions for EarnX backend
+
+# Local build artifacts (Vercel builds fresh)
+dist/
+.tsbuildinfo
+
+# Local uploads (not writable on Vercel serverless)
+uploads/
+
+# Tests
+test/
+coverage/
+
+# Dev tools
+.eslintcache
+
+# Secrets (set via Vercel dashboard instead)
+.env
+.env.*

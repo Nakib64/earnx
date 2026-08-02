@@ -3,13 +3,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
+import type { Request, Response } from 'express';
 
 const server = express();
 
-export const createNestServer = async (expressInstance: express.Express) => {
+let isInitialized = false;
+
+// Singleton promise — created once per cold start
+const initPromise = (async () => {
   const app = await NestFactory.create(
     AppModule,
-    new ExpressAdapter(expressInstance),
+    new ExpressAdapter(server),
   );
 
   app.enableCors({
@@ -28,8 +32,13 @@ export const createNestServer = async (expressInstance: express.Express) => {
   );
 
   await app.init();
-};
+  isInitialized = true;
+})();
 
-createNestServer(server);
-
-export default server;
+// Vercel serverless handler — awaits initialization on cold start
+export default async function handler(req: Request, res: Response) {
+  if (!isInitialized) {
+    await initPromise;
+  }
+  server(req, res);
+}

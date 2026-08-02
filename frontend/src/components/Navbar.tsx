@@ -272,8 +272,8 @@ export default function Navbar() {
             <div className="flex items-center space-x-3">
               {user && !isAdminRoute && (
                 <div className="flex items-center space-x-2">
-                  {/* Balance Badge */}
-                  <div className="bg-sky-50 border border-sky-100 px-3 py-1.5 rounded-full flex items-center space-x-1.5">
+                  {/* Balance Badge — hidden on very small screens to save space */}
+                  <div className="hidden sm:flex bg-sky-50 border border-sky-100 px-3 py-1.5 rounded-full items-center space-x-1.5">
                     <Wallet className="w-4 h-4 text-sky-600" />
                     <span className="text-xs font-bold text-sky-900">
                       ৳{Number(user.wallet_balance).toFixed(2)}
@@ -293,11 +293,11 @@ export default function Navbar() {
                     </span>
                   )}
 
-                  {/* Dashboard Link if on public page */}
+                  {/* Dashboard button — always visible when on public pages */}
                   {isPublicRoute && (
                     <Link
                       href="/dashboard"
-                      className="hidden sm:inline-flex items-center space-x-1 px-3.5 py-1.5 sky-gradient-btn rounded-xl font-bold text-xs shadow-xs"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 sky-gradient-btn rounded-xl font-bold text-xs shadow-sm"
                     >
                       <LayoutDashboard className="w-3.5 h-3.5" />
                       <span>Dashboard</span>
@@ -315,11 +315,21 @@ export default function Navbar() {
                 </div>
               )}
 
-              {admin && isAdminRoute && (
-                <div className="flex items-center space-x-3">
+              {admin && (
+                <div className="flex items-center space-x-2">
                   <span className="text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full hidden sm:inline">
                     Admin: {admin.email}
                   </span>
+                  {/* Admin dashboard button on public pages */}
+                  {isPublicRoute && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-slate-800 transition-colors"
+                    >
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <span>Admin Panel</span>
+                    </Link>
+                  )}
                   <button
                     onClick={logoutAdmin}
                     className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 transition-colors"
