@@ -272,6 +272,13 @@ export class UsersService {
   }
 
   async deleteDesignation(id: string) {
+    // First, unbind all users assigned to this designation (set designation_id = null)
+    await this.prisma.user.updateMany({
+      where: { designation_id: id },
+      data: { designation_id: null },
+    });
+
+    // Then delete the designation record
     return this.prisma.designation.delete({
       where: { id },
     });

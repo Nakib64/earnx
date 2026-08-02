@@ -181,7 +181,7 @@ export default function AdminDesignationsPage() {
       <ConfirmModal
         isOpen={!!deletingId}
         title="Delete Designation Badge"
-        message="Are you sure you want to delete this designation badge? This action cannot be undone."
+        message="Are you sure you want to delete this designation badge? Any members holding this badge will safely revert to Unbadged (No Designation) status. User profiles and wallet data will NOT be deleted."
         confirmText="Delete Badge"
         variant="danger"
         loading={deleting}
