@@ -31,6 +31,30 @@ export class WalletsController {
     );
   }
 
+  // Network Balance Transfer (User)
+  @UseGuards(UserJwtGuard)
+  @Get('wallet/verify-recipient')
+  async verifyRecipient(
+    @Request() req: any,
+    @Query('referral_code') referralCode: string,
+  ) {
+    return this.walletService.verifyTransferRecipient(req.user.id, referralCode);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('wallet/transfer')
+  async transferBalance(
+    @Request() req: any,
+    @Body('target_referral_code') targetReferralCode: string,
+    @Body('amount') amount: number,
+  ) {
+    return this.walletService.executeBalanceTransfer(
+      req.user.id,
+      targetReferralCode,
+      Number(amount),
+    );
+  }
+
   // Admin transaction ledger & manual adjustments
   @UseGuards(AdminJwtGuard)
   @Get('admin/wallet/transactions')

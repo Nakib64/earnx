@@ -28,6 +28,7 @@ enum TransactionType {
   PREMIUM_WEEKLY_PAYOUT
   INVESTMENT_DEPOSIT
   INVESTMENT_PAYOUT
+  BALANCE_TRANSFER
 }
 
 enum CommissionType {

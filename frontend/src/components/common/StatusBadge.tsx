@@ -30,6 +30,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
       badgeStyle = 'bg-sky-50 text-sky-700 border-sky-200';
       break;
     case TransactionType.COMMISSION:
+    case TransactionType.BALANCE_TRANSFER:
       badgeStyle = 'bg-purple-50 text-purple-700 border-purple-200';
       break;
     case TransactionType.WITHDRAW:

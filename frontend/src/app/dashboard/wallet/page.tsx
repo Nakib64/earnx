@@ -7,24 +7,40 @@ import { WalletTransaction } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { AlertBanner } from '../../../components/common/AlertBanner';
-import { Wallet, Send } from 'lucide-react';
+import { Wallet, Send, ArrowRightLeft, CheckCircle2, UserCheck, Loader2 } from 'lucide-react';
 
 export default function WalletPage() {
   const { user, refreshUserProfile } = useAuth();
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Withdrawal Form State
+  // Modal / Form state
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [amount, setAmount] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+
+  // Withdrawal State
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [submittingWithdraw, setSubmittingWithdraw] = useState(false);
+
+  // Transfer State
+  const [targetReferralCode, setTargetReferralCode] = useState('');
+  const [transferAmount, setTransferAmount] = useState('');
+  const [searchingRecipient, setSearchingRecipient] = useState(false);
+  const [verifiedRecipient, setVerifiedRecipient] = useState<{
+    id: string;
+    full_name: string;
+    phone: string;
+    referral_code: string;
+  } | null>(null);
+  const [recipientError, setRecipientError] = useState<string | null>(null);
+  const [submittingTransfer, setSubmittingTransfer] = useState(false);
+
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const fetchTransactions = async () => {
     setLoading(true);
     const res = await apiFetch<any>('/wallet/transactions?page=1&limit=50');
     if (res.success && res.data) {
-      // Backend may return paginated shape { data: [...] } or { transactions: [...] } or a raw array
       const raw = res.data;
       const list: WalletTransaction[] = Array.isArray(raw)
         ? raw
@@ -42,31 +58,99 @@ export default function WalletPage() {
     if (user) fetchTransactions();
   }, [user]);
 
+  // Live Recipient Verification when Referral Code changes
+  useEffect(() => {
+    const code = targetReferralCode.trim();
+    if (!code) {
+      setVerifiedRecipient(null);
+      setRecipientError(null);
+      setSearchingRecipient(false);
+      return;
+    }
+
+    setSearchingRecipient(true);
+    setRecipientError(null);
+    setVerifiedRecipient(null);
+
+    const timer = setTimeout(async () => {
+      const res = await apiFetch<{
+        id: string;
+        full_name: string;
+        phone: string;
+        referral_code: string;
+      }>(`/wallet/verify-recipient?referral_code=${encodeURIComponent(code)}`);
+
+      if (res.success && res.data) {
+        setVerifiedRecipient(res.data);
+        setRecipientError(null);
+      } else {
+        setVerifiedRecipient(null);
+        setRecipientError(res.error?.message || 'User not found in your network tree');
+      }
+      setSearchingRecipient(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [targetReferralCode]);
+
   const handleWithdrawalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
+    setSubmittingWithdraw(true);
     setStatusMsg(null);
 
     const res = await apiFetch('/requests/withdrawal', {
       method: 'POST',
       body: JSON.stringify({
-        amount: parseFloat(amount),
+        amount: parseFloat(withdrawAmount),
       }),
     });
 
     if (res.success) {
       setStatusMsg({
         type: 'success',
-        text: 'Withdrawal request submitted! Sent to Admin approval queue.',
+        text: 'Withdrawal completed successfully! Balance deducted.',
       });
-      setAmount('');
+      setWithdrawAmount('');
       setShowWithdrawModal(false);
       await refreshUserProfile();
       await fetchTransactions();
     } else {
-      setStatusMsg({ type: 'error', text: res.error?.message || 'Failed to submit withdrawal request' });
+      setStatusMsg({ type: 'error', text: res.error?.message || 'Failed to process withdrawal' });
     }
-    setSubmitting(false);
+    setSubmittingWithdraw(false);
+  };
+
+  const handleTransferSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verifiedRecipient) return;
+
+    setSubmittingTransfer(true);
+    setStatusMsg(null);
+
+    const amt = parseFloat(transferAmount);
+    const res = await apiFetch<any>('/wallet/transfer', {
+      method: 'POST',
+      body: JSON.stringify({
+        target_referral_code: verifiedRecipient.referral_code,
+        amount: amt,
+      }),
+    });
+
+    if (res.success) {
+      setStatusMsg({
+        type: 'success',
+        text: `Transferred ৳${amt.toLocaleString()} to ${verifiedRecipient.full_name} (${verifiedRecipient.phone}) directly!`,
+      });
+      setTargetReferralCode('');
+      setTransferAmount('');
+      setVerifiedRecipient(null);
+      setShowTransferModal(false);
+      await refreshUserProfile();
+      await fetchTransactions();
+    } else {
+      setStatusMsg({ type: 'error', text: res.error?.message || 'Failed to complete balance transfer' });
+    }
+    setSubmittingTransfer(false);
   };
 
   const columns: ColumnDef<WalletTransaction>[] = [
@@ -109,32 +193,141 @@ export default function WalletPage() {
     },
   ];
 
+  const currentBal = Number(user?.wallet_balance || 0);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Wallet & Ledger</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Immutable transaction ledger backed by ACID database integrity
+            Manage your balance, request withdrawals, or transfer directly across your network.
           </p>
         </div>
 
-        <button
-          onClick={() => setShowWithdrawModal(!showWithdrawModal)}
-          className="sky-gradient-btn px-5 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md"
-        >
-          <Send className="w-4 h-4" />
-          <span>Request Withdrawal</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => {
+              setShowTransferModal(!showTransferModal);
+              setShowWithdrawModal(false);
+            }}
+            className="py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-all"
+          >
+            <ArrowRightLeft className="w-4 h-4" />
+            <span>Transfer to Network</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setShowWithdrawModal(!showWithdrawModal);
+              setShowTransferModal(false);
+            }}
+            className="sky-gradient-btn px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md"
+          >
+            <Send className="w-4 h-4" />
+            <span>Request Withdrawal</span>
+          </button>
+        </div>
       </div>
 
       {statusMsg && <AlertBanner type={statusMsg.type} message={statusMsg.text} onClose={() => setStatusMsg(null)} />}
+
+      {/* Network Transfer Modal / Form */}
+      {showTransferModal && (
+        <div className="glass-card rounded-2xl p-6 border-2 border-purple-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 text-base flex items-center space-x-2">
+              <ArrowRightLeft className="w-5 h-5 text-purple-600" />
+              <span>Direct Network Balance Transfer</span>
+            </h3>
+            <button
+              onClick={() => setShowTransferModal(false)}
+              className="text-xs font-bold text-slate-400 hover:text-slate-600"
+            >
+              Cancel
+            </button>
+          </div>
+
+          <form onSubmit={handleTransferSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Recipient Referral Code
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter referral code..."
+                    value={targetReferralCode}
+                    onChange={(e) => setTargetReferralCode(e.target.value.toUpperCase())}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                  {searchingRecipient && (
+                    <div className="absolute right-3 top-3 text-purple-600">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Live Recipient Info Status */}
+                {searchingRecipient && (
+                  <p className="text-xs text-purple-600 font-medium mt-1.5 flex items-center space-x-1">
+                    <span>Searching network tree...</span>
+                  </p>
+                )}
+
+                {verifiedRecipient && (
+                  <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center space-x-3 text-emerald-900">
+                    <UserCheck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    <div className="text-xs">
+                      <p className="font-bold text-slate-900">{verifiedRecipient.full_name}</p>
+                      <p className="text-slate-600 font-medium">{verifiedRecipient.phone}</p>
+                    </div>
+                  </div>
+                )}
+
+                {recipientError && (
+                  <p className="text-xs text-rose-600 font-semibold mt-1.5">{recipientError}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Transfer Amount (৳)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  max={currentBal}
+                  required
+                  placeholder="Enter amount..."
+                  value={transferAmount}
+                  onChange={(e) => setTransferAmount(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">Available: ৳{currentBal.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={submittingTransfer || !verifiedRecipient || !transferAmount || parseFloat(transferAmount) <= 0 || parseFloat(transferAmount) > currentBal}
+              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-md shadow-purple-600/25 transition-all"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{submittingTransfer ? 'Sending Transfer...' : 'Confirm & Direct Send'}</span>
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Withdrawal Form Modal / Box */}
       {showWithdrawModal && (
         <div className="glass-card rounded-2xl p-6 border-2 border-sky-200 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-base">Submit Direct Withdrawal Request</h3>
+            <h3 className="font-bold text-slate-900 text-base">Submit Direct Withdrawal</h3>
             <button
               onClick={() => setShowWithdrawModal(false)}
               className="text-xs font-bold text-slate-400 hover:text-slate-600"
@@ -145,7 +338,7 @@ export default function WalletPage() {
 
           <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+              <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Withdrawal Amount (৳)
                 </label>
@@ -153,21 +346,22 @@ export default function WalletPage() {
                   type="number"
                   step="0.01"
                   min="1"
+                  max={currentBal}
                   required
                   placeholder="500.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 font-bold"
                 />
               </div>
             </div>
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={submittingWithdraw || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > currentBal}
               className="w-full sky-gradient-btn py-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 disabled:opacity-50"
             >
-              <span>{submitting ? 'Submitting...' : 'Submit to Admin Queue'}</span>
+              <span>{submittingWithdraw ? 'Processing...' : 'Confirm & Withdraw'}</span>
             </button>
           </form>
         </div>
@@ -178,7 +372,7 @@ export default function WalletPage() {
         <div className="space-y-1">
           <span className="text-xs font-bold text-slate-400 uppercase">Available Wallet Balance</span>
           <div className="text-3xl font-extrabold text-slate-900">
-            ৳{Number(user?.wallet_balance || 0).toFixed(2)}
+            ৳{currentBal.toFixed(2)}
           </div>
         </div>
         <div className="w-12 h-12 rounded-2xl sky-gradient-bg flex items-center justify-center text-white shadow-lg">

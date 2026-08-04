@@ -161,4 +161,162 @@ export class WalletService {
       },
     };
   }
+
+  // ==========================================
+  // NETWORK BALANCE TRANSFER
+  // ==========================================
+
+  /**
+   * Check if target user is in sender's referral network tree (upline or downline).
+   */
+  async isInSameNetworkTree(userAId: string, userBId: string): Promise<boolean> {
+    if (userAId === userBId) return false;
+
+    const getAncestors = async (startUserId: string): Promise<Set<string>> => {
+      const ancestors = new Set<string>();
+      let currentId: string | null = startUserId;
+      const visited = new Set<string>();
+
+      while (currentId) {
+        if (visited.has(currentId)) break;
+        visited.add(currentId);
+
+        const user = await this.prisma.user.findUnique({
+          where: { id: currentId },
+          select: { id: true, referred_by_id: true },
+        });
+
+        if (!user || !user.referred_by_id) break;
+        ancestors.add(user.referred_by_id);
+        currentId = user.referred_by_id;
+      }
+      return ancestors;
+    };
+
+    const [ancestorsA, ancestorsB] = await Promise.all([
+      getAncestors(userAId),
+      getAncestors(userBId),
+    ]);
+
+    // B is an upline of A
+    if (ancestorsA.has(userBId)) return true;
+
+    // B is a downline of A
+    if (ancestorsB.has(userAId)) return true;
+
+    // A and B share any common ancestor in the referral tree
+    for (const id of ancestorsA) {
+      if (ancestorsB.has(id)) return true;
+    }
+
+    return false;
+  }
+
+  async verifyTransferRecipient(senderId: string, targetReferralCode: string) {
+    const code = targetReferralCode.trim();
+    if (!code) {
+      throw new BadRequestException('Referral code is required');
+    }
+
+    const recipient = await this.prisma.user.findUnique({
+      where: { referral_code: code },
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        referral_code: true,
+        status: true,
+      },
+    });
+
+    if (!recipient) {
+      throw new NotFoundException('No user found with this referral code');
+    }
+
+    if (recipient.id === senderId) {
+      throw new BadRequestException('You cannot transfer balance to yourself');
+    }
+
+    const isNetworkMember = await this.isInSameNetworkTree(senderId, recipient.id);
+    if (!isNetworkMember) {
+      throw new BadRequestException('This user is not in your referral network tree');
+    }
+
+    return {
+      id: recipient.id,
+      full_name: recipient.full_name || 'Anonymous User',
+      phone: recipient.phone,
+      referral_code: recipient.referral_code,
+    };
+  }
+
+  async executeBalanceTransfer(senderId: string, targetReferralCode: string, amount: number) {
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      throw new BadRequestException('Transfer amount must be greater than zero');
+    }
+
+    const recipient = await this.verifyTransferRecipient(senderId, targetReferralCode);
+
+    return this.prisma.$transaction(async (tx) => {
+      const sender = await tx.user.findUnique({ where: { id: senderId } });
+      if (!sender) throw new NotFoundException('Sender user not found');
+
+      const senderBalanceBefore = Number(sender.wallet_balance);
+      if (senderBalanceBefore < numAmount) {
+        throw new BadRequestException('Insufficient wallet balance to transfer');
+      }
+
+      const senderBalanceAfter = senderBalanceBefore - numAmount;
+
+      // 1. Deduct sender wallet
+      await tx.user.update({
+        where: { id: senderId },
+        data: { wallet_balance: new Prisma.Decimal(senderBalanceAfter) },
+      });
+
+      // 2. Log sender transaction
+      await tx.walletTransaction.create({
+        data: {
+          user_id: senderId,
+          type: TransactionType.BALANCE_TRANSFER,
+          amount: new Prisma.Decimal(-numAmount),
+          balance_before: new Prisma.Decimal(senderBalanceBefore),
+          balance_after: new Prisma.Decimal(senderBalanceAfter),
+          description: `Transfer sent to ${recipient.full_name} (${recipient.referral_code})`,
+        },
+      });
+
+      // 3. Credit recipient wallet
+      const recipientUser = await tx.user.findUnique({ where: { id: recipient.id } });
+      if (!recipientUser) throw new NotFoundException('Recipient user not found');
+
+      const recipientBalanceBefore = Number(recipientUser.wallet_balance);
+      const recipientBalanceAfter = recipientBalanceBefore + numAmount;
+
+      await tx.user.update({
+        where: { id: recipient.id },
+        data: { wallet_balance: new Prisma.Decimal(recipientBalanceAfter) },
+      });
+
+      // 4. Log recipient transaction
+      await tx.walletTransaction.create({
+        data: {
+          user_id: recipient.id,
+          type: TransactionType.BALANCE_TRANSFER,
+          amount: new Prisma.Decimal(numAmount),
+          balance_before: new Prisma.Decimal(recipientBalanceBefore),
+          balance_after: new Prisma.Decimal(recipientBalanceAfter),
+          description: `Transfer received from ${sender.full_name || sender.phone} (${sender.referral_code})`,
+        },
+      });
+
+      return {
+        success: true,
+        transferredAmount: numAmount,
+        recipient,
+        newBalance: senderBalanceAfter,
+      };
+    }, { maxWait: 10000, timeout: 30000 });
+  }
 }
