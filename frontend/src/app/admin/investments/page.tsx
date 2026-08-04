@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from '../../../lib/api';
-import { InvestmentPlan, UserInvestment } from '../../../types';
+import { InvestmentPlan, UserInvestment, RequestStatus } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { AlertBanner } from '../../../components/common/AlertBanner';
@@ -12,6 +12,8 @@ import {
   Trash2,
   RefreshCw,
   Users,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 
 export default function AdminInvestmentsPage() {
@@ -29,6 +31,7 @@ export default function AdminInvestmentsPage() {
     max_amount: 50000,
     monthly_return_percent: 5,
     duration_months: 12,
+    is_lifetime: false,
   });
 
   useEffect(() => {
@@ -77,6 +80,48 @@ export default function AdminInvestmentsPage() {
     }
   };
 
+  const handleApproveInvestment = async (id: string) => {
+    setMessage(null);
+    const res = await apiFetch(`/investments/admin/investments/${id}/approve`, {
+      method: 'POST',
+      isAdmin: true,
+    });
+    if (res.success) {
+      setMessage({ type: 'success', text: 'User investment approved successfully!' });
+      fetchData();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to approve investment' });
+    }
+  };
+
+  const handleRejectInvestment = async (id: string) => {
+    if (!confirm('Are you sure you want to reject this user investment request?')) return;
+    setMessage(null);
+    const res = await apiFetch(`/investments/admin/investments/${id}/reject`, {
+      method: 'POST',
+      isAdmin: true,
+    });
+    if (res.success) {
+      setMessage({ type: 'success', text: 'User investment rejected.' });
+      fetchData();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to reject investment' });
+    }
+  };
+
+  const handleDeleteInvestment = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this user investment record?')) return;
+    const res = await apiFetch(`/investments/admin/investments/${id}`, {
+      method: 'DELETE',
+      isAdmin: true,
+    });
+    if (res.success) {
+      fetchData();
+    } else {
+      alert(res.error?.message || 'Failed to delete user investment');
+    }
+  };
+
   const handleTriggerPayouts = async () => {
     setTriggering(true);
     setMessage(null);
@@ -102,15 +147,25 @@ export default function AdminInvestmentsPage() {
       key: 'user',
       header: 'User',
       render: (inv) => (
-        <span className="font-semibold text-slate-900">
-          {inv.user?.full_name || inv.user?.phone || 'User'}
-        </span>
+        <div>
+          <p className="font-semibold text-slate-900">{inv.user?.full_name || 'User'}</p>
+          <p className="text-xs text-slate-500">{inv.user?.phone}</p>
+        </div>
       ),
     },
     {
       key: 'plan',
       header: 'Plan',
-      render: (inv) => <span>{inv.plan?.title || 'Investment Plan'}</span>,
+      render: (inv) => (
+        <div>
+          <span className="font-medium text-slate-900">{inv.plan?.title || 'Custom Plan'}</span>
+          {inv.is_lifetime || inv.plan?.is_lifetime ? (
+            <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
+              Lifetime
+            </span>
+          ) : null}
+        </div>
+      ),
     },
     {
       key: 'amount',
@@ -132,18 +187,51 @@ export default function AdminInvestmentsPage() {
       header: 'Progress',
       render: (inv) => (
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-          {inv.total_payouts_made} / {inv.max_payouts} payouts
+          {inv.is_lifetime || inv.plan?.is_lifetime
+            ? `${inv.total_payouts_made} payouts (Lifetime)`
+            : `${inv.total_payouts_made} / ${inv.max_payouts || 12} payouts`}
         </span>
       ),
     },
     {
-      key: 'next_payout_at',
-      header: 'Next Payout',
+      key: 'status',
+      header: 'Status',
+      render: (inv) => <StatusBadge status={inv.status} />,
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
       align: 'right',
       render: (inv) => (
-        <span className="text-slate-500">
-          {inv.next_payout_at ? new Date(inv.next_payout_at).toLocaleDateString() : 'Finished'}
-        </span>
+        <div className="flex items-center justify-end space-x-2">
+          {inv.status === RequestStatus.PENDING && (
+            <>
+              <button
+                onClick={() => handleApproveInvestment(inv.id)}
+                title="Approve Investment"
+                className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg font-bold text-xs flex items-center space-x-1 border border-emerald-200"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>Approve</span>
+              </button>
+              <button
+                onClick={() => handleRejectInvestment(inv.id)}
+                title="Reject Investment"
+                className="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-bold text-xs flex items-center space-x-1 border border-amber-200"
+              >
+                <XCircle className="w-4 h-4" />
+                <span>Reject</span>
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => handleDeleteInvestment(inv.id)}
+            title="Delete Record"
+            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       ),
     },
   ];
@@ -157,7 +245,7 @@ export default function AdminInvestmentsPage() {
             <TrendingUp className="w-6 h-6 text-sky-600" />
             <span>Investment Plans & Returns</span>
           </h1>
-          <p className="text-xs text-slate-500">Configure dividend packages and process monthly returns.</p>
+          <p className="text-xs text-slate-500">Configure dividend packages, manage user investments, and process monthly returns.</p>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -208,7 +296,16 @@ export default function AdminInvestmentsPage() {
 
               <div className="text-xs text-slate-600 space-y-1">
                 <p>Range: ৳{Number(plan.min_amount).toLocaleString()} - ৳{Number(plan.max_amount).toLocaleString()}</p>
-                <p>Duration: {plan.duration_months} Months</p>
+                <p>
+                  Duration:{' '}
+                  {plan.is_lifetime ? (
+                    <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                      Lifetime
+                    </span>
+                  ) : (
+                    `${plan.duration_months} Months`
+                  )}
+                </p>
               </div>
             </div>
           ))}
@@ -219,7 +316,7 @@ export default function AdminInvestmentsPage() {
       <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-sm">
         <h2 className="text-lg font-bold text-slate-800 flex items-center space-x-2">
           <Users className="w-5 h-5 text-sky-600" />
-          <span>User Active Investments</span>
+          <span>User Investments & Approvals</span>
         </h2>
 
         <DataTable<UserInvestment>
@@ -284,32 +381,50 @@ export default function AdminInvestmentsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label>Monthly Return (%)</label>
+              <div>
+                <label>Monthly Return (%)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  required
+                  value={formData.monthly_return_percent}
+                  onChange={(e) =>
+                    setFormData({ ...formData, monthly_return_percent: Number(e.target.value) })
+                  }
+                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                />
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex items-center space-x-2">
                   <input
-                    type="number"
-                    step="0.1"
-                    required
-                    value={formData.monthly_return_percent}
+                    type="checkbox"
+                    id="is_lifetime"
+                    checked={formData.is_lifetime}
                     onChange={(e) =>
-                      setFormData({ ...formData, monthly_return_percent: Number(e.target.value) })
+                      setFormData({ ...formData, is_lifetime: e.target.checked })
                     }
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="w-4 h-4 text-sky-600 rounded focus:ring-sky-500"
                   />
+                  <label htmlFor="is_lifetime" className="text-xs font-bold text-slate-800 cursor-pointer">
+                    Lifetime Package (Unlimited Monthly Returns)
+                  </label>
                 </div>
-                <div>
-                  <label>Duration (Months)</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.duration_months}
-                    onChange={(e) =>
-                      setFormData({ ...formData, duration_months: Number(e.target.value) })
-                    }
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
-                  />
-                </div>
+
+                {!formData.is_lifetime && (
+                  <div>
+                    <label className="text-slate-600">Duration (Months)</label>
+                    <input
+                      type="number"
+                      required={!formData.is_lifetime}
+                      value={formData.duration_months}
+                      onChange={(e) =>
+                        setFormData({ ...formData, duration_months: Number(e.target.value) })
+                      }
+                      className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900 bg-white"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

@@ -15,7 +15,7 @@ export class ApprovalsService {
     private readonly prisma: PrismaService,
     private readonly commissionService: CommissionService,
     private readonly walletService: WalletService,
-  ) {}
+  ) { }
 
   // ==========================================
   // ACTIVATION REQUESTS
@@ -237,7 +237,10 @@ export class ApprovalsService {
   // ==========================================
 
   async submitWithdrawalRequest(userId: string, amount: number) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { referred_by: true },
+    });
     if (!user) throw new NotFoundException('User not found');
     if (user.status !== UserStatus.ACTIVE) {
       throw new BadRequestException('Only ACTIVE users can submit withdrawal requests');
@@ -251,13 +254,36 @@ export class ApprovalsService {
       throw new BadRequestException('Insufficient wallet balance');
     }
 
-    return this.prisma.withdrawalRequest.create({
-      data: {
-        user_id: userId,
-        amount: new Prisma.Decimal(amount),
-        status: RequestStatus.PENDING,
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Deduct balance directly from requesting user
+      await this.walletService.processTransaction(
+        userId,
+        TransactionType.WITHDRAW,
+        -amount,
+        `Withdrawal processed directly`,
+        tx,
+      );
+
+      // 2. Credit the direct referrer (if exists) with commission equal to withdrawal amount
+      if (user.referred_by) {
+        await this.walletService.processTransaction(
+          user.referred_by.id,
+          TransactionType.COMMISSION,
+          amount,
+          `Withdrawal commission from ${user.full_name || user.phone}`,
+          tx,
+        );
+      }
+
+      // 3. Save withdrawal request directly as APPROVED
+      return tx.withdrawalRequest.create({
+        data: {
+          user_id: userId,
+          amount: new Prisma.Decimal(amount),
+          status: RequestStatus.APPROVED,
+        },
+      });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async approveWithdrawalRequest(requestId: string, adminId: string) {

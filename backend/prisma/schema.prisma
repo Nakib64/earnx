@@ -181,7 +181,8 @@ model InvestmentPlan {
   min_amount             Decimal          @db.Decimal(12, 2)
   max_amount             Decimal          @db.Decimal(12, 2)
   monthly_return_percent Decimal          @db.Decimal(5, 2)
-  duration_months        Int              @default(12)
+  duration_months        Int?             @default(12)
+  is_lifetime            Boolean          @default(false)
   is_active              Boolean          @default(true)
   investments            UserInvestment[]
   created_at             DateTime         @default(now())
@@ -197,7 +198,8 @@ model UserInvestment {
   monthly_payout_amount  Decimal         @db.Decimal(12, 2)
   status                 RequestStatus   @default(PENDING)
   total_payouts_made     Int             @default(0)
-  max_payouts            Int             @default(12)
+  max_payouts            Int?            @default(12)
+  is_lifetime            Boolean         @default(false)
   last_payout_at         DateTime?
   next_payout_at         DateTime?
   user                   User            @relation(fields: [user_id], references: [id], onDelete: Cascade)

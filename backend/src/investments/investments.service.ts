@@ -37,6 +37,7 @@ export class InvestmentsService {
     max_amount: number;
     monthly_return_percent: number;
     duration_months?: number;
+    is_lifetime?: boolean;
   }) {
     if (data.min_amount <= 0 || data.max_amount < data.min_amount) {
       throw new BadRequestException('Invalid min or max investment amounts');
@@ -45,13 +46,16 @@ export class InvestmentsService {
       throw new BadRequestException('Monthly return percentage must be between 0 and 100');
     }
 
+    const isLifetime = data.is_lifetime || false;
+
     return this.prisma.investmentPlan.create({
       data: {
         title: data.title,
         min_amount: new Prisma.Decimal(data.min_amount),
         max_amount: new Prisma.Decimal(data.max_amount),
         monthly_return_percent: new Prisma.Decimal(data.monthly_return_percent),
-        duration_months: data.duration_months || 12,
+        duration_months: isLifetime ? null : (data.duration_months || 12),
+        is_lifetime: isLifetime,
       },
     });
   }
@@ -62,6 +66,7 @@ export class InvestmentsService {
     max_amount: number;
     monthly_return_percent: number;
     duration_months: number;
+    is_lifetime: boolean;
     is_active: boolean;
   }>) {
     const plan = await this.prisma.investmentPlan.findUnique({ where: { id } });
@@ -73,7 +78,12 @@ export class InvestmentsService {
     if (data.max_amount !== undefined) updateData.max_amount = new Prisma.Decimal(data.max_amount);
     if (data.monthly_return_percent !== undefined)
       updateData.monthly_return_percent = new Prisma.Decimal(data.monthly_return_percent);
-    if (data.duration_months !== undefined) updateData.duration_months = data.duration_months;
+    if (data.is_lifetime !== undefined) {
+      updateData.is_lifetime = data.is_lifetime;
+      updateData.duration_months = data.is_lifetime ? null : (data.duration_months || plan.duration_months || 12);
+    } else if (data.duration_months !== undefined) {
+      updateData.duration_months = data.duration_months;
+    }
     if (data.is_active !== undefined) updateData.is_active = data.is_active;
 
     return this.prisma.investmentPlan.update({
@@ -107,54 +117,25 @@ export class InvestmentsService {
       );
     }
 
-    if (Number(user.wallet_balance) < amount) {
-      throw new BadRequestException('Insufficient wallet balance to invest');
-    }
-
     const returnPercent = Number(plan.monthly_return_percent);
     const monthlyPayout = (amount * returnPercent) / 100;
-    const now = new Date();
-    const nextPayout = new Date();
-    nextPayout.setMonth(now.getMonth() + 1);
+    const isLifetime = plan.is_lifetime || false;
 
-    return this.prisma.$transaction(async (tx) => {
-      // 1. Deduct wallet balance
-      const balanceBefore = Number(user.wallet_balance);
-      const balanceAfter = balanceBefore - amount;
-
-      await tx.user.update({
-        where: { id: userId },
-        data: { wallet_balance: new Prisma.Decimal(balanceAfter) },
-      });
-
-      // 2. Log transaction
-      await tx.walletTransaction.create({
-        data: {
-          user_id: userId,
-          type: TransactionType.INVESTMENT_DEPOSIT,
-          amount: new Prisma.Decimal(-amount),
-          balance_before: new Prisma.Decimal(balanceBefore),
-          balance_after: new Prisma.Decimal(balanceAfter),
-          description: `Invested in ${plan.title} (৳${amount})`,
-        },
-      });
-
-      // 3. Create active investment
-      return tx.userInvestment.create({
-        data: {
-          user_id: userId,
-          plan_id: planId,
-          amount: new Prisma.Decimal(amount),
-          monthly_return_percent: new Prisma.Decimal(returnPercent),
-          monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
-          status: RequestStatus.APPROVED, // Direct activate when paid from wallet
-          total_payouts_made: 0,
-          max_payouts: plan.duration_months,
-          next_payout_at: nextPayout,
-        },
-        include: { plan: true },
-      });
-    }, { maxWait: 10000, timeout: 30000 });
+    // No wallet transaction needed - managed by admin upon approval
+    return this.prisma.userInvestment.create({
+      data: {
+        user_id: userId,
+        plan_id: planId,
+        amount: new Prisma.Decimal(amount),
+        monthly_return_percent: new Prisma.Decimal(returnPercent),
+        monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
+        status: RequestStatus.PENDING, // Submitted for Admin approval & management
+        total_payouts_made: 0,
+        max_payouts: isLifetime ? null : (plan.duration_months || 12),
+        is_lifetime: isLifetime,
+      },
+      include: { plan: true },
+    });
   }
 
   async getUserInvestments(userId: string) {
@@ -173,6 +154,44 @@ export class InvestmentsService {
       },
       orderBy: { created_at: 'desc' },
     });
+  }
+
+  async approveUserInvestment(id: string) {
+    const inv = await this.prisma.userInvestment.findUnique({ where: { id } });
+    if (!inv) throw new NotFoundException('Investment record not found');
+    if (inv.status !== RequestStatus.PENDING) {
+      throw new BadRequestException(`Investment is already ${inv.status}`);
+    }
+
+    const now = new Date();
+    const nextPayout = new Date();
+    nextPayout.setMonth(now.getMonth() + 1);
+
+    return this.prisma.userInvestment.update({
+      where: { id },
+      data: {
+        status: RequestStatus.APPROVED,
+        next_payout_at: nextPayout,
+      },
+      include: { user: true, plan: true },
+    });
+  }
+
+  async rejectUserInvestment(id: string) {
+    const inv = await this.prisma.userInvestment.findUnique({ where: { id } });
+    if (!inv) throw new NotFoundException('Investment record not found');
+    if (inv.status !== RequestStatus.PENDING) {
+      throw new BadRequestException(`Investment is already ${inv.status}`);
+    }
+
+    return this.prisma.userInvestment.update({
+      where: { id },
+      data: { status: RequestStatus.REJECTED },
+    });
+  }
+
+  async deleteUserInvestment(id: string) {
+    return this.prisma.userInvestment.delete({ where: { id } });
   }
 
   // ==========================================
@@ -199,7 +218,10 @@ export class InvestmentsService {
     let count = 0;
 
     for (const inv of dueInvestments) {
-      if (inv.total_payouts_made >= inv.max_payouts) {
+      const isLifetime = inv.is_lifetime || false;
+      const maxPayouts = inv.max_payouts;
+
+      if (!isLifetime && maxPayouts !== null && inv.total_payouts_made >= maxPayouts) {
         await this.prisma.userInvestment.update({
           where: { id: inv.id },
           data: { status: RequestStatus.REJECTED }, // Mark completed
@@ -212,7 +234,7 @@ export class InvestmentsService {
         const userBalBefore = Number(inv.user.wallet_balance);
         const userBalAfter = userBalBefore + payoutAmt;
         const newPayoutCount = inv.total_payouts_made + 1;
-        const isCompleted = newPayoutCount >= inv.max_payouts;
+        const isCompleted = !isLifetime && maxPayouts !== null && newPayoutCount >= maxPayouts;
 
         const nextDate = new Date(inv.next_payout_at || now);
         nextDate.setMonth(nextDate.getMonth() + 1);
@@ -231,7 +253,7 @@ export class InvestmentsService {
             amount: new Prisma.Decimal(payoutAmt),
             balance_before: new Prisma.Decimal(userBalBefore),
             balance_after: new Prisma.Decimal(userBalAfter),
-            description: `Monthly Investment Return (${newPayoutCount}/${inv.max_payouts})`,
+            description: `Monthly Investment Return (${newPayoutCount}${isLifetime ? ' - Lifetime' : '/' + maxPayouts})`,
           },
         });
 

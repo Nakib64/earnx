@@ -58,6 +58,7 @@ export class InvestmentsController {
       max_amount: number;
       monthly_return_percent: number;
       duration_months?: number;
+      is_lifetime?: boolean;
     },
   ) {
     return this.investmentsService.createPlan(body);
@@ -79,6 +80,24 @@ export class InvestmentsController {
   @Get('admin/all')
   async getAdminInvestments() {
     return this.investmentsService.getAdminInvestments();
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Post('admin/investments/:id/approve')
+  async approveInvestment(@Param('id') id: string) {
+    return this.investmentsService.approveUserInvestment(id);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Post('admin/investments/:id/reject')
+  async rejectInvestment(@Param('id') id: string) {
+    return this.investmentsService.rejectUserInvestment(id);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Delete('admin/investments/:id')
+  async deleteInvestment(@Param('id') id: string) {
+    return this.investmentsService.deleteUserInvestment(id);
   }
 
   @UseGuards(AdminJwtGuard)

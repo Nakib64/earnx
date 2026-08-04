@@ -62,7 +62,7 @@ export default function UserInvestmentsPage() {
     if (res.success) {
       setMessage({
         type: 'success',
-        text: 'Investment created successfully! Monthly dividends will be added to your wallet.',
+        text: 'Investment request submitted successfully! It is now pending admin approval.',
       });
       setSelectedPlan(null);
       await refreshUserProfile();
@@ -101,7 +101,9 @@ export default function UserInvestmentsPage() {
       header: 'Progress',
       render: (inv) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-          {inv.total_payouts_made} / {inv.max_payouts} payouts
+          {inv.is_lifetime || inv.plan?.is_lifetime
+            ? `${inv.total_payouts_made} payouts (Lifetime)`
+            : `${inv.total_payouts_made} / ${inv.max_payouts || 12} payouts`}
         </span>
       ),
     },
@@ -110,7 +112,7 @@ export default function UserInvestmentsPage() {
       header: 'Next Payout',
       render: (inv) => (
         <span className="text-slate-500">
-          {inv.next_payout_at ? new Date(inv.next_payout_at).toLocaleDateString() : 'Completed'}
+          {inv.next_payout_at ? new Date(inv.next_payout_at).toLocaleDateString() : (inv.status === RequestStatus.PENDING ? 'Pending Approval' : 'Completed')}
         </span>
       ),
     },
@@ -221,7 +223,13 @@ export default function UserInvestmentsPage() {
                       </div>
                       <div className="flex justify-between pt-1">
                         <span className="text-slate-500">Duration:</span>
-                        <span className="font-semibold text-slate-800">{plan.duration_months} Months</span>
+                        {plan.is_lifetime ? (
+                          <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                            Lifetime
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-slate-800">{plan.duration_months} Months</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -282,8 +290,8 @@ export default function UserInvestmentsPage() {
             <div className="space-y-4">
               <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 space-y-2">
                 <div className="flex justify-between text-xs text-slate-600">
-                  <span>Wallet Balance:</span>
-                  <span className="font-bold text-slate-900">৳{walletBal.toLocaleString()}</span>
+                  <span>Investment Status:</span>
+                  <span className="font-bold text-sky-800">Admin Managed</span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Allowed Range:</span>
@@ -322,7 +330,7 @@ export default function UserInvestmentsPage() {
               </button>
               <button
                 onClick={handleInvest}
-                disabled={submitting || investAmount > walletBal}
+                disabled={submitting || investAmount <= 0}
                 className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-sm shadow-md shadow-sky-600/25"
               >
                 {submitting ? 'Processing...' : 'Confirm & Invest'}

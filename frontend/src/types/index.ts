@@ -169,7 +169,8 @@ export interface InvestmentPlan {
   min_amount: number | string;
   max_amount: number | string;
   monthly_return_percent: number | string;
-  duration_months: number;
+  duration_months?: number | null;
+  is_lifetime?: boolean;
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -184,7 +185,8 @@ export interface UserInvestment {
   monthly_payout_amount: number | string;
   status: RequestStatus;
   total_payouts_made: number;
-  max_payouts: number;
+  max_payouts?: number | null;
+  is_lifetime?: boolean;
   last_payout_at?: string | null;
   next_payout_at?: string | null;
   created_at: string;
