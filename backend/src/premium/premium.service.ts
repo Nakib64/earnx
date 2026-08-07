@@ -20,7 +20,7 @@ export class PremiumService {
     await this.processWeeklyPayouts();
   }
 
-  async processWeeklyPayouts() {
+  async processWeeklyPayouts(force = false) {
     const weeklyAmountStr = await this.configService.getValue(
       'PREMIUM_WEEKLY_PAYOUT_AMOUNT',
       '100',
@@ -30,16 +30,21 @@ export class PremiumService {
     const now = new Date();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+    const whereClause: Prisma.UserWhereInput = {
+      is_premium: true,
+      premium_payout_count: { lt: 52 },
+    };
+
+    if (!force) {
+      whereClause.OR = [
+        { last_premium_payout_at: null },
+        { last_premium_payout_at: { lte: sevenDaysAgo } },
+      ];
+    }
+
     // Find active premium users who need payout
     const users = await this.prisma.user.findMany({
-      where: {
-        is_premium: true,
-        premium_payout_count: { lt: 52 },
-        OR: [
-          { last_premium_payout_at: null },
-          { last_premium_payout_at: { lte: sevenDaysAgo } },
-        ],
-      },
+      where: whereClause,
     });
 
     let processedCount = 0;
