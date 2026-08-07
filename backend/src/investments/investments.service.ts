@@ -274,4 +274,118 @@ export class InvestmentsService {
     this.logger.log(`Processed ${count} monthly investment return payouts.`);
     return { success: true, processedCount: count };
   }
+
+  // ==========================================
+  // ADMIN MANUAL ASSIGNMENT & TARGETED PAYOUTS
+  // ==========================================
+
+  async createInvestmentForUser(userId: string, planId: string, amount: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const plan = await this.prisma.investmentPlan.findUnique({ where: { id: planId } });
+    if (!plan) throw new NotFoundException('Investment plan not found');
+
+    const minAmt = Number(plan.min_amount);
+    const maxAmt = Number(plan.max_amount);
+    if (amount < minAmt || amount > maxAmt) {
+      throw new BadRequestException(
+        `Investment amount must be between ৳${minAmt} and ৳${maxAmt} for ${plan.title}`,
+      );
+    }
+
+    const returnPercent = Number(plan.monthly_return_percent);
+    const monthlyPayout = (amount * returnPercent) / 100;
+    const isLifetime = plan.is_lifetime || false;
+
+    const now = new Date();
+    const nextPayout = new Date();
+    nextPayout.setMonth(now.getMonth() + 1);
+
+    return this.prisma.userInvestment.create({
+      data: {
+        user_id: userId,
+        plan_id: planId,
+        amount: new Prisma.Decimal(amount),
+        monthly_return_percent: new Prisma.Decimal(returnPercent),
+        monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
+        status: RequestStatus.APPROVED, // Direct active status when assigned by Admin
+        total_payouts_made: 0,
+        max_payouts: isLifetime ? null : (plan.duration_months || 12),
+        is_lifetime: isLifetime,
+        next_payout_at: nextPayout,
+      },
+      include: { user: true, plan: true },
+    });
+  }
+
+  async payoutSpecificInvestments(investmentIds: string[]) {
+    if (!investmentIds || investmentIds.length === 0) {
+      return { success: true, processedCount: 0 };
+    }
+
+    const now = new Date();
+    const targetInvestments = await this.prisma.userInvestment.findMany({
+      where: {
+        id: { in: investmentIds },
+      },
+      include: { user: true, plan: true },
+    });
+
+    let count = 0;
+
+    for (const inv of targetInvestments) {
+      const isLifetime = inv.is_lifetime || false;
+      const maxPayouts = inv.max_payouts;
+
+      if (!isLifetime && maxPayouts !== null && inv.total_payouts_made >= maxPayouts) {
+        continue;
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        const payoutAmt = Number(inv.monthly_payout_amount);
+        const userBalBefore = Number(inv.user.wallet_balance);
+        const userBalAfter = userBalBefore + payoutAmt;
+        const newPayoutCount = inv.total_payouts_made + 1;
+        const isCompleted = !isLifetime && maxPayouts !== null && newPayoutCount >= maxPayouts;
+
+        const nextDate = new Date();
+        nextDate.setMonth(now.getMonth() + 1);
+
+        // 1. Credit wallet balance
+        await tx.user.update({
+          where: { id: inv.user_id },
+          data: { wallet_balance: new Prisma.Decimal(userBalAfter) },
+        });
+
+        // 2. Log transaction
+        await tx.walletTransaction.create({
+          data: {
+            user_id: inv.user_id,
+            type: TransactionType.INVESTMENT_PAYOUT,
+            amount: new Prisma.Decimal(payoutAmt),
+            balance_before: new Prisma.Decimal(userBalBefore),
+            balance_after: new Prisma.Decimal(userBalAfter),
+            description: `Monthly Investment Return (${newPayoutCount}${isLifetime ? ' - Lifetime' : '/' + maxPayouts})`,
+          },
+        });
+
+        // 3. Update investment record
+        await tx.userInvestment.update({
+          where: { id: inv.id },
+          data: {
+            status: RequestStatus.APPROVED,
+            total_payouts_made: newPayoutCount,
+            last_payout_at: now,
+            next_payout_at: isCompleted ? null : nextDate,
+          },
+        });
+      }, { maxWait: 10000, timeout: 30000 });
+
+      count++;
+    }
+
+    this.logger.log(`Targeted payout processed for ${count} user investments.`);
+    return { success: true, processedCount: count };
+  }
 }

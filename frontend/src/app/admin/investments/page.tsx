@@ -14,17 +14,34 @@ import {
   Users,
   CheckCircle,
   XCircle,
+  UserPlus,
+  Search,
+  CheckSquare,
+  Square,
+  DollarSign,
 } from 'lucide-react';
+
+interface SimpleUser {
+  id: string;
+  full_name: string | null;
+  phone: string;
+  referral_code: string;
+}
 
 export default function AdminInvestmentsPage() {
   const [plans, setPlans] = useState<InvestmentPlan[]>([]);
   const [userInvestments, setUserInvestments] = useState<UserInvestment[]>([]);
+  const [allUsers, setAllUsers] = useState<SimpleUser[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Modals
   const [showModal, setShowModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+
   const [triggering, setTriggering] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Form state
+  // Form state for creating plans
   const [formData, setFormData] = useState({
     title: '',
     min_amount: 10000,
@@ -34,8 +51,22 @@ export default function AdminInvestmentsPage() {
     is_lifetime: false,
   });
 
+  // Form state for assigning plan to user
+  const [assignForm, setAssignForm] = useState({
+    userId: '',
+    planId: '',
+    amount: 10000,
+  });
+  const [submittingAssign, setSubmittingAssign] = useState(false);
+
+  // Multi-select & Targeted Payout State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedInvestmentIds, setSelectedInvestmentIds] = useState<string[]>([]);
+  const [submittingTargetedPayout, setSubmittingTargetedPayout] = useState(false);
+
   useEffect(() => {
     fetchData();
+    fetchUsers();
   }, []);
 
   const fetchData = async () => {
@@ -48,6 +79,26 @@ export default function AdminInvestmentsPage() {
     if (invRes.success && invRes.data) setUserInvestments(invRes.data);
     setLoading(false);
   };
+
+  const fetchUsers = async () => {
+    const res = await apiFetch<any>('/admin/users?page=1&limit=200', { isAdmin: true });
+    if (res.success && res.data) {
+      const list = Array.isArray(res.data) ? res.data : res.data.data || [];
+      setAllUsers(list);
+      if (list.length > 0) setAssignForm((prev) => ({ ...prev, userId: list[0].id }));
+    }
+  };
+
+  useEffect(() => {
+    if (plans.length > 0 && !assignForm.planId) {
+      const firstPlan = plans[0];
+      setAssignForm((prev) => ({
+        ...prev,
+        planId: firstPlan.id,
+        amount: Number(firstPlan.min_amount),
+      }));
+    }
+  }, [plans]);
 
   const handleCreatePlan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,6 +116,33 @@ export default function AdminInvestmentsPage() {
     } else {
       setMessage({ type: 'error', text: res.error?.message || 'Failed to create plan' });
     }
+  };
+
+  const handleAssignPlanToUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignForm.userId || !assignForm.planId) return;
+
+    setSubmittingAssign(true);
+    setMessage(null);
+
+    const res = await apiFetch('/investments/admin/create-for-user', {
+      method: 'POST',
+      isAdmin: true,
+      body: JSON.stringify({
+        userId: assignForm.userId,
+        planId: assignForm.planId,
+        amount: assignForm.amount,
+      }),
+    });
+
+    if (res.success) {
+      setMessage({ type: 'success', text: 'Investment package successfully assigned to user!' });
+      setShowAssignModal(false);
+      fetchData();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to assign package' });
+    }
+    setSubmittingAssign(false);
   };
 
   const handleDeletePlan = async (id: string) => {
@@ -140,6 +218,61 @@ export default function AdminInvestmentsPage() {
       setMessage({ type: 'error', text: res.error?.message || 'Failed to process payouts' });
     }
     setTriggering(false);
+  };
+
+  // Targeted Payout Handler
+  const handlePayoutSelected = async () => {
+    if (selectedInvestmentIds.length === 0) return;
+    if (!confirm(`Are you sure you want to process monthly dividend payouts for ${selectedInvestmentIds.length} selected investment(s)?`)) return;
+
+    setSubmittingTargetedPayout(true);
+    setMessage(null);
+
+    const res = await apiFetch<{ processedCount: number }>('/investments/admin/payout-selected', {
+      method: 'POST',
+      isAdmin: true,
+      body: JSON.stringify({ investment_ids: selectedInvestmentIds }),
+    });
+
+    if (res.success && res.data) {
+      setMessage({
+        type: 'success',
+        text: `Successfully processed monthly dividend payouts for ${res.data.processedCount} selected investment(s)!`,
+      });
+      setSelectedInvestmentIds([]);
+      fetchData();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to process targeted payouts' });
+    }
+    setSubmittingTargetedPayout(false);
+  };
+
+  // Filter investments for search & selection
+  const filteredInvestments = userInvestments.filter((inv) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const userName = (inv.user?.full_name || '').toLowerCase();
+    const userPhone = (inv.user?.phone || '').toLowerCase();
+    const planTitle = (inv.plan?.title || '').toLowerCase();
+    return userName.includes(q) || userPhone.includes(q) || planTitle.includes(q);
+  });
+
+  const allSelected = filteredInvestments.length > 0 && selectedInvestmentIds.length === filteredInvestments.length;
+
+  const handleToggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedInvestmentIds([]);
+    } else {
+      setSelectedInvestmentIds(filteredInvestments.map((inv) => inv.id));
+    }
+  };
+
+  const handleToggleInvestment = (id: string) => {
+    if (selectedInvestmentIds.includes(id)) {
+      setSelectedInvestmentIds(selectedInvestmentIds.filter((invId) => invId !== id));
+    } else {
+      setSelectedInvestmentIds([...selectedInvestmentIds, id]);
+    }
   };
 
   const userInvestmentColumns: ColumnDef<UserInvestment>[] = [
@@ -245,17 +378,25 @@ export default function AdminInvestmentsPage() {
             <TrendingUp className="w-6 h-6 text-sky-600" />
             <span>Investment Plans & Returns</span>
           </h1>
-          <p className="text-xs text-slate-500">Configure dividend packages, manage user investments, and process monthly returns.</p>
+          <p className="text-xs text-slate-500">Configure dividend packages, assign packages to users, and process monthly returns.</p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleTriggerPayouts}
             disabled={triggering}
             className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md"
           >
             <RefreshCw className={`w-4 h-4 ${triggering ? 'animate-spin' : ''}`} />
-            <span>{triggering ? 'Processing...' : 'Run Monthly Return Payouts'}</span>
+            <span>{triggering ? 'Processing...' : 'Run Global Payouts'}</span>
+          </button>
+
+          <button
+            onClick={() => setShowAssignModal(true)}
+            className="py-2.5 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Assign Package to User</span>
           </button>
 
           <button
@@ -312,11 +453,136 @@ export default function AdminInvestmentsPage() {
         </div>
       </div>
 
-      {/* User Investments Table using DataTable */}
+      {/* Targeted / Specific Investment Dividend Payout Section */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              <span>Targeted / Specific User Dividend Payouts</span>
+            </h2>
+            <p className="text-xs text-slate-500">
+              Search active user investments, select specific investments via checkboxes, and process immediate dividend payouts to their wallets.
+            </p>
+          </div>
+
+          {selectedInvestmentIds.length > 0 && (
+            <button
+              onClick={handlePayoutSelected}
+              disabled={submittingTargetedPayout}
+              className="py-2.5 px-5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md shadow-purple-600/20"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span>
+                {submittingTargetedPayout
+                  ? 'Processing Payouts...'
+                  : `Payout Dividends to Selected (${selectedInvestmentIds.length})`}
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+          <input
+            type="text"
+            placeholder="Search investment by user name, phone, or plan title..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900"
+          />
+        </div>
+
+        {/* Table of User Investments with Checkboxes */}
+        <div className="overflow-x-auto rounded-2xl border border-slate-200">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+              <tr>
+                <th className="p-3 w-10 text-center">
+                  <button onClick={handleToggleSelectAll} type="button" className="text-slate-500 hover:text-slate-800">
+                    {allSelected ? <CheckSquare className="w-4 h-4 text-purple-600" /> : <Square className="w-4 h-4" />}
+                  </button>
+                </th>
+                <th className="p-3">User</th>
+                <th className="p-3">Plan</th>
+                <th className="p-3">Invested Amount</th>
+                <th className="p-3">Monthly Payout</th>
+                <th className="p-3">Progress</th>
+                <th className="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-slate-400">
+                    Loading investments...
+                  </td>
+                </tr>
+              ) : filteredInvestments.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-slate-500">
+                    No user investments found matching your query.
+                  </td>
+                </tr>
+              ) : (
+                filteredInvestments.map((inv) => {
+                  const isSelected = selectedInvestmentIds.includes(inv.id);
+                  return (
+                    <tr
+                      key={inv.id}
+                      onClick={() => handleToggleInvestment(inv.id)}
+                      className={`cursor-pointer transition-colors ${
+                        isSelected ? 'bg-purple-50/70' : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => handleToggleInvestment(inv.id)} type="button">
+                          {isSelected ? (
+                            <CheckSquare className="w-4 h-4 text-purple-600" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-300" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="p-3">
+                        <p className="font-bold text-slate-900">{inv.user?.full_name || 'User'}</p>
+                        <p className="text-slate-500 text-[11px]">{inv.user?.phone}</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="font-semibold text-slate-900">{inv.plan?.title || 'Investment Plan'}</span>
+                        {inv.is_lifetime || inv.plan?.is_lifetime ? (
+                          <span className="ml-1.5 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
+                            Lifetime
+                          </span>
+                        ) : null}
+                      </td>
+                      <td className="p-3 font-bold text-sky-600">৳{Number(inv.amount).toLocaleString()}</td>
+                      <td className="p-3 font-bold text-slate-900">৳{Number(inv.monthly_payout_amount).toLocaleString()}</td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200 font-semibold">
+                          {inv.is_lifetime || inv.plan?.is_lifetime
+                            ? `${inv.total_payouts_made} payouts (Lifetime)`
+                            : `${inv.total_payouts_made} / ${inv.max_payouts || 12} payouts`}
+                        </span>
+                      </td>
+                      <td className="p-3">
+                        <StatusBadge status={inv.status} />
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* User Investments & Approvals Table */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-sm">
         <h2 className="text-lg font-bold text-slate-800 flex items-center space-x-2">
           <Users className="w-5 h-5 text-sky-600" />
-          <span>User Investments & Approvals</span>
+          <span>All User Investments & Actions</span>
         </h2>
 
         <DataTable<UserInvestment>
@@ -327,6 +593,97 @@ export default function AdminInvestmentsPage() {
           emptyMessage="No user investments recorded yet."
         />
       </div>
+
+      {/* Manually Assign Package to User Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <form
+            onSubmit={handleAssignPlanToUser}
+            className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-100"
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-bold text-slate-900">Assign Package to User</h3>
+              <button
+                type="button"
+                onClick={() => setShowAssignModal(false)}
+                className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs font-bold text-slate-700">
+              <div>
+                <label>Select User</label>
+                <select
+                  required
+                  value={assignForm.userId}
+                  onChange={(e) => setAssignForm({ ...assignForm, userId: e.target.value })}
+                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900 bg-white"
+                >
+                  {allUsers.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.full_name || 'User'} ({u.phone}) - {u.referral_code}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Select Investment Plan</label>
+                <select
+                  required
+                  value={assignForm.planId}
+                  onChange={(e) => {
+                    const pId = e.target.value;
+                    const p = plans.find((pl) => pl.id === pId);
+                    setAssignForm({
+                      ...assignForm,
+                      planId: pId,
+                      amount: p ? Number(p.min_amount) : 10000,
+                    });
+                  }}
+                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900 bg-white"
+                >
+                  {plans.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} ({Number(p.monthly_return_percent)}% / mo - {p.is_lifetime ? 'Lifetime' : `${p.duration_months} Mos`})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label>Investment Amount (৳)</label>
+                <input
+                  type="number"
+                  required
+                  value={assignForm.amount}
+                  onChange={(e) => setAssignForm({ ...assignForm, amount: Number(e.target.value) })}
+                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900 bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowAssignModal(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submittingAssign}
+                className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold shadow-md disabled:opacity-50"
+              >
+                {submittingAssign ? 'Assigning...' : 'Assign Package'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Add Plan Modal */}
       {showModal && (

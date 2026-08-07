@@ -101,6 +101,26 @@ export class InvestmentsController {
   }
 
   @UseGuards(AdminJwtGuard)
+  @Post('admin/create-for-user')
+  async createForUser(
+    @Body() body: { userId: string; planId: string; amount: number },
+  ) {
+    return this.investmentsService.createInvestmentForUser(
+      body.userId,
+      body.planId,
+      Number(body.amount),
+    );
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Post('admin/payout-selected')
+  async payoutSelected(
+    @Body('investment_ids') investmentIds: string[],
+  ) {
+    return this.investmentsService.payoutSpecificInvestments(investmentIds || []);
+  }
+
+  @UseGuards(AdminJwtGuard)
   @Post('admin/trigger-payouts')
   async triggerPayouts() {
     return this.investmentsService.processMonthlyPayouts();
