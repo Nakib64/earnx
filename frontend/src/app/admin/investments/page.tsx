@@ -31,7 +31,6 @@ interface SimpleUser {
 export default function AdminInvestmentsPage() {
   const [plans, setPlans] = useState<InvestmentPlan[]>([]);
   const [userInvestments, setUserInvestments] = useState<UserInvestment[]>([]);
-  const [allUsers, setAllUsers] = useState<SimpleUser[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Modals
@@ -59,6 +58,15 @@ export default function AdminInvestmentsPage() {
   });
   const [submittingAssign, setSubmittingAssign] = useState(false);
 
+  // Modal User Search & Infinite Scroll State
+  const [modalUserSearch, setModalUserSearch] = useState('');
+  const [modalUsers, setModalUsers] = useState<SimpleUser[]>([]);
+  const [modalUserPage, setModalUserPage] = useState(1);
+  const [modalUserTotalPages, setModalUserTotalPages] = useState(1);
+  const [loadingModalUsers, setLoadingModalUsers] = useState(false);
+  const [loadingMoreModalUsers, setLoadingMoreModalUsers] = useState(false);
+  const [selectedUserObj, setSelectedUserObj] = useState<SimpleUser | null>(null);
+
   // Multi-select & Targeted Payout State
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInvestmentIds, setSelectedInvestmentIds] = useState<string[]>([]);
@@ -66,7 +74,6 @@ export default function AdminInvestmentsPage() {
 
   useEffect(() => {
     fetchData();
-    fetchUsers();
   }, []);
 
   const fetchData = async () => {
@@ -80,12 +87,57 @@ export default function AdminInvestmentsPage() {
     setLoading(false);
   };
 
-  const fetchUsers = async () => {
-    const res = await apiFetch<any>('/admin/users?page=1&limit=200', { isAdmin: true });
+  // Fetch modal users on search change or modal opening with pagination & infinite scroll
+  const fetchModalUsers = async (query = '', page = 1, append = false) => {
+    if (page === 1) setLoadingModalUsers(true);
+    else setLoadingMoreModalUsers(true);
+
+    const res = await apiFetch<any>(
+      `/admin/users?page=${page}&limit=15&search=${encodeURIComponent(query)}`,
+      { isAdmin: true },
+    );
+
     if (res.success && res.data) {
       const list = Array.isArray(res.data) ? res.data : res.data.data || [];
-      setAllUsers(list);
-      if (list.length > 0) setAssignForm((prev) => ({ ...prev, userId: list[0].id }));
+      const totalP = res.data.meta?.totalPages || 1;
+
+      if (append) {
+        setModalUsers((prev) => [...prev, ...list]);
+      } else {
+        setModalUsers(list);
+        if (list.length > 0 && !selectedUserObj) {
+          setSelectedUserObj(list[0]);
+          setAssignForm((prev) => ({ ...prev, userId: list[0].id }));
+        }
+      }
+      setModalUserPage(page);
+      setModalUserTotalPages(totalP);
+    }
+
+    setLoadingModalUsers(false);
+    setLoadingMoreModalUsers(false);
+  };
+
+  useEffect(() => {
+    if (showAssignModal) {
+      fetchModalUsers(modalUserSearch, 1, false);
+    }
+  }, [showAssignModal]);
+
+  const handleModalSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value;
+    setModalUserSearch(q);
+    fetchModalUsers(q, 1, false);
+  };
+
+  const handleModalScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (
+      scrollTop + clientHeight >= scrollHeight - 30 &&
+      !loadingMoreModalUsers &&
+      modalUserPage < modalUserTotalPages
+    ) {
+      fetchModalUsers(modalUserSearch, modalUserPage + 1, true);
     }
   };
 
@@ -612,21 +664,75 @@ export default function AdminInvestmentsPage() {
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-bold text-slate-700">
-              <div>
-                <label>Select User</label>
-                <select
-                  required
-                  value={assignForm.userId}
-                  onChange={(e) => setAssignForm({ ...assignForm, userId: e.target.value })}
-                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900 bg-white"
+            <div className="space-y-3.5 text-xs font-bold text-slate-700">
+              {/* Selected User Highlight Card */}
+              {selectedUserObj && (
+                <div className="bg-purple-50 p-3 rounded-2xl border border-purple-200 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 block">Selected User</span>
+                    <p className="font-bold text-slate-900 text-xs">{selectedUserObj.full_name || 'Anonymous User'}</p>
+                    <p className="text-[11px] text-slate-500">{selectedUserObj.phone} • Code: <span className="font-mono font-bold text-purple-700">{selectedUserObj.referral_code}</span></p>
+                  </div>
+                  <CheckCircle className="w-5 h-5 text-purple-600 shrink-0" />
+                </div>
+              )}
+
+              {/* SearchBar & Infinite Scroll User Selector */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Search & Select Target User</label>
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    placeholder="Search user by name, phone, or code..."
+                    value={modalUserSearch}
+                    onChange={handleModalSearchChange}
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900"
+                  />
+                </div>
+
+                <div
+                  onScroll={handleModalScroll}
+                  className="max-h-48 overflow-y-auto space-y-1.5 rounded-2xl border border-slate-200 p-2 bg-slate-50/50"
                 >
-                  {allUsers.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.full_name || 'User'} ({u.phone}) - {u.referral_code}
-                    </option>
-                  ))}
-                </select>
+                  {loadingModalUsers ? (
+                    <p className="text-center text-slate-400 py-4 text-xs font-medium">Loading users...</p>
+                  ) : modalUsers.length === 0 ? (
+                    <p className="text-center text-slate-400 py-4 text-xs font-medium">No users found matching search.</p>
+                  ) : (
+                    modalUsers.map((u) => {
+                      const isSelected = selectedUserObj?.id === u.id;
+                      return (
+                        <div
+                          key={u.id}
+                          onClick={() => {
+                            setSelectedUserObj(u);
+                            setAssignForm((prev) => ({ ...prev, userId: u.id }));
+                          }}
+                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between ${
+                            isSelected
+                              ? 'bg-purple-100/80 border-purple-400 text-purple-950 font-bold shadow-sm'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100/70'
+                          }`}
+                        >
+                          <div>
+                            <p className="font-bold text-slate-900">{u.full_name || 'Anonymous User'}</p>
+                            <p className="text-[11px] text-slate-500">{u.phone}</p>
+                          </div>
+                          <span className="font-mono text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100">
+                            {u.referral_code}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+
+                  {loadingMoreModalUsers && (
+                    <p className="text-center text-purple-600 font-bold text-[11px] py-2 animate-pulse">
+                      Loading more users...
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -675,7 +781,7 @@ export default function AdminInvestmentsPage() {
               </button>
               <button
                 type="submit"
-                disabled={submittingAssign}
+                disabled={submittingAssign || !selectedUserObj}
                 className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold shadow-md disabled:opacity-50"
               >
                 {submittingAssign ? 'Assigning...' : 'Assign Package'}
