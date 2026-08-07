@@ -1,4 +1,4 @@
-import { Controller, Post, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Query, Body, UseGuards } from '@nestjs/common';
 import { PremiumService } from './premium.service';
 import { AdminJwtGuard } from '../admin-auth/guards/admin-jwt.guard';
 
@@ -14,5 +14,15 @@ export class PremiumController {
   ) {
     const isForce = force !== undefined ? force === 'true' : bodyForce !== undefined ? bodyForce : true;
     return this.premiumService.processWeeklyPayouts(isForce);
+  }
+
+  @Get('users')
+  async getPremiumUsers(@Query('search') search?: string) {
+    return this.premiumService.getPremiumUsers(search);
+  }
+
+  @Post('payout-selected')
+  async payoutSelectedUsers(@Body('user_ids') userIds: string[]) {
+    return this.premiumService.payoutSpecificUsers(userIds || []);
   }
 }

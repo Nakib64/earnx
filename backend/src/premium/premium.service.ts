@@ -97,4 +97,97 @@ export class PremiumService {
     );
     return { success: true, processedCount, weeklyAmount };
   }
+
+  // ==========================================
+  // SPECIFIC USER PAYOUTS & MANAGEMENT
+  // ==========================================
+
+  async getPremiumUsers(search?: string) {
+    const where: Prisma.UserWhereInput = {
+      is_premium: true,
+    };
+
+    if (search && search.trim()) {
+      const q = search.trim();
+      where.OR = [
+        { full_name: { contains: q, mode: 'insensitive' } },
+        { phone: { contains: q, mode: 'insensitive' } },
+        { referral_code: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    return this.prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        referral_code: true,
+        wallet_balance: true,
+        is_premium: true,
+        premium_payout_count: true,
+        last_premium_payout_at: true,
+        premium_expires_at: true,
+      },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async payoutSpecificUsers(userIds: string[]) {
+    if (!userIds || userIds.length === 0) {
+      return { success: true, processedCount: 0, weeklyAmount: 0 };
+    }
+
+    const weeklyAmountStr = await this.configService.getValue(
+      'PREMIUM_WEEKLY_PAYOUT_AMOUNT',
+      '100',
+    );
+    const weeklyAmount = parseFloat(weeklyAmountStr) || 100;
+    const now = new Date();
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: { in: userIds },
+        is_premium: true,
+      },
+    });
+
+    let processedCount = 0;
+
+    for (const user of users) {
+      if (user.premium_payout_count >= 52) continue;
+
+      await this.prisma.$transaction(async (tx) => {
+        const balanceBefore = Number(user.wallet_balance);
+        const balanceAfter = balanceBefore + weeklyAmount;
+        const newPayoutCount = user.premium_payout_count + 1;
+        const isFinished = newPayoutCount >= 52;
+
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            wallet_balance: new Prisma.Decimal(balanceAfter),
+            premium_payout_count: newPayoutCount,
+            last_premium_payout_at: now, // Resets 7-day timer from current execution
+            is_premium: !isFinished,
+          },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            user_id: user.id,
+            type: TransactionType.PREMIUM_WEEKLY_PAYOUT,
+            amount: new Prisma.Decimal(weeklyAmount),
+            balance_before: new Prisma.Decimal(balanceBefore),
+            balance_after: new Prisma.Decimal(balanceAfter),
+            description: `Weekly Premium Payout (${newPayoutCount}/52 weeks)`,
+          },
+        });
+      }, { maxWait: 10000, timeout: 30000 });
+
+      processedCount++;
+    }
+
+    return { success: true, processedCount, weeklyAmount };
+  }
 }
