@@ -68,6 +68,7 @@ export default function AdminInvestmentsPage() {
 
   // Multi-select & Targeted Payout State
   const [searchQuery, setSearchQuery] = useState('');
+  const [payoutFilter, setPayoutFilter] = useState<'ALL' | 'DUE'>('ALL');
   const [selectedInvestmentIds, setSelectedInvestmentIds] = useState<string[]>([]);
   const [submittingTargetedPayout, setSubmittingTargetedPayout] = useState(false);
 
@@ -302,8 +303,41 @@ export default function AdminInvestmentsPage() {
     setSubmittingTargetedPayout(false);
   };
 
-  // Filter investments for search & selection
+  // Single Payout Handler for individual row
+  const handlePayoutSingle = async (invId: string, amount: number) => {
+    if (!confirm(`Are you sure you want to process ৳${amount.toLocaleString()} monthly dividend payout for this investment?`)) return;
+
+    setSubmittingTargetedPayout(true);
+    setMessage(null);
+
+    const res = await apiFetch<{ processedCount: number }>('/investments/admin/payout-selected', {
+      method: 'POST',
+      isAdmin: true,
+      body: JSON.stringify({ investment_ids: [invId] }),
+    });
+
+    if (res.success && res.data) {
+      setMessage({
+        type: 'success',
+        text: `Successfully processed monthly dividend payout of ৳${amount.toLocaleString()}!`,
+      });
+      fetchData();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to process payout' });
+    }
+    setSubmittingTargetedPayout(false);
+  };
+
+  // Filter investments for search & selection (only active approved investments)
   const filteredInvestments = userInvestments.filter((inv) => {
+    if (inv.status !== RequestStatus.APPROVED) return false;
+
+    if (payoutFilter === 'DUE') {
+      if (!inv.next_payout_at) return false;
+      const isDue = new Date(inv.next_payout_at) <= new Date();
+      if (!isDue) return false;
+    }
+
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
     const userName = (inv.user?.full_name || '').toLowerCase();
@@ -311,6 +345,11 @@ export default function AdminInvestmentsPage() {
     const planTitle = (inv.plan?.title || '').toLowerCase();
     return userName.includes(q) || userPhone.includes(q) || planTitle.includes(q);
   });
+
+  const selectedTotalAmount = selectedInvestmentIds.reduce((sum, id) => {
+    const inv = userInvestments.find((i) => i.id === id);
+    return sum + (inv ? Number(inv.monthly_payout_amount) : 0);
+  }, 0);
 
   const allSelected = filteredInvestments.length > 0 && selectedInvestmentIds.length === filteredInvestments.length;
 
@@ -542,28 +581,53 @@ export default function AdminInvestmentsPage() {
             <button
               onClick={handlePayoutSelected}
               disabled={submittingTargetedPayout}
-              className="py-2.5 px-5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md shadow-purple-600/20"
+              className="py-2.5 px-5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md shadow-purple-600/20 transition-all"
             >
               <DollarSign className="w-4 h-4" />
               <span>
                 {submittingTargetedPayout
                   ? 'Processing Payouts...'
-                  : `Payout Dividends to Selected (${selectedInvestmentIds.length})`}
+                  : `Payout Dividends to Selected (${selectedInvestmentIds.length} — Total: ৳${selectedTotalAmount.toLocaleString()})`}
               </span>
             </button>
           )}
         </div>
 
-        {/* Search Bar */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-          <input
-            type="text"
-            placeholder="Search investment by user name, phone, or plan title..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900"
-          />
+        {/* Filter and Search Bar */}
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+            <input
+              type="text"
+              placeholder="Search active investment by user name, phone, or plan title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 text-slate-900"
+            />
+          </div>
+
+          <div className="flex items-center space-x-2 shrink-0">
+            <button
+              onClick={() => setPayoutFilter('ALL')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                payoutFilter === 'ALL'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              All Active ({userInvestments.filter((i) => i.status === RequestStatus.APPROVED).length})
+            </button>
+            <button
+              onClick={() => setPayoutFilter('DUE')}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
+                payoutFilter === 'DUE'
+                  ? 'bg-amber-500 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Due For Payout Only ({userInvestments.filter((i) => i.status === RequestStatus.APPROVED && i.next_payout_at && new Date(i.next_payout_at) <= new Date()).length})
+            </button>
+          </div>
         </div>
 
         {/* Table of User Investments with Checkboxes */}
@@ -581,7 +645,8 @@ export default function AdminInvestmentsPage() {
                 <th className="p-3">Invested Amount</th>
                 <th className="p-3">Monthly Payout</th>
                 <th className="p-3">Progress</th>
-                <th className="p-3">Status</th>
+                <th className="p-3">Next Payout</th>
+                <th className="p-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -639,7 +704,29 @@ export default function AdminInvestmentsPage() {
                         </span>
                       </td>
                       <td className="p-3">
-                        <StatusBadge status={inv.status} />
+                        {inv.next_payout_at ? (
+                          new Date(inv.next_payout_at) <= new Date() ? (
+                            <span className="font-extrabold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-[10px]">
+                              DUE NOW
+                            </span>
+                          ) : (
+                            <span className="text-slate-500 text-[11px]">
+                              {new Date(inv.next_payout_at).toLocaleDateString()}
+                            </span>
+                          )
+                        ) : (
+                          <span className="text-slate-400 text-[11px]">Completed</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handlePayoutSingle(inv.id, Number(inv.monthly_payout_amount))}
+                          disabled={submittingTargetedPayout}
+                          className="py-1.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-[11px] rounded-lg shadow-xs transition-all inline-flex items-center space-x-1"
+                        >
+                          <DollarSign className="w-3 h-3" />
+                          <span>Payout ৳{Number(inv.monthly_payout_amount).toLocaleString()}</span>
+                        </button>
                       </td>
                     </tr>
                   );
