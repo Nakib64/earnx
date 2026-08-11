@@ -167,6 +167,7 @@ export interface Offer {
 export interface InvestmentPlan {
   id: string;
   title: string;
+  amount?: number | string;
   min_amount: number | string;
   max_amount: number | string;
   monthly_return_percent: number | string;
@@ -185,6 +186,9 @@ export interface UserInvestment {
   monthly_return_percent: number | string;
   monthly_payout_amount: number | string;
   status: RequestStatus;
+  request_type?: string;
+  pending_plan_id?: string | null;
+  pending_amount?: number | string | null;
   total_payouts_made: number;
   max_payouts?: number | null;
   is_lifetime?: boolean;
@@ -193,6 +197,7 @@ export interface UserInvestment {
   created_at: string;
   updated_at?: string;
   plan?: InvestmentPlan;
+  pending_plan?: InvestmentPlan | null;
   user?: UserSummary;
 }
 

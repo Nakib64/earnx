@@ -26,10 +26,35 @@ export class InvestmentsController {
 
   @UseGuards(UserJwtGuard)
   @Post('subscribe')
-  async subscribe(@Request() req, @Body() body: { planId: string; amount: number }) {
+  async subscribe(@Request() req, @Body() body: { planId: string }) {
     return this.investmentsService.createInvestment(
       req.user.id,
       body.planId,
+    );
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('upgrade')
+  async requestUpgrade(
+    @Request() req,
+    @Body() body: { currentInvestmentId: string; targetPlanId: string },
+  ) {
+    return this.investmentsService.requestUpgrade(
+      req.user.id,
+      body.currentInvestmentId,
+      body.targetPlanId,
+    );
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('withdraw-capital')
+  async requestCapitalWithdrawal(
+    @Request() req,
+    @Body() body: { investmentId: string; amount: number },
+  ) {
+    return this.investmentsService.requestCapitalWithdrawal(
+      req.user.id,
+      body.investmentId,
       Number(body.amount),
     );
   }
@@ -54,14 +79,22 @@ export class InvestmentsController {
     @Body()
     body: {
       title: string;
-      min_amount: number;
-      max_amount: number;
+      amount?: number;
+      min_amount?: number;
+      max_amount?: number;
       monthly_return_percent: number;
       duration_months?: number;
       is_lifetime?: boolean;
     },
   ) {
-    return this.investmentsService.createPlan(body);
+    const amt = Number(body.amount || body.min_amount || 0);
+    return this.investmentsService.createPlan({
+      title: body.title,
+      amount: amt,
+      monthly_return_percent: Number(body.monthly_return_percent),
+      duration_months: body.duration_months,
+      is_lifetime: body.is_lifetime,
+    });
   }
 
   @UseGuards(AdminJwtGuard)

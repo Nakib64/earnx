@@ -18,6 +18,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         `ALTER TABLE "InvestmentPlan" ADD COLUMN IF NOT EXISTS "is_lifetime" BOOLEAN DEFAULT false;`,
       );
       await this.$executeRawUnsafe(
+        `ALTER TABLE "InvestmentPlan" ADD COLUMN IF NOT EXISTS "amount" DECIMAL(12, 2) DEFAULT 0;`,
+      );
+      await this.$executeRawUnsafe(
         `ALTER TABLE "InvestmentPlan" ALTER COLUMN "duration_months" DROP NOT NULL;`,
       );
     } catch (err) {}
@@ -25,6 +28,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     try {
       await this.$executeRawUnsafe(
         `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "is_lifetime" BOOLEAN DEFAULT false;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "request_type" TEXT DEFAULT 'NEW';`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "pending_plan_id" TEXT;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "pending_amount" DECIMAL(12, 2);`,
       );
       await this.$executeRawUnsafe(
         `ALTER TABLE "UserInvestment" ALTER COLUMN "max_payouts" DROP NOT NULL;`,

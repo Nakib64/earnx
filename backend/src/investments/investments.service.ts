@@ -21,7 +21,7 @@ export class InvestmentsService {
   async getActivePlans() {
     return this.prisma.investmentPlan.findMany({
       where: { is_active: true },
-      orderBy: { min_amount: 'asc' },
+      orderBy: { amount: 'asc' },
     });
   }
 
@@ -33,14 +33,13 @@ export class InvestmentsService {
 
   async createPlan(data: {
     title: string;
-    min_amount: number;
-    max_amount: number;
+    amount: number;
     monthly_return_percent: number;
     duration_months?: number;
     is_lifetime?: boolean;
   }) {
-    if (data.min_amount <= 0 || data.max_amount < data.min_amount) {
-      throw new BadRequestException('Invalid min or max investment amounts');
+    if (data.amount <= 0) {
+      throw new BadRequestException('Invalid package investment amount');
     }
     if (data.monthly_return_percent <= 0 || data.monthly_return_percent > 100) {
       throw new BadRequestException('Monthly return percentage must be between 0 and 100');
@@ -51,8 +50,9 @@ export class InvestmentsService {
     return this.prisma.investmentPlan.create({
       data: {
         title: data.title,
-        min_amount: new Prisma.Decimal(data.min_amount),
-        max_amount: new Prisma.Decimal(data.max_amount),
+        amount: new Prisma.Decimal(data.amount),
+        min_amount: new Prisma.Decimal(data.amount),
+        max_amount: new Prisma.Decimal(data.amount),
         monthly_return_percent: new Prisma.Decimal(data.monthly_return_percent),
         duration_months: isLifetime ? null : (data.duration_months || 12),
         is_lifetime: isLifetime,
@@ -62,8 +62,7 @@ export class InvestmentsService {
 
   async updatePlan(id: string, data: Partial<{
     title: string;
-    min_amount: number;
-    max_amount: number;
+    amount: number;
     monthly_return_percent: number;
     duration_months: number;
     is_lifetime: boolean;
@@ -74,8 +73,11 @@ export class InvestmentsService {
 
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = data.title;
-    if (data.min_amount !== undefined) updateData.min_amount = new Prisma.Decimal(data.min_amount);
-    if (data.max_amount !== undefined) updateData.max_amount = new Prisma.Decimal(data.max_amount);
+    if (data.amount !== undefined) {
+      updateData.amount = new Prisma.Decimal(data.amount);
+      updateData.min_amount = new Prisma.Decimal(data.amount);
+      updateData.max_amount = new Prisma.Decimal(data.amount);
+    }
     if (data.monthly_return_percent !== undefined)
       updateData.monthly_return_percent = new Prisma.Decimal(data.monthly_return_percent);
     if (data.is_lifetime !== undefined) {
@@ -97,10 +99,10 @@ export class InvestmentsService {
   }
 
   // ==========================================
-  // USER INVESTMENTS
+  // USER INVESTMENTS & UPGRADES / WITHDRAWALS
   // ==========================================
 
-  async createInvestment(userId: string, planId: string, amount: number) {
+  async createInvestment(userId: string, planId: string, amount?: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -109,39 +111,93 @@ export class InvestmentsService {
       throw new BadRequestException('Invalid or inactive investment plan');
     }
 
-    const minAmt = Number(plan.min_amount);
-    const maxAmt = Number(plan.max_amount);
-    if (amount < minAmt || amount > maxAmt) {
-      throw new BadRequestException(
-        `Investment amount must be between ৳${minAmt} and ৳${maxAmt} for ${plan.title}`,
-      );
-    }
-
+    const planAmount = Number(plan.amount) > 0 ? Number(plan.amount) : Number(plan.min_amount);
     const returnPercent = Number(plan.monthly_return_percent);
-    const monthlyPayout = (amount * returnPercent) / 100;
+    const monthlyPayout = (planAmount * returnPercent) / 100;
     const isLifetime = plan.is_lifetime || false;
 
-    // No wallet transaction needed - managed by admin upon approval
     return this.prisma.userInvestment.create({
       data: {
         user_id: userId,
         plan_id: planId,
-        amount: new Prisma.Decimal(amount),
+        amount: new Prisma.Decimal(planAmount),
         monthly_return_percent: new Prisma.Decimal(returnPercent),
         monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
-        status: RequestStatus.PENDING, // Submitted for Admin approval & management
+        status: RequestStatus.PENDING,
+        request_type: 'NEW',
         total_payouts_made: 0,
         max_payouts: isLifetime ? null : (plan.duration_months || 12),
         is_lifetime: isLifetime,
       },
+      include: { plan: true, pending_plan: true },
+    });
+  }
+
+  async requestUpgrade(userId: string, currentInvestmentId: string, targetPlanId: string) {
+    const inv = await this.prisma.userInvestment.findFirst({
+      where: { id: currentInvestmentId, user_id: userId },
       include: { plan: true },
+    });
+    if (!inv) throw new NotFoundException('Active investment record not found');
+    if (inv.status === RequestStatus.PENDING) {
+      throw new BadRequestException('You already have a pending request on this investment.');
+    }
+
+    const targetPlan = await this.prisma.investmentPlan.findUnique({ where: { id: targetPlanId } });
+    if (!targetPlan || !targetPlan.is_active) {
+      throw new BadRequestException('Target upgrade package is invalid or inactive.');
+    }
+
+    const currentAmt = Number(inv.amount);
+    const targetAmt = Number(targetPlan.amount) > 0 ? Number(targetPlan.amount) : Number(targetPlan.min_amount);
+
+    if (targetAmt <= currentAmt) {
+      throw new BadRequestException('Target package must be higher than your current invested amount.');
+    }
+
+    const remainingToPay = targetAmt - currentAmt;
+
+    return this.prisma.userInvestment.update({
+      where: { id: currentInvestmentId },
+      data: {
+        request_type: 'UPGRADE',
+        pending_plan_id: targetPlanId,
+        pending_amount: new Prisma.Decimal(remainingToPay),
+        status: RequestStatus.PENDING,
+      },
+      include: { plan: true, pending_plan: true },
+    });
+  }
+
+  async requestCapitalWithdrawal(userId: string, investmentId: string, withdrawAmount: number) {
+    const inv = await this.prisma.userInvestment.findFirst({
+      where: { id: investmentId, user_id: userId },
+    });
+    if (!inv) throw new NotFoundException('Active investment record not found');
+    if (inv.status === RequestStatus.PENDING) {
+      throw new BadRequestException('You already have a pending request on this investment.');
+    }
+
+    const currentAmt = Number(inv.amount);
+    if (withdrawAmount <= 0 || withdrawAmount > currentAmt) {
+      throw new BadRequestException(`Withdrawal amount must be between ৳1 and ৳${currentAmt}`);
+    }
+
+    return this.prisma.userInvestment.update({
+      where: { id: investmentId },
+      data: {
+        request_type: 'WITHDRAWAL',
+        pending_amount: new Prisma.Decimal(withdrawAmount),
+        status: RequestStatus.PENDING,
+      },
+      include: { plan: true, pending_plan: true },
     });
   }
 
   async getUserInvestments(userId: string) {
     return this.prisma.userInvestment.findMany({
       where: { user_id: userId },
-      include: { plan: true },
+      include: { plan: true, pending_plan: true },
       orderBy: { created_at: 'desc' },
     });
   }
@@ -151,29 +207,96 @@ export class InvestmentsService {
       include: {
         user: { select: { id: true, full_name: true, phone: true } },
         plan: true,
+        pending_plan: true,
       },
       orderBy: { created_at: 'desc' },
     });
   }
 
   async approveUserInvestment(id: string) {
-    const inv = await this.prisma.userInvestment.findUnique({ where: { id } });
+    const inv = await this.prisma.userInvestment.findUnique({
+      where: { id },
+      include: { pending_plan: true, plan: true },
+    });
     if (!inv) throw new NotFoundException('Investment record not found');
     if (inv.status !== RequestStatus.PENDING) {
       throw new BadRequestException(`Investment is already ${inv.status}`);
     }
 
     const now = new Date();
-    const nextPayout = new Date();
-    nextPayout.setMonth(now.getMonth() + 1);
+    const nextPayout = inv.next_payout_at || new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+
+    if (inv.request_type === 'UPGRADE' && inv.pending_plan_id && inv.pending_plan) {
+      const targetPlan = inv.pending_plan;
+      const targetAmt = Number(targetPlan.amount) > 0 ? Number(targetPlan.amount) : Number(targetPlan.min_amount);
+      const returnPercent = Number(targetPlan.monthly_return_percent);
+      const monthlyPayout = (targetAmt * returnPercent) / 100;
+      const isLifetime = targetPlan.is_lifetime || false;
+
+      return this.prisma.userInvestment.update({
+        where: { id },
+        data: {
+          plan_id: inv.pending_plan_id,
+          amount: new Prisma.Decimal(targetAmt),
+          monthly_return_percent: new Prisma.Decimal(returnPercent),
+          monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
+          is_lifetime: isLifetime,
+          max_payouts: isLifetime ? null : (targetPlan.duration_months || 12),
+          status: RequestStatus.APPROVED,
+          request_type: 'NEW',
+          pending_plan_id: null,
+          pending_amount: null,
+          next_payout_at: nextPayout,
+        },
+        include: { user: true, plan: true, pending_plan: true },
+      });
+    }
+
+    if (inv.request_type === 'WITHDRAWAL' && inv.pending_amount) {
+      const withdrawAmt = Number(inv.pending_amount);
+      const newAmount = Number(inv.amount) - withdrawAmt;
+
+      if (newAmount <= 0) {
+        return this.prisma.userInvestment.update({
+          where: { id },
+          data: {
+            amount: new Prisma.Decimal(0),
+            monthly_payout_amount: new Prisma.Decimal(0),
+            status: RequestStatus.REJECTED,
+            request_type: 'NEW',
+            pending_amount: null,
+            next_payout_at: null,
+          },
+          include: { user: true, plan: true, pending_plan: true },
+        });
+      }
+
+      const returnPercent = Number(inv.monthly_return_percent);
+      const newMonthlyPayout = (newAmount * returnPercent) / 100;
+
+      return this.prisma.userInvestment.update({
+        where: { id },
+        data: {
+          amount: new Prisma.Decimal(newAmount),
+          monthly_payout_amount: new Prisma.Decimal(newMonthlyPayout),
+          status: RequestStatus.APPROVED,
+          request_type: 'NEW',
+          pending_amount: null,
+        },
+        include: { user: true, plan: true, pending_plan: true },
+      });
+    }
 
     return this.prisma.userInvestment.update({
       where: { id },
       data: {
         status: RequestStatus.APPROVED,
+        request_type: 'NEW',
+        pending_plan_id: null,
+        pending_amount: null,
         next_payout_at: nextPayout,
       },
-      include: { user: true, plan: true },
+      include: { user: true, plan: true, pending_plan: true },
     });
   }
 
@@ -184,9 +307,23 @@ export class InvestmentsService {
       throw new BadRequestException(`Investment is already ${inv.status}`);
     }
 
+    if (inv.request_type === 'UPGRADE' || inv.request_type === 'WITHDRAWAL') {
+      return this.prisma.userInvestment.update({
+        where: { id },
+        data: {
+          status: RequestStatus.APPROVED,
+          request_type: 'NEW',
+          pending_plan_id: null,
+          pending_amount: null,
+        },
+        include: { user: true, plan: true },
+      });
+    }
+
     return this.prisma.userInvestment.update({
       where: { id },
       data: { status: RequestStatus.REJECTED },
+      include: { user: true, plan: true },
     });
   }
 
@@ -279,23 +416,19 @@ export class InvestmentsService {
   // ADMIN MANUAL ASSIGNMENT & TARGETED PAYOUTS
   // ==========================================
 
-  async createInvestmentForUser(userId: string, planId: string, amount: number) {
+  async createInvestmentForUser(userId: string, planId: string, customAmount?: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
     const plan = await this.prisma.investmentPlan.findUnique({ where: { id: planId } });
     if (!plan) throw new NotFoundException('Investment plan not found');
 
-    const minAmt = Number(plan.min_amount);
-    const maxAmt = Number(plan.max_amount);
-    if (amount < minAmt || amount > maxAmt) {
-      throw new BadRequestException(
-        `Investment amount must be between ৳${minAmt} and ৳${maxAmt} for ${plan.title}`,
-      );
-    }
+    const planAmt = (customAmount && customAmount > 0)
+      ? customAmount
+      : (Number(plan.amount) > 0 ? Number(plan.amount) : Number(plan.min_amount));
 
     const returnPercent = Number(plan.monthly_return_percent);
-    const monthlyPayout = (amount * returnPercent) / 100;
+    const monthlyPayout = (planAmt * returnPercent) / 100;
     const isLifetime = plan.is_lifetime || false;
 
     const now = new Date();
@@ -306,10 +439,11 @@ export class InvestmentsService {
       data: {
         user_id: userId,
         plan_id: planId,
-        amount: new Prisma.Decimal(amount),
+        amount: new Prisma.Decimal(planAmt),
         monthly_return_percent: new Prisma.Decimal(returnPercent),
         monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
         status: RequestStatus.APPROVED, // Direct active status when assigned by Admin
+        request_type: 'NEW',
         total_payouts_made: 0,
         max_payouts: isLifetime ? null : (plan.duration_months || 12),
         is_lifetime: isLifetime,

@@ -43,8 +43,7 @@ export default function AdminInvestmentsPage() {
   // Form state for creating plans
   const [formData, setFormData] = useState({
     title: '',
-    min_amount: 10000,
-    max_amount: 50000,
+    amount: 10000,
     monthly_return_percent: 5,
     duration_months: 12,
     is_lifetime: false,
@@ -158,7 +157,11 @@ export default function AdminInvestmentsPage() {
     const res = await apiFetch('/investments/admin/plans', {
       method: 'POST',
       isAdmin: true,
-      body: JSON.stringify(formData),
+      body: JSON.stringify({
+        ...formData,
+        min_amount: formData.amount,
+        max_amount: formData.amount,
+      }),
     });
 
     if (res.success) {
@@ -340,15 +343,32 @@ export default function AdminInvestmentsPage() {
     },
     {
       key: 'plan',
-      header: 'Plan',
+      header: 'Plan / Request Details',
       render: (inv) => (
         <div>
-          <span className="font-medium text-slate-900">{inv.plan?.title || 'Custom Plan'}</span>
+          <span className="font-semibold text-slate-900">{inv.plan?.title || 'Custom Plan'}</span>
           {inv.is_lifetime || inv.plan?.is_lifetime ? (
             <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
               Lifetime
             </span>
           ) : null}
+          {inv.status === RequestStatus.PENDING && (
+            <div className="mt-1">
+              {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
+                <span className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md inline-block">
+                  Upgrade to {inv.pending_plan.title} (Paid Remaining: ৳{Number(inv.pending_amount || 0).toLocaleString()})
+                </span>
+              ) : inv.request_type === 'WITHDRAWAL' ? (
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md inline-block">
+                  Withdraw Capital: ৳{Number(inv.pending_amount || 0).toLocaleString()}
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md inline-block">
+                  New Package Subscription
+                </span>
+              )}
+            </div>
+          )}
         </div>
       ),
     },
@@ -488,7 +508,7 @@ export default function AdminInvestmentsPage() {
               </div>
 
               <div className="text-xs text-slate-600 space-y-1">
-                <p>Range: ৳{Number(plan.min_amount).toLocaleString()} - ৳{Number(plan.max_amount).toLocaleString()}</p>
+                <p>Package Amount: <span className="font-bold text-slate-900">৳{Number(plan.amount || plan.min_amount).toLocaleString()}</span></p>
                 <p>
                   Duration:{' '}
                   {plan.is_lifetime ? (
@@ -821,27 +841,15 @@ export default function AdminInvestmentsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label>Min Amount (৳)</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.min_amount}
-                    onChange={(e) => setFormData({ ...formData, min_amount: Number(e.target.value) })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label>Max Amount (৳)</label>
-                  <input
-                    type="number"
-                    required
-                    value={formData.max_amount}
-                    onChange={(e) => setFormData({ ...formData, max_amount: Number(e.target.value) })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
-                  />
-                </div>
+              <div>
+                <label>Package Amount (৳)</label>
+                <input
+                  type="number"
+                  required
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                />
               </div>
 
               <div>
