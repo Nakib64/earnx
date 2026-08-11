@@ -338,17 +338,25 @@ export class InvestmentsService {
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
     this.logger.log('Executing automated monthly investment return check...');
-    await this.processMonthlyPayouts();
+    await this.processMonthlyPayouts(false);
   }
 
-  async processMonthlyPayouts() {
+  async processMonthlyPayouts(force = false) {
     const now = new Date();
 
+    const whereClause: Prisma.UserInvestmentWhereInput = {
+      status: RequestStatus.APPROVED,
+    };
+
+    if (!force) {
+      whereClause.OR = [
+        { next_payout_at: null },
+        { next_payout_at: { lte: now } },
+      ];
+    }
+
     const dueInvestments = await this.prisma.userInvestment.findMany({
-      where: {
-        status: RequestStatus.APPROVED,
-        next_payout_at: { lte: now },
-      },
+      where: whereClause,
       include: { user: true, plan: true },
     });
 

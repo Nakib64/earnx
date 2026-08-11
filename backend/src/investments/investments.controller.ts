@@ -156,6 +156,6 @@ export class InvestmentsController {
   @UseGuards(AdminJwtGuard)
   @Post('admin/trigger-payouts')
   async triggerPayouts() {
-    return this.investmentsService.processMonthlyPayouts();
+    return this.investmentsService.processMonthlyPayouts(true);
   }
 }
