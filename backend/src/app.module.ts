@@ -12,6 +12,7 @@ import { SystemConfigModule } from './system-config/system-config.module';
 import { PremiumModule } from './premium/premium.module';
 import { InvestmentsModule } from './investments/investments.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { CoinsModule } from './coins/coins.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     PremiumModule,
     InvestmentsModule,
     LeaderboardModule,
+    CoinsModule,
   ],
 })
 export class AppModule {}

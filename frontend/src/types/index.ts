@@ -23,11 +23,19 @@ export enum TransactionType {
   INVESTMENT_DEPOSIT = 'INVESTMENT_DEPOSIT',
   INVESTMENT_PAYOUT = 'INVESTMENT_PAYOUT',
   BALANCE_TRANSFER = 'BALANCE_TRANSFER',
+  COIN_PURCHASE = 'COIN_PURCHASE',
 }
 
 export enum CommissionType {
   ACTIVATION = 'ACTIVATION',
   PREMIUM = 'PREMIUM',
+}
+
+export enum CoinTransactionType {
+  PURCHASE = 'PURCHASE',
+  PREMIUM_LOCKED_REWARD = 'PREMIUM_LOCKED_REWARD',
+  PREMIUM_UNLOCKED = 'PREMIUM_UNLOCKED',
+  ADMIN_ADJUSTMENT = 'ADMIN_ADJUSTMENT',
 }
 
 // ==========================================
@@ -59,6 +67,10 @@ export interface User {
   referred_by_id?: string | null;
   status: UserStatus;
   wallet_balance: number | string;
+  coin_balance?: number | string;
+  locked_coin_balance?: number | string;
+  premium_coins_granted?: boolean;
+  is_premium_coins_unlocked?: boolean;
   designation_id?: string | null;
   is_premium?: boolean;
   premium_started_at?: string | null;
@@ -69,6 +81,32 @@ export interface User {
   referred_by?: UserSummary | null;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface CoinTransaction {
+  id: string;
+  user_id: string;
+  type: CoinTransactionType;
+  amount: number | string;
+  coins_before: number | string;
+  coins_after: number | string;
+  cost_bdt?: number | string | null;
+  description?: string | null;
+  created_at: string;
+}
+
+export interface CoinInfo {
+  coin_balance: number;
+  locked_coin_balance: number;
+  wallet_balance: number;
+  is_premium: boolean;
+  premium_coins_granted: boolean;
+  is_premium_coins_unlocked: boolean;
+  active_referral_count: number;
+  required_referral_count: number;
+  coin_price: number;
+  premium_free_coins: number;
+  can_unlock: boolean;
 }
 
 export interface UserSummary {

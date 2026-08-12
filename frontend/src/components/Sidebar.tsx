@@ -18,6 +18,7 @@ import {
   LogOut,
   Star,
   ChevronDown,
+  Coins,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -47,6 +48,7 @@ export default function Sidebar() {
 
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
+    { href: '/dashboard/coins', label: 'Coins Wallet', icon: Coins },
     { href: '/dashboard/investments', label: 'Invest & Grow', icon: TrendingUp },
     { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
@@ -56,6 +58,7 @@ export default function Sidebar() {
 
   const adminTopItems: LinkItem[] = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/admin/settings', label: 'Global Settings', icon: Settings },

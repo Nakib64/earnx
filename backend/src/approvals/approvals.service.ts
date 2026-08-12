@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CommissionService } from '../commissions/commission.service';
 import { WalletService } from '../wallets/wallet.service';
+import { CoinsService } from '../coins/coins.service';
 import { RequestStatus, UserStatus, CommissionType, TransactionType, Prisma } from '@prisma/client';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class ApprovalsService {
     private readonly prisma: PrismaService,
     private readonly commissionService: CommissionService,
     private readonly walletService: WalletService,
+    private readonly coinsService: CoinsService,
   ) { }
 
   // ==========================================
@@ -106,6 +108,11 @@ export class ApprovalsService {
         CommissionType.ACTIVATION,
         tx,
       );
+
+      // 4. Check & unlock premium bonus coins for referrer if active referral count target met
+      if (request.referrer_id) {
+        await this.coinsService.checkAndUnlockForReferrer(request.referrer_id, tx);
+      }
 
       return { request: updatedRequest, payouts };
     }, { maxWait: 10000, timeout: 30000 });
@@ -199,6 +206,9 @@ export class ApprovalsService {
           last_premium_payout_at: null,
         },
       });
+
+      // Grant locked premium coins to user
+      await this.coinsService.grantLockedCoinsOnPremium(request.user_id, tx);
 
       // Distribute Premium commissions payout
       const payouts = await this.commissionService.distributeCommissions(

@@ -20,6 +20,9 @@ interface PremiumUser {
 
 export default function AdminSettingsPage() {
   const [weeklyPayout, setWeeklyPayout] = useState('100');
+  const [coinPrice, setCoinPrice] = useState('10');
+  const [premiumFreeCoins, setPremiumFreeCoins] = useState('100');
+  const [requiredReferrals, setRequiredReferrals] = useState('10');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [triggering, setTriggering] = useState(false);
@@ -40,8 +43,11 @@ export default function AdminSettingsPage() {
   const fetchSettings = async () => {
     setLoading(true);
     const res = await apiFetch<SystemConfigMap>('/admin/system-config', { isAdmin: true });
-    if (res.success && res.data && res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT) {
-      setWeeklyPayout(res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT);
+    if (res.success && res.data) {
+      if (res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT) setWeeklyPayout(res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT);
+      if (res.data.COIN_PRICE) setCoinPrice(res.data.COIN_PRICE);
+      if (res.data.PREMIUM_FREE_COINS) setPremiumFreeCoins(res.data.PREMIUM_FREE_COINS);
+      if (res.data.PREMIUM_FREE_COINS_REQUIRED_REFERRALS) setRequiredReferrals(res.data.PREMIUM_FREE_COINS_REQUIRED_REFERRALS);
     }
     setLoading(false);
   };
@@ -83,19 +89,34 @@ export default function AdminSettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     setMessage(null);
-    const res = await apiFetch('/admin/system-config', {
-      method: 'POST',
-      isAdmin: true,
-      body: JSON.stringify({
-        key: 'PREMIUM_WEEKLY_PAYOUT_AMOUNT',
-        value: weeklyPayout,
+    const requests = [
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'PREMIUM_WEEKLY_PAYOUT_AMOUNT', value: weeklyPayout }),
       }),
-    });
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'COIN_PRICE', value: coinPrice }),
+      }),
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'PREMIUM_FREE_COINS', value: premiumFreeCoins }),
+      }),
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'PREMIUM_FREE_COINS_REQUIRED_REFERRALS', value: requiredReferrals }),
+      }),
+    ];
 
-    if (res.success) {
-      setMessage({ type: 'success', text: 'Premium Weekly Payout Amount updated successfully!' });
+    const results = await Promise.all(requests);
+    if (results.every(r => r.success)) {
+      setMessage({ type: 'success', text: 'All Global Settings updated successfully!' });
     } else {
-      setMessage({ type: 'error', text: res.error?.message || 'Failed to update settings' });
+      setMessage({ type: 'error', text: 'Failed to update some settings' });
     }
     setSaving(false);
   };
