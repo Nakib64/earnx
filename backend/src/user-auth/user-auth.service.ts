@@ -14,19 +14,22 @@ export class UserAuthService {
   ) {}
 
   private async generateUniqueReferralCode(): Promise<string> {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const totalUsers = await this.prisma.user.count();
+    let nextNum = totalUsers + 1;
     let isUnique = false;
     let code = '';
 
     while (!isUnique) {
-      code = 'EX';
-      for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
+      const padded = String(nextNum).padStart(4, '0');
+      code = `EX-${padded}`;
       const existing = await this.prisma.user.findUnique({
         where: { referral_code: code },
       });
-      if (!existing) isUnique = true;
+      if (!existing) {
+        isUnique = true;
+      } else {
+        nextNum++;
+      }
     }
     return code;
   }
