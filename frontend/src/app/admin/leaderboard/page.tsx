@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import Link from 'next/link';
 import { apiFetch } from '../../../lib/api';
 import { LeaderboardEntry } from '../../../types';
-import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 import {
   Trophy,
@@ -11,13 +11,15 @@ import {
   Trash2,
   Edit2,
   Upload,
-  Sparkles,
   Search,
+  X,
+  Award,
+  GripVertical,
+  ArrowUpDown,
 } from 'lucide-react';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-import { useDebounce } from '../../../hooks/useDebounce';
 
 export default function AdminLeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -28,6 +30,11 @@ export default function AdminLeaderboardPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Drag and Drop State
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [savingReorder, setSavingReorder] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -48,23 +55,11 @@ export default function AdminLeaderboardPage() {
     setLoading(true);
     const res = await apiFetch<LeaderboardEntry[]>('/leaderboard/admin/all', { isAdmin: true });
     if (res.success && res.data) {
-      setEntries(res.data);
+      // Ensure ordered by rank asc
+      const sorted = [...res.data].sort((a, b) => a.rank - b.rank);
+      setEntries(sorted);
     }
     setLoading(false);
-  };
-
-  const handleSeed = async () => {
-    setMessage(null);
-    const res = await apiFetch<{ message: string }>('/leaderboard/admin/seed', {
-      method: 'POST',
-      isAdmin: true,
-    });
-    if (res.success && res.data) {
-      setMessage({ type: 'success', text: res.data.message });
-      fetchLeaderboard();
-    } else {
-      setMessage({ type: 'error', text: res.error?.message || 'Failed to seed leaderboard' });
-    }
   };
 
   const handleOpenAdd = () => {
@@ -168,105 +163,92 @@ export default function AdminLeaderboardPage() {
     }
   };
 
+  // Drag and Drop reordering logic
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = async (dropIndex: number) => {
+    if (draggedIndex === null || draggedIndex === dropIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Reorder local array
+    const updated = [...entries];
+    const [movedItem] = updated.splice(draggedIndex, 1);
+    updated.splice(dropIndex, 0, movedItem);
+
+    // Re-assign ranks 1..N based on new array order
+    const reordered = updated.map((item, idx) => ({
+      ...item,
+      rank: idx + 1,
+    }));
+
+    setEntries(reordered);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+
+    // Save to backend
+    setSavingReorder(true);
+    const orders = reordered.map((item) => ({ id: item.id, rank: item.rank }));
+    const res = await apiFetch('/leaderboard/admin/reorder', {
+      method: 'POST',
+      isAdmin: true,
+      body: JSON.stringify({ orders }),
+    });
+
+    if (res.success) {
+      setMessage({ type: 'success', text: 'Leaderboard ranking updated successfully!' });
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to save reordered ranks' });
+      fetchLeaderboard(); // Revert on failure
+    }
+    setSavingReorder(false);
+  };
+
   const filteredEntries = entries.filter((e) =>
     e.name.toLowerCase().includes(debouncedSearch.toLowerCase()),
   );
 
-  const leaderboardColumns: ColumnDef<LeaderboardEntry>[] = [
-    {
-      key: 'rank',
-      header: 'Rank',
-      render: (item) => <span className="font-bold text-slate-900">#{item.rank}</span>,
-    },
-    {
-      key: 'name',
-      header: 'Photo & Name',
-      render: (item) => (
-        <div className="flex items-center space-x-3">
-          {item.photo_url ? (
-            <img
-              src={
-                item.photo_url.startsWith('http')
-                  ? item.photo_url
-                  : `${API_BASE_URL.replace('/api', '')}${item.photo_url}`
-              }
-              alt={item.name}
-              className="w-9 h-9 rounded-full object-cover border border-slate-200"
-            />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
-              {item.name[0]}
-            </div>
-          )}
-          <span className="font-semibold text-slate-900">{item.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'phone',
-      header: 'Phone',
-      render: (item) => <span className="text-slate-500">{item.phone || 'N/A'}</span>,
-    },
-    {
-      key: 'invested_amount',
-      header: 'Invested Amount',
-      render: (item) => <span className="font-bold text-sky-600">৳{Number(item.invested_amount).toLocaleString()}</span>,
-    },
-    {
-      key: 'profit_earned',
-      header: 'Profit Earned',
-      render: (item) => <span className="font-bold text-emerald-600">৳{Number(item.profit_earned).toLocaleString()}</span>,
-    },
-    {
-      key: 'badge',
-      header: 'Badge',
-      render: (item) => (
-        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-          {item.badge || 'Member'}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      header: 'Actions',
-      align: 'right',
-      render: (item) => (
-        <div className="flex items-center justify-end space-x-2">
-          <button onClick={() => handleOpenEdit(item)} className="p-1 text-sky-600 hover:text-sky-800">
-            <Edit2 className="w-4 h-4" />
-          </button>
-          <button onClick={() => handleDelete(item.id)} className="p-1 text-rose-500 hover:text-rose-700">
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center space-x-2">
-            <Trophy className="w-6 h-6 text-amber-500" />
-            <span>Top 100 Leaderboard Manager</span>
-          </h1>
-          <p className="text-xs text-slate-500">Upload user photos, adjust rankings, and manage leaderboards.</p>
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+      {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
+
+      {/* Top Banner — Coins Page Theme */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Trophy className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+              Top 100 Leaderboard Manager
+            </h1>
+            <p className="text-xs text-emerald-100/80 font-medium">
+              Drag rows to adjust ranking, upload photos, and manage top earners.
+            </p>
+          </div>
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+            {entries.length} Entries
+          </span>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={handleSeed}
-            className="py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Seed Top 100 Mock Entries</span>
-          </button>
-
+        {/* Action Buttons */}
+        <div className="border-t border-emerald-700/60 pt-3 flex flex-wrap gap-2">
           <button
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md"
+            className="py-2 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Entry</span>
@@ -274,31 +256,170 @@ export default function AdminLeaderboardPage() {
         </div>
       </div>
 
-      {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
+      {/* Main Leaderboard Table Section */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <Award className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center space-x-2">
+                <span>Leaderboard Rankings</span>
+                {savingReorder && (
+                  <span className="text-xs text-primary font-mono animate-pulse">Saving rank order...</span>
+                )}
+              </h2>
+              <p className="text-[11px] font-medium text-slate-400">
+                {isSearching ? 'Search filtering active (Drag to reorder disabled during search)' : 'Drag rows using the handle to adjust ranks'}
+              </p>
+            </div>
+          </div>
 
-      {/* Search & Entries Table using DataTable */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-900">Leaderboard Records ({entries.length})</h2>
-          <div className="relative min-w-[240px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          {/* Search Input */}
+          <div className="relative w-full sm:w-64">
+            <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-2.5" />
             <input
               type="text"
               placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
             />
           </div>
         </div>
 
-        <DataTable<LeaderboardEntry>
-          data={filteredEntries}
-          columns={leaderboardColumns}
-          keyExtractor={(item) => item.id}
-          loading={loading}
-          emptyMessage="No leaderboard entries found."
-        />
+        {/* Draggable Table */}
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full text-left text-[10px]">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[9px]">
+              <tr>
+                <th className="px-2 py-2 w-8 text-center"></th>
+                <th className="px-2.5 py-2">Rank</th>
+                <th className="px-2.5 py-2">Member</th>
+                <th className="px-2.5 py-2 hidden sm:table-cell">Invested</th>
+                <th className="px-2.5 py-2 hidden sm:table-cell">Profit</th>
+                <th className="px-2.5 py-2 hidden sm:table-cell">Badge</th>
+                <th className="px-2.5 py-2 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-slate-400">
+                    Loading leaderboard entries...
+                  </td>
+                </tr>
+              ) : filteredEntries.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-slate-400">
+                    No leaderboard entries found.
+                  </td>
+                </tr>
+              ) : (
+                filteredEntries.map((item, index) => {
+                  const isDragging = draggedIndex === index;
+                  const isOver = dragOverIndex === index;
+
+                  return (
+                    <tr
+                      key={item.id}
+                      draggable={!isSearching}
+                      onDragStart={() => handleDragStart(index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDrop={() => handleDrop(index)}
+                      className={`transition-all ${
+                        isDragging
+                          ? 'opacity-40 bg-emerald-100/50'
+                          : isOver
+                          ? 'bg-emerald-50 border-y-2 border-primary'
+                          : 'hover:bg-slate-50'
+                      }`}
+                    >
+                      {/* Drag Handle */}
+                      <td className="px-2 py-2 text-center text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing">
+                        <GripVertical className="w-4 h-4 mx-auto" />
+                      </td>
+
+                      {/* Rank */}
+                      <td className="px-2.5 py-2">
+                        <span className="font-extrabold text-slate-900 font-mono text-xs">
+                          #{item.rank}
+                        </span>
+                      </td>
+
+                      {/* Member Photo & Name */}
+                      <td className="px-2.5 py-2">
+                        <div className="flex items-center space-x-2.5">
+                          {item.photo_url ? (
+                            <img
+                              src={
+                                item.photo_url.startsWith('http')
+                                  ? item.photo_url
+                                  : `${API_BASE_URL.replace('/api', '')}${item.photo_url}`
+                              }
+                              alt={item.name}
+                              className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-cover border border-slate-200 shrink-0"
+                            />
+                          ) : (
+                            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center font-extrabold text-primary text-xs shrink-0">
+                              {item.name[0]}
+                            </div>
+                          )}
+                          <div className="truncate max-w-[120px] sm:max-w-[180px]">
+                            <p className="font-extrabold text-slate-900 text-xs truncate">{item.name}</p>
+                            <p className="text-[9px] text-slate-500 font-mono">{item.phone || 'N/A'}</p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Invested */}
+                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                        <span className="font-extrabold text-primary font-mono text-xs">
+                          ৳{Number(item.invested_amount).toLocaleString()}
+                        </span>
+                      </td>
+
+                      {/* Profit */}
+                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                        <span className="font-extrabold text-slate-900 font-mono text-xs">
+                          ৳{Number(item.profit_earned).toLocaleString()}
+                        </span>
+                      </td>
+
+                      {/* Badge */}
+                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                        <span className="px-2 py-0.5 rounded-lg text-[9px] font-extrabold bg-amber-50 text-[#854D0E] border border-amber-200 inline-block truncate max-w-[90px]">
+                          {item.badge || 'Member'}
+                        </span>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-2.5 py-2 text-right">
+                        <div className="flex items-center justify-end space-x-1">
+                          <button
+                            onClick={() => handleOpenEdit(item)}
+                            title="Edit Entry"
+                            className="p-1.5 text-primary hover:bg-emerald-50 rounded-lg transition-colors"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            title="Delete Entry"
+                            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Add / Edit Modal */}
@@ -306,25 +427,32 @@ export default function AdminLeaderboardPage() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100"
+            className="bg-white rounded-2xl max-w-lg w-full p-5 sm:p-6 space-y-5 shadow-xl border border-slate-200/90 max-h-[90vh] overflow-y-auto"
           >
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-slate-900">
-                {editingId ? 'Edit Leaderboard Entry' : 'New Leaderboard Entry'}
-              </h3>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-black text-slate-900">
+                  {editingId ? 'Edit Leaderboard Entry' : 'New Leaderboard Entry'}
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs font-bold text-slate-700">
+            <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label>Rank Position (1 - 100)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                    Rank Position (1 - 100)
+                  </label>
                   <input
                     type="number"
                     required
@@ -332,44 +460,49 @@ export default function AdminLeaderboardPage() {
                     max={100}
                     value={formData.rank}
                     onChange={(e) => setFormData({ ...formData, rank: Number(e.target.value) })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
                   />
                 </div>
-                <div>
-                  <label>Badge / Title</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                    Badge / Title
+                  </label>
                   <input
                     type="text"
+                    placeholder="e.g. VIP Investor"
                     value={formData.badge}
                     onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
                 </div>
               </div>
 
-              <div>
-                <label>Full Name</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Full Name</label>
                 <input
                   type="text"
                   required
+                  placeholder="John Doe"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
               </div>
 
-              <div>
-                <label>Phone Number (Optional)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Phone Number <span className="normal-case text-slate-400 font-medium">(Optional)</span></label>
                 <input
                   type="text"
+                  placeholder="01700000000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label>Invested Amount (৳)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Invested (৳)</label>
                   <input
                     type="number"
                     required
@@ -377,11 +510,11 @@ export default function AdminLeaderboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, invested_amount: Number(e.target.value) })
                     }
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
                   />
                 </div>
-                <div>
-                  <label>Profit Earned (৳)</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Profit (৳)</label>
                   <input
                     type="number"
                     required
@@ -389,24 +522,24 @@ export default function AdminLeaderboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, profit_earned: Number(e.target.value) })
                     }
-                    className="w-full mt-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
                   />
                 </div>
               </div>
 
               {/* Photo Upload Input */}
-              <div className="space-y-1">
-                <label>Photo Avatar</label>
-                <div className="flex items-center space-x-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Photo Avatar</label>
+                <div className="flex items-center space-x-2">
                   <input
                     type="text"
                     placeholder="URL or Upload File"
                     value={formData.photo_url}
                     onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
-                    className="flex-1 p-2.5 border border-slate-300 rounded-xl font-medium text-slate-900"
+                    className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
                   />
-                  <label className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer text-slate-700 flex items-center space-x-1">
-                    <Upload className="w-4 h-4" />
+                  <label className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl border border-slate-200 cursor-pointer flex items-center space-x-1.5 transition-colors shrink-0">
+                    <Upload className="w-4 h-4 text-primary" />
                     <span>{uploading ? 'Uploading...' : 'Upload'}</span>
                     <input
                       type="file"
@@ -419,17 +552,17 @@ export default function AdminLeaderboardPage() {
               </div>
             </div>
 
-            <div className="flex space-x-3 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-300 text-sm font-bold text-slate-700"
+                className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl border border-slate-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-bold shadow-md"
+                className="py-2.5 px-4 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs rounded-xl shadow-sm transition-all"
               >
                 {editingId ? 'Update Entry' : 'Create Entry'}
               </button>

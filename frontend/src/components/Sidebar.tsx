@@ -19,6 +19,7 @@ import {
   Star,
   ChevronDown,
   Coins,
+  Globe,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -59,8 +60,10 @@ export default function Sidebar() {
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
+    { href: '/admin/investments/actions', label: 'Investment Actions', icon: UserCheck },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/admin/settings', label: 'Global Settings', icon: Settings },
+    { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
+    { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
     { href: '/admin/users', label: 'Users & Designations', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
   ];
@@ -68,7 +71,6 @@ export default function Sidebar() {
   const approvalItems: LinkItem[] = [
     { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-primary' },
     { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star, accentClass: 'text-[#854D0E]' },
-    { href: '/admin/approvals/withdrawals', label: 'Withdrawals', icon: DollarSign, accentClass: 'text-primary' },
   ];
 
   const adminBottomItems: LinkItem[] = [

@@ -125,6 +125,17 @@ export class LeaderboardService {
     return this.prisma.leaderboardEntry.delete({ where: { id } });
   }
 
+  async reorderEntries(orders: { id: string; rank: number }[]) {
+    return this.prisma.$transaction(
+      orders.map((item) =>
+        this.prisma.leaderboardEntry.update({
+          where: { id: item.id },
+          data: { rank: item.rank },
+        }),
+      ),
+    );
+  }
+
   // Seed default 100 leaderboard entries if empty
   async seedInitialLeaderboard() {
     const count = await this.prisma.leaderboardEntry.count();

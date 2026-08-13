@@ -7,7 +7,7 @@ import { CommissionRule, CommissionType } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
-import { Plus, Trash2, Save } from 'lucide-react';
+import { Plus, Trash2, Save, Layers, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminCommissionsPage() {
@@ -101,7 +101,7 @@ export default function AdminCommissionsPage() {
       key: 'level',
       header: 'Level Depth',
       render: (r) => (
-        <span className="font-bold font-mono text-slate-900">
+        <span className="font-extrabold font-mono text-slate-900 text-xs">
           Level {r.level} {r.type === CommissionType.ACTIVATION ? '(Direct Only)' : '(Tree Level)'}
         </span>
       ),
@@ -110,8 +110,8 @@ export default function AdminCommissionsPage() {
       key: 'amount',
       header: 'Reward Payout',
       render: (r) => (
-        <span className="font-extrabold text-emerald-600 font-mono text-sm">
-          ৳{Number(r.amount).toFixed(2)}
+        <span className="font-black text-[#005A36] font-mono text-xs">
+          ৳{Number(r.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
     },
@@ -122,7 +122,7 @@ export default function AdminCommissionsPage() {
       render: (r) => (
         <button
           onClick={() => setDeletingId(r.id)}
-          className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 transition-colors"
+          className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors"
           title="Delete Rule"
         >
           <Trash2 className="w-4 h-4" />
@@ -132,24 +132,42 @@ export default function AdminCommissionsPage() {
   ];
 
   return (
-    <div className="space-y-6 w-full">
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Commission Rules Matrix</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Define commission rewards for Activation (Direct Referrer Level 1) & Premium Package upgrades (Up to 5 Upper Levels).
-        </p>
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+      {/* Top Banner — Coins Page Theme */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Layers className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+              Commission Rules Matrix
+            </h1>
+            <p className="text-xs text-emerald-100/80 font-medium">
+              Define commission rewards for Activation (Direct Referrer Level 1) & Premium Package upgrades (Up to 5 Upper Levels).
+            </p>
+          </div>
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+            {rules.length} Rules Defined
+          </span>
+        </div>
       </div>
 
       {/* Add / Edit Form */}
-      <div className="glass-card rounded-2xl p-6 space-y-4 bg-white border border-slate-200 w-full">
-        <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
-          <Plus className="w-4 h-4 text-sky-500" />
-          <span>Add or Update Commission Rule</span>
-        </h3>
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+            <Plus className="w-4 h-4" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">
+            Add or Update Commission Rule
+          </h3>
+        </div>
 
-        <form onSubmit={handleSaveRule} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <form onSubmit={handleSaveRule} className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 items-end">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
               Commission Type
             </label>
             <select
@@ -159,7 +177,7 @@ export default function AdminCommissionsPage() {
                 setType(newType);
                 if (newType === CommissionType.ACTIVATION) setLevel(1);
               }}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value={CommissionType.ACTIVATION}>ACTIVATION (Direct Only)</option>
               <option value={CommissionType.PREMIUM}>PREMIUM (Up to 5 Levels)</option>
@@ -167,7 +185,7 @@ export default function AdminCommissionsPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
               Tree Level Depth (1 - 5)
             </label>
             <input
@@ -178,12 +196,12 @@ export default function AdminCommissionsPage() {
               required
               value={level}
               onChange={(e) => setLevel(parseInt(e.target.value, 10))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:opacity-60"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
               Payout Amount (৳)
             </label>
             <input
@@ -194,32 +212,39 @@ export default function AdminCommissionsPage() {
               placeholder="100.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            className="sky-gradient-btn py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5"
+            className="py-2.5 px-5 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs rounded-xl flex items-center justify-center space-x-1.5 shadow-sm transition-all cursor-pointer"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 text-secondary" />
             <span>{saving ? 'Saving...' : 'Save Rule'}</span>
           </button>
         </form>
       </div>
 
       {/* Rules Display Table */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
-        <h3 className="font-bold text-slate-900 text-sm">Active Rules Configured</h3>
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+            <DollarSign className="w-4 h-4" />
+          </div>
+          <h3 className="font-extrabold text-slate-900 text-base">Active Rules Configured</h3>
+        </div>
 
-        <DataTable<CommissionRule>
-          data={rules}
-          columns={columns}
-          keyExtractor={(r) => r.id}
-          loading={loading}
-          emptyMessage="No commission rules defined yet."
-        />
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <DataTable<CommissionRule>
+            data={rules}
+            columns={columns}
+            keyExtractor={(r) => r.id}
+            loading={loading}
+            emptyMessage="No commission rules defined yet."
+          />
+        </div>
       </div>
 
       {/* Delete Rule Confirmation Modal */}

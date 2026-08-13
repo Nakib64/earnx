@@ -9,6 +9,7 @@ import AssignUsersModal from '../../../components/designations/AssignUsersModal'
 import EditDesignationModal from '../../../components/designations/EditDesignationModal';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import { apiFetch } from '../../../lib/api';
+import { Award, Star } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminDesignationsPage() {
@@ -104,22 +105,27 @@ export default function AdminDesignationsPage() {
     setDeleting(false);
   };
 
-  const handleToggleUser = async (userId: string, currentDesId: string | null) => {
-    try {
-      await toggleUserDesignation(userId, currentDesId);
-      toast.success('Member designation assignment updated!');
-    } catch (err: any) {
-      toast.error(err.message || 'User assignment failed');
-    }
-  };
-
   return (
-    <div className="space-y-6 w-full">
-      <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Designation & Star Badges</h1>
-        <p className="text-xs text-slate-500 mt-1">
-          Configure Star badges and unlocked tree level depth keys. Assign members to control earning depth in the referral tree.
-        </p>
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+      {/* Top Banner — Coins Page Theme */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Award className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+              Designations & Star Badges
+            </h1>
+            <p className="text-xs text-emerald-100/80 font-medium">
+              Configure Star badges and unlocked tree level depth keys. Assign members to control earning depth.
+            </p>
+          </div>
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+            {designations.length} Badges
+          </span>
+        </div>
       </div>
 
       {/* Reusable Stats Component */}
@@ -144,13 +150,21 @@ export default function AdminDesignationsPage() {
       />
 
       {/* Designation Cards Grid */}
-      <div className="space-y-4">
-        <h3 className="font-bold text-slate-900 text-sm">Active Designations ({designations.length})</h3>
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+            <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Active Designations</h2>
+            <p className="text-[11px] font-medium text-slate-400">Total {designations.length} star tier badges configured</p>
+          </div>
+        </div>
 
         {loading ? (
-          <div className="text-xs text-slate-400 py-8 text-center">Loading designations...</div>
+          <div className="text-xs text-slate-400 py-8 text-center font-extrabold">Loading designations...</div>
         ) : designations.length === 0 ? (
-          <div className="glass-card rounded-2xl p-8 text-center text-xs text-slate-400">
+          <div className="rounded-2xl p-8 text-center text-xs text-slate-400 border border-dashed border-slate-200 bg-slate-50 font-extrabold">
             No designations created yet
           </div>
         ) : (

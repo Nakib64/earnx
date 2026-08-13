@@ -28,6 +28,8 @@ import {
   LogIn,
   UserPlus,
   Coins,
+  Globe,
+  Star,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -58,8 +60,10 @@ export default function Navbar() {
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
+    { href: '/admin/investments/actions', label: 'Investment Actions', icon: UserCheck },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/admin/settings', label: 'Global Settings', icon: Settings },
+    { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
+    { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
     { href: '/admin/users', label: 'Users & Designations', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
     { href: '/admin/approvals', label: 'Pending Approvals Queue', icon: UserCheck },
@@ -106,20 +110,51 @@ export default function Navbar() {
           {((isAdminRoute && admin) ? adminItems : (isDashboardRoute && user) ? userItems : publicItems).map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            const isApprovals = item.href === '/admin/approvals';
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold text-sm transition-all ${
-                  isActive
-                    ? 'bg-[#005A36] text-white shadow-sm font-black'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-secondary' : 'text-slate-400'}`} />
-                <span>{item.label}</span>
-              </Link>
+              <React.Fragment key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all ${
+                    isActive
+                      ? 'bg-[#005A36] text-white shadow-sm font-black'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-secondary' : 'text-slate-400'}`} />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+
+                {/* Approvals Subitems in Mobile Menu */}
+                {isApprovals && isAdminRoute && (
+                  <div className="pl-6 space-y-0.5 border-l-2 border-slate-100 my-1">
+                    {[
+                      { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck },
+                      { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star },
+                    ].map((sub) => {
+                      const SubIcon = sub.icon;
+                      const isSubActive = pathname === sub.href;
+                      return (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center space-x-2.5 px-3 py-2 rounded-lg font-bold text-xs transition-all ${
+                            isSubActive
+                              ? 'bg-[#005A36] text-white shadow-sm font-black'
+                              : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                          }`}
+                        >
+                          <SubIcon className={`w-3.5 h-3.5 ${isSubActive ? 'text-secondary' : 'text-slate-400'}`} />
+                          <span className="truncate">{sub.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </React.Fragment>
             );
           })}
         </nav>

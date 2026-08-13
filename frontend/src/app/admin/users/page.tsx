@@ -9,7 +9,7 @@ import { AdjustWalletModal } from '../../../components/users/AdjustWalletModal';
 import { AssignDesignationModal } from '../../../components/users/AssignDesignationModal';
 import { UserDetailCards } from '../../../components/users/UserDetailCards';
 import { useAdminUsersPage } from '../../../hooks/useAdminUsersPage';
-import { Search, RefreshCw } from 'lucide-react';
+import { Search, RefreshCw, Users, Award, ShieldCheck, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 
 function AdminUsersContent() {
@@ -51,95 +51,136 @@ function AdminUsersContent() {
     loadData,
   } = useAdminUsersPage();
 
+  const totalMembers = users.length;
+  const badgedLeadersCount = users.filter((u) => !!u.designation).length;
+  const activeAccountsCount = users.filter((u) => u.status === 'ACTIVE').length;
+  const totalNetworkBalance = users.reduce((acc, u) => acc + Number(u.wallet_balance || 0), 0);
+
   return (
-    <div className="space-y-6 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Badged Leaders & Referral Network
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Displaying referral tree network. Click any member row to explore their downlines in-place. Select Details to view profile & transaction history cards below.
-          </p>
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+      {/* Top Banner — Coins Page Theme */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+        <div className="flex items-start space-x-3">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <Users className="w-6 h-6 text-secondary" />
+          </div>
+          <div className="space-y-1 flex-1">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+              Badged Leaders & Referral Network
+            </h1>
+            <p className="text-xs text-emerald-100/80 font-medium">
+              Explore referral tree networks, assign leader badges, adjust balances, and manage account statuses.
+            </p>
+          </div>
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+            {totalMembers} Members
+          </span>
         </div>
 
-        <button
-          onClick={() => {
-            loadData();
-            toast.info('Refreshed user data');
-          }}
-          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors self-start flex items-center space-x-1.5 text-xs font-bold"
-          title="Refresh Data"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Refresh</span>
-        </button>
+        {/* Action Controls */}
+        <div className="border-t border-emerald-700/60 pt-3 flex items-center justify-between">
+          <button
+            onClick={() => {
+              loadData();
+              toast.info('Refreshed user data');
+            }}
+            className="py-2 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-sm cursor-pointer"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>Refresh Network Data</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Summary Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest">Total Members</span>
+            <Users className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 font-mono">{totalMembers}</div>
+        </div>
+
+        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-4 shadow-sm space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#005A36]">Badged Leaders</span>
+            <Award className="w-4 h-4 text-primary" />
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-primary font-mono">{badgedLeadersCount}</div>
+        </div>
+
+        <div className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 shadow-sm space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#854D0E]">Active Accounts</span>
+            <ShieldCheck className="w-4 h-4 text-[#854D0E]" />
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-[#854D0E] font-mono">{activeAccountsCount}</div>
+        </div>
+
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-sm space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest">Network Balance</span>
+            <Wallet className="w-4 h-4 text-primary" />
+          </div>
+          <div className="text-xl sm:text-2xl font-black text-slate-900 font-mono truncate">
+            ৳{totalNetworkBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </div>
+        </div>
       </div>
 
       {/* Breadcrumb Trail for In-Place Tree Exploration */}
       <UserBreadcrumbs breadcrumbs={breadcrumbs} onBreadcrumbClick={handleBreadcrumbClick} />
 
-      {/* Summary Metrics Bar (Shown Before Table) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
-          <div className="text-[10px] font-bold uppercase text-slate-400">Total Members</div>
-          <div className="text-base sm:text-xl font-extrabold text-slate-900 mt-0.5">{users.length}</div>
-        </div>
+      {/* Main Table Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <Users className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Referral Network Table</h2>
+              <p className="text-[11px] font-medium text-slate-400">
+                Click any row to explore their downlines in-place or select Action details.
+              </p>
+            </div>
+          </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
-          <div className="text-[10px] font-bold uppercase text-slate-400">Badged Leaders</div>
-          <div className="text-base sm:text-xl font-extrabold text-purple-600 mt-0.5">
-            {users.filter((u) => !!u.designation).length}
+          {/* Search Input */}
+          <div className="relative w-full sm:w-72">
+            <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-2.5" />
+            <input
+              type="text"
+              placeholder="Search by phone, name, or code..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
+            />
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
-          <div className="text-[10px] font-bold uppercase text-slate-400">Active Accounts</div>
-          <div className="text-base sm:text-xl font-extrabold text-emerald-600 mt-0.5">
-            {users.filter((u) => u.status === 'ACTIVE').length}
-          </div>
+        {/* Table wrapper */}
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <DataTable<User>
+            data={users}
+            columns={userColumns}
+            keyExtractor={(u) => u.id}
+            loading={loading}
+            onRowClick={handleRowClick}
+            emptyMessage={
+              searchTerm.trim()
+                ? `No members found matching "${searchTerm.trim()}" across the database.`
+                : currentParent.id === null
+                ? 'No badged leaders found. Assign a badge to users to display them here.'
+                : `No direct referral downlines found under ${currentParent.name}.`
+            }
+          />
         </div>
-
-        <div className="bg-white border border-slate-200 rounded-xl p-3 sm:p-4 shadow-xs">
-          <div className="text-[10px] font-bold uppercase text-slate-400">Network Balance</div>
-          <div className="text-base sm:text-xl font-extrabold text-sky-600 font-mono mt-0.5 truncate">
-            ৳{users.reduce((acc, u) => acc + Number(u.wallet_balance || 0), 0).toFixed(0)}
-          </div>
-        </div>
       </div>
 
-      {/* Debounced Search Bar */}
-      <div className="relative">
-        <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
-        <input
-          type="text"
-          placeholder="Search by phone, name, or referral code across whole database..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-        />
-      </div>
-
-      {/* Main Table displaying Badged Leaders or Downlines */}
-      <div className="glass-card rounded-2xl p-3 sm:p-5 bg-white border border-slate-200 w-full">
-        <DataTable<User>
-          data={users}
-          columns={userColumns}
-          keyExtractor={(u) => u.id}
-          loading={loading}
-          onRowClick={handleRowClick}
-          emptyMessage={
-            searchTerm.trim()
-              ? `No members found matching "${searchTerm.trim()}" across the database.`
-              : currentParent.id === null
-              ? 'No badged leaders found. Assign a badge to users to display them here.'
-              : `No direct referral downlines found under ${currentParent.name}.`
-          }
-        />
-      </div>
-
-      {/* Selected Member Details & Transaction History Cards (Shown AFTER / BELOW the Table) */}
+      {/* Selected Member Details & Transaction History Cards */}
       <UserDetailCards
         user={selectedUserForCards}
         onAdjustBalance={(user) => setAdjustUser(user)}
@@ -209,7 +250,7 @@ function AdminUsersContent() {
 
 export default function AdminUsersPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-500 text-sm">Loading users...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-slate-500 text-sm font-bold">Loading users...</div>}>
       <AdminUsersContent />
     </Suspense>
   );

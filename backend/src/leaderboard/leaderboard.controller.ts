@@ -81,6 +81,12 @@ export class LeaderboardController {
   }
 
   @UseGuards(AdminJwtGuard)
+  @Post('admin/reorder')
+  async reorderEntries(@Body() body: { orders: { id: string; rank: number }[] }) {
+    return this.leaderboardService.reorderEntries(body.orders);
+  }
+
+  @UseGuards(AdminJwtGuard)
   @Post('admin/seed')
   async seedLeaderboard() {
     return this.leaderboardService.seedInitialLeaderboard();

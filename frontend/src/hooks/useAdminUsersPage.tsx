@@ -198,40 +198,57 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     () => [
       {
         key: 'member',
-        header: 'Member & Ref',
+        header: 'Member',
         render: (u) => (
           <div>
-            <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[130px] sm:max-w-[180px]">
+            <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[100px] sm:max-w-[180px]">
               {u.full_name || u.phone}
             </div>
             <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
               <span>{u.phone}</span>
-              <span className="text-primary font-bold">• {u.referral_code}</span>
+              <span className="text-primary font-bold hidden sm:inline">• {u.referral_code}</span>
             </div>
           </div>
         ),
       },
       {
         key: 'designation_status',
-        header: 'Badge & Status',
-        render: (u) => (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-none bg-yellow-50 text-[#854D0E] font-extrabold text-[8px] sm:text-[9px] border border-yellow-300 whitespace-nowrap">
-              <Award className="w-2.5 h-2.5 mr-0.5 text-[#854D0E] shrink-0" />
-              <span className="truncate max-w-[80px]">{u.designation?.name || 'Unbadged'}</span>
-            </span>
-            <StatusBadge status={u.status} />
-          </div>
-        ),
+        header: 'Designation & Badge',
+        render: (u) => {
+          const starsCount = u.designation?.stars || 0;
+          return (
+            <div className="flex flex-col space-y-0.5">
+              <div className="inline-flex items-center space-x-1 text-[9px] font-extrabold text-slate-800">
+                <span className="truncate max-w-[80px] sm:max-w-[120px] font-bold text-slate-900">
+                  {u.designation?.name || 'Unbadged'}
+                </span>
+              </div>
+              {starsCount > 0 ? (
+                <div className="flex items-center space-x-0.5 text-amber-500">
+                  {Array.from({ length: Math.min(starsCount, 5) }).map((_, i) => (
+                    <span key={i} className="text-[10px] leading-none">★</span>
+                  ))}
+                  {starsCount > 5 && (
+                    <span className="text-[9px] font-extrabold text-amber-600 font-mono ml-0.5">
+                      +{starsCount - 5}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-[8.5px] font-medium text-slate-400">No Stars</span>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: 'wallet_actions',
         header: 'Wallet & Actions',
         align: 'right',
         render: (u) => (
-          <div className="flex items-center justify-end space-x-2">
-            <span className="font-mono font-extrabold text-slate-800 text-[11px]">
-              ৳{Number(u.wallet_balance || 0).toFixed(2)}
+          <div className="flex items-center justify-end space-x-1.5">
+            <span className="font-mono font-extrabold text-slate-900 text-[10px] sm:text-[11px]">
+              ৳{Number(u.wallet_balance || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </span>
             <RowActionsMenu
               user={u}

@@ -38,22 +38,26 @@ export default function AssignUsersModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[85vh] flex flex-col border border-slate-100">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-lg w-full space-y-4 shadow-xl max-h-[85vh] flex flex-col border border-slate-200/90">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div>
-            <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
-              <Users className="w-5 h-5 text-purple-600" />
-              <span>Assigned Members ({members.length})</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Badge: <span className="font-bold text-slate-700">{selectedDesignation.name}</span> — Click any row to view downlines table
-            </p>
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <Users className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-900 text-base">
+                Assigned Members ({members.length})
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Badge: <span className="font-bold text-primary">{selectedDesignation.name}</span>
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -61,13 +65,13 @@ export default function AssignUsersModal({
 
         {/* Search filter */}
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" />
+          <Search className="w-5 h-5 absolute left-3.5 top-2.5 text-slate-400" />
           <input
             type="text"
             placeholder="Search member by phone, name, or referral code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
+            className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -75,7 +79,7 @@ export default function AssignUsersModal({
         <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-96">
           {filteredMembers.length === 0 ? (
             <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-              <p className="text-xs font-semibold text-slate-400">
+              <p className="text-xs font-bold text-slate-400">
                 {searchTerm.trim()
                   ? `No members found matching "${searchTerm.trim()}"`
                   : 'No members assigned to this badge yet.'}
@@ -86,30 +90,30 @@ export default function AssignUsersModal({
               <div
                 key={user.id}
                 onClick={() => handleRowClick(user)}
-                className="group p-3.5 bg-slate-50 hover:bg-sky-50/80 border border-slate-200 hover:border-sky-300 rounded-xl flex items-center justify-between text-xs transition-all cursor-pointer shadow-xs"
+                className="group p-3 bg-slate-50 hover:bg-emerald-50/70 border border-slate-200 hover:border-emerald-200 rounded-xl flex items-center justify-between text-xs transition-all cursor-pointer shadow-xs"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xs">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 text-[#005A36] flex items-center justify-center font-black text-xs shrink-0">
                     {(user.full_name || user.phone || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                    <div className="font-extrabold text-slate-900 group-hover:text-primary transition-colors">
                       {user.full_name || user.phone}
                     </div>
-                    <div className="text-[11px] text-slate-500 flex items-center space-x-2 mt-0.5">
+                    <div className="text-[10px] text-slate-500 font-mono flex items-center space-x-2 mt-0.5">
                       <span>Phone: <strong className="text-slate-700">{user.phone}</strong></span>
                       {user.referral_code && (
                         <>
                           <span>•</span>
-                          <span>Code: <strong className="text-slate-700">{user.referral_code}</strong></span>
+                          <span className="text-primary font-bold">{user.referral_code}</span>
                         </>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-1 text-slate-400 group-hover:text-sky-600 font-bold text-[11px] transition-colors">
-                  <span>View Table</span>
+                <div className="flex items-center space-x-1 text-slate-400 group-hover:text-primary font-extrabold text-[11px] transition-colors shrink-0">
+                  <span>View</span>
                   <ChevronRight className="w-4 h-4" />
                 </div>
               </div>

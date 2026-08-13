@@ -5,6 +5,7 @@ import {
   Body,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { CoinsService } from './coins.service';
 import { UserJwtGuard } from '../user-auth/guards/user-jwt.guard';
@@ -50,6 +51,20 @@ export class CoinsController {
   @Get('admin/stats')
   async getAdminStats() {
     return this.coinsService.getAdminCoinStats();
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/users')
+  async getAdminCoinUsers(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.coinsService.getAdminCoinUsers(
+      page ? parseInt(page, 10) : 1,
+      limit ? parseInt(limit, 10) : 20,
+      search,
+    );
   }
 
   @UseGuards(AdminJwtGuard)

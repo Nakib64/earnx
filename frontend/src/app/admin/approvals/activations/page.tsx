@@ -1,114 +1,96 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { useAuth } from '../../../../context/AuthContext';
-import { apiFetch } from '../../../../lib/api';
-import { ActivationRequest, PremiumRequest, WithdrawalRequest } from '../../../../types';
 import ApprovalsHeader from '../../../../components/approvals/ApprovalsHeader';
+import { apiFetch } from '../../../../lib/api';
 import { AlertBanner } from '../../../../components/common/AlertBanner';
 import { StatusBadge } from '../../../../components/common/StatusBadge';
-import { Check, X, UserCheck, ShieldAlert, Award, Search, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
-import { toast } from 'sonner';
+import {
+  UserCheck,
+  Check,
+  X,
+  Search,
+  Filter,
+  ShieldAlert,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
-interface PendingQueueResponse {
-  activations: ActivationRequest[];
-  premiums: PremiumRequest[];
-  withdrawals: WithdrawalRequest[];
+interface ActivationRecord {
+  id: string;
+  user_id: string;
+  status: string;
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at: string;
+  user?: {
+    id: string;
+    full_name: string | null;
+    phone: string;
+    referral_code: string;
+    status: string;
+    referred_by?: {
+      id: string;
+      full_name: string | null;
+      phone: string;
+    } | null;
+  };
 }
 
 const ITEMS_PER_PAGE = 10;
 
-function getPaginationRange(current: number, total: number): (number | '...')[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
-  if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-  return [1, '...', current - 1, current, current + 1, '...', total];
-}
-
-export default function AdminActivationApprovalsPage() {
-  const { admin } = useAuth();
-  const [activations, setActivations] = useState<ActivationRequest[]>([]);
-  const [pendingPremiumCount, setPendingPremiumCount] = useState(0);
-  const [pendingWithdrawalCount, setPendingWithdrawalCount] = useState(0);
+export default function ActivationsApprovalPage() {
+  const [activations, setActivations] = useState<ActivationRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // Counts for tabs
+  const [pendingPremiumCount, setPendingPremiumCount] = useState(0);
+
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Reject Modal state
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('PENDING');
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchQueue = async () => {
+  const fetchActivations = async () => {
     setLoading(true);
-    const res = await apiFetch<PendingQueueResponse>('/admin/requests/pending', { isAdmin: true });
+    const res = await apiFetch<ActivationRecord[]>('/admin/approvals/activations', { isAdmin: true });
     if (res.success && res.data) {
-      setActivations(res.data.activations || []);
-      setPendingPremiumCount((res.data.premiums || []).filter(p => p.status === 'PENDING').length);
-      setPendingWithdrawalCount((res.data.withdrawals || []).filter(w => w.status === 'PENDING').length);
+      setActivations(res.data);
     }
     setLoading(false);
   };
 
+  const fetchTabCounts = async () => {
+    const resPrem = await apiFetch<any[]>('/admin/approvals/premium', { isAdmin: true });
+    if (resPrem.success && resPrem.data) {
+      setPendingPremiumCount(resPrem.data.filter((r) => r.status === 'PENDING').length);
+    }
+  };
+
   useEffect(() => {
-    if (admin) fetchQueue();
-  }, [admin]);
-
-  // Reset to page 1 whenever the search query or status filter changes
-  useEffect(() => { setCurrentPage(1); }, [search, statusFilter]);
-
-  const pendingActivationCount = useMemo(
-    () => activations.filter(req => req.status === 'PENDING').length,
-    [activations]
-  );
-
-  const filtered = useMemo(() => {
-    return activations.filter((req) => {
-      // Status filter check
-      if (statusFilter !== 'ALL' && req.status !== statusFilter) return false;
-
-      // Search check
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return (
-        req.user?.full_name?.toLowerCase().includes(q) ||
-        req.user?.phone?.toLowerCase().includes(q) ||
-        req.user?.referral_code?.toLowerCase().includes(q) ||
-        req.user?.referred_by?.full_name?.toLowerCase().includes(q) ||
-        req.user?.referred_by?.phone?.toLowerCase().includes(q) ||
-        req.status.toLowerCase().includes(q) ||
-        req.rejection_reason?.toLowerCase().includes(q)
-      );
-    });
-  }, [activations, search, statusFilter]);
-
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  const pageNumbers = getPaginationRange(currentPage, totalPages);
+    fetchActivations();
+    fetchTabCounts();
+  }, []);
 
   const handleApproveActivation = async (id: string) => {
     setProcessingId(id);
     setMsg(null);
-    const res = await apiFetch<any>(`/admin/requests/activation/${id}/approve`, {
+    const res = await apiFetch(`/admin/approvals/activations/${id}/approve`, {
       method: 'POST',
       isAdmin: true,
     });
-
     if (res.success) {
-      const payouts = res.data?.payouts || [];
-      const paidSummaries = payouts
-        .filter((p: any) => p.qualified)
-        .map((p: any) => `৳${p.amount} to sponsor (${p.parentPhone})`)
-        .join(', ');
-      const successText = paidSummaries
-        ? `Approved user activation! Referral commission paid: ${paidSummaries}`
-        : 'Approved user activation! User status set to ACTIVE.';
-      setMsg({ type: 'success', text: successText });
-      toast.success('Activation approved and commissions distributed!');
-      await fetchQueue();
+      setMsg({ type: 'success', text: 'Activation approved successfully! Multi-level commissions distributed.' });
+      fetchActivations();
+      fetchTabCounts();
     } else {
-      setMsg({ type: 'error', text: res.error?.message || 'Approval failed' });
-      toast.error(res.error?.message || 'Approval failed');
+      setMsg({ type: 'error', text: res.error?.message || 'Failed to approve activation' });
     }
     setProcessingId(null);
   };
@@ -116,70 +98,126 @@ export default function AdminActivationApprovalsPage() {
   const handleRejectActivation = async (id: string) => {
     setProcessingId(id);
     setMsg(null);
-    const res = await apiFetch(`/admin/requests/activation/${id}/reject`, {
+    const res = await apiFetch(`/admin/approvals/activations/${id}/reject`, {
       method: 'POST',
       isAdmin: true,
-      body: JSON.stringify({ reason: rejectReason.trim() || 'Admin rejected request' }),
+      body: JSON.stringify({ reason: rejectReason }),
     });
-
     if (res.success) {
       setMsg({ type: 'success', text: 'Activation request rejected.' });
-      toast.info('Activation request rejected');
       setRejectingId(null);
       setRejectReason('');
-      await fetchQueue();
+      fetchActivations();
+      fetchTabCounts();
     } else {
-      setMsg({ type: 'error', text: res.error?.message || 'Rejection failed' });
-      toast.error(res.error?.message || 'Rejection failed');
+      setMsg({ type: 'error', text: res.error?.message || 'Failed to reject activation' });
     }
     setProcessingId(null);
   };
 
+  // Filter logic
+  const filtered = useMemo(() => {
+    return activations.filter((req) => {
+      // Status filter
+      if (statusFilter !== 'ALL' && req.status !== statusFilter) return false;
+      // Search term
+      if (!search.trim()) return true;
+      const term = search.toLowerCase().trim();
+      const userName = req.user?.full_name?.toLowerCase() || '';
+      const userPhone = req.user?.phone?.toLowerCase() || '';
+      const refCode = req.user?.referral_code?.toLowerCase() || '';
+      const sponsorName = req.user?.referred_by?.full_name?.toLowerCase() || '';
+      const sponsorPhone = req.user?.referred_by?.phone?.toLowerCase() || '';
+      return (
+        userName.includes(term) ||
+        userPhone.includes(term) ||
+        refCode.includes(term) ||
+        sponsorName.includes(term) ||
+        sponsorPhone.includes(term)
+      );
+    });
+  }, [activations, statusFilter, search]);
+
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filtered.slice(start, start + ITEMS_PER_PAGE);
+  }, [filtered, currentPage]);
+
+  const pendingActivationCount = useMemo(
+    () => activations.filter((r) => r.status === 'PENDING').length,
+    [activations],
+  );
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  }, [totalPages, currentPage]);
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       <ApprovalsHeader
         activationCount={pendingActivationCount}
         premiumCount={pendingPremiumCount}
-        withdrawalCount={pendingWithdrawalCount}
       />
 
       {msg && <AlertBanner type={msg.type} message={msg.text} onClose={() => setMsg(null)} />}
 
       {/* ACTIVATION REQUESTS HISTORY & QUEUE */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 shadow-xs">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
         {/* Header row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
-            <UserCheck className="w-4.5 h-4.5 text-sky-600" />
-            <span>User Activation Requests History</span>
-            <span className="ml-1 px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 text-[10px] font-extrabold">
-              {filtered.length}
-            </span>
-          </h3>
-          <span className="text-xs text-slate-400 font-medium hidden sm:block">
-            All historical activation approval records
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
+                <span>User Activation Requests</span>
+                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-primary border border-emerald-200 text-[10px] font-mono font-extrabold">
+                  {filtered.length}
+                </span>
+              </h3>
+              <p className="text-[11px] font-medium text-slate-400">All historical activation approval records</p>
+            </div>
+          </div>
         </div>
 
         {/* Filter and Search Bar */}
         <div className="flex flex-col sm:flex-row items-center gap-3">
           {/* Search bar */}
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-3.5 top-2.5 w-5 h-5 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              id="activation-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by user name, phone, referral code, or sponsor..."
-              className="w-full pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all"
+              placeholder="Search by user name, phone, code, or sponsor..."
+              className="w-full pl-11 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-xs"
             />
             {search && (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 transition-colors"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
@@ -190,7 +228,7 @@ export default function AdminActivationApprovalsPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all w-full sm:w-auto"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary transition-all w-full sm:w-auto"
             >
               <option value="ALL">All Statuses</option>
               <option value="PENDING">Pending Approval ({pendingActivationCount})</option>
@@ -202,9 +240,9 @@ export default function AdminActivationApprovalsPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="text-xs text-slate-400 py-10 text-center animate-pulse">Loading activation records...</div>
+          <div className="text-xs text-slate-400 py-10 text-center font-extrabold animate-pulse">Loading activation records...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-xs text-slate-400 py-10 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
+          <div className="text-xs text-slate-400 py-10 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50 font-extrabold">
             {search || statusFilter !== 'ALL'
               ? 'No records matching your search/filter criteria.'
               : 'No activation request records found.'}
@@ -216,7 +254,7 @@ export default function AdminActivationApprovalsPage() {
               {paginated.map((req) => (
                 <div
                   key={req.id}
-                  className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-sky-300 hover:shadow-sm"
+                  className="bg-slate-50 border border-slate-200/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-emerald-200"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
@@ -225,21 +263,21 @@ export default function AdminActivationApprovalsPage() {
                       </span>
                       <StatusBadge status={req.status as any} />
                     </div>
-                    <div className="text-xs text-slate-600 font-mono space-x-3">
-                      <span>Phone: <strong>{req.user?.phone}</strong></span>
+                    <div className="text-xs text-slate-500 font-mono space-x-3">
+                      <span>Phone: <strong className="text-slate-800">{req.user?.phone}</strong></span>
                       <span>•</span>
-                      <span>Code: <strong>{req.user?.referral_code}</strong></span>
+                      <span>Code: <strong className="text-primary font-bold">{req.user?.referral_code}</strong></span>
                       <span>•</span>
-                      <span className="text-slate-400">
+                      <span className="text-slate-400 font-sans">
                         Requested: {new Date(req.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     {req.user?.referred_by && (
-                      <div className="text-xs text-purple-700 font-medium flex items-center space-x-1 pt-0.5">
-                        <Award className="w-3.5 h-3.5 text-purple-500" />
+                      <div className="text-xs text-slate-600 font-medium flex items-center space-x-1 pt-0.5">
+                        <Award className="w-3.5 h-3.5 text-primary" />
                         <span>
-                          Sponsor / Referrer:{' '}
-                          <strong>{req.user.referred_by.full_name || req.user.referred_by.phone}</strong>
+                          Sponsor:{' '}
+                          <strong className="text-slate-800">{req.user.referred_by.full_name || req.user.referred_by.phone}</strong>
                         </span>
                       </div>
                     )}
@@ -257,26 +295,26 @@ export default function AdminActivationApprovalsPage() {
                         <button
                           onClick={() => handleApproveActivation(req.id)}
                           disabled={processingId === req.id}
-                          className="sky-gradient-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm disabled:opacity-60"
+                          className="py-2 px-4 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs rounded-xl shadow-sm disabled:opacity-60 transition-all flex items-center space-x-1.5 cursor-pointer"
                         >
-                          <Check className="w-4 h-4" />
+                          <Check className="w-4 h-4 text-secondary" />
                           <span>{processingId === req.id ? 'Processing...' : 'Approve & Pay Commission'}</span>
                         </button>
                         <button
                           onClick={() => setRejectingId(req.id)}
                           disabled={processingId === req.id}
-                          className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-2 rounded-xl text-xs font-bold transition-colors disabled:opacity-60"
+                          className="bg-amber-50 hover:bg-amber-100 text-[#854D0E] border border-amber-200 px-3 py-2 rounded-xl text-xs font-extrabold transition-colors disabled:opacity-60 cursor-pointer"
                         >
                           Reject
                         </button>
                       </>
                     ) : req.status === 'APPROVED' ? (
-                      <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200 flex items-center space-x-1">
+                      <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-primary font-extrabold text-xs border border-emerald-200 flex items-center space-x-1">
                         <Check className="w-3.5 h-3.5" />
                         <span>Approved</span>
                       </span>
                     ) : (
-                      <span className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 font-bold text-xs border border-rose-200 flex items-center space-x-1">
+                      <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-500 font-extrabold text-xs border border-slate-200 flex items-center space-x-1">
                         <X className="w-3.5 h-3.5" />
                         <span>Rejected</span>
                       </span>
@@ -289,7 +327,7 @@ export default function AdminActivationApprovalsPage() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-slate-500 font-medium">
                   Showing{' '}
                   <strong>{(currentPage - 1) * ITEMS_PER_PAGE + 1}</strong>–
                   <strong>{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)}</strong>{' '}
@@ -299,22 +337,22 @@ export default function AdminActivationApprovalsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   {pageNumbers.map((page, idx) =>
                     page === '...' ? (
-                      <span key={`ellipsis-${idx}`} className="px-2 text-xs text-slate-400">
+                      <span key={`ellipsis-${idx}`} className="px-2 text-xs text-slate-400 font-mono">
                         ...
                       </span>
                     ) : (
                       <button
                         key={`page-${page}`}
                         onClick={() => setCurrentPage(page as number)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                           currentPage === page
-                            ? 'bg-sky-500 text-white shadow-xs'
+                            ? 'bg-[#005A36] text-white shadow-xs'
                             : 'border border-slate-200 text-slate-600 hover:bg-slate-100'
                         }`}
                       >
@@ -325,7 +363,7 @@ export default function AdminActivationApprovalsPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="p-1.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -338,33 +376,33 @@ export default function AdminActivationApprovalsPage() {
 
       {/* Reject Reason Modal */}
       {rejectingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center space-x-2 text-rose-600 font-extrabold text-base">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-xl space-y-4">
+            <div className="flex items-center space-x-2 text-rose-600 font-black text-base">
               <ShieldAlert className="w-5 h-5" />
               <span>Reject Activation Request</span>
             </div>
-            <p className="text-xs text-slate-500">Provide an optional reason for rejecting this user activation.</p>
+            <p className="text-xs text-slate-500 font-medium">Provide an optional reason for rejecting this user activation.</p>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="e.g. Invalid payment verification..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs focus:outline-none focus:ring-2 focus:ring-rose-400 h-24"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-400 h-24"
             />
-            <div className="flex justify-end space-x-2">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <button
                 onClick={() => {
                   setRejectingId(null);
                   setRejectReason('');
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                className="py-2.5 px-4 rounded-xl text-xs font-extrabold border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleRejectActivation(rejectingId)}
                 disabled={processingId === rejectingId}
-                className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm"
+                className="bg-rose-600 hover:bg-rose-700 text-white py-2.5 px-4 rounded-xl text-xs font-extrabold shadow-sm transition-all"
               >
                 {processingId === rejectingId ? 'Rejecting...' : 'Confirm Rejection'}
               </button>

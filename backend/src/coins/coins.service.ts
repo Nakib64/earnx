@@ -351,30 +351,17 @@ export class CoinsService {
   }
 
   // ==========================================
-  // ADMIN COIN STATS & USER LIST
+  // ADMIN COIN STATS (Aggregate only)
   // ==========================================
   async getAdminCoinStats() {
-    const [users, totals, configs] = await Promise.all([
-      this.prisma.user.findMany({
-        select: {
-          id: true,
-          phone: true,
-          full_name: true,
-          referral_code: true,
-          coin_balance: true,
-          locked_coin_balance: true,
-          is_premium: true,
-          premium_coins_granted: true,
-          is_premium_coins_unlocked: true,
-        },
-        orderBy: { coin_balance: 'desc' },
-      }),
+    const [totals, userCount, configs] = await Promise.all([
       this.prisma.user.aggregate({
         _sum: {
           coin_balance: true,
           locked_coin_balance: true,
         },
       }),
+      this.prisma.user.count(),
       this.configService.getAll(),
     ]);
 
@@ -394,9 +381,57 @@ export class CoinsService {
       stats: {
         total_available_coins: Number(totals._sum.coin_balance || 0),
         total_locked_coins: Number(totals._sum.locked_coin_balance || 0),
-        user_count: users.length,
+        user_count: userCount,
       },
-      users,
+    };
+  }
+
+  // ==========================================
+  // ADMIN COIN USERS (Paginated + Search)
+  // ==========================================
+  async getAdminCoinUsers(page: number = 1, limit: number = 20, search?: string) {
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = search
+      ? {
+          OR: [
+            { full_name: { contains: search, mode: 'insensitive' } },
+            { phone: { contains: search, mode: 'insensitive' } },
+            { referral_code: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          phone: true,
+          full_name: true,
+          referral_code: true,
+          coin_balance: true,
+          locked_coin_balance: true,
+          is_premium: true,
+          premium_coins_granted: true,
+          is_premium_coins_unlocked: true,
+        },
+        orderBy: { coin_balance: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + users.length < total,
+      },
     };
   }
 

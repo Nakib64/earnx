@@ -6,9 +6,8 @@ import { apiFetch } from '../../../lib/api';
 import { WalletTransaction, TransactionType } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
-import { AlertBanner } from '../../../components/common/AlertBanner';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { DollarSign, Search, Filter, Calendar, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Wallet, Search, Filter, RefreshCw, ChevronLeft, ChevronRight, Eye, X, Calendar, User, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminWalletPage() {
@@ -28,12 +27,8 @@ export default function AdminWalletPage() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  // Manual Adjustment Form State
-  const [userId, setUserId] = useState('');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [adjusting, setAdjusting] = useState(false);
-  const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // Selected Transaction Modal
+  const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
 
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
@@ -69,65 +64,36 @@ export default function AdminWalletPage() {
     setPage(1);
   }, [debouncedSearch, selectedType, startDate, endDate]);
 
-  const handleAdjustSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAdjusting(true);
-    setMsg(null);
-
-    const res = await apiFetch('/admin/wallet/adjust', {
-      method: 'POST',
-      isAdmin: true,
-      body: JSON.stringify({
-        user_id: userId.trim(),
-        amount: parseFloat(amount),
-        description: description || 'Manual Admin Adjustment',
-      }),
-    });
-
-    if (res.success) {
-      toast.success('Wallet adjustment executed successfully!');
-      setMsg({ type: 'success', text: 'Wallet adjusted successfully!' });
-      setUserId('');
-      setAmount('');
-      setDescription('');
-      await fetchTransactions();
-    } else {
-      toast.error(res.error?.message || 'Adjustment failed');
-      setMsg({ type: 'error', text: res.error?.message || 'Adjustment failed' });
-    }
-    setAdjusting(false);
-  };
-
+  // 3-Column Table Definition
   const columns: ColumnDef<WalletTransaction>[] = [
     {
       key: 'user',
-      header: 'Member & Ref',
+      header: 'Member',
       render: (tx) => (
         <div>
-          <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
-            {tx.user?.phone || tx.user_id}
+          <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[120px] sm:max-w-[180px]">
+            {tx.user?.full_name || tx.user?.phone || tx.user_id}
           </div>
-          <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5 truncate max-w-[130px]">
-            <span>{tx.user?.full_name || '-'}</span>
-            {tx.user?.referral_code && <span className="text-primary font-bold">• {tx.user.referral_code}</span>}
+          <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
+            <span>{tx.user?.phone || tx.user_id}</span>
+            {tx.user?.referral_code && <span className="text-primary font-bold hidden sm:inline">• {tx.user.referral_code}</span>}
           </div>
         </div>
       ),
     },
     {
       key: 'type_amount',
-      header: 'Type & Amount',
+      header: 'Amount',
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
           <div className="space-y-0.5">
             <div className="flex items-center space-x-1.5">
-              <StatusBadge status={tx.type} />
-              <span className={`font-mono font-extrabold text-[11px] ${isCredit ? 'text-emerald-700' : 'text-rose-700'}`}>
-                {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
+              <span className={`font-mono font-black text-[11px] ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
+                {isCredit ? '+' : ''}৳{Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="font-mono text-[9px] text-slate-400 font-medium truncate max-w-[130px]">
+            <div className="font-mono text-[9px] text-slate-400 font-medium truncate max-w-[140px] hidden sm:block">
               ৳{Number(tx.balance_before).toFixed(1)} → ৳{Number(tx.balance_after).toFixed(1)}
             </div>
           </div>
@@ -135,108 +101,63 @@ export default function AdminWalletPage() {
       },
     },
     {
-      key: 'description_date',
-      header: 'Note & Date',
+      key: 'actions',
+      header: 'Actions',
       align: 'right',
       render: (tx) => (
-        <div className="text-right">
-          <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
-            {tx.description || '-'}
-          </div>
-          <div className="text-slate-400 text-[9px] font-mono">{new Date(tx.created_at).toLocaleString()}</div>
+        <div className="flex justify-end">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedTx(tx);
+            }}
+            className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors border border-slate-200 flex items-center space-x-1 text-[10px] font-extrabold ml-auto"
+            title="View Transaction Details"
+          >
+            <Eye className="w-3.5 h-3.5 text-slate-500" />
+            <span className="hidden sm:inline">Details</span>
+          </button>
         </div>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">System Audit & Transaction History</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Complete audit trail of all member wallet transactions with debounced search and filtering.
-          </p>
-        </div>
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-        <button
-          onClick={() => {
-            fetchTransactions();
-            toast.info('Refreshed transaction log');
-          }}
-          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors self-start flex items-center space-x-1.5 text-xs font-bold"
-          title="Refresh Data"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Refresh</span>
-        </button>
-      </div>
-
-      {msg && <AlertBanner type={msg.type} message={msg.text} onClose={() => setMsg(null)} />}
-
-      {/* Manual Balance Adjustment Form */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
-        <h3 className="font-bold text-slate-900 text-sm flex items-center space-x-2">
-          <DollarSign className="w-4 h-4 text-emerald-600" />
-          <span>Issue Manual User Wallet Adjustment</span>
-        </h3>
-
-        <form onSubmit={handleAdjustSubmit} className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 items-end">
-          <div>
-            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              User ID / Target
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="UUID of target user"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Amount (+ / -)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              placeholder="e.g. 500 or -500"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-
-          <div className="col-span-2 sm:col-span-1">
-            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Audit Note / Reason
-            </label>
-            <input
-              type="text"
-              placeholder="Reason for adjustment"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+      {/* Top Banner — Coins Page Theme */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start space-x-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <Wallet className="w-6 h-6 text-secondary" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+                Ledger & Transaction History
+              </h1>
+              <p className="text-xs text-emerald-100/80 font-medium">
+                Complete audit log of all member deposits, withdrawals, payouts, and wallet adjustments.
+              </p>
+            </div>
           </div>
 
           <button
-            type="submit"
-            disabled={adjusting}
-            className="emerald-gold-btn py-2.5 px-4 rounded-none font-bold text-xs flex items-center justify-center space-x-1.5 col-span-2 sm:col-span-1"
+            onClick={() => {
+              fetchTransactions();
+              toast.info('Refreshed transaction log');
+            }}
+            className="py-2 px-3 bg-emerald-700/50 hover:bg-emerald-700 text-white rounded-xl transition-colors text-xs font-extrabold flex items-center space-x-1.5 border border-emerald-500/30 shrink-0 cursor-pointer"
+            title="Refresh Data"
           >
-            <span>{adjusting ? 'Processing...' : 'Execute Adjustment'}</span>
+            <RefreshCw className="w-3.5 h-3.5 text-secondary" />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
-        </form>
+        </div>
       </div>
 
       {/* Audit Filters Bar */}
-      <div className="glass-card rounded-2xl p-4 bg-white border border-slate-200 space-y-3 w-full">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
           {/* Debounced Search */}
           <div className="sm:col-span-5 relative">
@@ -246,7 +167,7 @@ export default function AdminWalletPage() {
               placeholder="Search by phone, name, referral code, or note..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -255,7 +176,7 @@ export default function AdminWalletPage() {
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="ALL">All Transaction Types</option>
               <option value={TransactionType.DEPOSIT}>DEPOSIT</option>
@@ -274,7 +195,7 @@ export default function AdminWalletPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
               title="Start Date"
             />
           </div>
@@ -284,7 +205,7 @@ export default function AdminWalletPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
               title="End Date"
             />
           </div>
@@ -294,7 +215,7 @@ export default function AdminWalletPage() {
         {(searchTerm || selectedType !== 'ALL' || startDate || endDate) && (
           <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
             <span className="text-slate-500 font-medium">
-              Filtered Result Count: <strong className="text-slate-900">{totalRecords}</strong> transactions
+              Filtered Records: <strong className="text-slate-900">{totalRecords}</strong> transactions
             </span>
             <button
               onClick={() => {
@@ -303,69 +224,59 @@ export default function AdminWalletPage() {
                 setStartDate('');
                 setEndDate('');
               }}
-              className="text-xs text-sky-600 font-bold hover:underline"
+              className="text-xs text-primary font-extrabold hover:underline"
             >
-              Clear All Filters
+              Clear Filters
             </button>
           </div>
         )}
       </div>
 
       {/* Global Transactions Audit Table */}
-      <div className="glass-card rounded-2xl p-5 space-y-4 bg-white border border-slate-200 w-full">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 text-sm">Transaction Logs ({totalRecords})</h3>
-          <span className="text-xs text-slate-400 font-mono">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
+            <span>Transaction Logs</span>
+            <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-primary border border-emerald-200 text-[10px] font-mono font-extrabold">
+              {totalRecords} Total
+            </span>
+          </h3>
+          <span className="text-xs text-slate-400 font-mono font-extrabold">
             Page {page} of {totalPages}
           </span>
         </div>
 
-        <DataTable<WalletTransaction>
-          data={transactions}
-          columns={columns}
-          keyExtractor={(tx) => tx.id}
-          loading={loading}
-          emptyMessage="No transaction logs match the selected filter criteria."
-        />
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <DataTable<WalletTransaction>
+            data={transactions}
+            columns={columns}
+            keyExtractor={(tx) => tx.id}
+            loading={loading}
+            onRowClick={(tx) => setSelectedTx(tx)}
+            emptyMessage="No transaction logs match the selected filter criteria."
+          />
+        </div>
 
         {/* Pagination Bar */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-xs rounded-xl flex items-center space-x-1 transition-colors"
+              className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-extrabold rounded-xl flex items-center space-x-1 transition-colors border border-slate-200 cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
               <span>Previous</span>
             </button>
 
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const pageNum = i + 1;
-                // Show pages near current page
-                if (pageNum === 1 || pageNum === totalPages || Math.abs(pageNum - page) <= 1) {
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`w-7 h-7 rounded-lg text-xs font-extrabold ${page === pageNum
-                          ? 'bg-sky-500 text-white shadow-xs'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                }
-                return null;
-              })}
-            </div>
+            <span className="font-mono text-slate-600 text-[11px] font-extrabold hidden sm:inline">
+              Page <strong>{page}</strong> of <strong>{totalPages}</strong> ({totalRecords} total records)
+            </span>
 
             <button
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-bold text-xs rounded-xl flex items-center space-x-1 transition-colors"
+              className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 disabled:opacity-40 text-slate-700 font-extrabold rounded-xl flex items-center space-x-1 transition-colors border border-slate-200 cursor-pointer"
             >
               <span>Next</span>
               <ChevronRight className="w-4 h-4" />
@@ -373,6 +284,97 @@ export default function AdminWalletPage() {
           </div>
         )}
       </div>
+
+      {/* Transaction Details Modal */}
+      {selectedTx && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-lg w-full space-y-5 shadow-xl border border-slate-200/90">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+                  <Wallet className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">Transaction Details</h3>
+                  <p className="text-[10px] text-slate-400 font-mono">ID: {selectedTx.id}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedTx(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {/* Member Card */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1">
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Member</div>
+                <div className="font-black text-slate-900 text-sm">{selectedTx.user?.full_name || 'Member'}</div>
+                <div className="font-mono text-slate-600 font-bold flex items-center space-x-2">
+                  <span>Phone: {selectedTx.user?.phone || selectedTx.user_id}</span>
+                  {selectedTx.user?.referral_code && (
+                    <>
+                      <span>•</span>
+                      <span className="text-primary">Code: {selectedTx.user.referral_code}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Transaction Metrics Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Type / Classification</div>
+                  <div className="pt-0.5">
+                    <StatusBadge status={selectedTx.type} />
+                  </div>
+                </div>
+
+                <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3 space-y-1">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Amount Payout</div>
+                  <div className={`font-mono font-black text-sm ${Number(selectedTx.amount) >= 0 ? 'text-[#005A36]' : 'text-rose-600'}`}>
+                    {Number(selectedTx.amount) >= 0 ? '+' : ''}৳{Number(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Balance Before</div>
+                  <div className="font-mono font-extrabold text-slate-700">
+                    ৳{Number(selectedTx.balance_before || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Balance After</div>
+                  <div className="font-mono font-black text-slate-900">
+                    ৳{Number(selectedTx.balance_after || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Audit Description */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Note / Reason</div>
+                <div className="font-bold text-slate-800">{selectedTx.description || 'No additional note provided.'}</div>
+                <div className="text-[10px] text-slate-400 font-mono pt-1">
+                  Timestamp: {new Date(selectedTx.created_at).toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2">
+              <button
+                onClick={() => setSelectedTx(null)}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs rounded-xl border border-slate-200 transition-colors"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
