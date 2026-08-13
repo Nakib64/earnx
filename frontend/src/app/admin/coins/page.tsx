@@ -74,17 +74,19 @@ export default function AdminCoinsPage() {
     setLoading(true);
     const res = await apiFetch<AdminCoinStats>('/coins/admin/stats', { isAdmin: true });
     if (res.success && res.data) {
-      setStatsData(res.data);
-      if (res.data.configs) {
-        setCoinPrice(String(res.data.configs.COIN_PRICE || 10));
-        setPremiumFreeCoins(String(res.data.configs.PREMIUM_FREE_COINS || 100));
+      const data = (res.data as any).data || res.data;
+      setStatsData(data);
+      if (data.configs) {
+        setCoinPrice(String(data.configs.COIN_PRICE || 10));
+        setPremiumFreeCoins(String(data.configs.PREMIUM_FREE_COINS || 100));
         setRequiredReferrals(
-          String(res.data.configs.PREMIUM_FREE_COINS_REQUIRED_REFERRALS || 10),
+          String(data.configs.PREMIUM_FREE_COINS_REQUIRED_REFERRALS || 10),
         );
       }
     }
     setLoading(false);
   };
+
 
   const handleSaveConfigs = async (e: React.FormEvent) => {
     e.preventDefault();

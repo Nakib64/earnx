@@ -72,9 +72,24 @@ export class UsersService {
     if (status) where.status = status;
 
     if (referredById) {
-      where.OR = [
-        { referred_by_id: referredById },
-        { referred_by: { referral_code: referredById } },
+      const parentUser = await this.prisma.user.findFirst({
+        where: {
+          OR: [{ id: referredById }, { referral_code: referredById }],
+        },
+        select: { id: true },
+      });
+
+      const parentId = parentUser ? parentUser.id : referredById;
+
+      where.AND = [
+        { id: { not: parentId } },
+        {
+          OR: [
+            { referred_by_id: parentId },
+            { referred_by_id: referredById },
+            { referred_by: { referral_code: referredById } },
+          ],
+        },
       ];
     } else if (hasDesignation) {
       where.designation_id = { not: null };
@@ -86,7 +101,9 @@ export class UsersService {
         { full_name: { contains: search, mode: 'insensitive' } },
         { referral_code: { contains: search, mode: 'insensitive' } },
       ];
-      if (where.OR) {
+      if (where.AND) {
+        where.AND.push({ OR: searchFilter });
+      } else if (where.OR) {
         where.AND = [{ OR: where.OR }, { OR: searchFilter }];
         delete where.OR;
       } else {

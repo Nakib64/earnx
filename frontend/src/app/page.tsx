@@ -539,7 +539,7 @@ export default function LandingPage() {
           ))}
         </div>
 
-        <Link href="/login" className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-sky-200 text-sky-600 text-sm font-bold hover:bg-sky-50 transition-colors">
+        <Link href={admin ? '/admin/leaderboard' : user ? '/dashboard/leaderboard' : '/login'} className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl border-2 border-sky-200 text-sky-600 text-sm font-bold hover:bg-sky-50 transition-colors">
           View Full Leaderboard <ArrowRight className="w-4 h-4" />
         </Link>
       </section>
@@ -610,11 +610,15 @@ export default function LandingPage() {
               </Link>
             </div>
           )}
-          {user && (
+          {user ? (
             <Link href="/dashboard" className="bg-white text-sky-600 font-black py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg">
               Go to Dashboard <ArrowRight className="w-4 h-4" />
             </Link>
-          )}
+          ) : admin ? (
+            <Link href="/admin/dashboard" className="bg-white text-sky-600 font-black py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg">
+              Go to Admin Panel <ArrowRight className="w-4 h-4" />
+            </Link>
+          ) : null}
         </div>
       </section>
 

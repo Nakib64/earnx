@@ -21,29 +21,25 @@ export class CoinsController {
   @UseGuards(UserJwtGuard)
   @Get('info')
   async getCoinInfo(@Request() req: any) {
-    const data = await this.coinsService.getCoinInfo(req.user.id);
-    return { success: true, data };
+    return this.coinsService.getCoinInfo(req.user.id);
   }
 
   @UseGuards(UserJwtGuard)
   @Post('buy')
   async buyCoins(@Request() req: any, @Body() body: { amount: number }) {
-    const data = await this.coinsService.buyCoins(req.user.id, body.amount);
-    return { success: true, data };
+    return this.coinsService.buyCoins(req.user.id, body.amount);
   }
 
   @UseGuards(UserJwtGuard)
   @Post('unlock-premium')
   async unlockPremiumCoins(@Request() req: any) {
-    const data = await this.coinsService.unlockPremiumCoins(req.user.id);
-    return { success: true, data };
+    return this.coinsService.unlockPremiumCoins(req.user.id);
   }
 
   @UseGuards(UserJwtGuard)
   @Get('transactions')
   async getUserTransactions(@Request() req: any) {
-    const data = await this.coinsService.getUserTransactions(req.user.id);
-    return { success: true, data };
+    return this.coinsService.getUserTransactions(req.user.id);
   }
 
   // ==========================================
@@ -53,8 +49,7 @@ export class CoinsController {
   @UseGuards(AdminJwtGuard)
   @Get('admin/stats')
   async getAdminStats() {
-    const data = await this.coinsService.getAdminCoinStats();
-    return { success: true, data };
+    return this.coinsService.getAdminCoinStats();
   }
 
   @UseGuards(AdminJwtGuard)
@@ -68,12 +63,12 @@ export class CoinsController {
       description?: string;
     },
   ) {
-    const data = await this.coinsService.adminAdjustCoins(
+    return this.coinsService.adminAdjustCoins(
       body.user_id,
       body.amount,
       body.is_locked,
       body.description,
     );
-    return { success: true, data };
   }
 }
+

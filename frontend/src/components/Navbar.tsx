@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, admin, logoutUser, logoutAdmin } = useAuth();
+  const { user, admin, logoutUser, logoutAdmin, isLoading } = useAuth();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -273,24 +273,26 @@ export default function Navbar() {
 
             {/* Right Status & Profile / Auth Controls */}
             <div className="flex items-center space-x-3">
-              {user && !isAdminRoute && (
+              {isLoading ? (
+                <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-xl" />
+              ) : user ? (
                 <div className="flex items-center space-x-2">
                   {/* Balance Badge — hidden on very small screens to save space */}
                   <div className="hidden sm:flex bg-sky-50 border border-sky-100 px-3 py-1.5 rounded-full items-center space-x-1.5">
                     <Wallet className="w-4 h-4 text-sky-600" />
                     <span className="text-xs font-bold text-sky-900">
-                      ৳{Number(user.wallet_balance).toFixed(2)}
+                      ৳{Number(user.wallet_balance || 0).toFixed(2)}
                     </span>
                   </div>
 
                   {/* Account Status Badge */}
                   {user.status === 'ACTIVE' ? (
-                    <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                       <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-500" />
                       Active
                     </span>
                   ) : (
-                    <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
                       <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" />
                       Disabled
                     </span>
@@ -300,9 +302,9 @@ export default function Navbar() {
                   {isPublicRoute && (
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 sky-gradient-btn rounded-xl font-bold text-xs shadow-sm"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 sky-gradient-btn rounded-xl font-bold text-xs shadow-sm hover:shadow-md transition-all"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <LayoutDashboard className="w-4 h-4" />
                       <span>Dashboard</span>
                     </Link>
                   )}
@@ -316,9 +318,7 @@ export default function Navbar() {
                     <LogOut className="w-5 h-5" />
                   </button>
                 </div>
-              )}
-
-              {admin && (
+              ) : admin ? (
                 <div className="flex items-center space-x-2">
                   <span className="text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full hidden sm:inline">
                     Admin: {admin.phone}
@@ -341,9 +341,7 @@ export default function Navbar() {
                     <LogOut className="w-5 h-5" />
                   </button>
                 </div>
-              )}
-
-              {(!user && !admin) || (isAdminRoute && !admin) ? (
+              ) : (
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
@@ -358,7 +356,7 @@ export default function Navbar() {
                     Sign Up
                   </Link>
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
         </div>

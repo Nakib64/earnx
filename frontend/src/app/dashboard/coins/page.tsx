@@ -42,10 +42,12 @@ export default function UserCoinsPage() {
     ]);
 
     if (infoRes.success && infoRes.data) {
-      setCoinInfo(infoRes.data);
+      const data = (infoRes.data as any).data || infoRes.data;
+      setCoinInfo(data);
     }
     if (txRes.success && txRes.data) {
-      setTransactions(txRes.data);
+      const data = (txRes.data as any).data || txRes.data;
+      setTransactions(Array.isArray(data) ? data : []);
     }
     setLoading(false);
   };
@@ -79,9 +81,10 @@ export default function UserCoinsPage() {
     );
 
     if (res.success && res.data) {
+      const data = (res.data as any).data || res.data;
       setMessage({
         type: 'success',
-        text: `Successfully purchased ${res.data.amount} coins for ৳${res.data.cost.toLocaleString()}!`,
+        text: `Successfully purchased ${data.amount} coins for ৳${(data.cost || 0).toLocaleString()}!`,
       });
       await refreshUserProfile();
       await fetchData();
@@ -101,9 +104,10 @@ export default function UserCoinsPage() {
     );
 
     if (res.success && res.data) {
+      const data = (res.data as any).data || res.data;
       setMessage({
         type: 'success',
-        text: `🎉 Congratulations! You have unlocked ${res.data.unlocked_amount} premium bonus coins to your available balance!`,
+        text: `🎉 Congratulations! You have unlocked ${data.unlocked_amount} premium bonus coins to your available balance!`,
       });
       await refreshUserProfile();
       await fetchData();
@@ -168,7 +172,7 @@ export default function UserCoinsPage() {
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Coin Balance</p>
             <h2 className="text-3xl font-extrabold text-slate-900 mt-1">
-              {loading ? '...' : coinInfo?.coin_balance.toLocaleString()} <span className="text-amber-500 text-lg">Coins</span>
+              {loading ? '...' : (coinInfo?.coin_balance ?? 0).toLocaleString()} <span className="text-amber-500 text-lg">Coins</span>
             </h2>
             <p className="text-xs font-medium text-slate-500 mt-1 flex items-center space-x-1">
               <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
@@ -191,7 +195,7 @@ export default function UserCoinsPage() {
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Locked Premium Bonus Coins</p>
             <h2 className="text-3xl font-extrabold text-purple-900 mt-1">
-              {loading ? '...' : coinInfo?.locked_coin_balance.toLocaleString()} <span className="text-purple-500 text-lg">Coins</span>
+              {loading ? '...' : (coinInfo?.locked_coin_balance ?? 0).toLocaleString()} <span className="text-purple-500 text-lg">Coins</span>
             </h2>
             <p className="text-xs font-medium text-slate-500 mt-1">
               {coinInfo?.is_premium_coins_unlocked
@@ -215,7 +219,7 @@ export default function UserCoinsPage() {
           <div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Wallet Balance</p>
             <h2 className="text-3xl font-extrabold text-slate-900 mt-1">
-              ৳{loading ? '...' : coinInfo?.wallet_balance.toLocaleString()}
+              ৳{loading ? '...' : (coinInfo?.wallet_balance ?? 0).toLocaleString()}
             </h2>
             <p className="text-xs font-medium text-slate-500 mt-1">
               Use your wallet balance to buy coins anytime.
@@ -239,7 +243,7 @@ export default function UserCoinsPage() {
               {coinInfo?.is_premium
                 ? coinInfo.is_premium_coins_unlocked
                   ? '🎉 Bonus Unlocked & Credited!'
-                  : `🎁 ${coinInfo.locked_coin_balance} Premium Bonus Coins Locked`
+                  : `🎁 ${coinInfo.locked_coin_balance ?? 0} Premium Bonus Coins Locked`
                 : `🎁 Get ${coinInfo?.premium_free_coins || 100} Locked Free Coins with Premium`}
             </h3>
 
@@ -300,7 +304,7 @@ export default function UserCoinsPage() {
                   className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-extrabold text-sm rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/25 transition-all"
                 >
                   <Unlock className="w-4 h-4" />
-                  <span>{unlocking ? 'Unlocking...' : `Unlock ${coinInfo.locked_coin_balance} Coins Now!`}</span>
+                  <span>{unlocking ? 'Unlocking...' : `Unlock ${coinInfo.locked_coin_balance ?? 0} Coins Now!`}</span>
                 </button>
               </>
             ) : (
@@ -309,7 +313,7 @@ export default function UserCoinsPage() {
                   <Lock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-amber-300">Locked ({coinInfo.locked_coin_balance} Coins)</p>
+                  <p className="text-xs font-bold text-amber-300">Locked ({coinInfo.locked_coin_balance ?? 0} Coins)</p>
                   <p className="text-xs text-slate-400 mt-1">
                     Needs {(coinInfo.required_referral_count || 10) - (coinInfo.active_referral_count || 0)} more active referral(s) to unlock.
                   </p>
