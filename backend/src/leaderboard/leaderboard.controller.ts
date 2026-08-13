@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -20,9 +21,20 @@ import { AdminJwtGuard } from '../admin-auth/guards/admin-jwt.guard';
 export class LeaderboardController {
   constructor(private readonly leaderboardService: LeaderboardService) {}
 
-  // Public/User Top 100 Leaderboard endpoint
+  // Public/User Leaderboard endpoint with pagination & infinite scroll support
   @Get()
-  async getTop100() {
+  async getLeaderboard(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    if (page || limit || search) {
+      return this.leaderboardService.getPaginated(
+        page ? parseInt(page, 10) : 1,
+        limit ? parseInt(limit, 10) : 20,
+        search,
+      );
+    }
     return this.leaderboardService.getTop100();
   }
 

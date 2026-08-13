@@ -7,7 +7,7 @@ import { WalletTransaction } from '../../../types';
 import { DataTable, ColumnDef } from '../../../components/common/DataTable';
 import { StatusBadge } from '../../../components/common/StatusBadge';
 import { AlertBanner } from '../../../components/common/AlertBanner';
-import { Wallet, Send, ArrowRightLeft, CheckCircle2, UserCheck, Loader2 } from 'lucide-react';
+import { Wallet, Send, ArrowRightLeft, CheckCircle2, UserCheck, Loader2, MinusCircle, ShieldCheck } from 'lucide-react';
 
 export default function WalletPage() {
   const { user, refreshUserProfile } = useAuth();
@@ -160,9 +160,9 @@ export default function WalletPage() {
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 min-w-0">
             <StatusBadge status={tx.type} />
-            <span className={`font-mono font-extrabold text-[11px] ${isCredit ? 'text-emerald-700' : 'text-rose-700'}`}>
+            <span className={`font-mono font-extrabold text-[11px] truncate ${isCredit ? 'text-[#005A36]' : 'text-rose-700'}`}>
               {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
             </span>
           </div>
@@ -183,11 +183,11 @@ export default function WalletPage() {
       header: 'Note & Date',
       align: 'right',
       render: (tx) => (
-        <div className="text-right">
-          <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
+        <div className="text-right min-w-0">
+          <div className="text-slate-700 text-[10px] font-semibold truncate max-w-[140px] sm:max-w-[240px] ml-auto">
             {tx.description || '-'}
           </div>
-          <div className="text-slate-400 text-[9px] font-mono">{new Date(tx.created_at).toLocaleString()}</div>
+          <div className="text-slate-400 text-[9px] font-mono truncate">{new Date(tx.created_at).toLocaleString()}</div>
         </div>
       ),
     },
@@ -196,22 +196,73 @@ export default function WalletPage() {
   const currentBal = Number(user?.wallet_balance || 0);
 
   return (
-    <div className="space-y-6">
-
-
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {statusMsg && <AlertBanner type={statusMsg.type} message={statusMsg.text} onClose={() => setStatusMsg(null)} />}
+
+      {/* Full-Width Hero Wallet Banner */}
+      <div className="relative overflow-hidden bg-[#005A36] rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+          {/* Balance info */}
+          <div className="space-y-3 min-w-0">
+            <div className="flex items-center space-x-2">
+              <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider text-white">
+                Main Wallet Balance
+              </span>
+              <span className="bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-emerald-200">
+                ACID Ledger
+              </span>
+            </div>
+
+            <div className="flex items-baseline space-x-2 min-w-0">
+              <span className="text-3xl sm:text-5xl font-black text-white font-mono tracking-tight truncate">
+                ৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+              <span className="text-xs sm:text-sm font-extrabold text-emerald-200">Available BDT</span>
+            </div>
+
+            <p className="text-xs text-emerald-100/80 font-medium truncate">
+              Instant multi-level payouts, package dividends, and network transfer balance.
+            </p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center shrink-0">
+            <button
+              onClick={() => {
+                setShowTransferModal((prev) => !prev);
+                setShowWithdrawModal(false);
+              }}
+              className="bg-secondary hover:bg-[#B89628] text-slate-950 px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:scale-[1.02] transition-all cursor-pointer truncate"
+            >
+              <ArrowRightLeft className="w-4 h-4 text-slate-950 shrink-0" />
+              <span className="truncate">Direct Send</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowWithdrawModal((prev) => !prev);
+                setShowTransferModal(false);
+              }}
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-3.5 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 backdrop-blur-md hover:scale-[1.02] transition-all cursor-pointer truncate"
+            >
+              <MinusCircle className="w-4 h-4 text-white shrink-0" />
+              <span className="truncate">Withdraw</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Network Transfer Modal / Form */}
       {showTransferModal && (
-        <div className="glass-card rounded-none p-6 border-2 border-yellow-300 space-y-4 animate-in fade-in zoom-in-95 duration-200">
-          <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
-              <ArrowRightLeft className="w-5 h-5 text-[#854D0E]" />
-              <span>Direct Network Balance Transfer</span>
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-amber-300 space-y-4 shadow-md animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2 truncate">
+              <ArrowRightLeft className="w-5 h-5 text-[#854D0E] shrink-0" />
+              <span className="truncate">Direct Network Balance Transfer</span>
             </h3>
             <button
               onClick={() => setShowTransferModal(false)}
-              className="text-xs font-bold text-slate-400 hover:text-slate-600"
+              className="text-xs font-bold text-slate-400 hover:text-slate-600 shrink-0"
             >
               Cancel
             </button>
@@ -230,7 +281,7 @@ export default function WalletPage() {
                     placeholder="Enter referral code..."
                     value={targetReferralCode}
                     onChange={(e) => setTargetReferralCode(e.target.value.toUpperCase())}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   {searchingRecipient && (
                     <div className="absolute right-3 top-3 text-primary">
@@ -247,11 +298,11 @@ export default function WalletPage() {
                 )}
 
                 {verifiedRecipient && (
-                  <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-none flex items-center space-x-3 text-emerald-900">
-                    <UserCheck className="w-5 h-5 text-primary flex-shrink-0" />
-                    <div className="text-xs">
-                      <p className="font-extrabold text-slate-900">{verifiedRecipient.full_name}</p>
-                      <p className="text-slate-600 font-medium">{verifiedRecipient.phone}</p>
+                  <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center space-x-3 text-emerald-900">
+                    <UserCheck className="w-5 h-5 text-primary shrink-0" />
+                    <div className="text-xs min-w-0">
+                      <p className="font-extrabold text-slate-900 truncate">{verifiedRecipient.full_name}</p>
+                      <p className="text-slate-600 font-medium truncate">{verifiedRecipient.phone}</p>
                     </div>
                   </div>
                 )}
@@ -274,7 +325,7 @@ export default function WalletPage() {
                   placeholder="Enter amount..."
                   value={transferAmount}
                   onChange={(e) => setTransferAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-[11px] text-slate-500 mt-1 font-mono">Available: ৳{currentBal.toLocaleString()}</p>
               </div>
@@ -283,9 +334,9 @@ export default function WalletPage() {
             <button
               type="submit"
               disabled={submittingTransfer || !verifiedRecipient || !transferAmount || parseFloat(transferAmount) <= 0 || parseFloat(transferAmount) > currentBal}
-              className="w-full py-3 rounded-none bg-primary hover:bg-[#044D2F] text-white font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-xs border-b-2 border-secondary transition-all"
+              className="w-full py-3 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-sm transition-all cursor-pointer"
             >
-              <CheckCircle2 className="w-4 h-4 text-secondary" />
+              <CheckCircle2 className="w-4 h-4 text-secondary shrink-0" />
               <span>{submittingTransfer ? 'Sending Transfer...' : 'Confirm & Direct Send'}</span>
             </button>
           </form>
@@ -294,12 +345,12 @@ export default function WalletPage() {
 
       {/* Withdrawal Form Modal / Box */}
       {showWithdrawModal && (
-        <div className="glass-card rounded-none p-6 border-2 border-emerald-200 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-slate-900 text-base">Submit Direct Withdrawal</h3>
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-200 space-y-4 shadow-md animate-in fade-in zoom-in-95 duration-200">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="font-extrabold text-slate-900 text-base truncate">Submit Direct Withdrawal</h3>
             <button
               onClick={() => setShowWithdrawModal(false)}
-              className="text-xs font-bold text-slate-400 hover:text-slate-600"
+              className="text-xs font-bold text-slate-400 hover:text-slate-600 shrink-0"
             >
               Cancel
             </button>
@@ -320,7 +371,7 @@ export default function WalletPage() {
                   placeholder="500.00"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary font-bold"
                 />
               </div>
             </div>
@@ -328,30 +379,21 @@ export default function WalletPage() {
             <button
               type="submit"
               disabled={submittingWithdraw || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > currentBal}
-              className="w-full emerald-gold-btn py-3 rounded-none font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full bg-[#005A36] hover:bg-[#044D2F] text-white py-3 rounded-xl font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-sm transition-all cursor-pointer"
             >
+              <Send className="w-4 h-4 text-secondary shrink-0" />
               <span>{submittingWithdraw ? 'Processing...' : 'Confirm & Withdraw'}</span>
             </button>
           </form>
         </div>
       )}
 
-      {/* Balance Summary Header */}
-      <div className="glass-card rounded-none p-6 flex items-center justify-between">
-        <div className="space-y-1">
-          <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Available Wallet Balance</span>
-          <div className="text-3xl font-extrabold text-slate-900 font-mono">
-            ৳{currentBal.toFixed(2)}
-          </div>
-        </div>
-        <div className="w-12 h-12 rounded-none bg-primary border-b-2 border-secondary flex items-center justify-center text-secondary shadow-xs">
-          <Wallet className="w-6 h-6" />
-        </div>
-      </div>
-
       {/* Transaction History Table */}
-      <div className="glass-card rounded-none p-5 space-y-4">
-        <h3 className="font-extrabold text-slate-900 text-sm">Ledger Audit History</h3>
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm overflow-hidden">
+        <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
+          <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+          <h3 className="font-extrabold text-slate-900 text-base truncate">Ledger Audit History</h3>
+        </div>
 
         <DataTable<WalletTransaction>
           data={transactions}

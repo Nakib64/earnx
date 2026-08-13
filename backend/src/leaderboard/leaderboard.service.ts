@@ -14,6 +14,44 @@ export class LeaderboardService {
     });
   }
 
+  async getPaginated(page = 1, limit = 20, search?: string) {
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.LeaderboardEntryWhereInput = {
+      is_active: true,
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { phone: { contains: search, mode: 'insensitive' } },
+              { badge: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    };
+
+    const [total, data] = await Promise.all([
+      this.prisma.leaderboardEntry.count({ where }),
+      this.prisma.leaderboardEntry.findMany({
+        where,
+        orderBy: { rank: 'asc' },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    return {
+      data,
+      total,
+      page,
+      totalPages,
+      hasMore,
+    };
+  }
+
   async getAllAdmin() {
     return this.prisma.leaderboardEntry.findMany({
       orderBy: { rank: 'asc' },

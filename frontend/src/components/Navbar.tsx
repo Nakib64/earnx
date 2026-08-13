@@ -51,7 +51,7 @@ export default function Navbar() {
     { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet & Ledger', icon: Wallet },
-    { href: '/dashboard/offers', label: 'Offers & Tasks', icon: Gift },
+    { href: '/dashboard/settings', label: 'Profile Settings', icon: Settings },
   ];
 
   const adminItems = [
@@ -65,7 +65,6 @@ export default function Navbar() {
     { href: '/admin/approvals', label: 'Pending Approvals Queue', icon: UserCheck },
     { href: '/admin/commissions', label: 'Commission Rules', icon: Layers },
     { href: '/admin/wallet', label: 'Ledger & Adjustments', icon: DollarSign },
-    { href: '/admin/offers', label: 'Manage Offers', icon: Gift },
   ];
 
   const publicItems = [
@@ -76,31 +75,27 @@ export default function Navbar() {
 
   const drawerContent = (
     <div
-      className={`lg:hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+      className={`lg:hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${
+        mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}
     >
       <div
-        className={`bg-white w-72 max-w-[85vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+        className={`bg-white w-72 max-w-[85vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-lg sky-gradient-bg flex items-center justify-center text-white font-bold text-sm">
-              X
-            </div>
-            <div className="flex flex-col overflow-hidden">
-              <span className="font-extrabold text-sm bg-gradient-to-r from-sky-500 to-sky-700 bg-clip-text text-transparent truncate">
-                EarnX
-              </span>
-              <span className="text-[10px] font-semibold text-slate-400 -mt-1 uppercase tracking-wider">
-                {isAdminRoute ? 'Admin Portal' : 'MLM Ecosystem'}
-              </span>
-            </div>
-          </div>
+          <Link href={isAdminRoute ? '/admin/dashboard' : '/'} onClick={() => setMobileMenuOpen(false)} className="flex items-center space-x-2">
+            <img
+              src="/logo.png"
+              alt="EarnX Capital"
+              className="h-8 w-auto object-contain"
+            />
+          </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+            className="p-1.5 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100"
           >
             <X className="w-5 h-5" />
           </button>
@@ -116,12 +111,13 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all ${isActive
-                  ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/20'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
+                className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl font-bold text-sm transition-all ${
+                  isActive
+                    ? 'bg-[#005A36] text-white shadow-sm font-black'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-secondary' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -135,9 +131,9 @@ export default function Navbar() {
               <Link
                 href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 sky-gradient-btn font-bold text-xs rounded-xl"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs rounded-xl shadow-sm"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-4 h-4 text-secondary" />
                 <span>Dashboard</span>
               </Link>
               <button
@@ -145,7 +141,7 @@ export default function Navbar() {
                   setMobileMenuOpen(false);
                   logoutUser();
                 }}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-bold text-xs transition-colors"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-extrabold text-xs transition-colors border border-rose-200/80"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Log Out</span>
@@ -156,9 +152,9 @@ export default function Navbar() {
               <Link
                 href="/admin/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-slate-900 text-white font-extrabold text-xs rounded-xl"
               >
-                <LayoutDashboard className="w-4 h-4" />
+                <LayoutDashboard className="w-4 h-4 text-secondary" />
                 <span>Admin Dashboard</span>
               </Link>
               <button
@@ -166,7 +162,7 @@ export default function Navbar() {
                   setMobileMenuOpen(false);
                   logoutAdmin();
                 }}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-bold text-xs transition-colors"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-extrabold text-xs transition-colors border border-rose-200/80"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Log Out Admin</span>
@@ -177,7 +173,7 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold text-xs transition-colors"
+                className="flex items-center justify-center space-x-1.5 py-2.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-extrabold text-xs transition-colors"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Sign In</span>
@@ -185,9 +181,9 @@ export default function Navbar() {
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 sky-gradient-btn font-bold text-xs rounded-xl"
+                className="flex items-center justify-center space-x-1.5 py-2.5 bg-[#005A36] text-white hover:bg-[#044D2F] font-extrabold text-xs rounded-xl shadow-sm"
               >
-                <UserPlus className="w-4 h-4" />
+                <UserPlus className="w-4 h-4 text-secondary" />
                 <span>Sign Up</span>
               </Link>
             </div>
@@ -201,33 +197,20 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm w-full ${isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
-          }`}
+        className={`sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/90 shadow-xs w-full ${
+          isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo & Mobile Menu Toggle */}
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-                title="Toggle Menu"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-
-              <Link href={isAdminRoute ? '/admin/dashboard' : '/'} className="flex items-center space-x-2 group">
-                <div className="w-10 h-10 rounded-xl sky-gradient-bg flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:scale-105 transition-transform">
-                  X
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-sky-500 to-sky-700 bg-clip-text text-transparent">
-                    EarnX
-                  </span>
-                  <span className="text-[10px] font-semibold text-slate-400 -mt-1 uppercase tracking-widest">
-                    {isAdminRoute ? 'Admin Portal' : 'MLM Ecosystem'}
-                  </span>
-                </div>
+            {/* Logo */}
+            <div className="flex items-center">
+              <Link href={isAdminRoute ? '/admin/dashboard' : '/'} className="flex items-center space-x-2.5 group">
+                <img
+                  src="/logo.png"
+                  alt="EarnX Capital"
+                  className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105"
+                />
               </Link>
             </div>
 
@@ -236,28 +219,31 @@ export default function Navbar() {
               <nav className="hidden md:flex items-center space-x-8">
                 <Link
                   href="/"
-                  className={`text-sm font-semibold transition-colors ${pathname === '/'
-                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                    : 'text-slate-600 hover:text-sky-600'
-                    }`}
+                  className={`text-xs sm:text-sm font-extrabold transition-colors ${
+                    pathname === '/'
+                      ? 'text-primary font-black border-b-2 border-secondary pb-0.5'
+                      : 'text-slate-600 hover:text-primary'
+                  }`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/about"
-                  className={`text-sm font-semibold transition-colors ${pathname === '/about'
-                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                    : 'text-slate-600 hover:text-sky-600'
-                    }`}
+                  className={`text-xs sm:text-sm font-extrabold transition-colors ${
+                    pathname === '/about'
+                      ? 'text-primary font-black border-b-2 border-secondary pb-0.5'
+                      : 'text-slate-600 hover:text-primary'
+                  }`}
                 >
                   About Us
                 </Link>
                 <Link
                   href="/contact"
-                  className={`text-sm font-semibold transition-colors ${pathname === '/contact'
-                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                    : 'text-slate-600 hover:text-sky-600'
-                    }`}
+                  className={`text-xs sm:text-sm font-extrabold transition-colors ${
+                    pathname === '/contact'
+                      ? 'text-primary font-black border-b-2 border-secondary pb-0.5'
+                      : 'text-slate-600 hover:text-primary'
+                  }`}
                 >
                   Contact Us
                 </Link>
@@ -267,26 +253,26 @@ export default function Navbar() {
             {/* Right Status & Profile / Auth Controls */}
             <div className="flex items-center space-x-3">
               {isLoading ? (
-                <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-none" />
+                <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
                   {/* Balance Badge */}
-                  <div className="hidden sm:flex bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-none items-center space-x-1.5">
+                  <div className="hidden sm:flex bg-[#F2FBF6] border border-emerald-100/90 px-3 py-1.5 rounded-xl items-center space-x-1.5">
                     <Wallet className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-bold text-emerald-900 font-mono">
+                    <span className="text-xs font-black text-primary font-mono">
                       ৳{Number(user.wallet_balance || 0).toFixed(2)}
                     </span>
                   </div>
 
                   {/* Account Status Badge */}
                   {user.status === 'ACTIVE' ? (
-                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-emerald-100 text-primary border border-emerald-300">
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-extrabold bg-emerald-50 text-primary border border-emerald-200">
                       <CheckCircle className="w-3.5 h-3.5 mr-1 text-primary" />
                       Active
                     </span>
                   ) : (
-                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                      <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" />
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-xl text-xs font-extrabold bg-amber-50 text-[#854D0E] border border-amber-200">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-[#854D0E]" />
                       Disabled
                     </span>
                   )}
@@ -295,61 +281,54 @@ export default function Navbar() {
                   {isPublicRoute && (
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 emerald-gold-btn rounded-none font-bold text-xs shadow-xs transition-all"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#005A36] hover:bg-[#044D2F] text-white rounded-xl font-extrabold text-xs shadow-sm transition-all"
                     >
-                      <LayoutDashboard className="w-4 h-4" />
+                      <LayoutDashboard className="w-4 h-4 text-secondary" />
                       <span>Dashboard</span>
                     </Link>
                   )}
-
-                  {/* Logout User */}
-                  <button
-                    onClick={logoutUser}
-                    className="p-2 text-slate-400 hover:text-red-500 rounded-none hover:bg-slate-100 transition-colors"
-                    title="Logout"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
                 </div>
               ) : admin ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-primary bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-none hidden sm:inline">
+                  <span className="text-xs font-extrabold text-primary bg-[#F2FBF6] border border-emerald-200 px-3 py-1 rounded-xl hidden sm:inline">
                     Admin: {admin.phone}
                   </span>
                   {/* Admin dashboard button on public pages */}
                   {isPublicRoute && (
                     <Link
                       href="/admin/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-primary text-white border-b-2 border-secondary rounded-none font-bold text-xs shadow-xs transition-colors"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#005A36] text-white rounded-xl font-extrabold text-xs shadow-sm transition-colors"
                     >
                       <LayoutDashboard className="w-3.5 h-3.5 text-secondary" />
                       <span>Admin Panel</span>
                     </Link>
                   )}
-                  <button
-                    onClick={logoutAdmin}
-                    className="p-2 text-slate-400 hover:text-red-500 rounded-none hover:bg-slate-100 transition-colors"
-                    title="Logout Admin"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-primary transition-colors"
+                    className="px-4 py-2 text-xs font-extrabold text-slate-700 hover:text-primary transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="px-4 py-2 rounded-none emerald-gold-btn font-bold text-xs shadow-xs transition-all"
+                    className="px-4 py-2 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs shadow-sm transition-all"
                   >
                     Sign Up
                   </Link>
                 </div>
               )}
+
+              {/* Mobile Menu Toggle */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
+                title="Toggle Menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
           </div>
         </div>

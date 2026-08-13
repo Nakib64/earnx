@@ -195,10 +195,7 @@ export default function UserCoinsPage() {
               <Wallet className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
-                Available Wallet Balance
-              </h3>
-              <p className="text-sm sm:text-base font-black text-slate-900 font-mono mt-0.5">
+              <p className="text-xl sm:text-base font-black text-slate-900 font-mono mt-0.5">
                 ৳{loading ? '...' : (coinInfo?.wallet_balance ?? 0).toLocaleString()}
               </p>
             </div>

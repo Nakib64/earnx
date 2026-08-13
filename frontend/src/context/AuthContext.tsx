@@ -16,6 +16,7 @@ interface AuthContextType {
   logoutUser: () => void;
   logoutAdmin: () => void;
   refreshUserProfile: () => Promise<void>;
+  refreshAdminProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,6 +39,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Failed to refresh user profile:', res.error?.message);
       if (res.statusCode === 401) {
         logoutUser();
+      }
+    }
+  };
+
+  const refreshAdminProfile = async () => {
+    const token = adminToken || getCookie('earnx_admin_token') || localStorage.getItem('earnx_admin_token');
+    if (!token) return;
+
+    const res = await apiFetch<Admin>('/admin/auth/me', { token, isAdmin: true });
+    if (res.success && res.data) {
+      setAdmin(res.data);
+    } else {
+      console.error('Failed to refresh admin profile:', res.error?.message);
+      if (res.statusCode === 401) {
+        logoutAdmin();
       }
     }
   };
@@ -124,6 +140,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logoutUser,
         logoutAdmin,
         refreshUserProfile,
+        refreshAdminProfile,
       }}
     >
       {children}

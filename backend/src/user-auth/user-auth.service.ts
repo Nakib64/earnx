@@ -143,4 +143,56 @@ export class UserAuthService {
     const { password_hash, ...sanitized } = user;
     return sanitized;
   }
+
+  async updateProfile(
+    userId: string,
+    dto: { full_name?: string; current_password?: string; new_password?: string },
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const updateData: any = {};
+
+    if (dto.full_name !== undefined) {
+      updateData.full_name = dto.full_name.trim() || null;
+    }
+
+    if (dto.new_password) {
+      if (!dto.current_password) {
+        throw new BadRequestException('Current password is required to set a new password');
+      }
+      const isPasswordValid = await bcrypt.compare(dto.current_password, user.password_hash);
+      if (!isPasswordValid) {
+        throw new BadRequestException('Current password is incorrect');
+      }
+      if (dto.new_password.length < 6) {
+        throw new BadRequestException('New password must be at least 6 characters');
+      }
+      updateData.password_hash = await bcrypt.hash(dto.new_password, 10);
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      include: {
+        designation: true,
+        referred_by: {
+          select: {
+            id: true,
+            phone: true,
+            full_name: true,
+            referral_code: true,
+          },
+        },
+      },
+    });
+
+    const { password_hash, ...sanitized } = updatedUser;
+    return sanitized;
+  }
 }

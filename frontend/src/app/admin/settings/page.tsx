@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
 import { SystemConfigMap } from '../../../types';
 import { AlertBanner } from '../../../components/common/AlertBanner';
-import { Settings, Save, RefreshCw, Search, Users, CheckSquare, Square, DollarSign } from 'lucide-react';
+import { Settings, Save, RefreshCw, Search, Users, CheckSquare, Square, DollarSign, UserCheck, Lock, User } from 'lucide-react';
 
 interface PremiumUser {
   id: string;
@@ -19,6 +20,15 @@ interface PremiumUser {
 }
 
 export default function AdminSettingsPage() {
+  const { admin, refreshAdminProfile } = useAuth();
+
+  // Admin Profile State
+  const [adminName, setAdminName] = useState(admin?.name || '');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [savingAdminProfile, setSavingAdminProfile] = useState(false);
+
+  // System Config State
   const [weeklyPayout, setWeeklyPayout] = useState('100');
   const [coinPrice, setCoinPrice] = useState('10');
   const [premiumFreeCoins, setPremiumFreeCoins] = useState('100');
@@ -36,9 +46,10 @@ export default function AdminSettingsPage() {
   const [submittingSelectedPayout, setSubmittingSelectedPayout] = useState(false);
 
   useEffect(() => {
+    if (admin) setAdminName(admin.name || '');
     fetchSettings();
     fetchPremiumUsers();
-  }, []);
+  }, [admin]);
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -62,6 +73,34 @@ export default function AdminSettingsPage() {
       setPremiumUsers(res.data);
     }
     setLoadingUsers(false);
+  };
+
+  const handleUpdateAdminProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingAdminProfile(true);
+    setMessage(null);
+
+    const bodyData: any = { name: adminName.trim() };
+    if (newPassword) {
+      bodyData.current_password = currentPassword;
+      bodyData.new_password = newPassword;
+    }
+
+    const res = await apiFetch('/admin/auth/profile', {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify(bodyData),
+    });
+
+    if (res.success) {
+      setMessage({ type: 'success', text: 'Admin profile updated successfully!' });
+      setCurrentPassword('');
+      setNewPassword('');
+      await refreshAdminProfile();
+    } else {
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to update admin profile' });
+    }
+    setSavingAdminProfile(false);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -178,14 +217,88 @@ export default function AdminSettingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center space-x-2">
-            <Settings className="w-6 h-6 text-sky-600" />
-            <span>Global System Configuration</span>
+            <Settings className="w-6 h-6 text-emerald-700" />
+            <span>Admin Settings & Profile</span>
           </h1>
-          <p className="text-xs text-slate-500">Configure global parameters, payouts, and execution rules.</p>
+          <p className="text-xs text-slate-500">Update your admin credentials and global system settings.</p>
         </div>
       </div>
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
+
+      {/* Admin Profile Settings Card */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center space-x-2">
+          <User className="w-5 h-5 text-emerald-700" />
+          <span>Admin Profile & Password</span>
+        </h2>
+
+        <form onSubmit={handleUpdateAdminProfile} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Admin Name
+              </label>
+              <input
+                type="text"
+                required
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 focus:ring-2 focus:ring-emerald-600 text-xs sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Phone Number (Readonly)
+              </label>
+              <input
+                type="text"
+                disabled
+                value={admin?.phone || ''}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 font-mono text-slate-500 text-xs sm:text-sm cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Current Password (required to change)
+              </label>
+              <input
+                type="password"
+                placeholder="Current password..."
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 focus:ring-2 focus:ring-emerald-600 text-xs sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                New Password
+              </label>
+              <input
+                type="password"
+                placeholder="New password (min. 6 chars)..."
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-900 focus:ring-2 focus:ring-emerald-600 text-xs sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={savingAdminProfile}
+            className="w-full py-3 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-all cursor-pointer"
+          >
+            <Save className="w-4 h-4 text-secondary" />
+            <span>{savingAdminProfile ? 'Saving Profile...' : 'Save Admin Profile'}</span>
+          </button>
+        </form>
+      </div>
 
       {/* Global Premium Settings Card */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
@@ -205,7 +318,7 @@ export default function AdminSettingsPage() {
               type="number"
               value={weeklyPayout}
               onChange={(e) => setWeeklyPayout(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-300 font-bold text-slate-900 focus:ring-2 focus:ring-sky-500"
+              className="w-full px-4 py-3 rounded-xl border border-slate-300 font-bold text-slate-900 focus:ring-2 focus:ring-emerald-600"
             />
           </div>
 
@@ -213,10 +326,10 @@ export default function AdminSettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving || loading}
-              className="w-full py-3 px-6 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex items-center justify-center space-x-2 shadow-md shadow-sky-600/20"
+              className="w-full py-3 px-6 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-sm transition-all"
             >
-              <Save className="w-4 h-4" />
-              <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+              <Save className="w-4 h-4 text-secondary" />
+              <span>{saving ? 'Saving...' : 'Save Global Settings'}</span>
             </button>
           </div>
         </div>
@@ -232,7 +345,7 @@ export default function AdminSettingsPage() {
           <button
             onClick={handleTriggerPayouts}
             disabled={triggering}
-            className="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-md"
+            className="py-2.5 px-5 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center space-x-2 shadow-sm"
           >
             <RefreshCw className={`w-4 h-4 ${triggering ? 'animate-spin' : ''}`} />
             <span>{triggering ? 'Executing Payouts...' : 'Trigger Global Payouts Now'}</span>

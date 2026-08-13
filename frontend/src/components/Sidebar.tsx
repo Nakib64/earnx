@@ -45,7 +45,6 @@ export default function Sidebar() {
   if (isDashboardRoute && !user && !isLoading && !userToken) return null;
   if (!isDashboardRoute && !isAdminRoute) return null;
 
-
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
     { href: '/dashboard/coins', label: 'Coins Wallet', icon: Coins },
@@ -53,6 +52,7 @@ export default function Sidebar() {
     { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet & Ledger', icon: Wallet },
+    { href: '/dashboard/settings', label: 'Profile Settings', icon: Settings },
   ];
 
   const adminTopItems: LinkItem[] = [
@@ -76,7 +76,6 @@ export default function Sidebar() {
     { href: '/admin/wallet', label: 'Ledger & Adjustments', icon: DollarSign },
   ];
 
-
   const renderLink = (item: LinkItem, isChild = false) => {
     const Icon = item.icon;
     const isActive = pathname === item.href;
@@ -84,55 +83,50 @@ export default function Sidebar() {
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center space-x-3 py-2.5 rounded-none font-medium text-xs transition-all ${isChild ? 'pl-7 pr-3.5' : 'px-3.5'
-          } ${isActive
-            ? 'bg-primary text-white border-l-4 border-secondary shadow-xs'
-            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
+        className={`flex items-center space-x-3 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 ${
+          isChild ? 'pl-7 pr-3.5' : 'px-3.5'
+        } ${
+          isActive
+            ? 'bg-[#005A36] text-white shadow-sm shadow-emerald-950/20 font-black'
+            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+        }`}
       >
         <Icon
-          className={`w-4 h-4 shrink-0 ${isActive ? 'text-secondary' : item.accentClass || 'text-slate-400'
-            }`}
+          className={`w-4 h-4 shrink-0 transition-colors ${
+            isActive ? 'text-secondary' : item.accentClass || 'text-slate-400'
+          }`}
         />
-        <span>{item.label}</span>
+        <span className="truncate">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <aside
-      className={`hidden lg:flex flex-col w-64 shrink-0 bg-white border-r border-slate-200 p-4 space-y-5 overflow-y-auto z-10 h-screen sticky top-0 rounded-none`}
-    >
+    <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-white/95 backdrop-blur-xl border-r border-slate-200/90 p-4 space-y-4 overflow-y-auto z-20 h-screen sticky top-0">
       {/* Brand Header */}
-      <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-100 shrink-0">
-        <div className="w-9 h-9 rounded-none bg-primary border-b-2 border-secondary flex items-center justify-center text-secondary font-black text-lg shadow-xs">
-          X
-        </div>
-        <div className="flex flex-col">
-          <span className="font-extrabold text-lg tracking-tight text-primary">
-            Earn<span className="text-secondary">X</span>
-          </span>
-          <span className="text-[9px] font-bold text-slate-400 -mt-1 uppercase tracking-widest">
-            {isAdminRoute ? 'Admin Portal' : 'Capital Ecosystem'}
-          </span>
-        </div>
-      </div>
+      <Link href={isAdminRoute ? '/admin/dashboard' : '/dashboard'} className="flex items-center space-x-2.5 pb-3 border-b border-slate-100 shrink-0 group">
+        <img
+          src="/logo.png"
+          alt="EarnX Capital"
+          className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+        />
+      </Link>
 
       {/* Role Indicator Banner */}
-      <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-none p-3 flex items-center space-x-3 shrink-0">
-        <div className="w-8 h-8 rounded-none bg-primary flex items-center justify-center text-secondary font-bold text-xs shrink-0">
+      <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-3 flex items-center space-x-3 shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-[#005A36] flex items-center justify-center text-secondary font-black text-xs shrink-0">
           {isAdminRoute ? 'A' : 'U'}
         </div>
         <div className="flex flex-col overflow-hidden flex-1">
-          <span className="text-xs font-bold text-slate-800 truncate">
+          <span className="text-xs font-extrabold text-slate-900 truncate">
             {isAdminRoute ? 'Admin Control' : user?.full_name || user?.phone}
           </span>
-          <span className="text-[10px] font-semibold text-primary truncate">
-            {isAdminRoute ? admin?.phone : user?.designation?.name || 'Starter Member'}
+          <span className="text-[10px] font-bold text-primary truncate">
+            {isAdminRoute ? admin?.phone : user?.designation?.name || 'Member'}
           </span>
         </div>
         {isDashboardRoute && user && (
-          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-none shrink-0 font-mono">
+          <span className="text-[10px] font-extrabold text-primary bg-emerald-100/80 border border-emerald-200/80 px-2 py-0.5 rounded-lg shrink-0 font-mono">
             ৳{Number(user.wallet_balance || 0).toFixed(0)}
           </span>
         )}
@@ -145,29 +139,31 @@ export default function Sidebar() {
             {/* Top admin links */}
             {adminTopItems.map((item) => renderLink(item))}
 
-            {/* ── Approvals Queue Group (collapsible) ── */}
+            {/* Approvals Queue Group (collapsible) */}
             <div className="pt-1 pb-0.5">
-              {/* Clickable toggle header */}
               <button
-                onClick={() => setApprovalsOpen(o => !o)}
-                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-none text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${isApprovalsSection
-                  ? 'text-primary bg-emerald-50/70 border-l-2 border-primary'
-                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                  }`}
+                onClick={() => setApprovalsOpen((o) => !o)}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
+                  isApprovalsSection
+                    ? 'text-primary bg-emerald-50/70 border-l-2 border-primary'
+                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                }`}
               >
-                <span className="flex items-center space-x-2">
+                <span className="flex items-center space-x-2 truncate">
                   <UserCheck className="w-3.5 h-3.5 shrink-0 text-primary" />
-                  <span>Approvals Queue</span>
+                  <span className="truncate">Approvals Queue</span>
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${approvalsOpen ? 'rotate-180' : 'rotate-0'
-                    }`}
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                    approvalsOpen ? 'rotate-180' : 'rotate-0'
+                  }`}
                 />
               </button>
-              {/* Indented children */}
+
               <div
-                className={`overflow-hidden transition-all duration-200 ease-in-out ${approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
-                  }`}
+                className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                  approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
+                }`}
               >
                 <div className="space-y-0.5">
                   {approvalItems.map((item) => renderLink(item, true))}
@@ -190,9 +186,9 @@ export default function Sidebar() {
             if (isAdminRoute) logoutAdmin();
             else logoutUser();
           }}
-          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-none font-bold text-xs transition-colors border border-rose-200"
+          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-extrabold text-xs transition-colors border border-rose-200/80 cursor-pointer"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4 h-4 shrink-0" />
           <span>Log Out</span>
         </button>
       </div>
