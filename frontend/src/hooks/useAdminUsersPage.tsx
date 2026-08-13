@@ -123,14 +123,15 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
 
     let url = `/admin/users?page=1&limit=100`;
 
-    if (currentParent.id !== null) {
+    if (debouncedSearch.trim()) {
+      url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
+      if (currentParent.id !== null) {
+        url += `&referred_by_id=${currentParent.id}`;
+      }
+    } else if (currentParent.id !== null) {
       url += `&referred_by_id=${currentParent.id}`;
     } else {
       url += `&has_designation=true`;
-    }
-
-    if (debouncedSearch.trim()) {
-      url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
     }
 
     const [usersRes, desRes] = await Promise.all([
