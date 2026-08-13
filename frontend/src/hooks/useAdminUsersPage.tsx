@@ -1,17 +1,25 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { apiFetch } from '../lib/api';
-import { User, Designation, UserStatus } from '../types';
+import React, { useState, useCallback, useMemo } from 'react';
+import { User, UserStatus, Designation } from '../types';
 import { ColumnDef } from '../components/common/DataTable';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { BreadcrumbItem } from '../components/users/UserBreadcrumbs';
-import { useDebounce } from './useDebounce';
 import { RowActionsMenu } from '../components/users/RowActionsMenu';
 import { Award } from 'lucide-react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
+
+import { useUserTreeData } from './useUserTreeData';
+import { useUserStatusActions } from './useUserStatusActions';
+import { useWalletAdjustment } from './useWalletAdjustment';
+import { useDesignationBadge } from './useDesignationBadge';
+import { useUserDeletion } from './useUserDeletion';
+
+// Re-export sub-hooks for direct consumption if needed
+export { useUserTreeData } from './useUserTreeData';
+export { useUserStatusActions } from './useUserStatusActions';
+export { useWalletAdjustment } from './useWalletAdjustment';
+export { useDesignationBadge } from './useDesignationBadge';
+export { useUserDeletion } from './useUserDeletion';
 
 export interface UseAdminUsersPageReturn {
   users: User[];
@@ -55,249 +63,111 @@ export interface UseAdminUsersPageReturn {
 }
 
 export function useAdminUsersPage(): UseAdminUsersPageReturn {
-  const { admin, isLoading: authLoading } = useAuth();
-  const router = useRouter();
-
-  const [users, setUsers] = useState<User[]>([]);
-  const [designations, setDesignations] = useState<Designation[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 350);
-  const [loading, setLoading] = useState(true);
-
-  // Status Change Confirmation Modal State
-  const [statusConfirmTarget, setStatusConfirmTarget] = useState<{
-    user: User;
-    newStatus: UserStatus;
-  } | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-
-  // Delete User Confirmation Modal State
-  const [deleteConfirmTarget, setDeleteConfirmTarget] = useState<User | null>(null);
-  const [deletingUser, setDeletingUser] = useState(false);
-
-  // User Detail & Transactions Modal State
   const [detailModalUser, setDetailModalUser] = useState<User | null>(null);
 
-  // Selected User For Cards View Below Table State
-  const [selectedUserForCards, setSelectedUserForCards] = useState<User | null>(null);
+  // 1. Sub-hook: Tree Data, Breadcrumbs & Fetching
+  const {
+    users,
+    setUsers,
+    designations,
+    searchTerm,
+    setSearchTerm,
+    loading,
+    breadcrumbs,
+    currentParent,
+    selectedUserForCards,
+    setSelectedUserForCards,
+    loadData,
+    handleRowClick,
+    handleBreadcrumbClick,
+  } = useUserTreeData();
 
-  const searchParams = useSearchParams();
-  const queryParentId = searchParams ? searchParams.get('parentId') : null;
-  const queryParentName = searchParams ? searchParams.get('parentName') : null;
+  // 2. Sub-hook: User Status Manager
+  const {
+    statusConfirmTarget,
+    setStatusConfirmTarget,
+    updatingStatus,
+    openStatusConfirmModal,
+    handleStatusChangeConfirm: triggerStatusChange,
+  } = useUserStatusActions();
 
-  // Breadcrumb Trail state for In-Place Tree Navigation
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>(() => {
-    if (queryParentId) {
-      return [
-        { id: null, name: 'Root Badged Leaders' },
-        { id: queryParentId, name: queryParentName || 'User' },
-      ];
-    }
-    return [{ id: null, name: 'Root Badged Leaders' }];
-  });
-  const currentParent = breadcrumbs[breadcrumbs.length - 1];
+  // 3. Sub-hook: Wallet Balance Adjustment
+  const {
+    adjustUser,
+    setAdjustUser,
+    adjusting,
+    handleBalanceAdjustSubmit: triggerBalanceAdjust,
+  } = useWalletAdjustment();
 
-  useEffect(() => {
-    if (queryParentId) {
-      setBreadcrumbs([
-        { id: null, name: 'Root Badged Leaders' },
-        { id: queryParentId, name: queryParentName || 'User' },
-      ]);
-    }
-  }, [queryParentId, queryParentName]);
+  // 4. Sub-hook: Designation & Badge Management
+  const {
+    selectedUserForBadge,
+    setSelectedUserForBadge,
+    targetDesignation,
+    setTargetDesignation,
+    targetSponsorId,
+    setTargetSponsorId,
+    allBadgedLeaders,
+    savingBadge,
+    openBadgeModal,
+    handleAssignDesignation: triggerAssignDesignation,
+  } = useDesignationBadge();
 
-  // Designation Badge Modal State
-  const [selectedUserForBadge, setSelectedUserForBadge] = useState<User | null>(null);
-  const [targetDesignation, setTargetDesignation] = useState<string>('');
-  const [targetSponsorId, setTargetSponsorId] = useState<string>('ROOT');
-  const [allBadgedLeaders, setAllBadgedLeaders] = useState<User[]>([]);
-  const [savingBadge, setSavingBadge] = useState(false);
+  // 5. Sub-hook: User Deletion
+  const {
+    deleteConfirmTarget,
+    setDeleteConfirmTarget,
+    deletingUser,
+    handleDeleteUserConfirm: triggerDeleteUser,
+  } = useUserDeletion();
 
-  // Inline Wallet Adjustment Modal State
-  const [adjustUser, setAdjustUser] = useState<User | null>(null);
-  const [adjusting, setAdjusting] = useState(false);
-
-  // Load Users & Designations
-  const loadData = useCallback(async () => {
-    setLoading(true);
-
-    let url = `/admin/users?page=1&limit=100`;
-
-    if (debouncedSearch.trim()) {
-      url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
-    } else if (currentParent.id !== null) {
-      url += `&referred_by_id=${currentParent.id}`;
-    } else {
-      url += `&has_designation=true`;
-    }
-
-    const [usersRes, desRes] = await Promise.all([
-      apiFetch<User[]>(url, { isAdmin: true }),
-      apiFetch<Designation[]>('/admin/designations', { isAdmin: true }),
-    ]);
-
-    if (usersRes.success && usersRes.data) {
-      const dataArr = (usersRes.data as any).data || (Array.isArray(usersRes.data) ? usersRes.data : []);
-      setUsers(dataArr);
-    }
-    if (desRes.success && desRes.data) {
-      setDesignations(desRes.data);
-    }
-    setLoading(false);
-  }, [currentParent.id, debouncedSearch]);
-
-  useEffect(() => {
-    if (admin) loadData();
-  }, [admin, loadData]);
-
-  // Fetch badged leaders for sponsor dropdown
-  const fetchAllBadgedLeaders = useCallback(async () => {
-    const res = await apiFetch<User[]>('/admin/users?has_designation=true&limit=100', {
-      isAdmin: true,
-    });
-    if (res.success && res.data) {
-      setAllBadgedLeaders((res.data as any).data || (Array.isArray(res.data) ? res.data : []));
-    }
-  }, []);
-
-  const openBadgeModal = useCallback(
-    (user: User) => {
-      setSelectedUserForBadge(user);
-      setTargetDesignation(user.designation_id || '');
-      setTargetSponsorId('ROOT');
-      fetchAllBadgedLeaders();
-    },
-    [fetchAllBadgedLeaders],
-  );
-
-  const handleRowClick = useCallback((user: User) => {
-    setSelectedUserForCards(user);
-    setSearchTerm('');
-    setBreadcrumbs((prev) => {
-      const lastCrumb = prev[prev.length - 1];
-      if (lastCrumb?.id === user.id) {
-        return prev;
-      }
-      return [
-        ...prev,
-        { id: user.id, name: user.full_name || user.phone || 'User' },
-      ];
-    });
-  }, []);
-
-  const handleBreadcrumbClick = useCallback((index: number) => {
-    setSearchTerm('');
-    setBreadcrumbs((prev) => prev.slice(0, index + 1));
-  }, []);
-
-  const openStatusConfirmModal = useCallback(
-    (e: React.MouseEvent, user: User, newStatus: UserStatus) => {
-      e.stopPropagation();
-      setStatusConfirmTarget({ user, newStatus });
-    },
-    [],
-  );
-
+  // Composed Handlers
   const handleStatusChangeConfirm = useCallback(async () => {
-    if (!statusConfirmTarget) return;
-    const { user, newStatus } = statusConfirmTarget;
-    setUpdatingStatus(true);
-
-    const res = await apiFetch(`/admin/users/${user.id}/status`, {
-      method: 'PATCH',
-      isAdmin: true,
-      body: JSON.stringify({ status: newStatus }),
-    });
-
-    if (res.success) {
+    await triggerStatusChange((user, newStatus) => {
       setUsers((prev) =>
         prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)),
       );
       if (selectedUserForCards?.id === user.id) {
         setSelectedUserForCards((prev) => (prev ? { ...prev, status: newStatus } : null));
       }
-      toast.success(`User ${user.full_name || user.phone} status updated to ${newStatus}`);
-      setStatusConfirmTarget(null);
-    } else {
-      toast.error(res.error?.message || 'Status update failed');
-    }
-    setUpdatingStatus(false);
-  }, [statusConfirmTarget, selectedUserForCards]);
+    });
+  }, [triggerStatusChange, setUsers, selectedUserForCards, setSelectedUserForCards]);
 
   const handleAssignDesignation = useCallback(async () => {
-    if (!selectedUserForBadge) return;
-    setSavingBadge(true);
-
-    const payload: any = { designation_id: targetDesignation || null };
-
-    if (targetSponsorId === 'ROOT') {
-      payload.referred_by_id = null;
-    } else if (targetSponsorId && targetSponsorId !== 'CURRENT') {
-      payload.referred_by_id = targetSponsorId;
-    }
-
-    const res = await apiFetch<User>(`/admin/users/${selectedUserForBadge.id}/designation`, {
-      method: 'PATCH',
-      isAdmin: true,
-      body: JSON.stringify(payload),
-    });
-
-    if (res.success) {
-      const updatedUser = res.data || {};
-      const newDesObj = designations.find((d) => d.id === targetDesignation) || null;
-
+    await triggerAssignDesignation(designations, (selectedUser, updatedUser, targetDesId, newDesObj) => {
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === selectedUserForBadge.id
+          u.id === selectedUser.id
             ? {
                 ...u,
                 ...updatedUser,
-                designation_id: targetDesignation || null,
+                designation_id: targetDesId || null,
                 designation: newDesObj || (updatedUser as any).designation || null,
               }
             : u,
         ),
       );
-      if (selectedUserForCards?.id === selectedUserForBadge.id) {
+      if (selectedUserForCards?.id === selectedUser.id) {
         setSelectedUserForCards((prev) =>
           prev
             ? {
                 ...prev,
-                designation_id: targetDesignation || null,
+                designation_id: targetDesId || null,
                 designation: newDesObj || null,
               }
             : null,
         );
       }
-      toast.success(`Designation badge updated for ${selectedUserForBadge.full_name || selectedUserForBadge.phone}`);
-      setSelectedUserForBadge(null);
-    } else {
-      toast.error(res.error?.message || 'Designation assignment failed');
-    }
-    setSavingBadge(false);
-  }, [selectedUserForBadge, targetDesignation, targetSponsorId, designations, selectedUserForCards]);
+    });
+  }, [triggerAssignDesignation, designations, setUsers, selectedUserForCards, setSelectedUserForCards]);
 
   const handleBalanceAdjustSubmit = useCallback(
     async (user: User, rawAmount: number, type: 'ADD' | 'SUBTRACT', reason: string) => {
-      setAdjusting(true);
-      const finalAmount = type === 'ADD' ? rawAmount : -rawAmount;
-
-      const res = await apiFetch('/admin/wallet/adjust', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({
-          user_id: user.id,
-          amount: finalAmount,
-          description: reason.trim() || 'Admin Direct Adjustment',
-        }),
-      });
-
-      if (res.success) {
-        const targetId = user.id;
+      await triggerBalanceAdjust(user, rawAmount, type, reason, (targetId, finalAmount) => {
         setUsers((prev) =>
           prev.map((u) => {
             if (u.id === targetId) {
-              const newBal = Number(u.wallet_balance) + finalAmount;
+              const newBal = Number(u.wallet_balance || 0) + finalAmount;
               return { ...u, wallet_balance: newBal };
             }
             return u;
@@ -310,39 +180,19 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
               : null,
           );
         }
-        toast.success(
-          `${type === 'ADD' ? 'Added' : 'Subtracted'} ৳${rawAmount} ${
-            type === 'ADD' ? 'to' : 'from'
-          } ${user.full_name || user.phone}'s balance`,
-        );
-        setAdjustUser(null);
-      } else {
-        toast.error(res.error?.message || 'Balance adjustment failed');
-      }
-      setAdjusting(false);
+      });
     },
-    [selectedUserForCards],
+    [triggerBalanceAdjust, setUsers, selectedUserForCards, setSelectedUserForCards],
   );
 
-  const handleDeleteUserConfirm = async () => {
-    if (!deleteConfirmTarget) return;
-    setDeletingUser(true);
-    const res = await apiFetch(`/admin/users/${deleteConfirmTarget.id}`, {
-      method: 'DELETE',
-      isAdmin: true,
-    });
-    if (res.success) {
-      toast.success(`User ${deleteConfirmTarget.full_name || deleteConfirmTarget.phone} deleted successfully`);
-      if (selectedUserForCards?.id === deleteConfirmTarget.id) {
+  const handleDeleteUserConfirm = useCallback(async () => {
+    await triggerDeleteUser(async (deletedUser) => {
+      if (selectedUserForCards?.id === deletedUser.id) {
         setSelectedUserForCards(null);
       }
-      setDeleteConfirmTarget(null);
       await loadData();
-    } else {
-      toast.error(res.error?.message || 'Failed to delete user');
-    }
-    setDeletingUser(false);
-  };
+    });
+  }, [triggerDeleteUser, selectedUserForCards, setSelectedUserForCards, loadData]);
 
   const userColumns = useMemo<ColumnDef<User>[]>(
     () => [
@@ -409,7 +259,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
         ),
       },
     ],
-    [openBadgeModal, openStatusConfirmModal],
+    [openBadgeModal, openStatusConfirmModal, setSelectedUserForCards, setAdjustUser, setDeleteConfirmTarget],
   );
 
   return {
