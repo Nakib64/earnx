@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { apiFetch } from '../../../lib/api';
 import { CoinInfo, CoinTransaction } from '../../../types';
 import { AlertBanner } from '../../../components/common/AlertBanner';
@@ -9,14 +10,12 @@ import {
   Lock,
   Unlock,
   Wallet,
-  ArrowUpRight,
-  Sparkles,
   Users,
-  CheckCircle2,
-  AlertCircle,
   History,
   ShoppingCart,
   TrendingUp,
+  ChevronRight,
+  Tag,
 } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -124,190 +123,245 @@ export default function UserCoinsPage() {
     : 0;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
-      {/* Main Metric Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 sm:gap-6">
-        {/* Card 1: Available Coin Balance */}
-        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-wider truncate">
-              Available Coins
-            </span>
+      {/* Top 2 Metric Cards */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-5">
+        {/* Card 1: Available Coins */}
+        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-sm">
+          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest">
+            Available Coins
+          </span>
 
-          </div>
-
-          <div className="">
-            <div className='flex gap-4 justify-start items-center '>
-              <h2 className="text-4xl sm:text-4xl font-black text-primary/80 font-mono tracking-tight">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100/80 flex items-center justify-center text-primary shrink-0">
+              <Coins className="w-6 h-6 sm:w-7 sm:h-7" />
+            </div>
+            <div>
+              <div className="text-2xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight">
                 {loading ? '...' : (coinInfo?.coin_balance ?? 0).toLocaleString()}
-              </h2>
-              <Coins className="text-4xl text-primary/50" />
+              </div>
+              <div className="text-xs sm:text-sm font-extrabold text-primary">Coins</div>
             </div>
+          </div>
 
-            <p className="text-[14px] sm:text-sm text-slate-500 mt-1 flex items-center space-x-1 font-mono truncate">
-              <TrendingUp className="text-4xl text-primary/50 shrink-0" />
-              <span className='text-primary/80 font-extrabold'>Est: {((coinInfo?.coin_balance || 0) * currentCoinPrice).toLocaleString()} BDT</span>
-            </p>
+          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-primary">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <span>+0% this week</span>
           </div>
         </div>
 
-        {/* Card 2: Locked Premium Coins */}
-        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-wider truncate">
-              Locked Bonus
-            </span>
-          </div>
+        {/* Card 2: Location Pools / Referral Lock */}
+        <div className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 shadow-sm">
+          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest">
+            Location Pools
+          </span>
 
-          <div className="">
-            <div className="flex gap-4 justify-start items-center">
-              <h2 className="text-4xl sm:text-4xl font-black text-amber-800/80 font-mono tracking-tight">
-                {loading ? '...' : (coinInfo?.locked_coin_balance ?? 0).toLocaleString()}
-              </h2>
-              <Lock className="text-4xl text-amber-800/50" />
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
+              <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-
-            <p className="text-[14px] sm:text-sm text-slate-500 mt-1 flex items-center space-x-1 font-mono truncate">
-              <span className="text-amber-800/80 font-extrabold truncate">
-                {coinInfo?.is_premium_coins_unlocked
-                  ? '✅ Unlocked!'
-                  : `${coinInfo?.active_referral_count || 0}/${coinInfo?.required_referral_count || 10} Referrals`}
-              </span>
-            </p>
-          </div>
-        </div>
-
-        {/* Card 3: Wallet Balance */}
-        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-5 shadow-xs flex flex-col justify-between col-span-2 md:col-span-1">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-wider truncate">
-              Main Wallet
-            </span>
-          </div>
-
-          <div className="">
-            <div className="flex gap-4 justify-start items-center">
-              <h2 className="text-3xl sm:text-3xl font-black text-primary/80 font-mono tracking-tight">
-                 {loading ? '...' : (coinInfo?.wallet_balance ?? 0).toLocaleString()}
-              </h2>
-              <Wallet className="text-3xl text-primary/50" />
+            <div>
+              <div className="text-2xl sm:text-4xl font-black text-[#854D0E] font-mono tracking-tight">
+                {loading ? '...' : (coinInfo?.active_referral_count ?? 0)}
+              </div>
+              <div className="text-xs sm:text-sm font-extrabold text-[#854D0E]">
+               Referral
+              </div>
             </div>
-
-            <p className="text-[14px] sm:text-sm text-slate-500 mt-1 flex items-center space-x-1 font-mono truncate">
-              <span className="text-primary/80 font-extrabold">Available Wallet Balance</span>
-            </p>
           </div>
+
+          <Link
+            href="/dashboard/referral"
+            className="w-full bg-[#FFF0E5] hover:bg-[#FFE5D2] text-[#854D0E] font-extrabold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-colors mt-1"
+          >
+            <span>View Referrals</span>
+            <ChevronRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
 
-      {/* Locked Coins Banner / Premium Status Card */}
-      <div className="bg-primary rounded-none p-4 sm:p-8 text-white shadow-xs relative overflow-hidden ">
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-          <div className="lg:col-span-2 space-y-3">
+      {/* Main Wallet Card */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+        <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest">
+          Main Wallet
+        </span>
 
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center space-x-3">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <Wallet className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                Available Wallet Balance
+              </h3>
+              <p className="text-sm sm:text-base font-black text-slate-900 font-mono mt-0.5">
+                ৳{loading ? '...' : (coinInfo?.wallet_balance ?? 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
 
-            <h3 className="text-xl sm:text-2xl font-extrabold text-white">
-              {coinInfo?.is_premium
-                ? coinInfo.is_premium_coins_unlocked
-                  ? '🎉 Bonus Unlocked & Credited!'
-                  : `🎁 ${coinInfo.locked_coin_balance ?? 0} Premium Bonus Coins Locked`
-                : `🎁 Get ${coinInfo?.premium_free_coins || 100} Locked Free Coins with Premium`}
+          <Link
+            href="/dashboard/wallet"
+            className="bg-emerald-50 hover:bg-emerald-100 text-primary border border-emerald-200/80 font-extrabold text-xs px-3.5 py-2 rounded-xl flex items-center space-x-1 shrink-0 transition-colors"
+          >
+            <span>View Wallet</span>
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+
+      {/* Green Banner: Premium Bonus Coins */}
+      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-4">
+        <div className="flex items-start space-x-3">
+          <div className="text-3xl shrink-0">🎁</div>
+          <div className="space-y-1">
+            <h3 className="text-base sm:text-lg font-black tracking-tight text-white">
+              You have {coinInfo?.locked_coin_balance ?? 1} Premium Bonus Coin{' '}
+              <span className="text-secondary font-black">Locked</span>
             </h3>
-
-
-            {/* Active Referral Progress Bar */}
-            <div className="pt-2 space-y-2 max-w-xl">
-              <div className="flex items-center justify-between text-xs font-extrabold">
-                <span className="text-emerald-100 flex items-center space-x-1.5">
-                  <Users className="w-4 h-4 text-secondary" />
-                  <span>Successful Active Referrals</span>
-                </span>
-                <span className="text-secondary font-mono">
-                  {coinInfo?.active_referral_count || 0} / {coinInfo?.required_referral_count || 10} Active Users
-                </span>
-              </div>
-              <div className="w-full bg-[#044D2F] rounded-none h-3 border border-emerald-400/30 p-0.5 overflow-hidden">
-                <div
-                  className="bg-secondary h-full rounded-none transition-all duration-500"
-                  style={{ width: `${referralProgress}%` }}
-                />
-              </div>
-            </div>
+            <p className="text-xs text-emerald-100/90 font-medium">
+              🎉 Participate in active campaigns to unlock your bonus!
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Buy Coins Form Section */}
-      <div className="bg-white rounded-none border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
-              <ShoppingCart className="text-3xl text-primary/70" />
-              <span>Purchase Coins</span>
-            </h2>
+        <div className="border-t border-emerald-700/60 pt-3 space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-emerald-100">
+            <div className="flex items-center space-x-2">
+              <TrendingUp className="w-4 h-4 text-emerald-300" />
+              <span>
+                <strong className="text-secondary font-mono">
+                  {coinInfo?.active_referral_count || 0}
+                </strong>{' '}
+                Successful Active Referrals
+              </span>
+            </div>
+            <div className="font-mono text-secondary font-extrabold">
+              {coinInfo?.active_referral_count || 0} / {coinInfo?.required_referral_count || 10}{' '}
+              Active Users
+            </div>
           </div>
 
-          <span className="text-xs font-extrabold px-3 py-1.5 rounded-none bg-emerald-50 text-primary border border-emerald-200 flex items-center space-x-1.5 self-start sm:self-auto">
-            <span>Rate: ৳{currentCoinPrice} / Coin</span>
+          {/* Progress bar */}
+          <div className="w-full bg-emerald-950/60 rounded-full h-2.5 p-0.5 overflow-hidden border border-emerald-600/40">
+            <div
+              className="bg-emerald-400 h-full rounded-full transition-all duration-500"
+              style={{ width: `${referralProgress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Unlock Button if condition met */}
+        {coinInfo?.can_unlock && !coinInfo.is_premium_coins_unlocked && (
+          <button
+            onClick={handleUnlockCoins}
+            disabled={unlocking}
+            className="w-full py-2.5 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center justify-center space-x-2 transition-all shadow-sm"
+          >
+            <Unlock className="w-4 h-4" />
+            <span>{unlocking ? 'Unlocking...' : `Unlock Bonus Coins Now!`}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Purchase Coins Section */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+              <ShoppingCart className="w-5 h-5" />
+            </div>
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Purchase Coins</h2>
+          </div>
+
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-50 text-primary border border-emerald-200/80 font-mono">
+          ৳{currentCoinPrice.toLocaleString()} / Coin
           </span>
         </div>
 
-        <form onSubmit={handleBuyCoins} className="space-y-6">
-          {/* Quick Presets */}
-          <div className="space-y-2">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Quick Presets</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[10, 50, 100, 500].map((preset) => (
-                <button
-                  key={preset}
-                  type="button"
-                  onClick={() => setBuyAmount(preset)}
-                  className={`py-3 px-4 rounded-none border text-sm font-extrabold transition-all flex items-center justify-center space-x-2 ${buyAmount === preset
-                    ? 'bg-primary/80 border-primary/50 text-white'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                >
-                  <Coins className="w-4 h-4" />
-                  <span>+{preset} Coins</span>
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Stacked Presets List matching image */}
+        <div className="space-y-3">
+          {[10, 100, 500].map((preset) => {
+            const cost = preset * currentCoinPrice;
+            const isSelected = buyAmount === preset;
+            return (
+              <div
+                key={preset}
+                onClick={() => setBuyAmount(preset)}
+                className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                  isSelected
+                    ? 'border-primary bg-emerald-50/50 shadow-xs'
+                    : 'border-slate-200/80 bg-white hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Tag className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm font-extrabold text-slate-800">+{preset} Coins</span>
+                </div>
 
-          {/* Amount Input & Cost Calculation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-            <div className="space-y-2">
-              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Number of Coins</label>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setBuyAmount(preset);
+                  }}
+                  className={`py-2 px-5 rounded-xl font-extrabold text-xs font-mono transition-all ${
+                    isSelected
+                      ? 'bg-[#005A36] text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-[#005A36] text-slate-800 hover:text-white'
+                  }`}
+                >
+                  ৳ {cost.toLocaleString()}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Custom Quantity Form & Confirm Button */}
+        <form onSubmit={handleBuyCoins} className="pt-2 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                Custom Quantity
+              </label>
               <div className="relative">
-                <Coins className="w-5 h-5 text-primary absolute left-4 top-3.5" />
+                <Coins className="w-5 h-5 text-primary absolute left-3.5 top-3" />
                 <input
                   type="number"
                   min="1"
                   step="1"
                   value={buyAmount || ''}
                   onChange={(e) => setBuyAmount(parseInt(e.target.value, 10) || 0)}
-                  placeholder="Enter coin quantity..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-none font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-base"
+                  placeholder="Enter coin count..."
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-none p-4 flex items-center justify-between">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
               <div>
-                <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Total Purchase Cost</p>
-                <p className="text-2xl font-extrabold text-slate-900 mt-0.5">৳{totalBuyCost.toLocaleString()}</p>
+                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  Total Cost
+                </p>
+                <p className="text-lg font-black text-slate-900 font-mono">
+                  ৳{totalBuyCost.toLocaleString()}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-extrabold text-slate-400">Wallet After Purchase</p>
+                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
+                  Wallet After
+                </p>
                 <p
-                  className={`text-sm font-extrabold mt-0.5 font-mono ${(coinInfo?.wallet_balance || 0) - totalBuyCost >= 0
-                    ? 'text-primary'
-                    : 'text-rose-700'
-                    }`}
+                  className={`text-xs font-extrabold font-mono ${
+                    (coinInfo?.wallet_balance || 0) - totalBuyCost >= 0
+                      ? 'text-primary'
+                      : 'text-rose-700'
+                  }`}
                 >
                   ৳{((coinInfo?.wallet_balance || 0) - totalBuyCost).toLocaleString()}
                 </p>
@@ -318,49 +372,52 @@ export default function UserCoinsPage() {
           <button
             type="submit"
             disabled={purchasing || buyAmount <= 0 || (coinInfo?.wallet_balance || 0) < totalBuyCost}
-            className="w-full py-4 bg-primary hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-base rounded-none flex items-center justify-center space-x-2  transition-all cursor-pointer"
+            className="w-full py-3.5 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md shadow-emerald-900/10"
           >
-            <ShoppingCart className="w-5 h-5 text-secondary" />
-            <span>{purchasing ? 'Processing Purchase...' : `Confirm & Buy ${buyAmount} Coins`}</span>
+            <ShoppingCart className="w-4 h-4 text-secondary" />
+            <span>
+              {purchasing ? 'Processing...' : `Confirm & Buy ${buyAmount} Coins (৳${totalBuyCost.toLocaleString()})`}
+            </span>
           </button>
         </form>
       </div>
 
       {/* Transaction History Section */}
-      <div className="bg-white rounded-none border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
-        <div className="flex items-center space-x-2 border-b border-slate-100 pb-4">
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
           <History className="w-5 h-5 text-slate-600" />
-          <h2 className="text-xl font-bold text-slate-900">Coin Transaction History</h2>
+          <h2 className="text-base sm:text-lg font-extrabold text-slate-900">
+            Coin Transaction History
+          </h2>
         </div>
 
-        <div className="overflow-x-auto rounded-none border border-slate-200">
-          <table className="w-full text-left text-[10px] sm:text-[11px]">
-            <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px]">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full text-left text-[11px]">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[10px]">
               <tr>
-                <th className="px-3 py-2.5">Coins</th>
-                <th className="px-3 py-2.5 text-right">Note & Date</th>
+                <th className="px-4 py-3">Coins</th>
+                <th className="px-4 py-3 text-right">Note & Date</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
               {loading ? (
                 <tr>
-                  <td colSpan={3} className="p-6 text-center text-slate-400">
-                    Loading coin transactions...
+                  <td colSpan={2} className="p-6 text-center text-slate-400">
+                    Loading transactions...
                   </td>
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="p-6 text-center text-slate-400">
-                    No coin transactions recorded yet.
+                  <td colSpan={2} className="p-6 text-center text-slate-400">
+                    No transactions recorded yet.
                   </td>
                 </tr>
               ) : (
                 transactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-3 py-2">
+                    <td className="px-4 py-3">
                       <div className="flex items-center space-x-2">
-
-                        <span className="font-extrabold text-[11px] text-slate-900 font-mono">
+                        <span className="font-black text-xs text-slate-900 font-mono">
                           +{Number(tx.amount).toLocaleString()} Coins
                         </span>
                         {tx.cost_bdt && (
@@ -371,11 +428,11 @@ export default function UserCoinsPage() {
                       </div>
                     </td>
 
-                    <td className="px-3 py-2 text-right">
-                      <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
+                    <td className="px-4 py-3 text-right">
+                      <div className="text-slate-700 text-xs font-semibold truncate max-w-[200px] ml-auto">
                         {tx.description || '-'}
                       </div>
-                      <div className="text-slate-400 text-[9px] font-mono">
+                      <div className="text-slate-400 text-[10px] font-mono mt-0.5">
                         {new Date(tx.created_at).toLocaleDateString()} {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>

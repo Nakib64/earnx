@@ -22,32 +22,47 @@ export default function BottomNav() {
     { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
   ];
 
+  const activeIndex = navItems.findIndex((item) => pathname === item.href);
+
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-slate-200 shadow-lg">
-      <div className="flex items-center justify-around h-16 px-2">
-        {navItems.map((item) => {
+    <div className="lg:hidden fixed bottom-4 left-3 right-3 z-50 pointer-events-auto">
+      <nav className="relative max-w-md mx-auto bg-white/85 backdrop-blur-2xl border border-white/80 shadow-[0_10px_35px_rgba(0,0,0,0.12)] rounded-full p-1.5 flex items-center justify-between">
+        {/* Animated Sliding Soft Primary Background Pill */}
+        {activeIndex >= 0 && (
+          <div
+            className="absolute top-1.5 bottom-1.5 rounded-full bg-primary/15 border border-primary/25 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-xs"
+            style={{
+              width: `calc(100% / ${navItems.length} - 6px)`,
+              left: `calc(${activeIndex} * (100% / ${navItems.length}) + 3px)`,
+            }}
+          />
+        )}
+
+        {navItems.map((item, idx) => {
           const Icon = item.icon;
-          const isActive = pathname === item.href;
+          const isActive = activeIndex === idx;
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all ${isActive
-                ? 'text-primary font-extrabold scale-105'
-                : 'text-slate-500 font-medium hover:text-primary'
-                }`}
+              className={`relative z-10 flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full transition-all duration-300 ${
+                isActive
+                  ? 'text-primary font-black scale-105'
+                  : 'text-slate-500 hover:text-slate-800 font-medium'
+              }`}
             >
-              <div
-                className={`p-1.5 rounded-none transition-colors ${isActive ? 'bg-emerald-100/80 text-primary border-b-2 border-secondary' : ''
+              <div className="flex flex-col items-center space-y-0.5">
+                <Icon
+                  className={`w-5 h-5 shrink-0 transition-transform duration-300 ${
+                    isActive ? 'text-primary scale-110' : 'text-slate-400'
                   }`}
-              >
-                <Icon className="w-5 h-5" />
+                />
+                <span className="text-[10px] tracking-tight font-extrabold">{item.label}</span>
               </div>
-              <span className="text-[11px] tracking-tight font-extrabold">{item.label}</span>
             </Link>
           );
         })}
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
