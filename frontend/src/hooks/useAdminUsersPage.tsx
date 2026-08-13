@@ -125,9 +125,6 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
 
     if (debouncedSearch.trim()) {
       url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
-      if (currentParent.id !== null) {
-        url += `&referred_by_id=${currentParent.id}`;
-      }
     } else if (currentParent.id !== null) {
       url += `&referred_by_id=${currentParent.id}`;
     } else {
