@@ -122,12 +122,15 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     setLoading(true);
 
     let url = `/admin/users?page=1&limit=100`;
+
+    if (currentParent.id !== null) {
+      url += `&referred_by_id=${currentParent.id}`;
+    } else {
+      url += `&has_designation=true`;
+    }
+
     if (debouncedSearch.trim()) {
       url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
-    } else if (currentParent.id === null) {
-      url += `&has_designation=true`;
-    } else {
-      url += `&referred_by_id=${currentParent.id}`;
     }
 
     const [usersRes, desRes] = await Promise.all([
@@ -171,13 +174,21 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
 
   const handleRowClick = useCallback((user: User) => {
     setSelectedUserForCards(user);
-    setBreadcrumbs((prev) => [
-      ...prev,
-      { id: user.id, name: user.full_name || user.phone || 'User' },
-    ]);
+    setSearchTerm('');
+    setBreadcrumbs((prev) => {
+      const lastCrumb = prev[prev.length - 1];
+      if (lastCrumb?.id === user.id) {
+        return prev;
+      }
+      return [
+        ...prev,
+        { id: user.id, name: user.full_name || user.phone || 'User' },
+      ];
+    });
   }, []);
 
   const handleBreadcrumbClick = useCallback((index: number) => {
+    setSearchTerm('');
     setBreadcrumbs((prev) => prev.slice(0, index + 1));
   }, []);
 
