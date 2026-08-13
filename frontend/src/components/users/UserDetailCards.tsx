@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, WalletTransaction, UserStatus } from '../../types';
 import { apiFetch } from '../../lib/api';
 import { DataTable, ColumnDef } from '../common/DataTable';
 import { StatusBadge } from '../common/StatusBadge';
-import { Users, Wallet, Award, DollarSign, Trash2, Shield, ArrowDown, RefreshCw } from 'lucide-react';
+import { Users, Wallet, Award, DollarSign, Trash2, Shield, ArrowDown, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface UserDetailCardsProps {
   user: User | null;
@@ -26,11 +26,36 @@ export function UserDetailCards({
   const [downlines, setDownlines] = useState<User[]>([]);
   const [loadingDownlines, setLoadingDownlines] = useState(false);
 
-  // Transactions Data
+  // Transactions Data & Pagination
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [loadingTx, setLoadingTx] = useState(false);
+  const [txPage, setTxPage] = useState(1);
+  const [txTotalPages, setTxTotalPages] = useState(1);
+  const [txTotalRecords, setTxTotalRecords] = useState(0);
 
-  const fetchUserData = async () => {
+  const fetchTransactions = useCallback(async (pageToFetch = 1) => {
+    if (!user) return;
+    setLoadingTx(true);
+    const resTx = await apiFetch<any>(
+      `/admin/wallet/transactions?user_id=${user.id}&page=${pageToFetch}&limit=10`,
+      { isAdmin: true },
+    );
+    if (resTx.success && resTx.data) {
+      const dataArr = resTx.data.data || (Array.isArray(resTx.data) ? resTx.data : []);
+      const meta = resTx.data.meta || {};
+      setTransactions(dataArr);
+      setTxPage(meta.page || pageToFetch);
+      setTxTotalPages(meta.totalPages || 1);
+      setTxTotalRecords(meta.total || dataArr.length);
+    } else {
+      setTransactions([]);
+      setTxTotalPages(1);
+      setTxTotalRecords(0);
+    }
+    setLoadingTx(false);
+  }, [user]);
+
+  const fetchUserData = useCallback(async () => {
     if (!user) return;
 
     // Fetch Direct Downlines
@@ -43,16 +68,10 @@ export function UserDetailCards({
     }
     setLoadingDownlines(false);
 
-    // Fetch Transactions
-    setLoadingTx(true);
-    const resTx = await apiFetch<any>(`/admin/wallet/transactions?user_id=${user.id}&limit=100`, { isAdmin: true });
-    if (resTx.success && resTx.data) {
-      setTransactions(resTx.data.data || (Array.isArray(resTx.data) ? resTx.data : []));
-    } else {
-      setTransactions([]);
-    }
-    setLoadingTx(false);
-  };
+    // Reset and Fetch Page 1 Transactions
+    setTxPage(1);
+    fetchTransactions(1);
+  }, [user, fetchTransactions]);
 
   useEffect(() => {
     fetchUserData();
@@ -225,10 +244,17 @@ export function UserDetailCards({
 
       {/* Transaction History Section */}
       <div className="space-y-3 pt-2">
-        <h3 className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
-          <Wallet className="w-4 h-4 text-sky-600" />
-          <span>Transaction History Log ({transactions.length})</span>
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+          <h3 className="font-extrabold text-slate-900 text-sm flex items-center space-x-2">
+            <Wallet className="w-4 h-4 text-sky-600" />
+            <span>Transaction History Log ({txTotalRecords})</span>
+          </h3>
+          {txTotalPages > 1 && (
+            <span className="text-xs font-semibold text-slate-500">
+              Page {txPage} of {txTotalPages}
+            </span>
+          )}
+        </div>
 
         <DataTable<WalletTransaction>
           data={transactions}
@@ -237,6 +263,39 @@ export function UserDetailCards({
           loading={loadingTx}
           emptyMessage={`No transaction history recorded for ${user.full_name || user.phone} yet.`}
         />
+
+        {/* Pagination Controls */}
+        {txTotalPages > 1 && (
+          <div className="flex items-center justify-between pt-2 text-xs">
+            <button
+              onClick={() => {
+                const newPage = Math.max(1, txPage - 1);
+                fetchTransactions(newPage);
+              }}
+              disabled={txPage <= 1 || loadingTx}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-xs"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Previous</span>
+            </button>
+
+            <span className="font-mono text-slate-500 text-[11px] font-medium">
+              Showing page <strong>{txPage}</strong> of <strong>{txTotalPages}</strong> ({txTotalRecords} total transactions)
+            </span>
+
+            <button
+              onClick={() => {
+                const newPage = Math.min(txTotalPages, txPage + 1);
+                fetchTransactions(newPage);
+              }}
+              disabled={txPage >= txTotalPages || loadingTx}
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-xs"
+            >
+              <span>Next</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
