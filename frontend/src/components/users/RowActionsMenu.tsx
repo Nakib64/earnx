@@ -74,10 +74,10 @@ export function RowActionsMenu({
             e.stopPropagation();
             onSelectDetails(user);
           }}
-          className="px-2 py-1 bg-sky-100 text-sky-800 hover:bg-sky-200 rounded-md font-bold text-[11px] flex items-center space-x-1 transition-colors"
+          className="px-2 py-1 bg-emerald-100 text-emerald-900 hover:bg-emerald-200 rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-300"
           title="View profile & transaction history below table"
         >
-          <Users className="w-3.5 h-3.5 text-sky-600" />
+          <Users className="w-3 h-3 text-[#005A36]" />
           <span>Details</span>
         </button>
 
@@ -86,10 +86,10 @@ export function RowActionsMenu({
             e.stopPropagation();
             onAdjustBalance(user);
           }}
-          className="px-2 py-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 rounded-md font-bold text-[11px] flex items-center space-x-1 transition-colors"
+          className="px-2 py-1 bg-emerald-50 text-[#005A36] hover:bg-emerald-100 rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-200"
           title="Adjust wallet balance"
         >
-          <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+          <DollarSign className="w-3 h-3 text-[#005A36]" />
           <span>Adjust</span>
         </button>
 
@@ -98,7 +98,7 @@ export function RowActionsMenu({
             e.stopPropagation();
             onAssignBadge(user);
           }}
-          className="px-2 py-1 bg-purple-100 text-purple-800 hover:bg-purple-200 rounded-md font-bold text-[11px] transition-colors"
+          className="px-2 py-1 bg-purple-50 text-purple-800 hover:bg-purple-100 rounded-none font-extrabold text-[10px] transition-colors border border-purple-200"
           title="Badge"
         >
           Badge
@@ -107,7 +107,7 @@ export function RowActionsMenu({
         {user.status === UserStatus.DISABLED && (
           <button
             onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-            className="px-2 py-1 bg-emerald-500 text-white rounded-md font-bold text-[11px] hover:bg-emerald-600 transition-colors"
+            className="px-2 py-1 bg-[#005A36] text-white rounded-none font-extrabold text-[10px] hover:bg-[#044D2F] transition-colors"
           >
             Activate
           </button>
@@ -116,7 +116,7 @@ export function RowActionsMenu({
         {user.status === UserStatus.ACTIVE && (
           <button
             onClick={(e) => onToggleStatus(e, user, UserStatus.BLOCKED)}
-            className="px-2 py-1 bg-rose-100 text-rose-800 rounded-md font-bold text-[11px] hover:bg-rose-200 transition-colors"
+            className="px-2 py-1 bg-rose-50 text-rose-800 rounded-none font-extrabold text-[10px] hover:bg-rose-100 transition-colors border border-rose-200"
           >
             Block
           </button>
@@ -125,7 +125,7 @@ export function RowActionsMenu({
         {user.status === UserStatus.BLOCKED && (
           <button
             onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-            className="px-2 py-1 bg-sky-100 text-sky-800 rounded-md font-bold text-[11px] hover:bg-sky-200 transition-colors"
+            className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-none font-extrabold text-[10px] hover:bg-emerald-200 transition-colors border border-emerald-300"
           >
             Unblock
           </button>
@@ -136,7 +136,7 @@ export function RowActionsMenu({
             e.stopPropagation();
             onDeleteUser(user);
           }}
-          className="px-2 py-1 bg-red-100 text-red-700 hover:bg-red-200 rounded-md font-bold text-[11px] transition-colors"
+          className="px-2 py-1 bg-red-50 text-red-700 hover:bg-red-100 rounded-none font-extrabold text-[10px] transition-colors border border-red-200"
           title="Delete user profile"
         >
           Delete
@@ -148,7 +148,7 @@ export function RowActionsMenu({
         <button
           ref={buttonRef}
           onClick={handleToggleOpen}
-          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200 active:scale-95"
+          className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-none transition-colors border border-slate-200 active:scale-95"
           title="Options"
         >
           <MoreVertical className="w-4 h-4" />
@@ -163,7 +163,7 @@ export function RowActionsMenu({
               right: `${dropdownPos.right}px`,
               zIndex: 99999,
             }}
-            className="w-48 bg-white rounded-2xl shadow-2xl border border-slate-200 p-1.5 space-y-0.5 divide-y divide-slate-100 text-left text-xs animate-in fade-in zoom-in-95 duration-100"
+            className="w-48 bg-white rounded-none shadow-xl border border-slate-200 p-1 space-y-0.5 divide-y divide-slate-100 text-left text-xs"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="py-1">
@@ -173,9 +173,9 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onSelectDetails(user);
                 }}
-                className="w-full px-3 py-2 text-left font-bold text-sky-700 hover:bg-sky-50 rounded-xl flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
               >
-                <Users className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                <Users className="w-3.5 h-3.5 text-[#005A36] shrink-0" />
                 <span>View Details Below</span>
               </button>
 
@@ -185,7 +185,7 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onAdjustBalance(user);
                 }}
-                className="w-full px-3 py-2 text-left font-bold text-emerald-700 hover:bg-emerald-50 rounded-xl flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-emerald-800 hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
               >
                 <DollarSign className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>Adjust Balance</span>
@@ -197,7 +197,7 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onAssignBadge(user);
                 }}
-                className="w-full px-3 py-2 text-left font-bold text-purple-700 hover:bg-purple-50 rounded-xl flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-purple-700 hover:bg-purple-50 rounded-none flex items-center space-x-2 transition-colors"
               >
                 <Award className="w-3.5 h-3.5 text-purple-600 shrink-0" />
                 <span>Assign Badge</span>
@@ -212,7 +212,7 @@ export function RowActionsMenu({
                     setIsOpen(false);
                     onToggleStatus(e, user, UserStatus.ACTIVE);
                   }}
-                  className="w-full px-3 py-2 text-left font-bold text-emerald-600 hover:bg-emerald-50 rounded-xl flex items-center space-x-2 transition-colors"
+                  className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   <span>Activate User</span>
@@ -226,7 +226,7 @@ export function RowActionsMenu({
                     setIsOpen(false);
                     onToggleStatus(e, user, UserStatus.BLOCKED);
                   }}
-                  className="w-full px-3 py-2 text-left font-bold text-rose-600 hover:bg-rose-50 rounded-xl flex items-center space-x-2 transition-colors"
+                  className="w-full px-3 py-1.5 text-left font-bold text-rose-600 hover:bg-rose-50 rounded-none flex items-center space-x-2 transition-colors"
                 >
                   <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
                   <span>Block User</span>
@@ -240,7 +240,7 @@ export function RowActionsMenu({
                     setIsOpen(false);
                     onToggleStatus(e, user, UserStatus.ACTIVE);
                   }}
-                  className="w-full px-3 py-2 text-left font-bold text-sky-600 hover:bg-sky-50 rounded-xl flex items-center space-x-2 transition-colors"
+                  className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   <span>Unblock User</span>
@@ -253,7 +253,7 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onDeleteUser(user);
                 }}
-                className="w-full px-3 py-2 text-left font-bold text-red-600 hover:bg-red-50 rounded-xl flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-red-600 hover:bg-red-50 rounded-none flex items-center space-x-2 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5 shrink-0" />
                 <span>Delete Profile</span>

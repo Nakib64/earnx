@@ -155,41 +155,41 @@ export default function WalletPage() {
 
   const columns: ColumnDef<WalletTransaction>[] = [
     {
-      key: 'type',
-      header: 'Type',
-      render: (tx) => <StatusBadge status={tx.type} />,
-    },
-    {
-      key: 'amount',
-      header: 'Amount',
+      key: 'type_amount',
+      header: 'Type & Amount',
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
-          <span className={`font-bold font-mono text-sm ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
-            {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
-          </span>
+          <div className="flex items-center space-x-2">
+            <StatusBadge status={tx.type} />
+            <span className={`font-mono font-extrabold text-[11px] ${isCredit ? 'text-emerald-700' : 'text-rose-700'}`}>
+              {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
+            </span>
+          </div>
         );
       },
     },
     {
       key: 'balance',
-      header: 'Before / After',
+      header: 'Before → After',
       render: (tx) => (
-        <span className="font-mono text-slate-500 text-[11px]">
+        <span className="font-mono text-[10px] text-slate-500 font-semibold truncate block max-w-[130px]">
           ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
         </span>
       ),
     },
     {
-      key: 'description',
-      header: 'Description',
-      render: (tx) => <span className="text-slate-700 font-medium max-w-xs truncate">{tx.description || '-'}</span>,
-    },
-    {
-      key: 'created_at',
-      header: 'Date',
+      key: 'description_date',
+      header: 'Note & Date',
       align: 'right',
-      render: (tx) => <span className="text-slate-400 text-[11px]">{new Date(tx.created_at).toLocaleString()}</span>,
+      render: (tx) => (
+        <div className="text-right">
+          <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
+            {tx.description || '-'}
+          </div>
+          <div className="text-slate-400 text-[9px] font-mono">{new Date(tx.created_at).toLocaleString()}</div>
+        </div>
+      ),
     },
   ];
 

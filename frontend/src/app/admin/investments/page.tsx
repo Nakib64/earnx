@@ -371,39 +371,29 @@ export default function AdminInvestmentsPage() {
 
   const userInvestmentColumns: ColumnDef<UserInvestment>[] = [
     {
-      key: 'user',
-      header: 'User',
+      key: 'user_plan',
+      header: 'User & Package',
       render: (inv) => (
         <div>
-          <p className="font-semibold text-slate-900">{inv.user?.full_name || 'User'}</p>
-          <p className="text-xs text-slate-500">{inv.user?.phone}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'plan',
-      header: 'Plan / Request Details',
-      render: (inv) => (
-        <div>
-          <span className="font-semibold text-slate-900">{inv.plan?.title || 'Custom Plan'}</span>
-          {inv.is_lifetime || inv.plan?.is_lifetime ? (
-            <span className="ml-2 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">
-              Lifetime
-            </span>
-          ) : null}
+          <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
+            {inv.user?.full_name || inv.user?.phone || 'User'}
+          </div>
+          <div className="text-[9px] text-slate-500 font-mono">
+            {inv.user?.phone} <span className="text-[#005A36] font-bold">• {inv.plan?.title || 'Custom'}</span>
+          </div>
           {inv.status === RequestStatus.PENDING && (
-            <div className="mt-1">
+            <div className="mt-0.5">
               {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
-                <span className="text-[11px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md inline-block">
-                  Upgrade to {inv.pending_plan.title} (Paid Remaining: ৳{Number(inv.pending_amount || 0).toLocaleString()})
+                <span className="text-[8px] font-extrabold text-purple-800 bg-purple-50 border border-purple-200 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
+                  Upgrade: {inv.pending_plan.title} (৳{Number(inv.pending_amount || 0).toLocaleString()})
                 </span>
               ) : inv.request_type === 'WITHDRAWAL' ? (
-                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md inline-block">
+                <span className="text-[8px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
                   Withdraw Capital: ৳{Number(inv.pending_amount || 0).toLocaleString()}
                 </span>
               ) : (
-                <span className="text-[11px] font-bold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md inline-block">
-                  New Package Subscription
+                <span className="text-[8px] font-extrabold text-[#005A36] bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded-none inline-block">
+                  New Package
                 </span>
               )}
             </div>
@@ -412,68 +402,51 @@ export default function AdminInvestmentsPage() {
       ),
     },
     {
-      key: 'amount',
-      header: 'Invested Amount',
-      render: (inv) => <span className="font-bold text-sky-600">৳{Number(inv.amount).toLocaleString()}</span>,
-    },
-    {
-      key: 'monthly_return_percent',
-      header: 'Return Rate',
-      render: (inv) => <span className="font-medium text-emerald-600">{Number(inv.monthly_return_percent)}% / mo</span>,
-    },
-    {
-      key: 'monthly_payout_amount',
-      header: 'Monthly Payout',
-      render: (inv) => <span className="font-bold text-slate-900">৳{Number(inv.monthly_payout_amount).toLocaleString()}</span>,
-    },
-    {
-      key: 'progress',
-      header: 'Progress',
+      key: 'financials',
+      header: 'Financials & Status',
       render: (inv) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-          {inv.is_lifetime || inv.plan?.is_lifetime
-            ? `${inv.total_payouts_made} payouts (Lifetime)`
-            : `${inv.total_payouts_made} / ${inv.max_payouts || 12} payouts`}
-        </span>
+        <div className="space-y-0.5">
+          <div className="flex items-center space-x-1.5 font-mono text-[10px]">
+            <span className="font-extrabold text-slate-900">৳{Number(inv.amount).toLocaleString()}</span>
+            <span className="text-[#005A36] font-bold">({Number(inv.monthly_return_percent)}%/mo)</span>
+            <StatusBadge status={inv.status} />
+          </div>
+          <div className="text-[9px] font-mono text-slate-500">
+            Payout: ৳{Number(inv.monthly_payout_amount).toLocaleString()} · {inv.total_payouts_made} Made
+          </div>
+        </div>
       ),
-    },
-    {
-      key: 'status',
-      header: 'Status',
-      render: (inv) => <StatusBadge status={inv.status} />,
     },
     {
       key: 'actions',
       header: 'Actions',
       align: 'right',
       render: (inv) => (
-        <div className="flex items-center justify-end space-x-2">
+        <div className="flex items-center justify-end space-x-1">
           {inv.status === RequestStatus.PENDING && (
             <>
               <button
                 onClick={() => handleApproveInvestment(inv.id)}
                 title="Approve Investment"
-                className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg font-bold text-xs flex items-center space-x-1 border border-emerald-200"
+                className="px-2 py-1 bg-[#005A36] text-white font-extrabold text-[9px] rounded-none shadow-xs border-b-2 border-[#D4AF37]"
               >
-                <CheckCircle className="w-4 h-4" />
-                <span>Approve</span>
+                Approve
               </button>
               <button
                 onClick={() => handleRejectInvestment(inv.id)}
                 title="Reject Investment"
-                className="p-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg font-bold text-xs flex items-center space-x-1 border border-amber-200"
+                className="px-2 py-1 bg-amber-50 text-amber-800 font-extrabold text-[9px] rounded-none border border-amber-200"
               >
-                <XCircle className="w-4 h-4" />
-                <span>Reject</span>
+                Reject
               </button>
             </>
           )}
           <button
             onClick={() => handleDeleteInvestment(inv.id)}
             title="Delete Record"
-            className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg"
+            className="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-none border border-rose-200"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       ),

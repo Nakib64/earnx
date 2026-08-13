@@ -17,11 +17,11 @@ export function UserBreadcrumbs({ breadcrumbs, onBreadcrumbClick }: UserBreadcru
   if (breadcrumbs.length <= 0) return null;
 
   return (
-    <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs overflow-x-auto">
+    <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 rounded-none p-2.5 text-[11px] overflow-x-auto">
       {breadcrumbs.length > 1 && (
         <button
           onClick={() => onBreadcrumbClick(breadcrumbs.length - 2)}
-          className="p-1 hover:bg-slate-200 rounded-lg text-slate-600 mr-1 flex items-center text-xs font-bold shrink-0"
+          className="p-1 hover:bg-slate-200 rounded-none text-slate-600 mr-1 flex items-center text-xs font-bold shrink-0"
           title="Go Back"
         >
           <ArrowLeft className="w-3.5 h-3.5 mr-1" />
@@ -38,7 +38,7 @@ export function UserBreadcrumbs({ breadcrumbs, onBreadcrumbClick }: UserBreadcru
               onClick={() => onBreadcrumbClick(idx)}
               className={`font-bold transition-colors shrink-0 ${
                 isLast
-                  ? 'text-sky-700 cursor-default font-extrabold'
+                  ? 'text-[#005A36] cursor-default font-extrabold'
                   : 'text-slate-500 hover:text-slate-900 underline underline-offset-2'
               }`}
             >

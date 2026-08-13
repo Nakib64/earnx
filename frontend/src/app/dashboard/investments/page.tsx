@@ -163,67 +163,61 @@ export default function UserInvestmentsPage() {
 
   const tableColumns: ColumnDef<UserInvestment>[] = [
     {
-      key: 'plan',
-      header: 'Package / Plan',
+      key: 'package_amount',
+      header: 'Package & Invested',
       render: (inv) => (
         <div>
-          <span className="font-semibold text-slate-900">{inv.plan?.title || 'Investment Package'}</span>
+          <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
+            {inv.plan?.title || 'Investment Package'}
+          </div>
+          <div className="text-[9px] font-mono text-[#005A36] font-bold">
+            ৳{Number(inv.amount).toLocaleString()} Invested
+          </div>
           {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
-            <p className="text-[11px] text-purple-600 font-bold">
-              Upgrading to {inv.pending_plan.title} (Pending)
-            </p>
+            <span className="text-[8px] font-extrabold text-purple-800 bg-purple-50 border border-purple-200 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
+              Upgrading: {inv.pending_plan.title}
+            </span>
           ) : inv.request_type === 'WITHDRAWAL' ? (
-            <p className="text-[11px] text-amber-600 font-bold">
-              Capital Withdraw: ৳{Number(inv.pending_amount || 0).toLocaleString()} (Pending)
-            </p>
+            <span className="text-[8px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
+              Withdraw: ৳{Number(inv.pending_amount || 0).toLocaleString()}
+            </span>
           ) : null}
         </div>
       ),
     },
     {
-      key: 'amount',
-      header: 'Invested Amount',
-      render: (inv) => <span className="font-bold text-sky-600">৳{Number(inv.amount).toLocaleString()}</span>,
-    },
-    {
-      key: 'monthly_return_percent',
-      header: 'Return Rate',
-      render: (inv) => <span className="font-medium text-emerald-600">{Number(inv.monthly_return_percent)}% / mo</span>,
-    },
-    {
-      key: 'monthly_payout_amount',
-      header: 'Monthly Payout',
-      render: (inv) => <span className="font-bold text-slate-900">৳{Number(inv.monthly_payout_amount).toLocaleString()}</span>,
-    },
-    {
-      key: 'progress',
-      header: 'Progress',
+      key: 'financials_progress',
+      header: 'Payout & Progress',
       render: (inv) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-          {inv.is_lifetime || inv.plan?.is_lifetime
-            ? `${inv.total_payouts_made} payouts (Lifetime)`
-            : `${inv.total_payouts_made} / ${inv.max_payouts || 12} payouts`}
-        </span>
+        <div className="space-y-0.5">
+          <div className="flex items-center space-x-1 font-mono text-[10px]">
+            <span className="text-emerald-700 font-extrabold">{Number(inv.monthly_return_percent)}%/mo</span>
+            <span className="text-slate-500 font-bold">(৳{Number(inv.monthly_payout_amount).toLocaleString()})</span>
+          </div>
+          <div className="text-[9px] font-mono text-slate-400">
+            {inv.is_lifetime || inv.plan?.is_lifetime
+              ? `${inv.total_payouts_made} Payouts (Lifetime)`
+              : `${inv.total_payouts_made} / ${inv.max_payouts || 12} Payouts`}
+          </div>
+        </div>
       ),
     },
     {
-      key: 'next_payout_at',
-      header: 'Next Payout',
-      render: (inv) => (
-        <span className="text-slate-500">
-          {inv.next_payout_at
-            ? new Date(inv.next_payout_at).toLocaleDateString()
-            : inv.status === RequestStatus.PENDING
-            ? 'Pending Approval'
-            : 'Completed'}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      header: 'Status',
+      key: 'status_next',
+      header: 'Status & Next Date',
       align: 'right',
-      render: (inv) => <StatusBadge status={inv.status} />,
+      render: (inv) => (
+        <div className="text-right space-y-0.5">
+          <StatusBadge status={inv.status} />
+          <div className="text-slate-400 text-[9px] font-mono">
+            {inv.next_payout_at
+              ? new Date(inv.next_payout_at).toLocaleDateString()
+              : inv.status === RequestStatus.PENDING
+              ? 'Pending Approval'
+              : 'Completed'}
+          </div>
+        </div>
+      ),
     },
   ];
 

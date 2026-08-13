@@ -86,17 +86,17 @@ export default function Sidebar() {
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center space-x-3 py-2.5 rounded-xl font-medium text-sm transition-all ${
+        className={`flex items-center space-x-3 py-2.5 rounded-none font-medium text-xs transition-all ${
           isChild ? 'pl-7 pr-3.5' : 'px-3.5'
         } ${
           isActive
-            ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/20'
+            ? 'bg-[#005A36] text-white border-l-4 border-[#D4AF37] shadow-xs'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
         }`}
       >
         <Icon
-          className={`w-5 h-5 shrink-0 ${
-            isActive ? 'text-white' : item.accentClass || 'text-slate-400'
+          className={`w-4 h-4 shrink-0 ${
+            isActive ? 'text-[#D4AF37]' : item.accentClass || 'text-slate-400'
           }`}
         />
         <span>{item.label}</span>
@@ -106,38 +106,38 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col w-64 shrink-0 bg-white border-r border-slate-200 p-4 space-y-5 overflow-y-auto z-10 h-screen sticky top-0`}
+      className={`hidden lg:flex flex-col w-64 shrink-0 bg-white border-r border-slate-200 p-4 space-y-5 overflow-y-auto z-10 h-screen sticky top-0 rounded-none`}
     >
-      {/* Brand Header — always shown since navbar is hidden on lg for both admin and dashboard */}
+      {/* Brand Header */}
       <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-100 shrink-0">
-        <div className="w-9 h-9 rounded-xl sky-gradient-bg flex items-center justify-center text-white font-bold text-lg shadow-md">
+        <div className="w-9 h-9 rounded-none bg-[#005A36] border-b-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] font-black text-lg shadow-xs">
           X
         </div>
         <div className="flex flex-col">
-          <span className="font-extrabold text-lg tracking-tight bg-gradient-to-r from-sky-500 to-sky-700 bg-clip-text text-transparent">
-            EarnX
+          <span className="font-extrabold text-lg tracking-tight text-[#005A36]">
+            Earn<span className="text-[#D4AF37]">X</span>
           </span>
-          <span className="text-[10px] font-semibold text-slate-400 -mt-1 uppercase tracking-widest">
-            {isAdminRoute ? 'Admin Portal' : 'MLM Ecosystem'}
+          <span className="text-[9px] font-bold text-slate-400 -mt-1 uppercase tracking-widest">
+            {isAdminRoute ? 'Admin Portal' : 'Capital Ecosystem'}
           </span>
         </div>
       </div>
 
       {/* Role Indicator Banner */}
-      <div className="bg-sky-50 border border-sky-100 rounded-xl p-3 flex items-center space-x-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg sky-gradient-bg flex items-center justify-center text-white font-bold text-sm shrink-0">
+      <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-none p-3 flex items-center space-x-3 shrink-0">
+        <div className="w-8 h-8 rounded-none bg-[#005A36] flex items-center justify-center text-[#D4AF37] font-bold text-xs shrink-0">
           {isAdminRoute ? 'A' : 'U'}
         </div>
         <div className="flex flex-col overflow-hidden flex-1">
           <span className="text-xs font-bold text-slate-800 truncate">
             {isAdminRoute ? 'Admin Control' : user?.full_name || user?.phone}
           </span>
-          <span className="text-[10px] font-semibold text-sky-600 truncate">
+          <span className="text-[10px] font-semibold text-[#005A36] truncate">
             {isAdminRoute ? admin?.phone : user?.designation?.name || 'Starter Member'}
           </span>
         </div>
         {isDashboardRoute && user && (
-          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-lg shrink-0">
+          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-none shrink-0 font-mono">
             ৳{Number(user.wallet_balance || 0).toFixed(0)}
           </span>
         )}
@@ -155,14 +155,14 @@ export default function Sidebar() {
               {/* Clickable toggle header */}
               <button
                 onClick={() => setApprovalsOpen(o => !o)}
-                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-none text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
                   isApprovalsSection
-                    ? 'text-sky-600 bg-sky-50/70'
+                    ? 'text-[#005A36] bg-emerald-50/70 border-l-2 border-[#005A36]'
                     : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 <span className="flex items-center space-x-2">
-                  <UserCheck className="w-3.5 h-3.5 shrink-0" />
+                  <UserCheck className="w-3.5 h-3.5 shrink-0 text-[#005A36]" />
                   <span>Approvals Queue</span>
                 </span>
                 <ChevronDown
@@ -171,7 +171,7 @@ export default function Sidebar() {
                   }`}
                 />
               </button>
-              {/* Indented children — animated open/close */}
+              {/* Indented children */}
               <div
                 className={`overflow-hidden transition-all duration-200 ease-in-out ${
                   approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
@@ -198,7 +198,7 @@ export default function Sidebar() {
             if (isAdminRoute) logoutAdmin();
             else logoutUser();
           }}
-          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-bold text-xs transition-colors"
+          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-none font-bold text-xs transition-colors border border-rose-200"
         >
           <LogOut className="w-4 h-4" />
           <span>Log Out</span>

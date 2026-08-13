@@ -274,35 +274,35 @@ export default function Navbar() {
             {/* Right Status & Profile / Auth Controls */}
             <div className="flex items-center space-x-3">
               {isLoading ? (
-                <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-xl" />
+                <div className="h-9 w-24 bg-slate-100 animate-pulse rounded-none" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
-                  {/* Balance Badge — hidden on very small screens to save space */}
-                  <div className="hidden sm:flex bg-sky-50 border border-sky-100 px-3 py-1.5 rounded-full items-center space-x-1.5">
-                    <Wallet className="w-4 h-4 text-sky-600" />
-                    <span className="text-xs font-bold text-sky-900">
+                  {/* Balance Badge */}
+                  <div className="hidden sm:flex bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-none items-center space-x-1.5">
+                    <Wallet className="w-4 h-4 text-[#005A36]" />
+                    <span className="text-xs font-bold text-emerald-900 font-mono">
                       ৳{Number(user.wallet_balance || 0).toFixed(2)}
                     </span>
                   </div>
 
                   {/* Account Status Badge */}
                   {user.status === 'ACTIVE' ? (
-                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      <CheckCircle className="w-3.5 h-3.5 mr-1 text-emerald-500" />
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-emerald-100 text-[#005A36] border border-emerald-300">
+                      <CheckCircle className="w-3.5 h-3.5 mr-1 text-[#005A36]" />
                       Active
                     </span>
                   ) : (
-                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                      <Clock className="w-3.5 h-3.5 mr-1 text-amber-500" />
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                      <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" />
                       Disabled
                     </span>
                   )}
 
-                  {/* Dashboard button — always visible when on public pages */}
+                  {/* Dashboard button */}
                   {isPublicRoute && (
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 sky-gradient-btn rounded-xl font-bold text-xs shadow-sm hover:shadow-md transition-all"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 emerald-gold-btn rounded-none font-bold text-xs shadow-xs transition-all"
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       <span>Dashboard</span>
@@ -312,7 +312,7 @@ export default function Navbar() {
                   {/* Logout User */}
                   <button
                     onClick={logoutUser}
-                    className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-500 rounded-none hover:bg-slate-100 transition-colors"
                     title="Logout"
                   >
                     <LogOut className="w-5 h-5" />
@@ -320,22 +320,22 @@ export default function Navbar() {
                 </div>
               ) : admin ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200 px-3 py-1 rounded-full hidden sm:inline">
+                  <span className="text-xs font-bold text-[#005A36] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-none hidden sm:inline">
                     Admin: {admin.phone}
                   </span>
                   {/* Admin dashboard button on public pages */}
                   {isPublicRoute && (
                     <Link
                       href="/admin/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs shadow-sm hover:bg-slate-800 transition-colors"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#005A36] text-white border-b-2 border-[#D4AF37] rounded-none font-bold text-xs shadow-xs transition-colors"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <LayoutDashboard className="w-3.5 h-3.5 text-[#D4AF37]" />
                       <span>Admin Panel</span>
                     </Link>
                   )}
                   <button
                     onClick={logoutAdmin}
-                    className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-500 rounded-none hover:bg-slate-100 transition-colors"
                     title="Logout Admin"
                   >
                     <LogOut className="w-5 h-5" />
@@ -345,13 +345,13 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-sky-600 transition-colors"
+                    className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-[#005A36] transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="px-4 py-2 rounded-xl sky-gradient-btn font-bold text-xs shadow-xs transition-all"
+                    className="px-4 py-2 rounded-none emerald-gold-btn font-bold text-xs shadow-xs transition-all"
                   >
                     Sign Up
                   </Link>

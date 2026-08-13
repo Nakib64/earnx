@@ -1,12 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F8FBFF;
-  --foreground: #0F172A;
-  --primary: #38BDF8;
-  --primary-hover: #0284C7;
+  --background: #F4F6F8;
+  --foreground: #374151;
+  --primary: #005A36;
+  --primary-hover: #044D2F;
+  --accent-gold: #D4AF37;
+  --accent-gold-hover: #B89628;
   --card-bg: #FFFFFF;
-  --border-color: #E2E8F0;
+  --border-color: #E5E7EB;
+  --text-muted: #6B7280;
 }
 
 body {
@@ -17,54 +20,82 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom Utilities */
-.glass-card {
-  background: #FFFFFF;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 4px 15px -2px rgba(14, 165, 233, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+/* Sharp Corners & Classy Emerald & Gold Theme Utilities */
+.dashboard-scope,
+.dashboard-scope * {
+  border-radius: 0px !important;
 }
 
-.sky-gradient-btn {
-  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+.glass-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  border-radius: 0px !important;
+}
+
+.sky-gradient-btn,
+.emerald-gold-btn {
+  background: #005A36;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35);
+  border-bottom: 2px solid #D4AF37;
+  border-radius: 0px !important;
   transition: all 0.2s ease-in-out;
 }
 
-.sky-gradient-btn:hover {
-  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
+.sky-gradient-btn:hover,
+.emerald-gold-btn:hover {
+  background: #044D2F;
+  border-bottom-color: #F3C649;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45);
 }
 
-.sky-gradient-btn:active {
+.sky-gradient-btn:active,
+.emerald-gold-btn:active {
   transform: translateY(0);
 }
 
-.sky-gradient-bg {
-  background: linear-gradient(135deg, #38BDF8 0%, #0284C7 100%);
+.sky-gradient-bg,
+.emerald-bg {
+  background: #005A36;
+  border-radius: 0px !important;
 }
 
-.sky-badge {
-  background-color: #E0F2FE;
-  color: #0369A1;
-  font-weight: 600;
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #D4AF37 0%, #B89628 100%);
+  border-radius: 0px !important;
+}
+
+.sky-badge,
+.emerald-badge {
+  background-color: #E6F4ED;
+  color: #005A36;
+  font-weight: 700;
+  border: 1px solid #B2DFC7;
+  border-radius: 0px !important;
+}
+
+.gold-badge {
+  background-color: #FEF9C3;
+  color: #854D0E;
+  font-weight: 700;
+  border: 1px solid #FDE047;
+  border-radius: 0px !important;
 }
 
 /* Smooth scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #F3F4F6;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 9999px;
+  background: #9CA3AF;
+  border-radius: 0px !important;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #6B7280;
 }
 
 /* ─── Landing Page Styles ────────────────────────────────────────────────── */

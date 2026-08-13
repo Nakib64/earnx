@@ -198,64 +198,50 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     () => [
       {
         key: 'member',
-        header: 'Member Name & Phone',
+        header: 'Member & Ref',
         render: (u) => (
           <div>
-            <div className="font-extrabold text-slate-900 text-[10px] sm:text-xs leading-tight flex items-center space-x-1">
-              <span className="truncate max-w-[110px] sm:max-w-none">{u.full_name || u.phone}</span>
+            <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[130px] sm:max-w-[180px]">
+              {u.full_name || u.phone}
             </div>
             <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
               <span>{u.phone}</span>
-              <span className="sm:hidden text-sky-600 font-bold">• {u.referral_code}</span>
+              <span className="text-[#005A36] font-bold">• {u.referral_code}</span>
             </div>
           </div>
         ),
       },
       {
-        key: 'designation',
-        header: 'Designation',
+        key: 'designation_status',
+        header: 'Badge & Status',
         render: (u) => (
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-extrabold text-[8px] sm:text-[10px] border border-purple-200 whitespace-nowrap">
-            <Award className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 text-purple-500 shrink-0" />
-            <span className="truncate max-w-[70px] sm:max-w-none">{u.designation?.name || 'Unbadged'}</span>
-          </span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-none bg-purple-50 text-purple-800 font-extrabold text-[8px] sm:text-[9px] border border-purple-200 whitespace-nowrap">
+              <Award className="w-2.5 h-2.5 mr-0.5 text-purple-600 shrink-0" />
+              <span className="truncate max-w-[80px]">{u.designation?.name || 'Unbadged'}</span>
+            </span>
+            <StatusBadge status={u.status} />
+          </div>
         ),
       },
       {
-        key: 'referral_code',
-        header: 'Ref Code',
-        className: 'hidden sm:table-cell',
-        render: (u) => <span className="font-mono font-bold text-sky-600 text-xs">{u.referral_code}</span>,
-      },
-      {
-        key: 'status',
-        header: 'Status',
-        className: 'hidden sm:table-cell',
-        render: (u) => <StatusBadge status={u.status} />,
-      },
-      {
-        key: 'wallet_balance',
-        header: 'Wallet',
-        className: 'hidden sm:table-cell',
-        render: (u) => (
-          <span className="font-mono font-extrabold text-slate-800 text-xs">
-            ৳{Number(u.wallet_balance || 0).toFixed(2)}
-          </span>
-        ),
-      },
-      {
-        key: 'actions',
-        header: 'Operations',
+        key: 'wallet_actions',
+        header: 'Wallet & Actions',
         align: 'right',
         render: (u) => (
-          <RowActionsMenu
-            user={u}
-            onSelectDetails={(user) => setSelectedUserForCards(user)}
-            onAdjustBalance={(user) => setAdjustUser(user)}
-            onAssignBadge={(user) => openBadgeModal(user)}
-            onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
-            onDeleteUser={(user) => setDeleteConfirmTarget(user)}
-          />
+          <div className="flex items-center justify-end space-x-2">
+            <span className="font-mono font-extrabold text-slate-800 text-[11px]">
+              ৳{Number(u.wallet_balance || 0).toFixed(2)}
+            </span>
+            <RowActionsMenu
+              user={u}
+              onSelectDetails={(user) => setSelectedUserForCards(user)}
+              onAdjustBalance={(user) => setAdjustUser(user)}
+              onAssignBadge={(user) => openBadgeModal(user)}
+              onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
+              onDeleteUser={(user) => setDeleteConfirmTarget(user)}
+            />
+          </div>
         ),
       },
     ],

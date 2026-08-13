@@ -101,50 +101,51 @@ export default function AdminWalletPage() {
   const columns: ColumnDef<WalletTransaction>[] = [
     {
       key: 'user',
-      header: 'Member / User',
+      header: 'Member & Ref',
       render: (tx) => (
         <div>
-          <div className="font-bold text-slate-900 text-xs">{tx.user?.phone || tx.user_id}</div>
-          <div className="text-[10px] text-slate-400">{tx.user?.full_name || tx.user?.referral_code || '-'}</div>
+          <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
+            {tx.user?.phone || tx.user_id}
+          </div>
+          <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5 truncate max-w-[130px]">
+            <span>{tx.user?.full_name || '-'}</span>
+            {tx.user?.referral_code && <span className="text-[#005A36] font-bold">• {tx.user.referral_code}</span>}
+          </div>
         </div>
       ),
     },
     {
-      key: 'type',
-      header: 'Type',
-      render: (tx) => <StatusBadge status={tx.type} />,
-    },
-    {
-      key: 'amount',
-      header: 'Amount',
+      key: 'type_amount',
+      header: 'Type & Amount',
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
-          <span className={`font-mono font-extrabold text-xs ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
-            {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
-          </span>
+          <div className="space-y-0.5">
+            <div className="flex items-center space-x-1.5">
+              <StatusBadge status={tx.type} />
+              <span className={`font-mono font-extrabold text-[11px] ${isCredit ? 'text-emerald-700' : 'text-rose-700'}`}>
+                {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
+              </span>
+            </div>
+            <div className="font-mono text-[9px] text-slate-400 font-medium truncate max-w-[130px]">
+              ৳{Number(tx.balance_before).toFixed(1)} → ৳{Number(tx.balance_after).toFixed(1)}
+            </div>
+          </div>
         );
       },
     },
     {
-      key: 'balance',
-      header: 'Before → After',
-      render: (tx) => (
-        <span className="font-mono text-[11px] text-slate-500">
-          ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
-        </span>
-      ),
-    },
-    {
-      key: 'description',
-      header: 'Description / Audit Note',
-      render: (tx) => <span className="text-slate-700 text-xs font-medium max-w-xs truncate">{tx.description || '-'}</span>,
-    },
-    {
-      key: 'created_at',
-      header: 'Date & Time',
+      key: 'description_date',
+      header: 'Note & Date',
       align: 'right',
-      render: (tx) => <span className="text-slate-400 text-[11px]">{new Date(tx.created_at).toLocaleString()}</span>,
+      render: (tx) => (
+        <div className="text-right">
+          <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
+            {tx.description || '-'}
+          </div>
+          <div className="text-slate-400 text-[9px] font-mono">{new Date(tx.created_at).toLocaleString()}</div>
+        </div>
+      ),
     },
   ];
 

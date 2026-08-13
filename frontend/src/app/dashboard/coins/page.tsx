@@ -422,61 +422,66 @@ export default function UserCoinsPage() {
           <h2 className="text-xl font-bold text-slate-900">Coin Transaction History</h2>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-slate-200">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
+        <div className="overflow-x-auto rounded-none border border-slate-200">
+          <table className="w-full text-left text-[10px] sm:text-[11px]">
+            <thead className="bg-slate-100 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[9px] sm:text-[10px]">
               <tr>
-                <th className="p-4">Type</th>
-                <th className="p-4">Amount</th>
-                <th className="p-4">Coins Before / After</th>
-                <th className="p-4">Cost (BDT)</th>
-                <th className="p-4">Description</th>
-                <th className="p-4">Date</th>
+                <th className="px-3 py-2.5">Type & Coins</th>
+                <th className="px-3 py-2.5">Balance</th>
+                <th className="px-3 py-2.5 text-right">Note & Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700 bg-white">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                  <td colSpan={3} className="p-6 text-center text-slate-400">
                     Loading coin transactions...
                   </td>
                 </tr>
               ) : transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-400">
+                  <td colSpan={3} className="p-6 text-center text-slate-400">
                     No coin transactions recorded yet.
                   </td>
                 </tr>
               ) : (
                 transactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                          tx.type === 'PURCHASE'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            : tx.type === 'PREMIUM_UNLOCKED'
-                            ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                            : tx.type === 'PREMIUM_LOCKED_REWARD'
-                            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                            : 'bg-sky-50 text-sky-700 border border-sky-200'
-                        }`}
-                      >
-                        {tx.type.replace(/_/g, ' ')}
-                      </span>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-none text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider ${
+                            tx.type === 'PURCHASE'
+                              ? 'bg-emerald-50 text-[#005A36] border border-emerald-300'
+                              : tx.type === 'PREMIUM_UNLOCKED'
+                              ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                              : tx.type === 'PREMIUM_LOCKED_REWARD'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}
+                        >
+                          {tx.type.replace(/_/g, ' ')}
+                        </span>
+                        <span className="font-extrabold text-[11px] text-slate-900 font-mono">
+                          +{Number(tx.amount).toLocaleString()} Coins
+                        </span>
+                        {tx.cost_bdt && (
+                          <span className="text-[10px] text-[#005A36] font-extrabold">
+                            (৳{Number(tx.cost_bdt).toLocaleString()})
+                          </span>
+                        )}
+                      </div>
                     </td>
-                    <td className="p-4 font-extrabold text-sm text-slate-900">
-                      +{Number(tx.amount).toLocaleString()} Coins
-                    </td>
-                    <td className="p-4 font-mono text-slate-500">
+                    <td className="px-3 py-2 font-mono text-[10px] text-slate-500 truncate max-w-[130px]">
                       {Number(tx.coins_before).toLocaleString()} → <strong className="text-slate-800">{Number(tx.coins_after).toLocaleString()}</strong>
                     </td>
-                    <td className="p-4 font-bold text-slate-900">
-                      {tx.cost_bdt ? `৳${Number(tx.cost_bdt).toLocaleString()}` : '-'}
-                    </td>
-                    <td className="p-4 text-slate-600 max-w-xs truncate">{tx.description || '-'}</td>
-                    <td className="p-4 text-slate-500">
-                      {new Date(tx.created_at).toLocaleDateString()} {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <td className="px-3 py-2 text-right">
+                      <div className="text-slate-700 text-[10px] font-medium truncate max-w-[160px] sm:max-w-[240px] ml-auto">
+                        {tx.description || '-'}
+                      </div>
+                      <div className="text-slate-400 text-[9px] font-mono">
+                        {new Date(tx.created_at).toLocaleDateString()} {new Date(tx.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </td>
                   </tr>
                 ))
