@@ -135,90 +135,74 @@ function ReferralContent() {
   const columns = useMemo<ColumnDef<TreeMember>[]>(
     () => [
       {
-        key: 'member',
-        header: 'Member',
+        key: 'member_ref',
+        header: 'Member & Ref',
         render: (m) => (
           <div>
-            <div className="font-bold text-slate-900 text-xs sm:text-sm">
+            <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
               {m.full_name || m.phone}
             </div>
-            <div className="text-[9px] sm:text-[11px] text-slate-500 font-mono">{m.phone}</div>
+            <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
+              <span>{m.phone}</span>
+              <span className="text-[#005A36] font-bold">• {m.referral_code}</span>
+            </div>
           </div>
         ),
       },
       {
-        key: 'referral_code',
-        header: 'Referral Code',
+        key: 'badge_status',
+        header: 'Badge & Status',
         render: (m) => (
-          <span className="font-mono font-bold text-sky-600 text-xs sm:text-sm">{m.referral_code}</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
+            {m.designation ? (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-none bg-yellow-50 text-[#854D0E] font-extrabold text-[8px] sm:text-[9px] border border-yellow-300 whitespace-nowrap">
+                <Award className="w-2.5 h-2.5 mr-0.5 text-[#854D0E] shrink-0" />
+                <span className="truncate max-w-[70px]">{m.designation.name}</span>
+              </span>
+            ) : (
+              <span className="text-[9px] text-slate-400 font-medium">Unbadged</span>
+            )}
+            <StatusBadge status={(m.status as any) ?? 'DISABLED'} />
+          </div>
         ),
       },
       {
-        key: 'status',
-        header: 'Status',
-        render: (m) => <StatusBadge status={(m.status as any) ?? 'DISABLED'} />,
-      },
-      {
-        key: 'designation',
-        header: 'Badge',
-        render: (m) =>
-          m.designation ? (
-            <span className="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold text-[9px] sm:text-[11px] border border-purple-200 whitespace-nowrap">
-              <Award className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5 sm:mr-1 text-purple-500" />
-              {m.designation.name}
-            </span>
-          ) : (
-            <span className="text-[10px] text-slate-400 font-medium">No badge</span>
-          ),
-      },
-      {
-        key: 'referrals',
-        header: 'Referrals',
+        key: 'referrals_joined',
+        header: 'Downlines & Joined',
         align: 'right',
         render: (m) => {
           const count = treeByParent.get(m.id)?.length ?? 0;
           const drillable = canDrillDown(m);
           const depthLocked = !!m.designation && currentDepth >= maxLevel && treeByParent.has(m.id);
 
-          if (count === 0) return <span className="text-[10px] text-slate-400">—</span>;
-
-          if (depthLocked) {
-            // Has children but we've hit max_level — show locked indicator
-            return (
-              <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg" title={`Requires higher badge to view beyond Level ${maxLevel}`}>
-                <span>🔒</span>
-                <span>{count}</span>
-              </span>
-            );
-          }
-
-          if (drillable) {
-            return (
-              <span className="inline-flex items-center space-x-1 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg">
-                <Users className="w-3 h-3" />
-                <span>{count}</span>
-              </span>
-            );
-          }
-
-          // Has children but no designation — can't drill
           return (
-            <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg" title="Member needs a badge to drill down">
-              <Users className="w-3 h-3" />
-              <span>{count}</span>
-            </span>
+            <div className="text-right space-y-0.5">
+              <div>
+                {count === 0 ? (
+                  <span className="text-[9px] text-slate-400">—</span>
+                ) : depthLocked ? (
+                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-none" title={`Requires higher badge to view beyond Level ${maxLevel}`}>
+                    <span>🔒</span>
+                    <span>{count}</span>
+                  </span>
+                ) : drillable ? (
+                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-[#005A36] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-none">
+                    <Users className="w-3 h-3 text-[#005A36]" />
+                    <span>{count}</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded-none">
+                    <Users className="w-3 h-3" />
+                    <span>{count}</span>
+                  </span>
+                )}
+              </div>
+              <div className="text-slate-400 text-[9px] font-mono">
+                {m.created_at ? new Date(m.created_at).toLocaleDateString() : '—'}
+              </div>
+            </div>
           );
         },
-      },
-      {
-        key: 'joined',
-        header: 'Joined',
-        align: 'right',
-        render: (m) => (
-          <span className="text-slate-400 text-[10px] sm:text-xs">
-            {m.created_at ? new Date(m.created_at).toLocaleDateString() : '—'}
-          </span>
-        ),
       },
     ],
     [treeByParent, canDrillDown, currentDepth, maxLevel],
@@ -240,7 +224,7 @@ function ReferralContent() {
           onClick={() => {
             fetchTree();
           }}
-          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors self-start flex items-center space-x-1.5 text-xs font-bold"
+          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none border border-slate-200 transition-colors self-start flex items-center space-x-1.5 text-xs font-extrabold"
         >
           <RefreshCw className="w-4 h-4" />
           <span>Refresh</span>
@@ -249,21 +233,21 @@ function ReferralContent() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div className="glass-card p-4 rounded-xl text-center bg-white border border-slate-200">
-          <span className="text-xs font-bold text-slate-400 uppercase">Your Referral Code</span>
-          <div className="text-lg font-mono font-extrabold text-sky-600 mt-1">{user?.referral_code}</div>
+        <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200">
+          <span className="text-xs font-extrabold text-slate-400 uppercase">Your Referral Code</span>
+          <div className="text-lg font-mono font-extrabold text-[#005A36] mt-1">{user?.referral_code}</div>
         </div>
-        <div className="glass-card p-4 rounded-xl text-center bg-white border border-slate-200">
-          <span className="text-xs font-bold text-slate-400 uppercase">Earning Badge</span>
+        <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200">
+          <span className="text-xs font-extrabold text-slate-400 uppercase">Earning Badge</span>
           <div className="text-sm font-extrabold text-slate-800 mt-1 flex items-center justify-center space-x-1">
-            <Award className="w-4 h-4 text-purple-600" />
+            <Award className="w-4 h-4 text-[#854D0E]" />
             <span>{user?.designation?.name || 'Starter Member'}</span>
           </div>
         </div>
-        <div className="glass-card p-4 rounded-xl text-center bg-white border border-slate-200 col-span-2 sm:col-span-1">
-          <span className="text-xs font-bold text-slate-400 uppercase">Total Downlines</span>
-          <div className="text-lg font-extrabold text-indigo-600 mt-1 flex items-center justify-center space-x-1">
-            <Users className="w-4 h-4" />
+        <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200 col-span-2 sm:col-span-1">
+          <span className="text-xs font-extrabold text-slate-400 uppercase">Total Downlines</span>
+          <div className="text-lg font-extrabold text-[#005A36] mt-1 flex items-center justify-center space-x-1 font-mono">
+            <Users className="w-4 h-4 text-[#005A36]" />
             <span>{allMembers.length}</span>
           </div>
         </div>
@@ -281,7 +265,7 @@ function ReferralContent() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by name, phone, or referral code..."
-          className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
+          className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-none text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#005A36] transition-all"
         />
         {searchTerm && (
           <button
@@ -294,7 +278,7 @@ function ReferralContent() {
       </div>
 
       {/* Main Table */}
-      <div className="glass-card rounded-2xl p-3 sm:p-5 bg-white border border-slate-200 w-full">
+      <div className="glass-card rounded-none p-3 sm:p-5 bg-white border border-slate-200 w-full">
         <DataTable<TreeMember>
           data={displayMembers}
           columns={columns}
@@ -307,8 +291,7 @@ function ReferralContent() {
               : breadcrumbs.length > 1
               ? `${currentParent.name} has no direct referrals yet.`
               : 'You have no downline members yet. Share your referral code to get started.'
-          }
-        />
+          }/>
       </div>
     </div>
   );

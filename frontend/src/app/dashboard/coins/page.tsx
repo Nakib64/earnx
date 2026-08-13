@@ -126,32 +126,29 @@ export default function UserCoinsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Top Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 p-6 sm:p-8 rounded-3xl text-white shadow-lg shadow-amber-500/20 relative overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#005A36] p-6 sm:p-8 rounded-none text-white shadow-xs relative overflow-hidden border-b-4 border-[#D4AF37]">
         <div className="relative z-10 space-y-1">
           <div className="flex items-center space-x-2">
-            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-amber-100 flex items-center space-x-1">
+            <span className="bg-black/20 backdrop-blur-md px-3 py-1 rounded-none text-xs font-extrabold uppercase tracking-wider text-[#D4AF37] border border-[#D4AF37]/40 flex items-center space-x-1">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Digital Asset Hub</span>
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Coins & Bonus System</h1>
-          <p className="text-amber-100 text-xs sm:text-sm max-w-xl">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Coins & Bonus System</h1>
+          <p className="text-emerald-100 text-xs sm:text-sm max-w-xl">
             Earn, unlock, and purchase EarnX Coins using your wallet balance. Subscribe to Premium to claim locked bonus coins!
           </p>
         </div>
 
         <div className="relative z-10 flex items-center space-x-3 self-start sm:self-auto">
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2.5 rounded-2xl flex items-center space-x-3">
-            <Coins className="w-6 h-6 text-yellow-300 animate-pulse" />
+          <div className="bg-[#044D2F] border border-[#D4AF37]/50 px-4 py-2.5 rounded-none flex items-center space-x-3">
+            <Coins className="w-6 h-6 text-[#D4AF37]" />
             <div>
-              <p className="text-[10px] text-amber-200 uppercase tracking-wider font-semibold">Coin Market Rate</p>
-              <p className="text-base font-bold text-white">৳{currentCoinPrice} / Coin</p>
+              <p className="text-[10px] text-[#D4AF37] uppercase tracking-wider font-extrabold">Coin Market Rate</p>
+              <p className="text-base font-black text-white font-mono">৳{currentCoinPrice} / Coin</p>
             </div>
           </div>
         </div>
-
-        {/* Subtle Decorative Circle Background */}
-        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl pointer-events-none" />
       </div>
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
@@ -159,23 +156,23 @@ export default function UserCoinsPage() {
       {/* Main Metric Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: Available Coin Balance */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm relative overflow-hidden flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600">
+            <div className="w-12 h-12 rounded-none bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005A36]">
               <Coins className="w-6 h-6" />
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="px-3 py-1 rounded-none text-xs font-extrabold bg-emerald-50 text-[#005A36] border border-emerald-200">
               Available & Spendable
             </span>
           </div>
 
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Coin Balance</p>
-            <h2 className="text-3xl font-extrabold text-slate-900 mt-1">
-              {loading ? '...' : (coinInfo?.coin_balance ?? 0).toLocaleString()} <span className="text-amber-500 text-lg">Coins</span>
+            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Available Coin Balance</p>
+            <h2 className="text-3xl font-extrabold text-slate-900 mt-1 font-mono">
+              {loading ? '...' : (coinInfo?.coin_balance ?? 0).toLocaleString()} <span className="text-[#005A36] text-lg font-extrabold">Coins</span>
             </h2>
-            <p className="text-xs font-medium text-slate-500 mt-1 flex items-center space-x-1">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+            <p className="text-xs font-medium text-slate-500 mt-1 flex items-center space-x-1 font-mono">
+              <TrendingUp className="w-3.5 h-3.5 text-[#005A36]" />
               <span>Est. Value: ৳{((coinInfo?.coin_balance || 0) * currentCoinPrice).toLocaleString()} BDT</span>
             </p>
           </div>
@@ -452,12 +449,12 @@ export default function UserCoinsPage() {
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-none text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider ${
                             tx.type === 'PURCHASE'
-                              ? 'bg-emerald-50 text-[#005A36] border border-emerald-300'
-                              : tx.type === 'PREMIUM_UNLOCKED'
-                              ? 'bg-purple-50 text-purple-800 border border-purple-200'
-                              : tx.type === 'PREMIUM_LOCKED_REWARD'
-                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                            ? 'bg-emerald-50 text-[#005A36] border border-emerald-300'
+                            : tx.type === 'PREMIUM_UNLOCKED'
+                            ? 'bg-yellow-50 text-[#854D0E] border border-yellow-300'
+                            : tx.type === 'PREMIUM_LOCKED_REWARD'
+                            ? 'bg-yellow-50 text-[#854D0E] border border-yellow-300'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
                           }`}
                         >
                           {tx.type.replace(/_/g, ' ')}

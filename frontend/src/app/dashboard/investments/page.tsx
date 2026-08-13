@@ -224,28 +224,28 @@ export default function UserInvestmentsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 p-6 sm:p-8 text-white shadow-xl shadow-sky-500/20">
+      <div className="relative overflow-hidden rounded-none bg-[#005A36] p-6 sm:p-8 text-white shadow-xs border-b-4 border-[#D4AF37]">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-sky-100 text-xs font-semibold">
-              <Sparkles className="w-4 h-4 text-amber-300" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-extrabold">
+              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
               <span>Fixed Package Investment</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Investment & Wealth Growth
             </h1>
-            <p className="text-sky-100 text-sm max-w-xl">
+            <p className="text-emerald-100 text-sm max-w-xl">
               Subscribe to guaranteed monthly return packages. Upgrade packages anytime or withdraw invested capital safely.
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex items-center space-x-4 min-w-[220px]">
-            <div className="p-3 bg-white/20 rounded-xl">
-              <DollarSign className="w-6 h-6 text-white" />
+          <div className="bg-[#044D2F] border border-[#D4AF37]/50 rounded-none p-4 flex items-center space-x-4 min-w-[220px]">
+            <div className="p-3 bg-black/20 rounded-none border border-[#D4AF37]/40">
+              <DollarSign className="w-6 h-6 text-[#D4AF37]" />
             </div>
             <div>
-              <p className="text-xs font-medium text-sky-100">Available Wallet</p>
-              <p className="text-2xl font-bold text-white">৳{walletBal.toLocaleString()}</p>
+              <p className="text-xs font-extrabold text-[#D4AF37]">Available Wallet</p>
+              <p className="text-2xl font-black text-white font-mono">৳{walletBal.toLocaleString()}</p>
             </div>
           </div>
         </div>
@@ -255,20 +255,20 @@ export default function UserInvestmentsPage() {
 
       {/* Active Investment Banner & Capital Withdrawal Button */}
       {activeInv && (
-        <div className="bg-white rounded-3xl border border-sky-200 p-6 shadow-sm space-y-4 relative overflow-hidden">
+        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs space-y-4 relative overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold text-sky-600 uppercase tracking-wider bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+                <span className="text-xs font-extrabold text-[#005A36] uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-none border border-emerald-200">
                   Current Investment Package
                 </span>
                 <StatusBadge status={activeInv.status} />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 mt-1">
+              <h2 className="text-xl font-black text-slate-900 mt-1">
                 {activeInv.plan?.title || 'Investment Package'} — ৳{Number(activeInv.amount).toLocaleString()}
               </h2>
               <p className="text-xs text-slate-500">
-                Monthly Dividend Return: <span className="font-bold text-emerald-600">{Number(activeInv.monthly_return_percent)}%</span> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
+                Monthly Dividend Return: <span className="font-extrabold text-[#005A36] font-mono">{Number(activeInv.monthly_return_percent)}%</span> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
               </p>
             </div>
 
@@ -276,7 +276,7 @@ export default function UserInvestmentsPage() {
               {activeInv.status === RequestStatus.APPROVED && (
                 <button
                   onClick={() => handleOpenWithdrawCapital(activeInv)}
-                  className="py-2.5 px-4 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md shadow-amber-500/20 transition-all"
+                  className="py-2.5 px-4 bg-yellow-50 hover:bg-yellow-100 text-[#854D0E] font-extrabold text-xs rounded-none border border-yellow-300 flex items-center space-x-2 shadow-xs transition-all"
                 >
                   <MinusCircle className="w-4 h-4" />
                   <span>Withdraw Capital</span>
@@ -287,17 +287,17 @@ export default function UserInvestmentsPage() {
 
           {/* Pending Alert Banners */}
           {activeInv.status === RequestStatus.PENDING && (
-            <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-start space-x-3 text-purple-900">
-              <Clock className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+            <div className="bg-yellow-50 border border-yellow-300 rounded-none p-4 flex items-start space-x-3 text-[#854D0E]">
+              <Clock className="w-5 h-5 text-[#854D0E] shrink-0 mt-0.5" />
               <div className="text-xs space-y-1">
-                <p className="font-bold">
+                <p className="font-extrabold">
                   {activeInv.request_type === 'UPGRADE'
                     ? `Package Upgrade Pending Admin Approval`
                     : activeInv.request_type === 'WITHDRAWAL'
                     ? `Capital Withdrawal Pending Admin Approval`
                     : `New Investment Package Pending Admin Approval`}
                 </p>
-                <p className="text-purple-700">
+                <p className="text-[#854D0E]">
                   {activeInv.request_type === 'UPGRADE'
                     ? `Upgrading to ${activeInv.pending_plan?.title || 'Target Package'}. Remaining amount to pay: ৳${Number(activeInv.pending_amount || 0).toLocaleString()}.`
                     : activeInv.request_type === 'WITHDRAWAL'
@@ -313,21 +313,21 @@ export default function UserInvestmentsPage() {
       {/* Investment Plans Grid */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-            <TrendingUp className="w-5 h-5 text-sky-600" />
+          <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
+            <TrendingUp className="w-5 h-5 text-[#005A36]" />
             <span>High-Yield Investment Packages</span>
           </h2>
-          <span className="text-xs font-medium text-slate-500">Fixed Package Amount</span>
+          <span className="text-xs font-extrabold text-slate-500">Fixed Package Amount</span>
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="h-64 bg-slate-100 animate-pulse rounded-2xl"></div>
+              <div key={n} className="h-64 bg-slate-100 animate-pulse rounded-none"></div>
             ))}
           </div>
         ) : plans.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center border border-slate-200 text-slate-500">
+          <div className="bg-white rounded-none p-8 text-center border border-slate-200 text-slate-500">
             No investment plans available at the moment. Please check back soon!
           </div>
         ) : (
@@ -345,44 +345,44 @@ export default function UserInvestmentsPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative bg-white rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 flex flex-col justify-between overflow-hidden ${
+                  className={`relative bg-white rounded-none border transition-all duration-300 hover:shadow-md flex flex-col justify-between overflow-hidden ${
                     isPopular
-                      ? 'border-sky-500 ring-2 ring-sky-500/20 shadow-lg shadow-sky-500/10'
-                      : 'border-slate-200 shadow-sm'
+                      ? 'border-[#005A36] border-t-4 shadow-xs'
+                      : 'border-slate-200 shadow-xs'
                   }`}
                 >
                   {isPopular && (
-                    <div className="absolute top-0 right-0 bg-gradient-to-l from-sky-600 to-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-sm">
+                    <div className="absolute top-0 right-0 bg-[#005A36] text-[#D4AF37] border-b border-l border-[#D4AF37] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-none shadow-xs">
                       Best Value
                     </div>
                   )}
 
                   <div className="p-6 space-y-4">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900">{plan.title}</h3>
+                      <h3 className="text-lg font-extrabold text-slate-900">{plan.title}</h3>
                       <p className="text-xs text-slate-500">Fixed Monthly Dividend Package</p>
                     </div>
 
-                    <div className="bg-sky-50 rounded-xl p-4 border border-sky-100 flex items-baseline justify-between">
-                      <span className="text-xs font-semibold text-sky-800 uppercase tracking-wide">
+                    <div className="bg-emerald-50 rounded-none p-4 border border-emerald-200 flex items-baseline justify-between">
+                      <span className="text-xs font-extrabold text-[#005A36] uppercase tracking-wide">
                         Package Amount
                       </span>
-                      <span className="text-2xl font-extrabold text-sky-700">৳{packageAmt.toLocaleString()}</span>
+                      <span className="text-2xl font-black text-[#005A36] font-mono">৳{packageAmt.toLocaleString()}</span>
                     </div>
 
                     <div className="space-y-2 text-sm text-slate-600">
                       <div className="flex justify-between border-b border-slate-100 pb-2">
                         <span className="text-slate-500">Monthly Return:</span>
-                        <span className="font-bold text-emerald-600">{returnPct}% / month</span>
+                        <span className="font-extrabold text-[#005A36] font-mono">{returnPct}% / month</span>
                       </div>
                       <div className="flex justify-between border-b border-slate-100 pb-2">
                         <span className="text-slate-500">Est. Dividend:</span>
-                        <span className="font-bold text-slate-900">৳{monthlyDividend.toLocaleString()}</span>
+                        <span className="font-extrabold text-slate-900 font-mono">৳{monthlyDividend.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between pt-1">
                         <span className="text-slate-500">Duration:</span>
                         {plan.is_lifetime ? (
-                          <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full text-xs">
+                          <span className="font-extrabold text-[#005A36] bg-emerald-50 px-2 py-0.5 rounded-none border border-emerald-200 text-xs">
                             Lifetime
                           </span>
                         ) : (
@@ -394,25 +394,25 @@ export default function UserInvestmentsPage() {
 
                   <div className="p-6 pt-0">
                     {isCurrentPackage ? (
-                      <div className="w-full py-3 px-4 rounded-xl font-bold text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 text-center">
+                      <div className="w-full py-3 px-4 rounded-none font-extrabold text-xs bg-emerald-50 text-[#005A36] border border-emerald-200 text-center">
                         Active Package
                       </div>
                     ) : isHigherPackage ? (
                       <button
                         onClick={() => handleOpenInvestOrUpgrade(plan)}
                         disabled={activeInv?.status === RequestStatus.PENDING}
-                        className="w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center space-x-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-md shadow-purple-600/25 disabled:opacity-50"
+                        className="w-full py-3 px-4 rounded-none font-extrabold text-xs transition-all flex items-center justify-center space-x-2 bg-yellow-50 hover:bg-yellow-100 text-[#854D0E] border border-yellow-300 shadow-xs disabled:opacity-50"
                       >
-                        <ArrowUpRight className="w-4 h-4" />
+                        <ArrowUpRight className="w-4 h-4 text-[#854D0E]" />
                         <span>Upgrade Package</span>
                       </button>
                     ) : (
                       <button
                         onClick={() => handleOpenInvestOrUpgrade(plan)}
                         disabled={!!activeInv}
-                        className={`w-full py-3 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center space-x-2 disabled:opacity-40 ${
+                        className={`w-full py-3 px-4 rounded-none font-extrabold text-xs transition-all flex items-center justify-center space-x-2 disabled:opacity-40 ${
                           isPopular
-                            ? 'bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white shadow-md shadow-sky-500/25'
+                            ? 'emerald-gold-btn shadow-xs'
                             : 'bg-slate-900 hover:bg-slate-800 text-white'
                         }`}
                       >
@@ -429,9 +429,9 @@ export default function UserInvestmentsPage() {
       </div>
 
       {/* Active Investments Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-        <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+      <div className="bg-white rounded-none border border-slate-200 shadow-xs p-6 space-y-4">
+        <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
+          <ShieldCheck className="w-5 h-5 text-[#005A36]" />
           <span>My Investment History & Returns</span>
         </h2>
 
@@ -446,11 +446,11 @@ export default function UserInvestmentsPage() {
 
       {/* New Investment Modal */}
       {selectedPlan && !showUpgradeModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-none max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Subscribe to {selectedPlan.title}</h3>
+                <h3 className="text-xl font-extrabold text-slate-900">Subscribe to {selectedPlan.title}</h3>
                 <p className="text-xs text-slate-500">Fixed Package Subscription</p>
               </div>
               <button
@@ -462,24 +462,24 @@ export default function UserInvestmentsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100 space-y-2">
+              <div className="bg-emerald-50 p-4 rounded-none border border-emerald-200 space-y-2">
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Package Amount:</span>
-                  <span className="font-extrabold text-slate-900 text-base">
+                  <span className="font-black text-slate-900 text-base font-mono">
                     ৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Monthly Return Rate:</span>
-                  <span className="font-bold text-emerald-600">
+                  <span className="font-extrabold text-[#005A36] font-mono">
                     {Number(selectedPlan.monthly_return_percent)}% / month
                   </span>
                 </div>
               </div>
 
-              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between text-emerald-900">
+              <div className="bg-emerald-50 p-4 rounded-none border border-emerald-200 flex items-center justify-between text-emerald-900">
                 <span className="text-xs font-semibold">Estimated Monthly Dividend:</span>
-                <span className="text-lg font-extrabold text-emerald-700">
+                <span className="text-lg font-black text-[#005A36] font-mono">
                   ৳{((Number(selectedPlan.amount || selectedPlan.min_amount) * Number(selectedPlan.monthly_return_percent)) / 100).toLocaleString()}
                 </span>
               </div>
@@ -488,14 +488,14 @@ export default function UserInvestmentsPage() {
             <div className="flex space-x-3">
               <button
                 onClick={() => setSelectedPlan(null)}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-100"
+                className="flex-1 py-3 rounded-none border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
                 onClick={handleInvest}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-sky-600/25"
+                className="flex-1 py-3 rounded-none emerald-gold-btn disabled:opacity-50 font-extrabold text-xs shadow-xs"
               >
                 {submitting ? 'Processing...' : 'Confirm & Invest'}
               </button>
@@ -506,11 +506,11 @@ export default function UserInvestmentsPage() {
 
       {/* Package Upgrade Modal */}
       {selectedPlan && showUpgradeModal && activeInv && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-none max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Upgrade Package</h3>
+                <h3 className="text-xl font-extrabold text-slate-900">Upgrade Package</h3>
                 <p className="text-xs text-slate-500">Upgrade from {activeInv.plan?.title || 'Current Package'} to {selectedPlan.title}</p>
               </div>
               <button
@@ -526,25 +526,25 @@ export default function UserInvestmentsPage() {
 
             <div className="space-y-4">
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="flex justify-between p-3 rounded-none bg-slate-50 border border-slate-200">
                   <span className="text-slate-600 font-medium">Current Package ({activeInv.plan?.title}):</span>
-                  <span className="font-bold text-slate-900">৳{Number(activeInv.amount).toLocaleString()}</span>
+                  <span className="font-extrabold text-slate-900 font-mono">৳{Number(activeInv.amount).toLocaleString()}</span>
                 </div>
-                <div className="flex justify-between p-3 rounded-xl bg-purple-50 border border-purple-200">
-                  <span className="text-purple-700 font-medium">Target Package ({selectedPlan.title}):</span>
-                  <span className="font-bold text-purple-950">৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}</span>
+                <div className="flex justify-between p-3 rounded-none bg-yellow-50 border border-yellow-300">
+                  <span className="text-[#854D0E] font-medium">Target Package ({selectedPlan.title}):</span>
+                  <span className="font-extrabold text-[#854D0E] font-mono">৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Remaining Amount Highlight Card */}
-              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-2xl shadow-md space-y-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-purple-200">
+              <div className="bg-[#005A36] text-white p-4 rounded-none border-b-4 border-[#D4AF37] space-y-1">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#D4AF37]">
                   Remaining Amount to Pay
                 </span>
-                <p className="text-3xl font-extrabold">
+                <p className="text-3xl font-black font-mono">
                   ৳{(Number(selectedPlan.amount || selectedPlan.min_amount) - Number(activeInv.amount)).toLocaleString()}
                 </p>
-                <p className="text-[11px] text-purple-100">
+                <p className="text-[11px] text-emerald-100">
                   Pay this remaining amount to Admin to activate your upgraded {selectedPlan.title} package.
                 </p>
               </div>
@@ -560,14 +560,14 @@ export default function UserInvestmentsPage() {
                   setSelectedPlan(null);
                   setShowUpgradeModal(false);
                 }}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-100"
+                className="flex-1 py-3 rounded-none border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpgrade}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-purple-600/25"
+                className="flex-1 py-3 rounded-none bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-[#854D0E] font-extrabold text-xs disabled:opacity-50"
               >
                 {submitting ? 'Submitting Request...' : 'Confirm Upgrade Request'}
               </button>
@@ -578,11 +578,11 @@ export default function UserInvestmentsPage() {
 
       {/* Capital Withdrawal Modal */}
       {showWithdrawModal && activeInv && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-none max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-xl font-bold text-slate-900">Withdraw Invested Capital</h3>
+                <h3 className="text-xl font-extrabold text-slate-900">Withdraw Invested Capital</h3>
                 <p className="text-xs text-slate-500">Reduce your active investment principal</p>
               </div>
               <button
@@ -594,31 +594,31 @@ export default function UserInvestmentsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-amber-900 text-xs space-y-1">
-                <div className="flex justify-between font-bold">
+              <div className="bg-yellow-50 p-4 rounded-none border border-yellow-300 text-[#854D0E] text-xs space-y-1">
+                <div className="flex justify-between font-extrabold">
                   <span>Current Invested Capital:</span>
-                  <span>৳{Number(activeInv.amount).toLocaleString()}</span>
+                  <span className="font-mono">৳{Number(activeInv.amount).toLocaleString()}</span>
                 </div>
-                <p className="text-[11px] text-amber-700">
+                <p className="text-[11px] text-[#854D0E]">
                   Withdrawal reduces your invested package capital. This will not touch your main wallet balance.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700">Enter Withdrawal Amount (৳)</label>
+                <label className="text-xs font-extrabold text-slate-700">Enter Withdrawal Amount (৳)</label>
                 <input
                   type="number"
                   min={1}
                   max={Number(activeInv.amount)}
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500 font-bold text-slate-900 text-sm"
+                  className="w-full px-4 py-3 rounded-none border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#005A36] font-extrabold text-slate-900 text-sm font-mono"
                 />
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between text-slate-700 font-medium">
+              <div className="bg-slate-50 p-3 rounded-none border border-slate-200 text-xs flex justify-between text-slate-700 font-medium">
                 <span>Remaining Capital After Withdrawal:</span>
-                <span className="font-bold text-slate-900">
+                <span className="font-extrabold text-slate-900 font-mono">
                   ৳{Math.max(0, Number(activeInv.amount) - withdrawAmount).toLocaleString()}
                 </span>
               </div>
@@ -627,14 +627,14 @@ export default function UserInvestmentsPage() {
             <div className="flex space-x-3">
               <button
                 onClick={() => setShowWithdrawModal(false)}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-100"
+                className="flex-1 py-3 rounded-none border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
                 onClick={handleWithdrawCapital}
                 disabled={submitting || withdrawAmount <= 0 || withdrawAmount > Number(activeInv.amount)}
-                className="flex-1 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-amber-600/25"
+                className="flex-1 py-3 rounded-none bg-yellow-50 hover:bg-yellow-100 border border-yellow-300 text-[#854D0E] font-extrabold text-xs disabled:opacity-50"
               >
                 {submitting ? 'Submitting...' : 'Confirm Withdrawal Request'}
               </button>

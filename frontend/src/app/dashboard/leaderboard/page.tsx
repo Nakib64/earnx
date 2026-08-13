@@ -45,47 +45,37 @@ export default function UserLeaderboardPage() {
 
   const leaderboardColumns: ColumnDef<LeaderboardEntry>[] = [
     {
-      key: 'rank',
-      header: 'Rank',
+      key: 'rank_investor',
+      header: 'Rank & Investor',
       render: (item) => (
-        <span className="w-8 h-8 rounded-full bg-slate-100 inline-flex items-center justify-center text-xs font-bold text-slate-800">
-          #{item.rank}
-        </span>
-      ),
-    },
-    {
-      key: 'name',
-      header: 'Investor',
-      render: (item) => (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
+          <span className="w-6 h-6 rounded-none bg-slate-100 border border-slate-200 inline-flex items-center justify-center text-[10px] font-extrabold text-slate-800 shrink-0 font-mono">
+            #{item.rank}
+          </span>
           <img
             src={getPhotoUrl(item.photo_url)}
             alt={item.name}
-            className="w-10 h-10 rounded-full object-cover border border-slate-200"
+            className="w-8 h-8 rounded-none object-cover border border-slate-200 shrink-0"
           />
           <div>
-            <p className="font-bold text-slate-900">{item.name}</p>
-            {item.phone && <p className="text-xs text-slate-400">{item.phone}</p>}
+            <p className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[120px] sm:max-w-[180px]">{item.name}</p>
+            {item.phone && <p className="text-[9px] font-mono text-slate-400">{item.phone}</p>}
           </div>
         </div>
       ),
     },
     {
-      key: 'badge',
-      header: 'Badge / Title',
+      key: 'badge_invested',
+      header: 'Badge & Invested',
       render: (item) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-          {item.badge || 'Top Investor'}
-        </span>
-      ),
-    },
-    {
-      key: 'invested_amount',
-      header: 'Invested Amount',
-      render: (item) => (
-        <span className="font-semibold text-slate-900">
-          ৳{Number(item.invested_amount).toLocaleString()}
-        </span>
+        <div className="space-y-0.5">
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-none text-[8px] sm:text-[9px] font-extrabold bg-yellow-50 text-[#854D0E] border border-yellow-300">
+            {item.badge || 'Top Investor'}
+          </span>
+          <div className="font-mono text-[10px] font-extrabold text-slate-900">
+            ৳{Number(item.invested_amount).toLocaleString()}
+          </div>
+        </div>
       ),
     },
     {
@@ -93,7 +83,7 @@ export default function UserLeaderboardPage() {
       header: 'Profit Earned',
       align: 'right',
       render: (item) => (
-        <span className="font-extrabold text-emerald-600">
+        <span className="font-mono font-extrabold text-[11px] text-[#005A36]">
           +৳{Number(item.profit_earned).toLocaleString()}
         </span>
       ),
@@ -103,32 +93,32 @@ export default function UserLeaderboardPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-sky-600 to-indigo-700 p-6 sm:p-8 text-white shadow-xl shadow-amber-500/10">
+      <div className="relative overflow-hidden rounded-none bg-[#005A36] p-6 sm:p-8 text-white shadow-xs border-b-4 border-[#D4AF37]">
         <div className="relative z-10 space-y-2 text-center sm:text-left">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-amber-100 text-xs font-semibold">
-            <Trophy className="w-4 h-4 text-amber-300" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-extrabold">
+            <Trophy className="w-4 h-4 text-[#D4AF37]" />
             <span>Official Investor Hall of Fame</span>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Top 100 Investment Leaderboard</h1>
-          <p className="text-sky-100 text-sm max-w-2xl">
+          <h1 className="text-3xl font-black tracking-tight">Top 100 Investment Leaderboard</h1>
+          <p className="text-emerald-100 text-sm max-w-2xl">
             Celebrating our top 100 high-yield investors. Rankings are based on total capital invested and profit dividends earned.
           </p>
         </div>
       </div>
 
       {loading ? (
-        <div className="h-64 bg-slate-100 animate-pulse rounded-2xl"></div>
+        <div className="h-64 bg-slate-100 animate-pulse rounded-none"></div>
       ) : (
         <>
           {/* Top 3 Podium */}
           {(top1 || top2 || top3) && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end pt-4">
               {top2 && (
-                <div className="bg-white rounded-3xl p-6 border-2 border-slate-200 shadow-lg text-center space-y-4 relative order-2 md:order-1">
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-400 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow">
+                <div className="bg-white rounded-none p-6 border-2 border-slate-200 shadow-xs text-center space-y-4 relative order-2 md:order-1">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-700 text-white px-3 py-0.5 rounded-none text-xs font-black shadow-xs">
                     2ND PLACE
                   </div>
-                  <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden border-4 border-slate-300 shadow-md">
+                  <div className="relative w-20 h-20 mx-auto rounded-none overflow-hidden border-2 border-slate-300 shadow-xs">
                     <img
                       src={getPhotoUrl(top2.photo_url)}
                       alt={top2.name}
@@ -136,14 +126,14 @@ export default function UserLeaderboardPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{top2.name}</h3>
-                    <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                    <h3 className="font-extrabold text-slate-900 text-lg">{top2.name}</h3>
+                    <span className="text-xs font-extrabold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-none border border-slate-200">
                       {top2.badge || 'Silver Investor'}
                     </span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1">
+                  <div className="bg-slate-50 p-3 rounded-none border border-slate-200 space-y-1 font-mono">
                     <p className="text-xs text-slate-500">Invested: ৳{Number(top2.invested_amount).toLocaleString()}</p>
-                    <p className="text-sm font-extrabold text-sky-600">
+                    <p className="text-sm font-extrabold text-[#005A36]">
                       Profit: ৳{Number(top2.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -151,12 +141,12 @@ export default function UserLeaderboardPage() {
               )}
 
               {top1 && (
-                <div className="bg-gradient-to-b from-amber-50 to-white rounded-3xl p-6 border-2 border-amber-400 shadow-2xl shadow-amber-500/20 text-center space-y-4 relative order-1 md:order-2 md:-translate-y-4">
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 py-1 rounded-full text-xs font-black shadow-lg flex items-center space-x-1">
-                    <Crown className="w-4 h-4 text-yellow-200 fill-yellow-200" />
+                <div className="bg-emerald-50/40 rounded-none p-6 border-2 border-[#D4AF37] shadow-md text-center space-y-4 relative order-1 md:order-2 md:-translate-y-4">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#005A36] text-[#D4AF37] border-b-2 border-[#D4AF37] px-4 py-1 rounded-none text-xs font-black shadow-xs flex items-center space-x-1">
+                    <Crown className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
                     <span>#1 CHAMPION</span>
                   </div>
-                  <div className="relative w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-amber-400 shadow-xl ring-4 ring-amber-400/20">
+                  <div className="relative w-24 h-24 mx-auto rounded-none overflow-hidden border-4 border-[#D4AF37] shadow-md">
                     <img
                       src={getPhotoUrl(top1.photo_url)}
                       alt={top1.name}
@@ -164,14 +154,14 @@ export default function UserLeaderboardPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-slate-900 text-xl">{top1.name}</h3>
-                    <span className="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">
+                    <h3 className="font-black text-slate-900 text-xl">{top1.name}</h3>
+                    <span className="text-xs font-extrabold text-[#854D0E] bg-yellow-50 px-3 py-1 rounded-none border border-yellow-300">
                       {top1.badge || 'VIP Diamond Leader'}
                     </span>
                   </div>
-                  <div className="bg-amber-100/50 p-3.5 rounded-2xl border border-amber-200 space-y-1">
-                    <p className="text-xs text-amber-900 font-medium">Invested: ৳{Number(top1.invested_amount).toLocaleString()}</p>
-                    <p className="text-base font-black text-amber-700">
+                  <div className="bg-yellow-50/80 p-3.5 rounded-none border border-yellow-300 space-y-1 font-mono">
+                    <p className="text-xs text-[#854D0E] font-medium">Invested: ৳{Number(top1.invested_amount).toLocaleString()}</p>
+                    <p className="text-base font-black text-[#005A36]">
                       Total Profit: ৳{Number(top1.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -179,11 +169,11 @@ export default function UserLeaderboardPage() {
               )}
 
               {top3 && (
-                <div className="bg-white rounded-3xl p-6 border-2 border-amber-700/20 shadow-lg text-center space-y-4 relative order-3">
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-700 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow">
+                <div className="bg-white rounded-none p-6 border-2 border-slate-200 shadow-xs text-center space-y-4 relative order-3">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#854D0E] text-white px-3 py-0.5 rounded-none text-xs font-black shadow-xs">
                     3RD PLACE
                   </div>
-                  <div className="relative w-20 h-20 mx-auto rounded-full overflow-hidden border-4 border-amber-600/40 shadow-md">
+                  <div className="relative w-20 h-20 mx-auto rounded-none overflow-hidden border-2 border-amber-600/40 shadow-xs">
                     <img
                       src={getPhotoUrl(top3.photo_url)}
                       alt={top3.name}
@@ -191,14 +181,14 @@ export default function UserLeaderboardPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{top3.name}</h3>
-                    <span className="text-xs font-semibold text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                    <h3 className="font-extrabold text-slate-900 text-lg">{top3.name}</h3>
+                    <span className="text-xs font-extrabold text-[#854D0E] bg-yellow-50 px-2.5 py-0.5 rounded-none border border-yellow-300">
                       {top3.badge || 'Bronze Member'}
                     </span>
                   </div>
-                  <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-1">
+                  <div className="bg-slate-50 p-3 rounded-none border border-slate-200 space-y-1 font-mono">
                     <p className="text-xs text-slate-500">Invested: ৳{Number(top3.invested_amount).toLocaleString()}</p>
-                    <p className="text-sm font-extrabold text-sky-600">
+                    <p className="text-sm font-extrabold text-[#005A36]">
                       Profit: ৳{Number(top3.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -208,10 +198,10 @@ export default function UserLeaderboardPage() {
           )}
 
           {/* Ranks 4 to 100 List using DataTable */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 space-y-6">
+          <div className="bg-white rounded-none border border-slate-200 shadow-xs p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center space-x-2">
-                <Medal className="w-5 h-5 text-sky-600" />
+              <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
+                <Medal className="w-5 h-5 text-[#005A36]" />
                 <span>Ranks 4 to 100 Leaderboard</span>
               </h2>
 
@@ -222,7 +212,7 @@ export default function UserLeaderboardPage() {
                   placeholder="Search by investor name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#005A36]"
                 />
               </div>
             </div>

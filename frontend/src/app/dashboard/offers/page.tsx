@@ -31,18 +31,18 @@ export default function OffersPage() {
 
   if (user?.status !== UserStatus.ACTIVE) {
     return (
-      <div className="glass-card rounded-2xl p-8 text-center space-y-4 max-w-lg mx-auto mt-10 bg-white border border-slate-200 shadow-sm">
-        <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto">
+      <div className="glass-card rounded-none p-8 text-center space-y-4 max-w-lg mx-auto mt-10 bg-white border border-slate-200 shadow-xs">
+        <div className="w-16 h-16 bg-yellow-50 text-[#854D0E] border border-yellow-300 rounded-none flex items-center justify-center mx-auto">
           <Lock className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">Offers & Tasks Locked</h2>
+        <h2 className="text-xl font-extrabold text-slate-900">Offers & Tasks Locked</h2>
         <p className="text-xs text-slate-500 leading-relaxed">
           Your member account is currently in <strong>{user?.status || 'DISABLED'}</strong> status. Offers and promotional tasks are exclusively available to <strong>ACTIVE</strong> members.
         </p>
         <div className="pt-2">
           <Link
             href="/dashboard"
-            className="inline-flex items-center sky-gradient-btn px-6 py-2.5 rounded-xl font-bold text-xs shadow-md"
+            className="inline-flex items-center emerald-gold-btn px-6 py-2.5 rounded-none font-extrabold text-xs shadow-xs"
           >
             Go to Dashboard & Request Activation
           </Link>
@@ -63,31 +63,31 @@ export default function OffersPage() {
       {loading ? (
         <div className="text-center py-10 text-xs text-slate-400">Loading active promotions...</div>
       ) : offers.length === 0 ? (
-        <div className="glass-card rounded-2xl p-8 text-center space-y-2 bg-white border border-slate-200">
+        <div className="glass-card rounded-none p-8 text-center space-y-2 bg-white border border-slate-200">
           <Gift className="w-10 h-10 text-slate-300 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-700">No active offers available right now</h3>
+          <h3 className="text-sm font-extrabold text-slate-700">No active offers available right now</h3>
           <p className="text-xs text-slate-400">Check back soon for new task promotions from admins.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {offers.map((offer) => (
-            <div key={offer.id} className="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 bg-white border border-slate-200">
+            <div key={offer.id} className="glass-card rounded-none p-5 flex flex-col justify-between space-y-4 bg-white border border-slate-200">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 bg-purple-50 text-purple-700 border border-purple-200 rounded-full text-xs font-bold">
+                  <span className="px-2.5 py-1 bg-yellow-50 text-[#854D0E] border border-yellow-300 rounded-none text-xs font-extrabold">
                     Special Offer
                   </span>
-                  <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-base">
+                  <div className="flex items-center space-x-1 text-[#005A36] font-extrabold text-base font-mono">
                     <DollarSign className="w-4 h-4" />
                     <span>{Number(offer.reward_amount).toFixed(2)}</span>
                   </div>
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">{offer.title}</h3>
+                <h3 className="font-extrabold text-slate-900 text-base">{offer.title}</h3>
                 <p className="text-xs text-slate-500 line-clamp-3">{offer.description}</p>
               </div>
 
-              <button className="w-full sky-gradient-btn py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5">
-                <CheckCircle2 className="w-4 h-4" />
+              <button className="w-full emerald-gold-btn py-2.5 rounded-none font-extrabold text-xs flex items-center justify-center space-x-1.5">
+                <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
                 <span>Complete Task & Claim</span>
               </button>
             </div>

@@ -211,9 +211,9 @@ export default function WalletPage() {
               setShowTransferModal(!showTransferModal);
               setShowWithdrawModal(false);
             }}
-            className="py-2.5 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center space-x-2 shadow-md transition-all"
+            className="py-2.5 px-4 rounded-none bg-yellow-50 hover:bg-yellow-100 text-[#854D0E] font-extrabold text-xs flex items-center justify-center space-x-2 shadow-xs transition-all border border-yellow-300"
           >
-            <ArrowRightLeft className="w-4 h-4" />
+            <ArrowRightLeft className="w-4 h-4 text-[#854D0E]" />
             <span>Transfer to Network</span>
           </button>
 
@@ -222,7 +222,7 @@ export default function WalletPage() {
               setShowWithdrawModal(!showWithdrawModal);
               setShowTransferModal(false);
             }}
-            className="sky-gradient-btn px-4 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 shadow-md"
+            className="emerald-gold-btn px-4 py-2.5 rounded-none font-extrabold text-xs flex items-center justify-center space-x-2 shadow-xs"
           >
             <Send className="w-4 h-4" />
             <span>Request Withdrawal</span>
@@ -234,10 +234,10 @@ export default function WalletPage() {
 
       {/* Network Transfer Modal / Form */}
       {showTransferModal && (
-        <div className="glass-card rounded-2xl p-6 border-2 border-purple-200 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+        <div className="glass-card rounded-none p-6 border-2 border-yellow-300 space-y-4 animate-in fade-in zoom-in-95 duration-200">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-base flex items-center space-x-2">
-              <ArrowRightLeft className="w-5 h-5 text-purple-600" />
+            <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
+              <ArrowRightLeft className="w-5 h-5 text-[#854D0E]" />
               <span>Direct Network Balance Transfer</span>
             </h3>
             <button
@@ -251,7 +251,7 @@ export default function WalletPage() {
           <form onSubmit={handleTransferSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                   Recipient Referral Code
                 </label>
                 <div className="relative">
@@ -261,10 +261,10 @@ export default function WalletPage() {
                     placeholder="Enter referral code..."
                     value={targetReferralCode}
                     onChange={(e) => setTargetReferralCode(e.target.value.toUpperCase())}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
                   />
                   {searchingRecipient && (
-                    <div className="absolute right-3 top-3 text-purple-600">
+                    <div className="absolute right-3 top-3 text-[#005A36]">
                       <Loader2 className="w-4 h-4 animate-spin" />
                     </div>
                   )}
@@ -272,16 +272,16 @@ export default function WalletPage() {
 
                 {/* Live Recipient Info Status */}
                 {searchingRecipient && (
-                  <p className="text-xs text-purple-600 font-medium mt-1.5 flex items-center space-x-1">
+                  <p className="text-xs text-[#005A36] font-medium mt-1.5 flex items-center space-x-1">
                     <span>Searching network tree...</span>
                   </p>
                 )}
 
                 {verifiedRecipient && (
-                  <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center space-x-3 text-emerald-900">
-                    <UserCheck className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                  <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-none flex items-center space-x-3 text-emerald-900">
+                    <UserCheck className="w-5 h-5 text-[#005A36] flex-shrink-0" />
                     <div className="text-xs">
-                      <p className="font-bold text-slate-900">{verifiedRecipient.full_name}</p>
+                      <p className="font-extrabold text-slate-900">{verifiedRecipient.full_name}</p>
                       <p className="text-slate-600 font-medium">{verifiedRecipient.phone}</p>
                     </div>
                   </div>
@@ -293,7 +293,7 @@ export default function WalletPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                   Transfer Amount (৳)
                 </label>
                 <input
@@ -305,18 +305,18 @@ export default function WalletPage() {
                   placeholder="Enter amount..."
                   value={transferAmount}
                   onChange={(e) => setTransferAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
                 />
-                <p className="text-[11px] text-slate-500 mt-1">Available: ৳{currentBal.toLocaleString()}</p>
+                <p className="text-[11px] text-slate-500 mt-1 font-mono">Available: ৳{currentBal.toLocaleString()}</p>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={submittingTransfer || !verifiedRecipient || !transferAmount || parseFloat(transferAmount) <= 0 || parseFloat(transferAmount) > currentBal}
-              className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-md shadow-purple-600/25 transition-all"
+              className="w-full py-3 rounded-none bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-xs border-b-2 border-[#D4AF37] transition-all"
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
               <span>{submittingTransfer ? 'Sending Transfer...' : 'Confirm & Direct Send'}</span>
             </button>
           </form>
@@ -325,9 +325,9 @@ export default function WalletPage() {
 
       {/* Withdrawal Form Modal / Box */}
       {showWithdrawModal && (
-        <div className="glass-card rounded-2xl p-6 border-2 border-sky-200 space-y-4">
+        <div className="glass-card rounded-none p-6 border-2 border-emerald-200 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-base">Submit Direct Withdrawal</h3>
+            <h3 className="font-extrabold text-slate-900 text-base">Submit Direct Withdrawal</h3>
             <button
               onClick={() => setShowWithdrawModal(false)}
               className="text-xs font-bold text-slate-400 hover:text-slate-600"
@@ -339,7 +339,7 @@ export default function WalletPage() {
           <form onSubmit={handleWithdrawalSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                   Withdrawal Amount (৳)
                 </label>
                 <input
@@ -351,7 +351,7 @@ export default function WalletPage() {
                   placeholder="500.00"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#005A36] font-bold"
                 />
               </div>
             </div>
@@ -359,7 +359,7 @@ export default function WalletPage() {
             <button
               type="submit"
               disabled={submittingWithdraw || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > currentBal}
-              className="w-full sky-gradient-btn py-3 rounded-xl font-bold text-xs flex items-center justify-center space-x-2 disabled:opacity-50"
+              className="w-full emerald-gold-btn py-3 rounded-none font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50"
             >
               <span>{submittingWithdraw ? 'Processing...' : 'Confirm & Withdraw'}</span>
             </button>
@@ -368,28 +368,27 @@ export default function WalletPage() {
       )}
 
       {/* Balance Summary Header */}
-      <div className="glass-card rounded-2xl p-6 flex items-center justify-between">
+      <div className="glass-card rounded-none p-6 flex items-center justify-between">
         <div className="space-y-1">
-          <span className="text-xs font-bold text-slate-400 uppercase">Available Wallet Balance</span>
-          <div className="text-3xl font-extrabold text-slate-900">
+          <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Available Wallet Balance</span>
+          <div className="text-3xl font-extrabold text-slate-900 font-mono">
             ৳{currentBal.toFixed(2)}
           </div>
         </div>
-        <div className="w-12 h-12 rounded-2xl sky-gradient-bg flex items-center justify-center text-white shadow-lg">
+        <div className="w-12 h-12 rounded-none bg-[#005A36] border-b-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow-xs">
           <Wallet className="w-6 h-6" />
         </div>
       </div>
 
       {/* Transaction History Table */}
-      <div className="glass-card rounded-2xl p-5 space-y-4">
-        <h3 className="font-bold text-slate-900 text-sm">Ledger Audit History</h3>
+      <div className="glass-card rounded-none p-5 space-y-4">
+        <h3 className="font-extrabold text-slate-900 text-sm">Ledger Audit History</h3>
 
         <DataTable<WalletTransaction>
           data={transactions}
           columns={columns}
           keyExtractor={(tx) => tx.id}
           loading={loading}
-          emptyMessage="No transactions recorded yet in your wallet ledger."
         />
       </div>
     </div>
