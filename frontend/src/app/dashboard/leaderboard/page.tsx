@@ -83,7 +83,7 @@ export default function UserLeaderboardPage() {
       header: 'Profit Earned',
       align: 'right',
       render: (item) => (
-        <span className="font-mono font-extrabold text-[11px] text-[#005A36]">
+        <span className="font-mono font-extrabold text-[11px] text-primary">
           +৳{Number(item.profit_earned).toLocaleString()}
         </span>
       ),
@@ -93,10 +93,10 @@ export default function UserLeaderboardPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-none bg-[#005A36] p-6 sm:p-8 text-white shadow-xs border-b-4 border-[#D4AF37]">
+      <div className="relative overflow-hidden rounded-none bg-primary p-6 sm:p-8 text-white shadow-xs ">
         <div className="relative z-10 space-y-2 text-center sm:text-left">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-extrabold">
-            <Trophy className="w-4 h-4 text-[#D4AF37]" />
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-secondary border border-secondary/40 text-xs font-extrabold">
+            <Trophy className="w-4 h-4 text-secondary" />
             <span>Official Investor Hall of Fame</span>
           </div>
           <h1 className="text-3xl font-black tracking-tight">Top 100 Investment Leaderboard</h1>
@@ -133,7 +133,7 @@ export default function UserLeaderboardPage() {
                   </div>
                   <div className="bg-slate-50 p-3 rounded-none border border-slate-200 space-y-1 font-mono">
                     <p className="text-xs text-slate-500">Invested: ৳{Number(top2.invested_amount).toLocaleString()}</p>
-                    <p className="text-sm font-extrabold text-[#005A36]">
+                    <p className="text-sm font-extrabold text-primary">
                       Profit: ৳{Number(top2.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -141,12 +141,12 @@ export default function UserLeaderboardPage() {
               )}
 
               {top1 && (
-                <div className="bg-emerald-50/40 rounded-none p-6 border-2 border-[#D4AF37] shadow-md text-center space-y-4 relative order-1 md:order-2 md:-translate-y-4">
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#005A36] text-[#D4AF37] border-b-2 border-[#D4AF37] px-4 py-1 rounded-none text-xs font-black shadow-xs flex items-center space-x-1">
-                    <Crown className="w-4 h-4 text-[#D4AF37] fill-[#D4AF37]" />
+                <div className="bg-emerald-50/40 rounded-none p-6 border-2 border-secondary shadow-md text-center space-y-4 relative order-1 md:order-2 md:-translate-y-4">
+                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-secondary border-b-2 border-secondary px-4 py-1 rounded-none text-xs font-black shadow-xs flex items-center space-x-1">
+                    <Crown className="w-4 h-4 text-secondary fill-secondary" />
                     <span>#1 CHAMPION</span>
                   </div>
-                  <div className="relative w-24 h-24 mx-auto rounded-none overflow-hidden border-4 border-[#D4AF37] shadow-md">
+                  <div className="relative w-24 h-24 mx-auto rounded-none overflow-hidden border-4 border-secondary shadow-md">
                     <img
                       src={getPhotoUrl(top1.photo_url)}
                       alt={top1.name}
@@ -161,7 +161,7 @@ export default function UserLeaderboardPage() {
                   </div>
                   <div className="bg-yellow-50/80 p-3.5 rounded-none border border-yellow-300 space-y-1 font-mono">
                     <p className="text-xs text-[#854D0E] font-medium">Invested: ৳{Number(top1.invested_amount).toLocaleString()}</p>
-                    <p className="text-base font-black text-[#005A36]">
+                    <p className="text-base font-black text-primary">
                       Total Profit: ৳{Number(top1.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function UserLeaderboardPage() {
                   </div>
                   <div className="bg-slate-50 p-3 rounded-none border border-slate-200 space-y-1 font-mono">
                     <p className="text-xs text-slate-500">Invested: ৳{Number(top3.invested_amount).toLocaleString()}</p>
-                    <p className="text-sm font-extrabold text-[#005A36]">
+                    <p className="text-sm font-extrabold text-primary">
                       Profit: ৳{Number(top3.profit_earned).toLocaleString()}
                     </p>
                   </div>
@@ -201,7 +201,7 @@ export default function UserLeaderboardPage() {
           <div className="bg-white rounded-none border border-slate-200 shadow-xs p-6 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
-                <Medal className="w-5 h-5 text-[#005A36]" />
+                <Medal className="w-5 h-5 text-primary" />
                 <span>Ranks 4 to 100 Leaderboard</span>
               </h2>
 
@@ -212,7 +212,7 @@ export default function UserLeaderboardPage() {
                   placeholder="Search by investor name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
             </div>

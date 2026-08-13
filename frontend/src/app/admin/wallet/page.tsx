@@ -109,7 +109,7 @@ export default function AdminWalletPage() {
           </div>
           <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5 truncate max-w-[130px]">
             <span>{tx.user?.full_name || '-'}</span>
-            {tx.user?.referral_code && <span className="text-[#005A36] font-bold">• {tx.user.referral_code}</span>}
+            {tx.user?.referral_code && <span className="text-primary font-bold">• {tx.user.referral_code}</span>}
           </div>
         </div>
       ),
@@ -182,9 +182,9 @@ export default function AdminWalletPage() {
           <span>Issue Manual User Wallet Adjustment</span>
         </h3>
 
-        <form onSubmit={handleAdjustSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <form onSubmit={handleAdjustSubmit} className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 items-end">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
               User ID / Target
             </label>
             <input
@@ -193,13 +193,13 @@ export default function AdminWalletPage() {
               placeholder="UUID of target user"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-              Adjustment Amount (+ / -)
+            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Amount (+ / -)
             </label>
             <input
               type="number"
@@ -208,12 +208,12 @@ export default function AdminWalletPage() {
               placeholder="e.g. 500 or -500"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+          <div className="col-span-2 sm:col-span-1">
+            <label className="block text-[10px] sm:text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
               Audit Note / Reason
             </label>
             <input
@@ -221,14 +221,14 @@ export default function AdminWalletPage() {
               placeholder="Reason for adjustment"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400"
+              className="w-full bg-slate-50 border border-slate-200 rounded-none px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
           <button
             type="submit"
             disabled={adjusting}
-            className="sky-gradient-btn py-2.5 px-4 rounded-xl font-bold text-xs flex items-center justify-center space-x-1.5"
+            className="emerald-gold-btn py-2.5 px-4 rounded-none font-bold text-xs flex items-center justify-center space-x-1.5 col-span-2 sm:col-span-1"
           >
             <span>{adjusting ? 'Processing...' : 'Execute Adjustment'}</span>
           </button>
@@ -349,11 +349,10 @@ export default function AdminWalletPage() {
                     <button
                       key={pageNum}
                       onClick={() => setPage(pageNum)}
-                      className={`w-7 h-7 rounded-lg text-xs font-extrabold ${
-                        page === pageNum
+                      className={`w-7 h-7 rounded-lg text-xs font-extrabold ${page === pageNum
                           ? 'bg-sky-500 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       {pageNum}
                     </button>

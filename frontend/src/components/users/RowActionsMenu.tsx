@@ -77,7 +77,7 @@ export function RowActionsMenu({
           className="px-2 py-1 bg-emerald-100 text-emerald-900 hover:bg-emerald-200 rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-300"
           title="View profile & transaction history below table"
         >
-          <Users className="w-3 h-3 text-[#005A36]" />
+          <Users className="w-3 h-3 text-primary" />
           <span>Details</span>
         </button>
 
@@ -86,10 +86,10 @@ export function RowActionsMenu({
             e.stopPropagation();
             onAdjustBalance(user);
           }}
-          className="px-2 py-1 bg-emerald-50 text-[#005A36] hover:bg-emerald-100 rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-200"
+          className="px-2 py-1 bg-emerald-50 text-primary hover:bg-emerald-100 rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-200"
           title="Adjust wallet balance"
         >
-          <DollarSign className="w-3 h-3 text-[#005A36]" />
+          <DollarSign className="w-3 h-3 text-primary" />
           <span>Adjust</span>
         </button>
 
@@ -107,7 +107,7 @@ export function RowActionsMenu({
         {user.status === UserStatus.DISABLED && (
           <button
             onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-            className="px-2 py-1 bg-[#005A36] text-white rounded-none font-extrabold text-[10px] hover:bg-[#044D2F] transition-colors"
+            className="px-2 py-1 bg-primary text-white rounded-none font-extrabold text-[10px] hover:bg-[#044D2F] transition-colors"
           >
             Activate
           </button>
@@ -173,9 +173,9 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onSelectDetails(user);
                 }}
-                className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-primary hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
               >
-                <Users className="w-3.5 h-3.5 text-[#005A36] shrink-0" />
+                <Users className="w-3.5 h-3.5 text-primary shrink-0" />
                 <span>View Details Below</span>
               </button>
 
@@ -212,7 +212,7 @@ export function RowActionsMenu({
                     setIsOpen(false);
                     onToggleStatus(e, user, UserStatus.ACTIVE);
                   }}
-                  className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
+                  className="w-full px-3 py-1.5 text-left font-bold text-primary hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   <span>Activate User</span>
@@ -240,7 +240,7 @@ export function RowActionsMenu({
                     setIsOpen(false);
                     onToggleStatus(e, user, UserStatus.ACTIVE);
                   }}
-                  className="w-full px-3 py-1.5 text-left font-bold text-[#005A36] hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
+                  className="w-full px-3 py-1.5 text-left font-bold text-primary hover:bg-emerald-50 rounded-none flex items-center space-x-2 transition-colors"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                   <span>Unblock User</span>

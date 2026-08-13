@@ -31,7 +31,7 @@ type LinkItem = {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { user, admin, logoutAdmin, logoutUser } = useAuth();
+  const { user, admin, userToken, adminToken, isLoading, logoutAdmin, logoutUser } = useAuth();
 
   const isDashboardRoute = pathname?.startsWith('/dashboard');
   const isAdminRoute = pathname?.startsWith('/admin');
@@ -40,9 +40,9 @@ export default function Sidebar() {
   // Default open when already on an approvals sub-route
   const [approvalsOpen, setApprovalsOpen] = useState(!!isApprovalsSection);
 
-  // Hide sidebar on public pages, or if user/admin isn't logged in for their respective section
-  if (isAdminRoute && !admin) return null;
-  if (isDashboardRoute && !user) return null;
+  // Hide sidebar on public pages, or if user/admin isn't logged in for their respective section (only after auth loading completes)
+  if (isAdminRoute && !admin && !isLoading && !adminToken) return null;
+  if (isDashboardRoute && !user && !isLoading && !userToken) return null;
   if (!isDashboardRoute && !isAdminRoute) return null;
 
 
@@ -53,7 +53,6 @@ export default function Sidebar() {
     { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet & Ledger', icon: Wallet },
-    { href: '/dashboard/offers', label: 'Offers & Tasks', icon: Gift },
   ];
 
   const adminTopItems: LinkItem[] = [
@@ -67,15 +66,14 @@ export default function Sidebar() {
   ];
 
   const approvalItems: LinkItem[] = [
-    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-[#005A36]' },
+    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-primary' },
     { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star, accentClass: 'text-[#854D0E]' },
-    { href: '/admin/approvals/withdrawals', label: 'Withdrawals', icon: DollarSign, accentClass: 'text-[#005A36]' },
+    { href: '/admin/approvals/withdrawals', label: 'Withdrawals', icon: DollarSign, accentClass: 'text-primary' },
   ];
 
   const adminBottomItems: LinkItem[] = [
     { href: '/admin/commissions', label: 'Commission Rules', icon: Layers },
     { href: '/admin/wallet', label: 'Ledger & Adjustments', icon: DollarSign },
-    { href: '/admin/offers', label: 'Manage Offers', icon: Gift },
   ];
 
 
@@ -86,18 +84,15 @@ export default function Sidebar() {
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center space-x-3 py-2.5 rounded-none font-medium text-xs transition-all ${
-          isChild ? 'pl-7 pr-3.5' : 'px-3.5'
-        } ${
-          isActive
-            ? 'bg-[#005A36] text-white border-l-4 border-[#D4AF37] shadow-xs'
+        className={`flex items-center space-x-3 py-2.5 rounded-none font-medium text-xs transition-all ${isChild ? 'pl-7 pr-3.5' : 'px-3.5'
+          } ${isActive
+            ? 'bg-primary text-white border-l-4 border-secondary shadow-xs'
             : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-        }`}
+          }`}
       >
         <Icon
-          className={`w-4 h-4 shrink-0 ${
-            isActive ? 'text-[#D4AF37]' : item.accentClass || 'text-slate-400'
-          }`}
+          className={`w-4 h-4 shrink-0 ${isActive ? 'text-secondary' : item.accentClass || 'text-slate-400'
+            }`}
         />
         <span>{item.label}</span>
       </Link>
@@ -110,12 +105,12 @@ export default function Sidebar() {
     >
       {/* Brand Header */}
       <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-100 shrink-0">
-        <div className="w-9 h-9 rounded-none bg-[#005A36] border-b-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] font-black text-lg shadow-xs">
+        <div className="w-9 h-9 rounded-none bg-primary border-b-2 border-secondary flex items-center justify-center text-secondary font-black text-lg shadow-xs">
           X
         </div>
         <div className="flex flex-col">
-          <span className="font-extrabold text-lg tracking-tight text-[#005A36]">
-            Earn<span className="text-[#D4AF37]">X</span>
+          <span className="font-extrabold text-lg tracking-tight text-primary">
+            Earn<span className="text-secondary">X</span>
           </span>
           <span className="text-[9px] font-bold text-slate-400 -mt-1 uppercase tracking-widest">
             {isAdminRoute ? 'Admin Portal' : 'Capital Ecosystem'}
@@ -125,14 +120,14 @@ export default function Sidebar() {
 
       {/* Role Indicator Banner */}
       <div className="bg-emerald-50/60 border border-emerald-200/80 rounded-none p-3 flex items-center space-x-3 shrink-0">
-        <div className="w-8 h-8 rounded-none bg-[#005A36] flex items-center justify-center text-[#D4AF37] font-bold text-xs shrink-0">
+        <div className="w-8 h-8 rounded-none bg-primary flex items-center justify-center text-secondary font-bold text-xs shrink-0">
           {isAdminRoute ? 'A' : 'U'}
         </div>
         <div className="flex flex-col overflow-hidden flex-1">
           <span className="text-xs font-bold text-slate-800 truncate">
             {isAdminRoute ? 'Admin Control' : user?.full_name || user?.phone}
           </span>
-          <span className="text-[10px] font-semibold text-[#005A36] truncate">
+          <span className="text-[10px] font-semibold text-primary truncate">
             {isAdminRoute ? admin?.phone : user?.designation?.name || 'Starter Member'}
           </span>
         </div>
@@ -155,27 +150,24 @@ export default function Sidebar() {
               {/* Clickable toggle header */}
               <button
                 onClick={() => setApprovalsOpen(o => !o)}
-                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-none text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
-                  isApprovalsSection
-                    ? 'text-[#005A36] bg-emerald-50/70 border-l-2 border-[#005A36]'
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`w-full flex items-center justify-between px-3.5 py-2 rounded-none text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${isApprovalsSection
+                  ? 'text-primary bg-emerald-50/70 border-l-2 border-primary'
+                  : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                  }`}
               >
                 <span className="flex items-center space-x-2">
-                  <UserCheck className="w-3.5 h-3.5 shrink-0 text-[#005A36]" />
+                  <UserCheck className="w-3.5 h-3.5 shrink-0 text-primary" />
                   <span>Approvals Queue</span>
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
-                    approvalsOpen ? 'rotate-180' : 'rotate-0'
-                  }`}
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${approvalsOpen ? 'rotate-180' : 'rotate-0'
+                    }`}
                 />
               </button>
               {/* Indented children */}
               <div
-                className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                  approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
-                }`}
+                className={`overflow-hidden transition-all duration-200 ease-in-out ${approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
+                  }`}
               >
                 <div className="space-y-0.5">
                   {approvalItems.map((item) => renderLink(item, true))}

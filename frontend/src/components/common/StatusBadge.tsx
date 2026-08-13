@@ -17,7 +17,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
     case TransactionType.DEPOSIT:
     case TransactionType.INVESTMENT_PAYOUT:
     case TransactionType.PREMIUM_WEEKLY_PAYOUT:
-      badgeStyle = 'bg-emerald-50 text-[#005A36] border-emerald-200';
+      badgeStyle = 'bg-emerald-50 text-primary border-emerald-200';
       break;
     case RequestStatus.PENDING:
     case TransactionType.COMMISSION:

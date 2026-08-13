@@ -36,11 +36,10 @@ export function UserBreadcrumbs({ breadcrumbs, onBreadcrumbClick }: UserBreadcru
             {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
             <button
               onClick={() => onBreadcrumbClick(idx)}
-              className={`font-bold transition-colors shrink-0 ${
-                isLast
-                  ? 'text-[#005A36] cursor-default font-extrabold'
+              className={`font-bold transition-colors shrink-0 ${isLast
+                  ? 'text-primary cursor-default font-extrabold'
                   : 'text-slate-500 hover:text-slate-900 underline underline-offset-2'
-              }`}
+                }`}
             >
               {crumb.name}
             </button>

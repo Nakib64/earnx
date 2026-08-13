@@ -69,7 +69,7 @@ export default function OffersPage() {
           <p className="text-xs text-slate-400">Check back soon for new task promotions from admins.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
           {offers.map((offer) => (
             <div key={offer.id} className="glass-card rounded-none p-5 flex flex-col justify-between space-y-4 bg-white border border-slate-200">
               <div className="space-y-2">
@@ -77,7 +77,7 @@ export default function OffersPage() {
                   <span className="px-2.5 py-1 bg-yellow-50 text-[#854D0E] border border-yellow-300 rounded-none text-xs font-extrabold">
                     Special Offer
                   </span>
-                  <div className="flex items-center space-x-1 text-[#005A36] font-extrabold text-base font-mono">
+                  <div className="flex items-center space-x-1 text-primary font-extrabold text-base font-mono">
                     <DollarSign className="w-4 h-4" />
                     <span>{Number(offer.reward_amount).toFixed(2)}</span>
                   </div>
@@ -87,7 +87,7 @@ export default function OffersPage() {
               </div>
 
               <button className="w-full emerald-gold-btn py-2.5 rounded-none font-extrabold text-xs flex items-center justify-center space-x-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
+                <CheckCircle2 className="w-4 h-4 text-secondary" />
                 <span>Complete Task & Claim</span>
               </button>
             </div>

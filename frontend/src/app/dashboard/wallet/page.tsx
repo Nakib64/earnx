@@ -45,10 +45,10 @@ export default function WalletPage() {
       const list: WalletTransaction[] = Array.isArray(raw)
         ? raw
         : Array.isArray(raw?.data)
-        ? raw.data
-        : Array.isArray(raw?.transactions)
-        ? raw.transactions
-        : [];
+          ? raw.data
+          : Array.isArray(raw?.transactions)
+            ? raw.transactions
+            : [];
       setTransactions(list);
     }
     setLoading(false);
@@ -197,38 +197,7 @@ export default function WalletPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Wallet & Ledger</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Manage your balance, request withdrawals, or transfer directly across your network.
-          </p>
-        </div>
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => {
-              setShowTransferModal(!showTransferModal);
-              setShowWithdrawModal(false);
-            }}
-            className="py-2.5 px-4 rounded-none bg-yellow-50 hover:bg-yellow-100 text-[#854D0E] font-extrabold text-xs flex items-center justify-center space-x-2 shadow-xs transition-all border border-yellow-300"
-          >
-            <ArrowRightLeft className="w-4 h-4 text-[#854D0E]" />
-            <span>Transfer to Network</span>
-          </button>
-
-          <button
-            onClick={() => {
-              setShowWithdrawModal(!showWithdrawModal);
-              setShowTransferModal(false);
-            }}
-            className="emerald-gold-btn px-4 py-2.5 rounded-none font-extrabold text-xs flex items-center justify-center space-x-2 shadow-xs"
-          >
-            <Send className="w-4 h-4" />
-            <span>Request Withdrawal</span>
-          </button>
-        </div>
-      </div>
 
       {statusMsg && <AlertBanner type={statusMsg.type} message={statusMsg.text} onClose={() => setStatusMsg(null)} />}
 
@@ -261,10 +230,10 @@ export default function WalletPage() {
                     placeholder="Enter referral code..."
                     value={targetReferralCode}
                     onChange={(e) => setTargetReferralCode(e.target.value.toUpperCase())}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-semibold uppercase text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   {searchingRecipient && (
-                    <div className="absolute right-3 top-3 text-[#005A36]">
+                    <div className="absolute right-3 top-3 text-primary">
                       <Loader2 className="w-4 h-4 animate-spin" />
                     </div>
                   )}
@@ -272,14 +241,14 @@ export default function WalletPage() {
 
                 {/* Live Recipient Info Status */}
                 {searchingRecipient && (
-                  <p className="text-xs text-[#005A36] font-medium mt-1.5 flex items-center space-x-1">
+                  <p className="text-xs text-primary font-medium mt-1.5 flex items-center space-x-1">
                     <span>Searching network tree...</span>
                   </p>
                 )}
 
                 {verifiedRecipient && (
                   <div className="mt-2.5 p-3 bg-emerald-50 border border-emerald-200 rounded-none flex items-center space-x-3 text-emerald-900">
-                    <UserCheck className="w-5 h-5 text-[#005A36] flex-shrink-0" />
+                    <UserCheck className="w-5 h-5 text-primary flex-shrink-0" />
                     <div className="text-xs">
                       <p className="font-extrabold text-slate-900">{verifiedRecipient.full_name}</p>
                       <p className="text-slate-600 font-medium">{verifiedRecipient.phone}</p>
@@ -305,7 +274,7 @@ export default function WalletPage() {
                   placeholder="Enter amount..."
                   value={transferAmount}
                   onChange={(e) => setTransferAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <p className="text-[11px] text-slate-500 mt-1 font-mono">Available: ৳{currentBal.toLocaleString()}</p>
               </div>
@@ -314,9 +283,9 @@ export default function WalletPage() {
             <button
               type="submit"
               disabled={submittingTransfer || !verifiedRecipient || !transferAmount || parseFloat(transferAmount) <= 0 || parseFloat(transferAmount) > currentBal}
-              className="w-full py-3 rounded-none bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-xs border-b-2 border-[#D4AF37] transition-all"
+              className="w-full py-3 rounded-none bg-primary hover:bg-[#044D2F] text-white font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-xs border-b-2 border-secondary transition-all"
             >
-              <CheckCircle2 className="w-4 h-4 text-[#D4AF37]" />
+              <CheckCircle2 className="w-4 h-4 text-secondary" />
               <span>{submittingTransfer ? 'Sending Transfer...' : 'Confirm & Direct Send'}</span>
             </button>
           </form>
@@ -351,7 +320,7 @@ export default function WalletPage() {
                   placeholder="500.00"
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#005A36] font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-none px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary font-bold"
                 />
               </div>
             </div>
@@ -375,7 +344,7 @@ export default function WalletPage() {
             ৳{currentBal.toFixed(2)}
           </div>
         </div>
-        <div className="w-12 h-12 rounded-none bg-[#005A36] border-b-2 border-[#D4AF37] flex items-center justify-center text-[#D4AF37] shadow-xs">
+        <div className="w-12 h-12 rounded-none bg-primary border-b-2 border-secondary flex items-center justify-center text-secondary shadow-xs">
           <Wallet className="w-6 h-6" />
         </div>
       </div>

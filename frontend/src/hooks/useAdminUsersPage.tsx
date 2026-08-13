@@ -139,11 +139,11 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
         prev.map((u) =>
           u.id === selectedUser.id
             ? {
-                ...u,
-                ...updatedUser,
-                designation_id: targetDesId || null,
-                designation: newDesObj || (updatedUser as any).designation || null,
-              }
+              ...u,
+              ...updatedUser,
+              designation_id: targetDesId || null,
+              designation: newDesObj || (updatedUser as any).designation || null,
+            }
             : u,
         ),
       );
@@ -151,10 +151,10 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
         setSelectedUserForCards((prev) =>
           prev
             ? {
-                ...prev,
-                designation_id: targetDesId || null,
-                designation: newDesObj || null,
-              }
+              ...prev,
+              designation_id: targetDesId || null,
+              designation: newDesObj || null,
+            }
             : null,
         );
       }
@@ -206,7 +206,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             </div>
             <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
               <span>{u.phone}</span>
-              <span className="text-[#005A36] font-bold">• {u.referral_code}</span>
+              <span className="text-primary font-bold">• {u.referral_code}</span>
             </div>
           </div>
         ),

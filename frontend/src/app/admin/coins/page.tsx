@@ -159,9 +159,8 @@ export default function AdminCoinsPage() {
     if (res.success) {
       setMessage({
         type: 'success',
-        text: `Successfully adjusted ${adjustIsLocked ? 'locked' : 'available'} coins for ${
-          selectedUser.full_name || selectedUser.phone
-        }!`,
+        text: `Successfully adjusted ${adjustIsLocked ? 'locked' : 'available'} coins for ${selectedUser.full_name || selectedUser.phone
+          }!`,
       });
       setSelectedUser(null);
       setAdjustAmount('');
@@ -210,34 +209,34 @@ export default function AdminCoinsPage() {
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
       {/* System Overview Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-none bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005A36]">
-            <Coins className="w-6 h-6" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-6">
+        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-6 shadow-xs flex items-center space-x-3 sm:space-x-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-none bg-emerald-50 border border-emerald-200 flex items-center justify-center text-primary shrink-0">
+            <Coins className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Spendable Coins</p>
-            <h2 className="text-2xl font-extrabold text-slate-900 mt-0.5">
-              {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()} Coins
+            <p className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-wider">Spendable Coins</p>
+            <h2 className="text-lg sm:text-2xl font-extrabold text-slate-900 mt-0.5 font-mono">
+              {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()}
             </h2>
           </div>
         </div>
 
-        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-none bg-yellow-50 border border-yellow-300 flex items-center justify-center text-[#854D0E]">
-            <Lock className="w-6 h-6" />
+        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-6 shadow-xs flex items-center space-x-3 sm:space-x-4">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-none bg-yellow-50 border border-yellow-300 flex items-center justify-center text-[#854D0E] shrink-0">
+            <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Total Locked Premium Coins</p>
-            <h2 className="text-2xl font-extrabold text-[#854D0E] mt-0.5">
-              {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()} Coins
+            <p className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-wider">Locked Coins</p>
+            <h2 className="text-lg sm:text-2xl font-extrabold text-[#854D0E] mt-0.5 font-mono">
+              {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()}
             </h2>
           </div>
         </div>
 
-        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-none bg-emerald-100/50 border border-emerald-200 flex items-center justify-center text-[#005A36]">
-            <Users className="w-6 h-6" />
+        <div className="bg-white rounded-none border border-slate-200 p-4 sm:p-6 shadow-xs flex items-center space-x-3 sm:space-x-4 col-span-2 md:col-span-1">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-none bg-emerald-100/50 border border-emerald-200 flex items-center justify-center text-primary shrink-0">
+            <Users className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
           <div>
             <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">System Users Count</p>
@@ -251,7 +250,7 @@ export default function AdminCoinsPage() {
       {/* Global Coin Configuration Form Card */}
       <div className="bg-white rounded-none border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
         <h2 className="text-lg font-extrabold text-slate-900 border-b border-slate-100 pb-3 flex items-center space-x-2">
-          <Sliders className="w-5 h-5 text-[#005A36]" />
+          <Sliders className="w-5 h-5 text-primary" />
           <span>Global Coin Parameters</span>
         </h2>
 
@@ -267,7 +266,7 @@ export default function AdminCoinsPage() {
                 min="0.1"
                 value={coinPrice}
                 onChange={(e) => setCoinPrice(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005A36]"
+                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
@@ -283,7 +282,7 @@ export default function AdminCoinsPage() {
                 min="0"
                 value={premiumFreeCoins}
                 onChange={(e) => setPremiumFreeCoins(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005A36]"
+                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
@@ -292,14 +291,14 @@ export default function AdminCoinsPage() {
             <label className="text-xs font-extrabold text-slate-700">Required Active Referrals to Unlock</label>
             <p className="text-xs text-slate-500">Number of active direct referrals required to unlock locked coins.</p>
             <div className="relative">
-              <Users className="w-4 h-4 text-[#005A36] absolute left-4 top-3.5" />
+              <Users className="w-4 h-4 text-primary absolute left-4 top-3.5" />
               <input
                 type="number"
                 step="1"
                 min="1"
                 value={requiredReferrals}
                 onChange={(e) => setRequiredReferrals(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-[#005A36] font-mono"
+                className="w-full pl-10 pr-4 py-3 rounded-none border border-slate-300 font-extrabold text-slate-900 focus:ring-2 focus:ring-primary font-mono"
               />
             </div>
           </div>
@@ -308,9 +307,9 @@ export default function AdminCoinsPage() {
             <button
               type="submit"
               disabled={savingConfig}
-              className="py-3 px-8 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-sm rounded-none flex items-center space-x-2 border-b-2 border-[#D4AF37]"
+              className="py-3 px-8 bg-primary hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-sm rounded-none flex items-center space-x-2 border-b-2 border-secondary"
             >
-              <Save className="w-4 h-4 text-[#D4AF37]" />
+              <Save className="w-4 h-4 text-secondary" />
               <span>{savingConfig ? 'Saving Configurations...' : 'Save System Configurations'}</span>
             </button>
           </div>
@@ -322,7 +321,7 @@ export default function AdminCoinsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 className="text-lg font-extrabold text-slate-900 flex items-center space-x-2">
-              <Users className="w-5 h-5 text-[#005A36]" />
+              <Users className="w-5 h-5 text-primary" />
               <span>User Coin Balances & Manual Adjustments</span>
             </h2>
             <p className="text-xs text-slate-500">
@@ -338,7 +337,7 @@ export default function AdminCoinsPage() {
               placeholder="Search by name, phone, code..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-none text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-none text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
@@ -374,12 +373,12 @@ export default function AdminCoinsPage() {
                         {u.full_name || u.phone}
                       </p>
                       <p className="text-slate-500 font-mono text-[9px]">
-                        {u.phone} <span className="text-[#005A36] font-bold">• {u.referral_code}</span>
+                        {u.phone} <span className="text-primary font-bold">• {u.referral_code}</span>
                       </p>
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
-                        <span className="font-extrabold text-[#005A36]">
+                        <span className="font-extrabold text-primary">
                           {Number(u.coin_balance).toLocaleString()} Avail
                         </span>
                         <span className="font-bold text-purple-800">
@@ -404,7 +403,7 @@ export default function AdminCoinsPage() {
                           setAdjustIsLocked(false);
                           setAdjustDescription('');
                         }}
-                        className="py-1 px-2.5 bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-[10px] rounded-none shadow-xs transition-all border-b-2 border-[#D4AF37]"
+                        className="py-1 px-2.5 bg-primary hover:bg-[#044D2F] text-white font-extrabold text-[10px] rounded-none shadow-xs transition-all border-b-2 border-secondary"
                       >
                         Adjust Coins
                       </button>
@@ -423,7 +422,7 @@ export default function AdminCoinsPage() {
           <div className="bg-white rounded-none max-w-md w-full p-6 space-y-6 shadow-xl relative border border-slate-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-lg font-black text-slate-900 flex items-center space-x-2">
-                <Coins className="w-5 h-5 text-[#005A36]" />
+                <Coins className="w-5 h-5 text-primary" />
                 <span>Adjust User Coins</span>
               </h3>
               <button
@@ -438,7 +437,7 @@ export default function AdminCoinsPage() {
               <p className="font-extrabold text-slate-800">{selectedUser.full_name || 'Anonymous User'}</p>
               <p className="text-slate-500 font-mono">Phone: {selectedUser.phone} | Code: {selectedUser.referral_code}</p>
               <div className="pt-2 flex justify-between font-extrabold border-t border-slate-200 mt-2 font-mono">
-                <span className="text-[#005A36]">Available: {Number(selectedUser.coin_balance)} Coins</span>
+                <span className="text-primary">Available: {Number(selectedUser.coin_balance)} Coins</span>
                 <span className="text-[#854D0E]">Locked: {Number(selectedUser.locked_coin_balance)} Coins</span>
               </div>
             </div>
@@ -450,22 +449,20 @@ export default function AdminCoinsPage() {
                   <button
                     type="button"
                     onClick={() => setAdjustIsLocked(false)}
-                    className={`py-2 px-3 rounded-none border text-xs font-extrabold transition-all ${
-                      !adjustIsLocked
-                        ? 'bg-[#005A36] border-[#005A36] text-white border-b-2 border-[#D4AF37]'
-                        : 'bg-slate-50 border-slate-200 text-slate-700'
-                    }`}
+                    className={`py-2 px-3 rounded-none border text-xs font-extrabold transition-all ${!adjustIsLocked
+                      ? 'bg-primary border-primary text-white border-b-2 border-secondary'
+                      : 'bg-slate-50 border-slate-200 text-slate-700'
+                      }`}
                   >
                     Available Coins
                   </button>
                   <button
                     type="button"
                     onClick={() => setAdjustIsLocked(true)}
-                    className={`py-2 px-3 rounded-none border text-xs font-extrabold transition-all ${
-                      adjustIsLocked
-                        ? 'bg-yellow-100 border-yellow-300 text-[#854D0E]'
-                        : 'bg-slate-50 border-slate-200 text-slate-700'
-                    }`}
+                    className={`py-2 px-3 rounded-none border text-xs font-extrabold transition-all ${adjustIsLocked
+                      ? 'bg-yellow-100 border-yellow-300 text-[#854D0E]'
+                      : 'bg-slate-50 border-slate-200 text-slate-700'
+                      }`}
                   >
                     Locked Coins
                   </button>
@@ -481,7 +478,7 @@ export default function AdminCoinsPage() {
                   placeholder="e.g. 50 or -20"
                   value={adjustAmount}
                   onChange={(e) => setAdjustAmount(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none font-bold text-slate-900 text-sm focus:ring-2 focus:ring-[#005A36]"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none font-bold text-slate-900 text-sm focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -492,7 +489,7 @@ export default function AdminCoinsPage() {
                   placeholder="Admin adjustment reason..."
                   value={adjustDescription}
                   onChange={(e) => setAdjustDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-xs font-medium text-slate-900 focus:ring-2 focus:ring-[#005A36]"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-xs font-medium text-slate-900 focus:ring-2 focus:ring-primary"
                 />
               </div>
 
@@ -507,7 +504,7 @@ export default function AdminCoinsPage() {
                 <button
                   type="submit"
                   disabled={adjusting || !adjustAmount}
-                  className="py-2.5 px-4 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-xs rounded-none shadow-xs border-b-2 border-[#D4AF37]"
+                  className="py-2.5 px-4 bg-primary hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-xs rounded-none shadow-xs border-b-2 border-secondary"
                 >
                   {adjusting ? 'Saving...' : 'Apply Adjustment'}
                 </button>

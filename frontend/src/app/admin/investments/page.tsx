@@ -32,7 +32,7 @@ export default function AdminInvestmentsPage() {
   const [plans, setPlans] = useState<InvestmentPlan[]>([]);
   const [userInvestments, setUserInvestments] = useState<UserInvestment[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Modals
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
@@ -379,7 +379,7 @@ export default function AdminInvestmentsPage() {
             {inv.user?.full_name || inv.user?.phone || 'User'}
           </div>
           <div className="text-[9px] text-slate-500 font-mono">
-            {inv.user?.phone} <span className="text-[#005A36] font-bold">• {inv.plan?.title || 'Custom'}</span>
+            {inv.user?.phone} <span className="text-primary font-bold">• {inv.plan?.title || 'Custom'}</span>
           </div>
           {inv.status === RequestStatus.PENDING && (
             <div className="mt-0.5">
@@ -392,7 +392,7 @@ export default function AdminInvestmentsPage() {
                   Withdraw Capital: ৳{Number(inv.pending_amount || 0).toLocaleString()}
                 </span>
               ) : (
-                <span className="text-[8px] font-extrabold text-[#005A36] bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded-none inline-block">
+                <span className="text-[8px] font-extrabold text-primary bg-emerald-50 border border-emerald-200 px-1 py-0.5 rounded-none inline-block">
                   New Package
                 </span>
               )}
@@ -408,7 +408,7 @@ export default function AdminInvestmentsPage() {
         <div className="space-y-0.5">
           <div className="flex items-center space-x-1.5 font-mono text-[10px]">
             <span className="font-extrabold text-slate-900">৳{Number(inv.amount).toLocaleString()}</span>
-            <span className="text-[#005A36] font-bold">({Number(inv.monthly_return_percent)}%/mo)</span>
+            <span className="text-primary font-bold">({Number(inv.monthly_return_percent)}%/mo)</span>
             <StatusBadge status={inv.status} />
           </div>
           <div className="text-[9px] font-mono text-slate-500">
@@ -428,7 +428,7 @@ export default function AdminInvestmentsPage() {
               <button
                 onClick={() => handleApproveInvestment(inv.id)}
                 title="Approve Investment"
-                className="px-2 py-1 bg-[#005A36] text-white font-extrabold text-[9px] rounded-none shadow-xs border-b-2 border-[#D4AF37]"
+                className="px-2 py-1 bg-primary text-white font-extrabold text-[9px] rounded-none shadow-xs border-b-2 border-secondary"
               >
                 Approve
               </button>
@@ -498,7 +498,7 @@ export default function AdminInvestmentsPage() {
       {/* Existing Plans */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-slate-800">Active Investment Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -582,21 +582,19 @@ export default function AdminInvestmentsPage() {
           <div className="flex items-center space-x-2 shrink-0">
             <button
               onClick={() => setPayoutFilter('ALL')}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                payoutFilter === 'ALL'
-                  ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${payoutFilter === 'ALL'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
               All Active ({userInvestments.filter((i) => i.status === RequestStatus.APPROVED).length})
             </button>
             <button
               onClick={() => setPayoutFilter('DUE')}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${
-                payoutFilter === 'DUE'
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${payoutFilter === 'DUE'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
             >
               Due For Payout Only ({userInvestments.filter((i) => i.status === RequestStatus.APPROVED && i.next_payout_at && new Date(i.next_payout_at) <= new Date()).length})
             </button>
@@ -642,9 +640,8 @@ export default function AdminInvestmentsPage() {
                     <tr
                       key={inv.id}
                       onClick={() => handleToggleInvestment(inv.id)}
-                      className={`cursor-pointer transition-colors ${
-                        isSelected ? 'bg-purple-50/70' : 'hover:bg-slate-50'
-                      }`}
+                      className={`cursor-pointer transition-colors ${isSelected ? 'bg-purple-50/70' : 'hover:bg-slate-50'
+                        }`}
                     >
                       <td className="p-3 text-center" onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => handleToggleInvestment(inv.id)} type="button">
@@ -789,11 +786,10 @@ export default function AdminInvestmentsPage() {
                             setSelectedUserObj(u);
                             setAssignForm((prev) => ({ ...prev, userId: u.id }));
                           }}
-                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between ${
-                            isSelected
-                              ? 'bg-purple-100/80 border-purple-400 text-purple-950 font-bold shadow-sm'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100/70'
-                          }`}
+                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between ${isSelected
+                            ? 'bg-purple-100/80 border-purple-400 text-purple-950 font-bold shadow-sm'
+                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100/70'
+                            }`}
                         >
                           <div>
                             <p className="font-bold text-slate-900">{u.full_name || 'Anonymous User'}</p>

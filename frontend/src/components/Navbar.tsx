@@ -76,14 +76,12 @@ export default function Navbar() {
 
   const drawerContent = (
     <div
-      className={`lg:hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${
-        mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`}
+      className={`lg:hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
     >
       <div
-        className={`bg-white w-72 max-w-[85vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out ${
-          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`bg-white w-72 max-w-[85vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between pb-3 border-b border-slate-100 shrink-0">
@@ -118,11 +116,10 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all ${
-                  isActive
-                    ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/20'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                }`}
+                className={`flex items-center space-x-3 px-3.5 py-3 rounded-xl font-medium text-sm transition-all ${isActive
+                  ? 'bg-gradient-to-r from-sky-500 to-sky-600 text-white shadow-md shadow-sky-500/20'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                 <span>{item.label}</span>
@@ -204,9 +201,8 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm w-full ${
-          isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
-        }`}
+        className={`sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm w-full ${isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -240,31 +236,28 @@ export default function Navbar() {
               <nav className="hidden md:flex items-center space-x-8">
                 <Link
                   href="/"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === '/'
-                      ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                      : 'text-slate-600 hover:text-sky-600'
-                  }`}
+                  className={`text-sm font-semibold transition-colors ${pathname === '/'
+                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
+                    : 'text-slate-600 hover:text-sky-600'
+                    }`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/about"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === '/about'
-                      ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                      : 'text-slate-600 hover:text-sky-600'
-                  }`}
+                  className={`text-sm font-semibold transition-colors ${pathname === '/about'
+                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
+                    : 'text-slate-600 hover:text-sky-600'
+                    }`}
                 >
                   About Us
                 </Link>
                 <Link
                   href="/contact"
-                  className={`text-sm font-semibold transition-colors ${
-                    pathname === '/contact'
-                      ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
-                      : 'text-slate-600 hover:text-sky-600'
-                  }`}
+                  className={`text-sm font-semibold transition-colors ${pathname === '/contact'
+                    ? 'text-sky-600 font-bold border-b-2 border-sky-500 pb-0.5'
+                    : 'text-slate-600 hover:text-sky-600'
+                    }`}
                 >
                   Contact Us
                 </Link>
@@ -279,7 +272,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2">
                   {/* Balance Badge */}
                   <div className="hidden sm:flex bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-none items-center space-x-1.5">
-                    <Wallet className="w-4 h-4 text-[#005A36]" />
+                    <Wallet className="w-4 h-4 text-primary" />
                     <span className="text-xs font-bold text-emerald-900 font-mono">
                       ৳{Number(user.wallet_balance || 0).toFixed(2)}
                     </span>
@@ -287,8 +280,8 @@ export default function Navbar() {
 
                   {/* Account Status Badge */}
                   {user.status === 'ACTIVE' ? (
-                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-emerald-100 text-[#005A36] border border-emerald-300">
-                      <CheckCircle className="w-3.5 h-3.5 mr-1 text-[#005A36]" />
+                    <span className="hidden md:inline-flex items-center px-2.5 py-1 rounded-none text-xs font-bold bg-emerald-100 text-primary border border-emerald-300">
+                      <CheckCircle className="w-3.5 h-3.5 mr-1 text-primary" />
                       Active
                     </span>
                   ) : (
@@ -320,16 +313,16 @@ export default function Navbar() {
                 </div>
               ) : admin ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-[#005A36] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-none hidden sm:inline">
+                  <span className="text-xs font-bold text-primary bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-none hidden sm:inline">
                     Admin: {admin.phone}
                   </span>
                   {/* Admin dashboard button on public pages */}
                   {isPublicRoute && (
                     <Link
                       href="/admin/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-[#005A36] text-white border-b-2 border-[#D4AF37] rounded-none font-bold text-xs shadow-xs transition-colors"
+                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-primary text-white border-b-2 border-secondary rounded-none font-bold text-xs shadow-xs transition-colors"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5 text-[#D4AF37]" />
+                      <LayoutDashboard className="w-3.5 h-3.5 text-secondary" />
                       <span>Admin Panel</span>
                     </Link>
                   )}
@@ -345,7 +338,7 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-[#005A36] transition-colors"
+                    className="px-4 py-2 text-xs font-bold text-slate-700 hover:text-primary transition-colors"
                   >
                     Sign In
                   </Link>

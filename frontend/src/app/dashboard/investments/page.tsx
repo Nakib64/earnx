@@ -170,7 +170,7 @@ export default function UserInvestmentsPage() {
           <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
             {inv.plan?.title || 'Investment Package'}
           </div>
-          <div className="text-[9px] font-mono text-[#005A36] font-bold">
+          <div className="text-[9px] font-mono text-primary font-bold">
             ৳{Number(inv.amount).toLocaleString()} Invested
           </div>
           {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
@@ -213,8 +213,8 @@ export default function UserInvestmentsPage() {
             {inv.next_payout_at
               ? new Date(inv.next_payout_at).toLocaleDateString()
               : inv.status === RequestStatus.PENDING
-              ? 'Pending Approval'
-              : 'Completed'}
+                ? 'Pending Approval'
+                : 'Completed'}
           </div>
         </div>
       ),
@@ -224,11 +224,11 @@ export default function UserInvestmentsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-none bg-[#005A36] p-6 sm:p-8 text-white shadow-xs border-b-4 border-[#D4AF37]">
+      <div className="relative overflow-hidden rounded-none bg-primary p-6 sm:p-8 text-white shadow-xs ">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-extrabold">
-              <Sparkles className="w-4 h-4 text-[#D4AF37]" />
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-none bg-black/20 text-secondary border border-secondary/40 text-xs font-extrabold">
+              <Sparkles className="w-4 h-4 text-secondary" />
               <span>Fixed Package Investment</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
@@ -239,12 +239,12 @@ export default function UserInvestmentsPage() {
             </p>
           </div>
 
-          <div className="bg-[#044D2F] border border-[#D4AF37]/50 rounded-none p-4 flex items-center space-x-4 min-w-[220px]">
-            <div className="p-3 bg-black/20 rounded-none border border-[#D4AF37]/40">
-              <DollarSign className="w-6 h-6 text-[#D4AF37]" />
+          <div className="bg-[#044D2F] border border-secondary/50 rounded-none p-4 flex items-center space-x-4 min-w-[220px]">
+            <div className="p-3 bg-black/20 rounded-none border border-secondary/40">
+              <DollarSign className="w-6 h-6 text-secondary" />
             </div>
             <div>
-              <p className="text-xs font-extrabold text-[#D4AF37]">Available Wallet</p>
+              <p className="text-xs font-extrabold text-secondary">Available Wallet</p>
               <p className="text-2xl font-black text-white font-mono">৳{walletBal.toLocaleString()}</p>
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function UserInvestmentsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center space-x-2">
-                <span className="text-xs font-extrabold text-[#005A36] uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-none border border-emerald-200">
+                <span className="text-xs font-extrabold text-primary uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-none border border-emerald-200">
                   Current Investment Package
                 </span>
                 <StatusBadge status={activeInv.status} />
@@ -268,7 +268,7 @@ export default function UserInvestmentsPage() {
                 {activeInv.plan?.title || 'Investment Package'} — ৳{Number(activeInv.amount).toLocaleString()}
               </h2>
               <p className="text-xs text-slate-500">
-                Monthly Dividend Return: <span className="font-extrabold text-[#005A36] font-mono">{Number(activeInv.monthly_return_percent)}%</span> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
+                Monthly Dividend Return: <span className="font-extrabold text-primary font-mono">{Number(activeInv.monthly_return_percent)}%</span> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
               </p>
             </div>
 
@@ -294,15 +294,15 @@ export default function UserInvestmentsPage() {
                   {activeInv.request_type === 'UPGRADE'
                     ? `Package Upgrade Pending Admin Approval`
                     : activeInv.request_type === 'WITHDRAWAL'
-                    ? `Capital Withdrawal Pending Admin Approval`
-                    : `New Investment Package Pending Admin Approval`}
+                      ? `Capital Withdrawal Pending Admin Approval`
+                      : `New Investment Package Pending Admin Approval`}
                 </p>
                 <p className="text-[#854D0E]">
                   {activeInv.request_type === 'UPGRADE'
                     ? `Upgrading to ${activeInv.pending_plan?.title || 'Target Package'}. Remaining amount to pay: ৳${Number(activeInv.pending_amount || 0).toLocaleString()}.`
                     : activeInv.request_type === 'WITHDRAWAL'
-                    ? `Requested capital withdrawal of ৳${Number(activeInv.pending_amount || 0).toLocaleString()} from your invested principal.`
-                    : `Your package subscription of ৳${Number(activeInv.amount).toLocaleString()} is awaiting verification by Admin.`}
+                      ? `Requested capital withdrawal of ৳${Number(activeInv.pending_amount || 0).toLocaleString()} from your invested principal.`
+                      : `Your package subscription of ৳${Number(activeInv.amount).toLocaleString()} is awaiting verification by Admin.`}
                 </p>
               </div>
             </div>
@@ -314,14 +314,14 @@ export default function UserInvestmentsPage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
-            <TrendingUp className="w-5 h-5 text-[#005A36]" />
+            <TrendingUp className="w-5 h-5 text-primary" />
             <span>High-Yield Investment Packages</span>
           </h2>
           <span className="text-xs font-extrabold text-slate-500">Fixed Package Amount</span>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
             {[1, 2, 3].map((n) => (
               <div key={n} className="h-64 bg-slate-100 animate-pulse rounded-none"></div>
             ))}
@@ -331,7 +331,7 @@ export default function UserInvestmentsPage() {
             No investment plans available at the moment. Please check back soon!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-6">
             {plans.map((plan) => {
               const packageAmt = Number(plan.amount || plan.min_amount);
               const returnPct = Number(plan.monthly_return_percent);
@@ -345,14 +345,13 @@ export default function UserInvestmentsPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`relative bg-white rounded-none border transition-all duration-300 hover:shadow-md flex flex-col justify-between overflow-hidden ${
-                    isPopular
-                      ? 'border-[#005A36] border-t-4 shadow-xs'
-                      : 'border-slate-200 shadow-xs'
-                  }`}
+                  className={`relative bg-white rounded-none border transition-all duration-300 hover:shadow-md flex flex-col justify-between overflow-hidden ${isPopular
+                    ? 'border-primary border-t-4 shadow-xs'
+                    : 'border-slate-200 shadow-xs'
+                    }`}
                 >
                   {isPopular && (
-                    <div className="absolute top-0 right-0 bg-[#005A36] text-[#D4AF37] border-b border-l border-[#D4AF37] text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-none shadow-xs">
+                    <div className="absolute top-0 right-0 bg-primary text-secondary border-b border-l border-secondary text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-none shadow-xs">
                       Best Value
                     </div>
                   )}
@@ -364,16 +363,16 @@ export default function UserInvestmentsPage() {
                     </div>
 
                     <div className="bg-emerald-50 rounded-none p-4 border border-emerald-200 flex items-baseline justify-between">
-                      <span className="text-xs font-extrabold text-[#005A36] uppercase tracking-wide">
+                      <span className="text-xs font-extrabold text-primary uppercase tracking-wide">
                         Package Amount
                       </span>
-                      <span className="text-2xl font-black text-[#005A36] font-mono">৳{packageAmt.toLocaleString()}</span>
+                      <span className="text-2xl font-black text-primary font-mono">৳{packageAmt.toLocaleString()}</span>
                     </div>
 
                     <div className="space-y-2 text-sm text-slate-600">
                       <div className="flex justify-between border-b border-slate-100 pb-2">
                         <span className="text-slate-500">Monthly Return:</span>
-                        <span className="font-extrabold text-[#005A36] font-mono">{returnPct}% / month</span>
+                        <span className="font-extrabold text-primary font-mono">{returnPct}% / month</span>
                       </div>
                       <div className="flex justify-between border-b border-slate-100 pb-2">
                         <span className="text-slate-500">Est. Dividend:</span>
@@ -382,7 +381,7 @@ export default function UserInvestmentsPage() {
                       <div className="flex justify-between pt-1">
                         <span className="text-slate-500">Duration:</span>
                         {plan.is_lifetime ? (
-                          <span className="font-extrabold text-[#005A36] bg-emerald-50 px-2 py-0.5 rounded-none border border-emerald-200 text-xs">
+                          <span className="font-extrabold text-primary bg-emerald-50 px-2 py-0.5 rounded-none border border-emerald-200 text-xs">
                             Lifetime
                           </span>
                         ) : (
@@ -394,7 +393,7 @@ export default function UserInvestmentsPage() {
 
                   <div className="p-6 pt-0">
                     {isCurrentPackage ? (
-                      <div className="w-full py-3 px-4 rounded-none font-extrabold text-xs bg-emerald-50 text-[#005A36] border border-emerald-200 text-center">
+                      <div className="w-full py-3 px-4 rounded-none font-extrabold text-xs bg-emerald-50 text-primary border border-emerald-200 text-center">
                         Active Package
                       </div>
                     ) : isHigherPackage ? (
@@ -410,11 +409,10 @@ export default function UserInvestmentsPage() {
                       <button
                         onClick={() => handleOpenInvestOrUpgrade(plan)}
                         disabled={!!activeInv}
-                        className={`w-full py-3 px-4 rounded-none font-extrabold text-xs transition-all flex items-center justify-center space-x-2 disabled:opacity-40 ${
-                          isPopular
-                            ? 'emerald-gold-btn shadow-xs'
-                            : 'bg-slate-900 hover:bg-slate-800 text-white'
-                        }`}
+                        className={`w-full py-3 px-4 rounded-none font-extrabold text-xs transition-all flex items-center justify-center space-x-2 disabled:opacity-40 ${isPopular
+                          ? 'emerald-gold-btn shadow-xs'
+                          : 'bg-slate-900 hover:bg-slate-800 text-white'
+                          }`}
                       >
                         <Zap className="w-4 h-4 fill-current" />
                         <span>Invest Now</span>
@@ -431,7 +429,7 @@ export default function UserInvestmentsPage() {
       {/* Active Investments Table */}
       <div className="bg-white rounded-none border border-slate-200 shadow-xs p-6 space-y-4">
         <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
-          <ShieldCheck className="w-5 h-5 text-[#005A36]" />
+          <ShieldCheck className="w-5 h-5 text-primary" />
           <span>My Investment History & Returns</span>
         </h2>
 
@@ -471,7 +469,7 @@ export default function UserInvestmentsPage() {
                 </div>
                 <div className="flex justify-between text-xs text-slate-600">
                   <span>Monthly Return Rate:</span>
-                  <span className="font-extrabold text-[#005A36] font-mono">
+                  <span className="font-extrabold text-primary font-mono">
                     {Number(selectedPlan.monthly_return_percent)}% / month
                   </span>
                 </div>
@@ -479,7 +477,7 @@ export default function UserInvestmentsPage() {
 
               <div className="bg-emerald-50 p-4 rounded-none border border-emerald-200 flex items-center justify-between text-emerald-900">
                 <span className="text-xs font-semibold">Estimated Monthly Dividend:</span>
-                <span className="text-lg font-black text-[#005A36] font-mono">
+                <span className="text-lg font-black text-primary font-mono">
                   ৳{((Number(selectedPlan.amount || selectedPlan.min_amount) * Number(selectedPlan.monthly_return_percent)) / 100).toLocaleString()}
                 </span>
               </div>
@@ -537,8 +535,8 @@ export default function UserInvestmentsPage() {
               </div>
 
               {/* Remaining Amount Highlight Card */}
-              <div className="bg-[#005A36] text-white p-4 rounded-none border-b-4 border-[#D4AF37] space-y-1">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#D4AF37]">
+              <div className="bg-primary text-white p-4 rounded-none  space-y-1">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-secondary">
                   Remaining Amount to Pay
                 </span>
                 <p className="text-3xl font-black font-mono">
@@ -612,7 +610,7 @@ export default function UserInvestmentsPage() {
                   max={Number(activeInv.amount)}
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-none border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#005A36] font-extrabold text-slate-900 text-sm font-mono"
+                  className="w-full px-4 py-3 rounded-none border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary font-extrabold text-slate-900 text-sm font-mono"
                 />
               </div>
 

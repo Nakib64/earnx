@@ -36,7 +36,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(res.data);
     } else {
       console.error('Failed to refresh user profile:', res.error?.message);
-      logoutUser();
+      if (res.statusCode === 401) {
+        logoutUser();
+      }
     }
   };
 
@@ -50,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiFetch<User>('/auth/me', { token: uToken });
         if (res.success && res.data) {
           setUser(res.data);
-        } else {
+        } else if (res.statusCode === 401) {
           deleteCookie('earnx_user_token');
           localStorage.removeItem('earnx_user_token');
           setUserToken(null);
@@ -62,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiFetch<Admin>('/admin/auth/me', { token: aToken, isAdmin: true });
         if (res.success && res.data) {
           setAdmin(res.data);
-        } else {
+        } else if (res.statusCode === 401) {
           deleteCookie('earnx_admin_token');
           localStorage.removeItem('earnx_admin_token');
           setAdminToken(null);

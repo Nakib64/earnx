@@ -124,7 +124,7 @@ export function UserDetailCards({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-none bg-[#005A36] flex items-center justify-center text-[#D4AF37] font-extrabold text-base border-b-2 border-[#D4AF37]">
+          <div className="w-10 h-10 rounded-none bg-primary flex items-center justify-center text-secondary font-extrabold text-base border-b-2 border-secondary">
             {user.designation?.stars ? `${user.designation.stars}★` : 'U'}
           </div>
           <div>
@@ -155,8 +155,8 @@ export function UserDetailCards({
         <div className="bg-slate-50 border border-slate-200 rounded-none p-4 space-y-2">
           <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Designation & Star Badge</div>
           <div className="flex items-center space-x-2">
-            <Award className="w-4 h-4 text-[#005A36]" />
-            <span className="text-sm font-extrabold text-[#005A36]">
+            <Award className="w-4 h-4 text-primary" />
+            <span className="text-sm font-extrabold text-primary">
               {user.designation?.name || 'Unbadged Member'}
             </span>
           </div>
@@ -173,7 +173,7 @@ export function UserDetailCards({
           <div className="text-xs font-bold text-slate-700">
             Sponsor: {user.referred_by ? `${user.referred_by.phone} (${user.referred_by.full_name || 'Member'})` : 'Top of Tree'}
           </div>
-          <div className="text-[11px] text-[#005A36] font-extrabold flex items-center space-x-1">
+          <div className="text-[11px] text-primary font-extrabold flex items-center space-x-1">
             <Users className="w-3.5 h-3.5" />
             <span>Direct Downlines: {downlines.length} Members</span>
           </div>
@@ -183,7 +183,7 @@ export function UserDetailCards({
         <div className="bg-slate-50 border border-slate-200 rounded-none p-4 space-y-3">
           <div>
             <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Wallet Balance</div>
-            <div className="text-xl font-extrabold text-[#005A36] font-mono mt-0.5">
+            <div className="text-xl font-extrabold text-primary font-mono mt-0.5">
               ৳{Number(user.wallet_balance || 0).toFixed(2)}
             </div>
           </div>
@@ -192,9 +192,9 @@ export function UserDetailCards({
           <div className="flex items-center flex-wrap gap-1.5 pt-1 border-t border-slate-200">
             <button
               onClick={() => onAdjustBalance(user)}
-              className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-[#005A36] rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-300"
+              className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-primary rounded-none font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-emerald-300"
             >
-              <DollarSign className="w-3 h-3 text-[#005A36]" />
+              <DollarSign className="w-3 h-3 text-primary" />
               <span>Adjust</span>
             </button>
 
@@ -208,7 +208,7 @@ export function UserDetailCards({
             {user.status === UserStatus.DISABLED && (
               <button
                 onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-                className="px-2.5 py-1 bg-[#005A36] text-white hover:bg-[#044D2F] rounded-none font-extrabold text-[10px] transition-colors"
+                className="px-2.5 py-1 bg-primary text-white hover:bg-[#044D2F] rounded-none font-extrabold text-[10px] transition-colors"
               >
                 Activate
               </button>

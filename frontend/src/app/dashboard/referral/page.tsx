@@ -144,7 +144,7 @@ function ReferralContent() {
             </div>
             <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
               <span>{m.phone}</span>
-              <span className="text-[#005A36] font-bold">• {m.referral_code}</span>
+              <span className="text-primary font-bold">• {m.referral_code}</span>
             </div>
           </div>
         ),
@@ -186,8 +186,8 @@ function ReferralContent() {
                     <span>{count}</span>
                   </span>
                 ) : drillable ? (
-                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-[#005A36] bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-none">
-                    <Users className="w-3 h-3 text-[#005A36]" />
+                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-primary bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-none">
+                    <Users className="w-3 h-3 text-primary" />
                     <span>{count}</span>
                   </span>
                 ) : (
@@ -210,32 +210,13 @@ function ReferralContent() {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-            Referral Tree Network
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Click a <strong>badged member</strong> row to drill into their direct referrals (up to Level {maxLevel} of your badge).
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            fetchTree();
-          }}
-          className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-none border border-slate-200 transition-colors self-start flex items-center space-x-1.5 text-xs font-extrabold"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>Refresh</span>
-        </button>
-      </div>
+
 
       {/* Summary Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200">
           <span className="text-xs font-extrabold text-slate-400 uppercase">Your Referral Code</span>
-          <div className="text-lg font-mono font-extrabold text-[#005A36] mt-1">{user?.referral_code}</div>
+          <div className="text-lg font-mono font-extrabold text-primary mt-1">{user?.referral_code}</div>
         </div>
         <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200">
           <span className="text-xs font-extrabold text-slate-400 uppercase">Earning Badge</span>
@@ -246,8 +227,8 @@ function ReferralContent() {
         </div>
         <div className="glass-card p-4 rounded-none text-center bg-white border border-slate-200 col-span-2 sm:col-span-1">
           <span className="text-xs font-extrabold text-slate-400 uppercase">Total Downlines</span>
-          <div className="text-lg font-extrabold text-[#005A36] mt-1 flex items-center justify-center space-x-1 font-mono">
-            <Users className="w-4 h-4 text-[#005A36]" />
+          <div className="text-lg font-extrabold text-primary mt-1 flex items-center justify-center space-x-1 font-mono">
+            <Users className="w-4 h-4 text-primary" />
             <span>{allMembers.length}</span>
           </div>
         </div>
@@ -265,7 +246,7 @@ function ReferralContent() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Search by name, phone, or referral code..."
-          className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-none text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#005A36] transition-all"
+          className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-200 rounded-none text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary transition-all"
         />
         {searchTerm && (
           <button
@@ -289,9 +270,9 @@ function ReferralContent() {
             debouncedSearch.trim()
               ? `No members found matching "${debouncedSearch.trim()}".`
               : breadcrumbs.length > 1
-              ? `${currentParent.name} has no direct referrals yet.`
-              : 'You have no downline members yet. Share your referral code to get started.'
-          }/>
+                ? `${currentParent.name} has no direct referrals yet.`
+                : 'You have no downline members yet. Share your referral code to get started.'
+          } />
       </div>
     </div>
   );

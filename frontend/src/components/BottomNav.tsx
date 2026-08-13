@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Wallet, Gift, UserCheck } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, Coins, TrendingUp } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function BottomNav() {
@@ -16,10 +16,10 @@ export default function BottomNav() {
 
   const navItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
+    { href: '/dashboard/coins', label: 'Coins', icon: Coins },
+    { href: '/dashboard/investments', label: 'Invest', icon: TrendingUp },
     { href: '/dashboard/referral', label: 'Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
-    { href: '/dashboard/offers', label: 'Offers', icon: Gift },
-    { href: '/dashboard/approvals', label: 'Approvals', icon: UserCheck },
   ];
 
   return (
@@ -32,16 +32,14 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all ${
-                isActive
-                  ? 'text-[#005A36] font-extrabold scale-105'
-                  : 'text-slate-500 font-medium hover:text-[#005A36]'
-              }`}
+              className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all ${isActive
+                ? 'text-primary font-extrabold scale-105'
+                : 'text-slate-500 font-medium hover:text-primary'
+                }`}
             >
               <div
-                className={`p-1.5 rounded-none transition-colors ${
-                  isActive ? 'bg-emerald-100/80 text-[#005A36] border-b-2 border-[#D4AF37]' : ''
-                }`}
+                className={`p-1.5 rounded-none transition-colors ${isActive ? 'bg-emerald-100/80 text-primary border-b-2 border-secondary' : ''
+                  }`}
               >
                 <Icon className="w-5 h-5" />
               </div>

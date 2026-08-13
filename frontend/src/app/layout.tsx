@@ -35,7 +35,7 @@ export default function RootLayout({
           <Navbar />
           <div className="flex-1 flex w-full pb-20 lg:pb-8">
             <Sidebar />
-            <main className="flex-1 w-full p-4 sm:p-6 lg:p-8 overflow-y-auto">{children}</main>
+            <main className="flex-1 w-full  sm:p-6 lg:p-8 overflow-y-auto">{children}</main>
           </div>
           <BottomNav />
         </Providers>

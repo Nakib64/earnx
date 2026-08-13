@@ -1,10 +1,19 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #005A36;
+  --color-primary-hover: #044D2F;
+  --color-secondary: #D4AF37;
+  --color-secondary-hover: #B89628;
+}
+
 :root {
   --background: #F4F6F8;
   --foreground: #374151;
   --primary: #005A36;
   --primary-hover: #044D2F;
+  --secondary: #D4AF37;
+  --secondary-hover: #B89628;
   --accent-gold: #D4AF37;
   --accent-gold-hover: #B89628;
   --card-bg: #FFFFFF;
@@ -35,17 +44,17 @@ body {
 
 .sky-gradient-btn,
 .emerald-gold-btn {
-  background: #005A36;
+  background: var(--primary);
   color: #FFFFFF;
-  border-bottom: 2px solid #D4AF37;
+  border-bottom: 2px solid var(--secondary);
   border-radius: 0px !important;
   transition: all 0.2s ease-in-out;
 }
 
 .sky-gradient-btn:hover,
 .emerald-gold-btn:hover {
-  background: #044D2F;
-  border-bottom-color: #F3C649;
+  background: var(--primary-hover);
+  border-bottom-color: var(--secondary-hover);
   transform: translateY(-1px);
 }
 
@@ -56,12 +65,12 @@ body {
 
 .sky-gradient-bg,
 .emerald-bg {
-  background: #005A36;
+  background: var(--primary);
   border-radius: 0px !important;
 }
 
 .gold-gradient-bg {
-  background: linear-gradient(135deg, #D4AF37 0%, #B89628 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%);
   border-radius: 0px !important;
 }
 

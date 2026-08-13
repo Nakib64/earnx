@@ -52,7 +52,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
         <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200">
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Registered Users</span>
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
 
-        <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200 sm:col-span-2 lg:col-span-1">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 space-y-3 bg-white border border-slate-200 col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between">
             <span className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">Commission Matrix</span>
             <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600 shrink-0" />
