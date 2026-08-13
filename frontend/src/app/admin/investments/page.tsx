@@ -384,11 +384,11 @@ export default function AdminInvestmentsPage() {
           {inv.status === RequestStatus.PENDING && (
             <div className="mt-0.5">
               {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
-                <span className="text-[8px] font-extrabold text-purple-800 bg-purple-50 border border-purple-200 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
+                <span className="text-[8px] font-extrabold text-[#854D0E] bg-yellow-50 border border-yellow-300 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
                   Upgrade: {inv.pending_plan.title} (৳{Number(inv.pending_amount || 0).toLocaleString()})
                 </span>
               ) : inv.request_type === 'WITHDRAWAL' ? (
-                <span className="text-[8px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
+                <span className="text-[8px] font-extrabold text-[#854D0E] bg-yellow-50 border border-yellow-300 px-1 py-0.5 rounded-none block truncate max-w-[140px]">
                   Withdraw Capital: ৳{Number(inv.pending_amount || 0).toLocaleString()}
                 </span>
               ) : (

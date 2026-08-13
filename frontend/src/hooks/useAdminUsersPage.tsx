@@ -216,8 +216,8 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
         header: 'Badge & Status',
         render: (u) => (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-none bg-purple-50 text-purple-800 font-extrabold text-[8px] sm:text-[9px] border border-purple-200 whitespace-nowrap">
-              <Award className="w-2.5 h-2.5 mr-0.5 text-purple-600 shrink-0" />
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-none bg-yellow-50 text-[#854D0E] font-extrabold text-[8px] sm:text-[9px] border border-yellow-300 whitespace-nowrap">
+              <Award className="w-2.5 h-2.5 mr-0.5 text-[#854D0E] shrink-0" />
               <span className="truncate max-w-[80px]">{u.designation?.name || 'Unbadged'}</span>
             </span>
             <StatusBadge status={u.status} />

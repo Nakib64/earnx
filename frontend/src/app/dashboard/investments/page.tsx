@@ -174,11 +174,11 @@ export default function UserInvestmentsPage() {
             ৳{Number(inv.amount).toLocaleString()} Invested
           </div>
           {inv.request_type === 'UPGRADE' && inv.pending_plan ? (
-            <span className="text-[8px] font-extrabold text-purple-800 bg-purple-50 border border-purple-200 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
+            <span className="text-[8px] font-extrabold text-[#854D0E] bg-yellow-50 border border-yellow-300 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
               Upgrading: {inv.pending_plan.title}
             </span>
           ) : inv.request_type === 'WITHDRAWAL' ? (
-            <span className="text-[8px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
+            <span className="text-[8px] font-extrabold text-[#854D0E] bg-yellow-50 border border-yellow-300 px-1 py-0.5 rounded-none block truncate max-w-[130px] mt-0.5">
               Withdraw: ৳{Number(inv.pending_amount || 0).toLocaleString()}
             </span>
           ) : null}

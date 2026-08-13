@@ -67,9 +67,9 @@ export default function Sidebar() {
   ];
 
   const approvalItems: LinkItem[] = [
-    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-sky-500' },
-    { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star, accentClass: 'text-amber-500' },
-    { href: '/admin/approvals/withdrawals', label: 'Withdrawals', icon: DollarSign, accentClass: 'text-emerald-500' },
+    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-[#005A36]' },
+    { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star, accentClass: 'text-[#854D0E]' },
+    { href: '/admin/approvals/withdrawals', label: 'Withdrawals', icon: DollarSign, accentClass: 'text-[#005A36]' },
   ];
 
   const adminBottomItems: LinkItem[] = [

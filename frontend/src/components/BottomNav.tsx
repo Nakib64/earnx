@@ -34,18 +34,18 @@ export default function BottomNav() {
               href={item.href}
               className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all ${
                 isActive
-                  ? 'text-sky-600 font-bold scale-105'
-                  : 'text-slate-500 font-medium hover:text-sky-500'
+                  ? 'text-[#005A36] font-extrabold scale-105'
+                  : 'text-slate-500 font-medium hover:text-[#005A36]'
               }`}
             >
               <div
-                className={`p-1.5 rounded-xl transition-colors ${
-                  isActive ? 'bg-sky-100/80 text-sky-600' : ''
+                className={`p-1.5 rounded-none transition-colors ${
+                  isActive ? 'bg-emerald-100/80 text-[#005A36] border-b-2 border-[#D4AF37]' : ''
                 }`}
               >
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[11px] tracking-tight">{item.label}</span>
+              <span className="text-[11px] tracking-tight font-extrabold">{item.label}</span>
             </Link>
           );
         })}

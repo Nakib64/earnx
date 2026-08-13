@@ -14,28 +14,24 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = ''
   switch (status) {
     case UserStatus.ACTIVE:
     case RequestStatus.APPROVED:
-      badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case TransactionType.DEPOSIT:
+    case TransactionType.INVESTMENT_PAYOUT:
+    case TransactionType.PREMIUM_WEEKLY_PAYOUT:
+      badgeStyle = 'bg-emerald-50 text-[#005A36] border-emerald-200';
       break;
     case RequestStatus.PENDING:
-      badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+    case TransactionType.COMMISSION:
+    case TransactionType.BALANCE_TRANSFER:
+      badgeStyle = 'bg-yellow-50 text-[#854D0E] border-yellow-300';
       break;
     case UserStatus.DISABLED:
     case UserStatus.BLOCKED:
     case RequestStatus.REJECTED:
       badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
       break;
-    case TransactionType.DEPOSIT:
-    case TransactionType.INVESTMENT_PAYOUT:
-    case TransactionType.PREMIUM_WEEKLY_PAYOUT:
-      badgeStyle = 'bg-sky-50 text-sky-700 border-sky-200';
-      break;
-    case TransactionType.COMMISSION:
-    case TransactionType.BALANCE_TRANSFER:
-      badgeStyle = 'bg-purple-50 text-purple-700 border-purple-200';
-      break;
     case TransactionType.WITHDRAW:
     case TransactionType.INVESTMENT_DEPOSIT:
-      badgeStyle = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      badgeStyle = 'bg-emerald-100 text-[#044D2F] border-emerald-300';
       break;
   }
 

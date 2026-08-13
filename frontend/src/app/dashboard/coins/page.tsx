@@ -182,20 +182,20 @@ export default function UserCoinsPage() {
         </div>
 
         {/* Card 2: Locked Premium Coins */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm relative overflow-hidden flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600">
+            <div className="w-12 h-12 rounded-none bg-yellow-50 border border-yellow-300 flex items-center justify-center text-[#854D0E]">
               <Lock className="w-6 h-6" />
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            <span className="px-3 py-1 rounded-none text-xs font-bold bg-yellow-50 text-[#854D0E] border border-yellow-300">
               Referral Lock
             </span>
           </div>
 
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Locked Premium Bonus Coins</p>
-            <h2 className="text-3xl font-extrabold text-purple-900 mt-1">
-              {loading ? '...' : (coinInfo?.locked_coin_balance ?? 0).toLocaleString()} <span className="text-purple-500 text-lg">Coins</span>
+            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Locked Premium Bonus Coins</p>
+            <h2 className="text-3xl font-extrabold text-[#854D0E] mt-1">
+              {loading ? '...' : (coinInfo?.locked_coin_balance ?? 0).toLocaleString()} <span className="text-[#854D0E] text-lg">Coins</span>
             </h2>
             <p className="text-xs font-medium text-slate-500 mt-1">
               {coinInfo?.is_premium_coins_unlocked
@@ -206,18 +206,18 @@ export default function UserCoinsPage() {
         </div>
 
         {/* Card 3: Wallet Balance */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm relative overflow-hidden flex flex-col justify-between space-y-4">
+        <div className="bg-white rounded-none border border-slate-200 p-6 shadow-xs relative overflow-hidden flex flex-col justify-between space-y-4">
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600">
+            <div className="w-12 h-12 rounded-none bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005A36]">
               <Wallet className="w-6 h-6" />
             </div>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 border border-sky-200">
+            <span className="px-3 py-1 rounded-none text-xs font-bold bg-emerald-50 text-[#005A36] border border-emerald-200">
               Main Wallet
             </span>
           </div>
 
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Available Wallet Balance</p>
+            <p className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Available Wallet Balance</p>
             <h2 className="text-3xl font-extrabold text-slate-900 mt-1">
               ৳{loading ? '...' : (coinInfo?.wallet_balance ?? 0).toLocaleString()}
             </h2>
@@ -229,17 +229,17 @@ export default function UserCoinsPage() {
       </div>
 
       {/* Locked Coins Banner / Premium Status Card */}
-      <div className="bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-purple-900/50">
+      <div className="bg-[#005A36] rounded-none p-6 sm:p-8 text-white shadow-xs relative overflow-hidden border-b-4 border-[#D4AF37]">
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+              <span className="px-3 py-1 rounded-none bg-black/20 text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-extrabold uppercase tracking-wider flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                 <span>Premium Bonus Coins Rule</span>
               </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-white">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-white">
               {coinInfo?.is_premium
                 ? coinInfo.is_premium_coins_unlocked
                   ? '🎉 Bonus Unlocked & Credited!'
@@ -247,24 +247,24 @@ export default function UserCoinsPage() {
                 : `🎁 Get ${coinInfo?.premium_free_coins || 100} Locked Free Coins with Premium`}
             </h3>
 
-            <p className="text-xs sm:text-sm text-purple-200/80 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-emerald-100/90 max-w-2xl leading-relaxed">
               When you take a Premium membership, you are granted <strong>{coinInfo?.premium_free_coins || 100} Free Coins</strong> in a locked state. To unlock these coins into your spendable balance, you must refer at least <strong>{coinInfo?.required_referral_count || 10} active users</strong>.
             </p>
 
             {/* Active Referral Progress Bar */}
             <div className="pt-2 space-y-2 max-w-xl">
-              <div className="flex items-center justify-between text-xs font-bold">
-                <span className="text-purple-200 flex items-center space-x-1.5">
-                  <Users className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center justify-between text-xs font-extrabold">
+                <span className="text-emerald-100 flex items-center space-x-1.5">
+                  <Users className="w-4 h-4 text-[#D4AF37]" />
                   <span>Successful Active Referrals</span>
                 </span>
-                <span className="text-yellow-400">
+                <span className="text-[#D4AF37] font-mono">
                   {coinInfo?.active_referral_count || 0} / {coinInfo?.required_referral_count || 10} Active Users
                 </span>
               </div>
-              <div className="w-full bg-purple-950/80 rounded-full h-3 border border-purple-800/40 p-0.5 overflow-hidden">
+              <div className="w-full bg-[#044D2F] rounded-none h-3 border border-emerald-400/30 p-0.5 overflow-hidden">
                 <div
-                  className="bg-gradient-to-r from-amber-400 to-yellow-300 h-full rounded-full transition-all duration-500"
+                  className="bg-[#D4AF37] h-full rounded-none transition-all duration-500"
                   style={{ width: `${referralProgress}%` }}
                 />
               </div>
@@ -272,36 +272,36 @@ export default function UserCoinsPage() {
           </div>
 
           {/* Action Box on the Right */}
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl flex flex-col items-center text-center space-y-4">
+          <div className="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-none flex flex-col items-center text-center space-y-4">
             {!coinInfo?.is_premium ? (
               <>
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-yellow-400">
+                <div className="w-12 h-12 rounded-none bg-black/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
                   <Lock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-300">Unlock Condition</p>
-                  <p className="text-xs text-slate-400 mt-1">Upgrade to Premium to receive your locked bonus coins.</p>
+                  <p className="text-xs font-extrabold text-white">Unlock Condition</p>
+                  <p className="text-xs text-emerald-100/80 mt-1">Upgrade to Premium to receive your locked bonus coins.</p>
                 </div>
               </>
             ) : coinInfo.is_premium_coins_unlocked ? (
               <>
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                <div className="w-12 h-12 rounded-none bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005A36]">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-emerald-300">Unlocked & Claimed</p>
-                  <p className="text-xs text-slate-400 mt-1">Your premium coins have been credited to your balance.</p>
+                  <p className="text-xs font-extrabold text-emerald-200">Unlocked & Claimed</p>
+                  <p className="text-xs text-emerald-100/80 mt-1">Your premium coins have been credited to your balance.</p>
                 </div>
               </>
             ) : coinInfo.can_unlock ? (
               <>
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-yellow-400 animate-bounce">
+                <div className="w-12 h-12 rounded-none bg-black/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
                   <Unlock className="w-6 h-6" />
                 </div>
                 <button
                   onClick={handleUnlockCoins}
                   disabled={unlocking}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-extrabold text-sm rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/25 transition-all"
+                  className="w-full py-3 px-6 bg-[#D4AF37] hover:bg-[#B89628] text-slate-950 font-extrabold text-sm rounded-none flex items-center justify-center space-x-2 shadow-xs transition-all"
                 >
                   <Unlock className="w-4 h-4" />
                   <span>{unlocking ? 'Unlocking...' : `Unlock ${coinInfo.locked_coin_balance ?? 0} Coins Now!`}</span>
@@ -309,12 +309,12 @@ export default function UserCoinsPage() {
               </>
             ) : (
               <>
-                <div className="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                <div className="w-12 h-12 rounded-none bg-black/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37]">
                   <Lock className="w-6 h-6" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-amber-300">Locked ({coinInfo.locked_coin_balance ?? 0} Coins)</p>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs font-extrabold text-[#D4AF37]">Locked ({coinInfo.locked_coin_balance ?? 0} Coins)</p>
+                  <p className="text-xs text-emerald-100/80 mt-1">
                     Needs {(coinInfo.required_referral_count || 10) - (coinInfo.active_referral_count || 0)} more active referral(s) to unlock.
                   </p>
                 </div>
@@ -325,11 +325,11 @@ export default function UserCoinsPage() {
       </div>
 
       {/* Buy Coins Form Section */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
+      <div className="bg-white rounded-none border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 flex items-center space-x-2">
-              <ShoppingCart className="w-5 h-5 text-amber-500" />
+            <h2 className="text-xl font-extrabold text-slate-900 flex items-center space-x-2">
+              <ShoppingCart className="w-5 h-5 text-[#005A36]" />
               <span>Purchase Coins with Wallet Balance</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -337,8 +337,8 @@ export default function UserCoinsPage() {
             </p>
           </div>
 
-          <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center space-x-1.5 self-start sm:self-auto">
-            <Coins className="w-3.5 h-3.5 text-amber-600" />
+          <span className="text-xs font-extrabold px-3 py-1.5 rounded-none bg-emerald-50 text-[#005A36] border border-emerald-200 flex items-center space-x-1.5 self-start sm:self-auto">
+            <Coins className="w-3.5 h-3.5 text-[#005A36]" />
             <span>Rate: ৳{currentCoinPrice} / Coin</span>
           </span>
         </div>
@@ -346,16 +346,16 @@ export default function UserCoinsPage() {
         <form onSubmit={handleBuyCoins} className="space-y-6">
           {/* Quick Presets */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Quick Presets</label>
+            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Quick Presets</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[10, 50, 100, 500].map((preset) => (
                 <button
                   key={preset}
                   type="button"
                   onClick={() => setBuyAmount(preset)}
-                  className={`py-3 px-4 rounded-2xl border text-sm font-bold transition-all flex items-center justify-center space-x-2 ${
+                  className={`py-3 px-4 rounded-none border text-sm font-extrabold transition-all flex items-center justify-center space-x-2 ${
                     buyAmount === preset
-                      ? 'bg-amber-500 border-amber-500 text-white shadow-md shadow-amber-500/20'
+                      ? 'bg-[#005A36] border-[#005A36] text-white border-b-2 border-[#D4AF37]'
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
@@ -369,9 +369,9 @@ export default function UserCoinsPage() {
           {/* Amount Input & Cost Calculation */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Number of Coins</label>
+              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">Number of Coins</label>
               <div className="relative">
-                <Coins className="w-5 h-5 text-amber-500 absolute left-4 top-3.5" />
+                <Coins className="w-5 h-5 text-[#005A36] absolute left-4 top-3.5" />
                 <input
                   type="number"
                   min="1"
@@ -379,23 +379,23 @@ export default function UserCoinsPage() {
                   value={buyAmount || ''}
                   onChange={(e) => setBuyAmount(parseInt(e.target.value, 10) || 0)}
                   placeholder="Enter coin quantity..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500 text-base"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-none font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] text-base"
                 />
               </div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center justify-between">
+            <div className="bg-slate-50 border border-slate-200 rounded-none p-4 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Purchase Cost</p>
+                <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Total Purchase Cost</p>
                 <p className="text-2xl font-extrabold text-slate-900 mt-0.5">৳{totalBuyCost.toLocaleString()}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-semibold text-slate-400">Wallet After Purchase</p>
+                <p className="text-xs font-extrabold text-slate-400">Wallet After Purchase</p>
                 <p
-                  className={`text-sm font-bold mt-0.5 ${
+                  className={`text-sm font-extrabold mt-0.5 font-mono ${
                     (coinInfo?.wallet_balance || 0) - totalBuyCost >= 0
-                      ? 'text-emerald-600'
-                      : 'text-rose-600'
+                      ? 'text-[#005A36]'
+                      : 'text-rose-700'
                   }`}
                 >
                   ৳{((coinInfo?.wallet_balance || 0) - totalBuyCost).toLocaleString()}
@@ -407,16 +407,16 @@ export default function UserCoinsPage() {
           <button
             type="submit"
             disabled={purchasing || buyAmount <= 0 || (coinInfo?.wallet_balance || 0) < totalBuyCost}
-            className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 disabled:opacity-50 text-slate-950 font-extrabold text-base rounded-2xl flex items-center justify-center space-x-2 shadow-lg shadow-amber-500/20 transition-all cursor-pointer"
+            className="w-full py-4 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-extrabold text-base rounded-none flex items-center justify-center space-x-2 border-b-4 border-[#D4AF37] transition-all cursor-pointer"
           >
-            <ShoppingCart className="w-5 h-5" />
+            <ShoppingCart className="w-5 h-5 text-[#D4AF37]" />
             <span>{purchasing ? 'Processing Purchase...' : `Confirm & Buy ${buyAmount} Coins`}</span>
           </button>
         </form>
       </div>
 
       {/* Transaction History Section */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-6 shadow-sm">
+      <div className="bg-white rounded-none border border-slate-200 p-6 sm:p-8 space-y-6 shadow-xs">
         <div className="flex items-center space-x-2 border-b border-slate-100 pb-4">
           <History className="w-5 h-5 text-slate-600" />
           <h2 className="text-xl font-bold text-slate-900">Coin Transaction History</h2>

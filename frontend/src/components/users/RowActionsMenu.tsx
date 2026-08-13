@@ -98,7 +98,7 @@ export function RowActionsMenu({
             e.stopPropagation();
             onAssignBadge(user);
           }}
-          className="px-2 py-1 bg-purple-50 text-purple-800 hover:bg-purple-100 rounded-none font-extrabold text-[10px] transition-colors border border-purple-200"
+          className="px-2 py-1 bg-yellow-50 text-[#854D0E] hover:bg-yellow-100 rounded-none font-extrabold text-[10px] transition-colors border border-yellow-300"
           title="Badge"
         >
           Badge
@@ -197,9 +197,9 @@ export function RowActionsMenu({
                   setIsOpen(false);
                   onAssignBadge(user);
                 }}
-                className="w-full px-3 py-1.5 text-left font-bold text-purple-700 hover:bg-purple-50 rounded-none flex items-center space-x-2 transition-colors"
+                className="w-full px-3 py-1.5 text-left font-bold text-[#854D0E] hover:bg-yellow-50 rounded-none flex items-center space-x-2 transition-colors"
               >
-                <Award className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                <Award className="w-3.5 h-3.5 text-[#854D0E] shrink-0" />
                 <span>Assign Badge</span>
               </button>
             </div>
