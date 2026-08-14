@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Providers from '../context/Providers';
 import Navbar from '../components/Navbar';
@@ -7,14 +7,18 @@ import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import { Toaster } from 'sonner';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const outfit = Outfit({
+  variable: '--font-outfit',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
   subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -28,8 +32,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-screen flex flex-col bg-[#F8FBFF] text-slate-900 overflow-x-hidden">
+    <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} h-full antialiased font-sans`}>
+      <body className="min-h-screen flex flex-col bg-[#F4F7F6] text-slate-900 overflow-x-hidden font-sans font-semibold">
         <Providers>
           <Toaster position="top-right" richColors closeButton />
           <Navbar />

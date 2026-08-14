@@ -239,35 +239,35 @@ export default function AdminInvestmentsPage() {
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
-      {/* Green Banner Header */}
-      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <TrendingUp className="w-6 h-6 text-secondary" />
+      {/* Dark Emerald & Gold Luxury Header Banner */}
+      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-3">
+        <div className="flex items-start space-x-3.5">
+          <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
+            <TrendingUp className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1 flex-1">
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">Investment Plans & Returns</h1>
-            <p className="text-xs text-emerald-100/80 font-medium">Configure dividend packages, assign to users, and process returns.</p>
+            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">Investment Plans & Returns</h1>
+            <p className="text-xs text-slate-300 font-semibold">Configure dividend packages, assign to users, and process returns.</p>
           </div>
-          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
             {plans.length} Plans
           </span>
         </div>
 
-        <div className="border-t border-emerald-700/60 pt-3 flex flex-wrap gap-2">
+        <div className="border-t border-[#053d29] pt-3 flex flex-wrap gap-2">
           <button
             onClick={handleTriggerPayouts}
             disabled={triggering}
-            className="py-2 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-sm disabled:opacity-50"
+            className="py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-md disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${triggering ? 'animate-spin' : ''}`} />
             <span>{triggering ? 'Processing...' : 'Run Global Payouts'}</span>
           </button>
-          <button onClick={() => setShowAssignModal(true)} className="py-2 px-4 bg-emerald-700/60 hover:bg-emerald-700/80 text-white font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all border border-emerald-500/30">
+          <button onClick={() => setShowAssignModal(true)} className="py-2.5 px-4 bg-[#023322] hover:bg-[#03442e] text-amber-200 font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all border border-[#d4af37]/35 cursor-pointer">
             <UserPlus className="w-4 h-4" />
             <span>Assign Package</span>
           </button>
-          <button onClick={() => setShowModal(true)} className="py-2 px-4 bg-emerald-700/60 hover:bg-emerald-700/80 text-white font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all border border-emerald-500/30">
+          <button onClick={() => setShowModal(true)} className="py-2.5 px-4 bg-[#023322] hover:bg-[#03442e] text-amber-200 font-extrabold text-xs rounded-xl flex items-center space-x-2 transition-all border border-[#d4af37]/35 cursor-pointer">
             <Plus className="w-4 h-4" />
             <span>Add Plan</span>
           </button>
@@ -278,46 +278,46 @@ export default function AdminInvestmentsPage() {
       {pendingCount > 0 && (
         <Link
           href="/admin/investments/actions"
-          className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-sm hover:bg-[#FFF0E5] transition-colors"
+          className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-lg text-white hover:border-amber-400 transition-colors"
         >
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/50 flex items-center justify-center text-[#f3ba2f] shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-sm font-extrabold text-[#854D0E]">{pendingCount} Pending Approval{pendingCount > 1 ? 's' : ''}</div>
-              <div className="text-[11px] font-medium text-slate-500">New investments, upgrades & withdrawals awaiting review</div>
+              <div className="text-sm font-black text-amber-200">{pendingCount} Pending Approval{pendingCount > 1 ? 's' : ''}</div>
+              <div className="text-xs font-semibold text-slate-300">New investments, upgrades & withdrawals awaiting review</div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-[#854D0E] shrink-0" />
+          <ChevronRight className="w-5 h-5 text-[#f3ba2f] shrink-0" />
         </Link>
       )}
 
       {/* Active Plans Card */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
         <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Active Investment Plans</h2>
+          <h2 className="text-base sm:text-lg font-black text-slate-900">Active Investment Plans</h2>
         </div>
 
         <div className="space-y-3">
           {plans.map((plan) => (
-            <div key={plan.id} className="p-3.5 sm:p-4 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 flex items-center justify-between transition-all group">
-              <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200/60 flex items-center justify-center text-primary shrink-0">
+            <div key={plan.id} className="p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-between transition-all group">
+              <div className="flex items-center space-x-3.5">
+                <div className="w-9 h-9 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
                   <TrendingUp className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="text-sm font-extrabold text-slate-800">{plan.title}</span>
+                  <span className="text-sm font-black text-slate-800">{plan.title}</span>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-extrabold text-primary bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-200">{Number(plan.monthly_return_percent)}% /mo</span>
-                    <span className="text-[10px] font-extrabold text-slate-500 font-mono">৳{Number(plan.amount || plan.min_amount).toLocaleString()}</span>
+                    <span className="text-[10px] font-black text-[#01281a] bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">{Number(plan.monthly_return_percent)}% /mo</span>
+                    <span className="text-[10px] font-black text-slate-600 font-mono">৳{Number(plan.amount || plan.min_amount).toLocaleString()}</span>
                     {plan.is_lifetime ? (
-                      <span className="text-[10px] font-extrabold text-[#854D0E] bg-amber-50 px-1.5 py-0.5 rounded-lg border border-amber-200">Lifetime</span>
+                      <span className="text-[10px] font-extrabold text-[#854D0E] bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">Lifetime</span>
                     ) : (
-                      <span className="text-[10px] font-medium text-slate-400">{plan.duration_months} Months</span>
+                      <span className="text-[10px] font-bold text-slate-500">{plan.duration_months} Months</span>
                     )}
                   </div>
                 </div>

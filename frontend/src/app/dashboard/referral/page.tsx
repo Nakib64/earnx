@@ -88,22 +88,19 @@ function ReferralContent() {
 
   const canDrillDown = useCallback(
     (member: TreeMember) =>
-      !!member.designation &&
-      currentDepth < maxLevel &&
-      treeByParent.has(member.id),
-    [currentDepth, maxLevel, treeByParent],
+      treeByParent.has(member.id) && treeByParent.get(member.id)!.length > 0,
+    [treeByParent],
   );
 
   const handleRowClick = useCallback(
     (member: TreeMember) => {
-      if (!canDrillDown(member)) return;
       setBreadcrumbs((prev) => [
         ...prev,
         { id: member.id, name: member.full_name || member.phone || 'Member' },
       ]);
       setSearchTerm('');
     },
-    [canDrillDown],
+    [],
   );
 
   const handleBreadcrumbClick = useCallback((index: number) => {
@@ -136,35 +133,53 @@ function ReferralContent() {
     () => [
       {
         key: 'member_ref',
-        header: 'Member & Ref',
+        header: 'Member',
         render: (m) => (
           <div className="min-w-0">
-            <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[120px] sm:max-w-[180px]">
+            <div className="font-black text-slate-900 text-[10px] sm:text-[11px] truncate max-w-[120px] sm:max-w-[180px]">
               {m.full_name || m.phone}
             </div>
             <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5 truncate">
               <span className="truncate">{m.phone}</span>
-              <span className="text-primary font-bold shrink-0">• {m.referral_code}</span>
+              <span className="text-[#01281a] font-bold shrink-0">• {m.referral_code}</span>
             </div>
           </div>
         ),
       },
       {
-        key: 'badge_status',
-        header: 'Badge & Status',
-        render: (m) => (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 min-w-0">
-            {m.designation ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-amber-50 text-[#854D0E] font-extrabold text-[8px] sm:text-[9px] border border-amber-200 shrink-0">
-                <Award className="w-2.5 h-2.5 mr-0.5 text-[#854D0E] shrink-0" />
-                <span className="truncate max-w-[70px]">{m.designation.name}</span>
-              </span>
-            ) : (
-              <span className="text-[9px] text-slate-400 font-medium shrink-0">Member</span>
-            )}
-            <StatusBadge status={(m.status as any) ?? 'DISABLED'} />
-          </div>
-        ),
+        key: 'badge_designation',
+        header: 'Designation & Badge',
+        render: (m) => {
+          const starsCount = m.designation?.stars || 0;
+          return (
+            <div className="flex flex-col space-y-0.5 min-w-0">
+              <div className="inline-flex items-center space-x-1 text-[9.5px] font-black text-slate-900">
+                <span className="truncate max-w-[100px] sm:max-w-[140px]">
+                  {m.designation?.name || 'Unbadged Member'}
+                </span>
+              </div>
+              {starsCount > 0 ? (
+                <div className="flex items-center space-x-0.5 text-amber-500">
+                  {Array.from({ length: Math.min(starsCount, 5) }).map((_, i) => (
+                    <span key={i} className="text-[10px] leading-none">★</span>
+                  ))}
+                  {starsCount > 5 && (
+                    <span className="text-[9px] font-black text-amber-600 font-mono ml-0.5">
+                      +{starsCount - 5}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <span className="text-[8.5px] font-bold text-slate-400">No Stars</span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        render: (m) => <StatusBadge status={(m.status as any) ?? 'DISABLED'} />,
       },
       {
         key: 'referrals_joined',
@@ -172,32 +187,21 @@ function ReferralContent() {
         align: 'right',
         render: (m) => {
           const count = treeByParent.get(m.id)?.length ?? 0;
-          const drillable = canDrillDown(m);
-          const depthLocked = !!m.designation && currentDepth >= maxLevel && treeByParent.has(m.id);
+          const hasChildren = count > 0;
 
           return (
             <div className="text-right space-y-0.5 min-w-0">
               <div>
-                {count === 0 ? (
-                  <span className="text-[9px] text-slate-400">—</span>
-                ) : depthLocked ? (
-                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg shrink-0" title={`Requires higher badge to view beyond Level ${maxLevel}`}>
-                    <span>🔒</span>
-                    <span>{count}</span>
-                  </span>
-                ) : drillable ? (
-                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-primary bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg shrink-0">
-                    <Users className="w-3 h-3 text-primary shrink-0" />
-                    <span>{count}</span>
+                {hasChildren ? (
+                  <span className="inline-flex items-center space-x-1 text-[9px] font-black text-[#01281a] bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-lg shrink-0">
+                    <Users className="w-3 h-3 text-[#01281a] shrink-0" />
+                    <span>{count} Downlines</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center space-x-1 text-[9px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg shrink-0">
-                    <Users className="w-3 h-3 shrink-0" />
-                    <span>{count}</span>
-                  </span>
+                  <span className="text-[9px] font-bold text-slate-400">—</span>
                 )}
               </div>
-              <div className="text-slate-400 text-[9px] font-mono truncate">
+              <div className="text-slate-400 text-[9px] font-mono font-semibold truncate">
                 {m.created_at ? new Date(m.created_at).toLocaleDateString() : '—'}
               </div>
             </div>
@@ -205,84 +209,86 @@ function ReferralContent() {
         },
       },
     ],
-    [treeByParent, canDrillDown, currentDepth, maxLevel],
+    [treeByParent],
   );
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Top 2 Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+      {/* Top 3 Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Card 1: Referral Code */}
-        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-sm min-w-0">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
-            Referral Code
-          </span>
+        <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <span className="text-[11px] font-black text-amber-200 uppercase tracking-widest truncate">
+              Referral Code
+            </span>
+            <div className="w-9 h-9 rounded-xl border border-[#d4af37]/60 bg-amber-500/10 flex items-center justify-center text-[#f3ba2f] shrink-0">
+              <Network className="w-5 h-5" />
+            </div>
+          </div>
 
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100/80 flex items-center justify-center text-primary shrink-0">
-              <Network className="w-6 h-6 sm:w-7 sm:h-7" />
+          <div className="min-w-0 space-y-0.5">
+            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight break-all">
+              {user?.referral_code || '---'}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight truncate">
-                {user?.referral_code || '---'}
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-primary truncate">Your Code</div>
-            </div>
+            <div className="text-xs font-bold text-slate-300 truncate">Your Referral Code</div>
           </div>
 
           <button
             onClick={copyCode}
-            className="w-full bg-emerald-100/60 hover:bg-emerald-100 text-primary font-extrabold text-xs py-2 px-3 rounded-xl flex items-center justify-between transition-colors mt-1 cursor-pointer"
+            className="w-full bg-[#03442e] hover:bg-[#04593d] text-amber-200 border border-[#d4af37]/30 font-black text-xs py-2.5 px-3.5 rounded-xl flex items-center justify-between transition-colors mt-1 cursor-pointer"
           >
             <span>{copied ? 'Copied Code!' : 'Copy Code'}</span>
-            {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-primary" />}
+            {copied ? <Check className="w-4 h-4 text-[#f3ba2f]" /> : <Copy className="w-4 h-4 text-[#f3ba2f]" />}
           </button>
         </div>
 
         {/* Card 2: Earning Designation */}
-        <div className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 shadow-sm min-w-0">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
-             Designation
-          </span>
-
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
-              <Award className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-base sm:text-xl font-black text-[#854D0E] truncate">
-                {user?.designation?.name || 'Member'}
-              </div>
-              <div className="text-xs font-extrabold text-amber-800/80 truncate">
-                Level {maxLevel}
-              </div>
+        <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <span className="text-[11px] font-black text-amber-300 uppercase tracking-widest truncate">
+              Designation
+            </span>
+            <div className="w-9 h-9 rounded-xl border border-amber-500/60 bg-amber-500/10 flex items-center justify-center text-[#f3ba2f] shrink-0">
+              <Award className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-[#854D0E] truncate">
+          <div className="min-w-0 space-y-0.5">
+            <div className="text-lg sm:text-xl font-black text-amber-100 truncate">
+              {user?.designation?.name || 'Member'}
+            </div>
+            <div className="text-xs font-bold text-amber-300 truncate">
+              Max Unlocked Level: {maxLevel}
+            </div>
+          </div>
+
+          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-amber-300/80 truncate">
             <span className="truncate">Unlocks multi-level commissions</span>
           </div>
         </div>
 
         {/* Card 3: Total Downline Count */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 col-span-2 lg:col-span-1 flex flex-col justify-between min-w-0">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
-            Total Network Downlines
-          </span>
-
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
-              <Users className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-2xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight truncate">
-                {allMembers.length}
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-slate-500 truncate">Total Team Members</div>
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm space-y-4 col-span-1 sm:col-span-2 lg:col-span-1 flex flex-col justify-between min-w-0">
+          <div className="flex items-center justify-between min-w-0">
+            <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
+              Total Network Downlines
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 shrink-0">
+              <Users className="w-5 h-5" />
             </div>
           </div>
 
-          <span className="text-[11px] font-semibold text-slate-400 truncate">Multi-level referral network</span>
+          <div className="min-w-0 space-y-0.5">
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+              {allMembers.length}
+            </div>
+            <div className="text-xs font-bold text-slate-500">Total Team Members</div>
+          </div>
+
+          <div className="pt-1 text-xs font-bold text-slate-400 truncate">
+            Multi-level referral network
+          </div>
         </div>
       </div>
 
@@ -315,13 +321,13 @@ function ReferralContent() {
       </div>
 
       {/* Main Referral Tree Table */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 shadow-sm space-y-4 overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center space-x-2 truncate">
-            <Users className="w-5 h-5 text-primary shrink-0" />
+          <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 truncate">
+            <Users className="w-5 h-5 text-[#01281a] shrink-0" />
             <span className="truncate">Referral Network Tree</span>
           </h2>
-          <span className="text-xs font-mono font-extrabold text-primary bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200/80">
+          <span className="text-xs font-mono font-black text-amber-200 bg-[#01281a] px-3 py-1 rounded-xl border border-[#d4af37]/40 shadow-sm">
             {displayMembers.length} Members
           </span>
         </div>
@@ -331,7 +337,7 @@ function ReferralContent() {
           columns={columns}
           keyExtractor={(m) => m.id}
           loading={loading}
-          onRowClick={(m) => canDrillDown(m) ? handleRowClick(m) : undefined}
+          onRowClick={(m) => handleRowClick(m)}
           emptyMessage={
             debouncedSearch.trim()
               ? `No members found matching "${debouncedSearch.trim()}".`

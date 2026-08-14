@@ -125,18 +125,18 @@ export default function AdminWalletPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
 
-      {/* Top Banner — Coins Page Theme */}
-      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
+      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
+      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <Wallet className="w-6 h-6 text-secondary" />
+          <div className="flex items-start space-x-3.5">
+            <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
+              <Wallet className="w-6 h-6 text-[#f3ba2f]" />
             </div>
             <div className="space-y-1">
-              <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+              <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
                 Ledger & Transaction History
               </h1>
-              <p className="text-xs text-emerald-100/80 font-medium">
+              <p className="text-xs text-slate-300 font-semibold">
                 Complete audit log of all member deposits, withdrawals, payouts, and wallet adjustments.
               </p>
             </div>
@@ -147,11 +147,11 @@ export default function AdminWalletPage() {
               fetchTransactions();
               toast.info('Refreshed transaction log');
             }}
-            className="py-2 px-3 bg-emerald-700/50 hover:bg-emerald-700 text-white rounded-xl transition-colors text-xs font-extrabold flex items-center space-x-1.5 border border-emerald-500/30 shrink-0 cursor-pointer"
+            className="py-2.5 px-4 bg-[#023322] hover:bg-[#03442e] text-amber-200 rounded-xl transition-colors text-xs font-black flex items-center space-x-2 border border-[#d4af37]/35 shrink-0 cursor-pointer shadow-md"
             title="Refresh Data"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-secondary" />
-            <span className="hidden sm:inline">Refresh</span>
+            <RefreshCw className="w-4 h-4 text-[#f3ba2f]" />
+            <span className="hidden sm:inline">Refresh Log</span>
           </button>
         </div>
       </div>

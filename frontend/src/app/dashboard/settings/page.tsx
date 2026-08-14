@@ -71,16 +71,18 @@ export default function UserSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Header Banner */}
-      <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-between">
+      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
+      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl flex items-center justify-between">
         <div className="space-y-1">
-          <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-primary">
+          <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-amber-200">
             Account Management
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Profile Settings</h1>
-          <p className="text-xs text-slate-500 font-medium">Update your account display name and password.</p>
+          <h1 className="text-xl sm:text-2xl font-black text-white">Profile Settings</h1>
+          <p className="text-xs text-slate-300 font-semibold">
+            Update your full name display and manage security password credentials.
+          </p>
         </div>
-        <div className="w-12 h-12 rounded-2xl bg-[#005A36] text-secondary flex items-center justify-center shadow-md">
+        <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center text-[#f3ba2f] shrink-0 hidden sm:flex shadow-md">
           <User className="w-6 h-6" />
         </div>
       </div>

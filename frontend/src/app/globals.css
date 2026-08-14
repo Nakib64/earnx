@@ -1,45 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #005A36;
-  --color-primary-hover: #044D2F;
-  --color-secondary: #D4AF37;
-  --color-secondary-hover: #B89628;
+  --color-primary: #01281a;
+  --color-primary-hover: #023c28;
+  --color-secondary: #f3ba2f;
+  --color-secondary-hover: #d4af37;
+  --font-sans: var(--font-outfit), var(--font-jakarta), system-ui, sans-serif;
 }
 
 :root {
-  --background: #F4F6F8;
-  --foreground: #374151;
-  --primary: #005A36;
-  --primary-hover: #044D2F;
-  --secondary: #D4AF37;
-  --secondary-hover: #B89628;
-  --accent-gold: #D4AF37;
-  --accent-gold-hover: #B89628;
+  --background: #F4F7F6;
+  --foreground: #0f172a;
+  --primary: #01281a;
+  --primary-hover: #023c28;
+  --secondary: #f3ba2f;
+  --secondary-hover: #d4af37;
+  --accent-gold: #f3ba2f;
+  --accent-gold-hover: #d4af37;
   --card-bg: #FFFFFF;
-  --border-color: #E5E7EB;
-  --text-muted: #6B7280;
+  --border-color: #E2E8F0;
+  --text-muted: #64748B;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-outfit), var(--font-jakarta), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   min-height: 100vh;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Sharp Corners & Classy Emerald & Gold Theme Utilities */
-.dashboard-scope,
-.dashboard-scope * {
-  border-radius: 0px !important;
-}
-
+/* Glass & Theme Buttons */
 .glass-card {
   background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  border-radius: 0px !important;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  border-radius: 16px;
 }
 
 .sky-gradient-btn,
@@ -47,7 +45,8 @@ body {
   background: var(--primary);
   color: #FFFFFF;
   border-bottom: 2px solid var(--secondary);
-  border-radius: 0px !important;
+  border-radius: 12px;
+  font-weight: 700;
   transition: all 0.2s ease-in-out;
 }
 
@@ -66,29 +65,29 @@ body {
 .sky-gradient-bg,
 .emerald-bg {
   background: var(--primary);
-  border-radius: 0px !important;
+  border-radius: 12px;
 }
 
 .gold-gradient-bg {
   background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%);
-  border-radius: 0px !important;
+  border-radius: 12px;
 }
 
 .sky-badge,
 .emerald-badge {
   background-color: #E6F4ED;
-  color: #005A36;
-  font-weight: 700;
+  color: #01281a;
+  font-weight: 800;
   border: 1px solid #B2DFC7;
-  border-radius: 0px !important;
+  border-radius: 8px;
 }
 
 .gold-badge {
   background-color: #FEF9C3;
   color: #854D0E;
-  font-weight: 700;
+  font-weight: 800;
   border: 1px solid #FDE047;
-  border-radius: 0px !important;
+  border-radius: 8px;
 }
 
 /* Smooth scrollbar */

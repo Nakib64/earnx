@@ -50,10 +50,10 @@ export function DataTable<T>({
       <table className="w-full text-left text-[10px] sm:text-[11px] text-slate-600">
         <thead className="bg-slate-100 text-slate-700 font-extrabold border-b border-slate-200 uppercase tracking-wider text-[9px] sm:text-[10px]">
           <tr>
-            {columns.map((col) => (
+            {columns.map((col, idx) => (
               <th
                 key={col.key}
-                className={`px-3 py-2.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''}`}
+                className={`px-3 py-2.5 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''} ${idx >= 3 ? 'hidden lg:table-cell' : ''}`}
               >
                 {col.header}
               </th>
@@ -67,10 +67,10 @@ export function DataTable<T>({
               onClick={() => onRowClick && onRowClick(item)}
               className={`transition-colors ${onRowClick ? 'cursor-pointer hover:bg-emerald-50/40' : 'hover:bg-slate-50/80'}`}
             >
-              {columns.map((col) => (
+              {columns.map((col, colIdx) => (
                 <td
                   key={`${keyExtractor(item, idx)}-${col.key}`}
-                  className={`px-3 py-2 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''}`}
+                  className={`px-3 py-2 ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'} ${col.className || ''} ${colIdx >= 3 ? 'hidden lg:table-cell' : ''}`}
                 >
                   {col.render ? col.render(item, idx) : (item as any)[col.key]}
                 </td>

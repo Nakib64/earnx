@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   Wallet,
-  Gift,
   UserCheck,
   Award,
   Settings,
@@ -18,8 +17,13 @@ import {
   LogOut,
   Star,
   ChevronDown,
+  ChevronRight,
   Coins,
   Globe,
+  Headset,
+  Crown,
+  CheckCircle2,
+  ExternalLink,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -38,22 +42,21 @@ export default function Sidebar() {
   const isAdminRoute = pathname?.startsWith('/admin');
   const isApprovalsSection = pathname?.startsWith('/admin/approvals');
 
-  // Default open when already on an approvals sub-route
   const [approvalsOpen, setApprovalsOpen] = useState(!!isApprovalsSection);
 
-  // Hide sidebar on public pages, or if user/admin isn't logged in for their respective section (only after auth loading completes)
+  // Hide sidebar on public pages, or if user/admin isn't logged in
   if (isAdminRoute && !admin && !isLoading && !adminToken) return null;
   if (isDashboardRoute && !user && !isLoading && !userToken) return null;
   if (!isDashboardRoute && !isAdminRoute) return null;
 
   const userItems: LinkItem[] = [
-    { href: '/dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
-    { href: '/dashboard/coins', label: 'Coins Wallet', icon: Coins },
-    { href: '/dashboard/investments', label: 'Invest & Grow', icon: TrendingUp },
-    { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/dashboard/referral', label: 'Referral Tree Network', icon: Users },
-    { href: '/dashboard/wallet', label: 'Wallet & Ledger', icon: Wallet },
-    { href: '/dashboard/settings', label: 'Profile Settings', icon: Settings },
+    { href: '/dashboard', label: 'Account Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
+    { href: '/dashboard/referral', label: 'Team Lead Report', icon: Users },
+    { href: '/dashboard/coins', label: 'Coin', icon: Coins },
+    { href: '/dashboard/investments', label: 'Investment', icon: TrendingUp },
+    { href: '/dashboard/settings', label: 'Account Setting', icon: Settings },
+    { href: '/contact', label: 'Support', icon: Headset },
   ];
 
   const adminTopItems: LinkItem[] = [
@@ -62,15 +65,15 @@ export default function Sidebar() {
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
     { href: '/admin/investments/actions', label: 'Investment Actions', icon: UserCheck },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
-    { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
     { href: '/admin/users', label: 'Users & Designations', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
+    { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
+    { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
   ];
 
   const approvalItems: LinkItem[] = [
-    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck, accentClass: 'text-primary' },
-    { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star, accentClass: 'text-[#854D0E]' },
+    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck },
+    { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star },
   ];
 
   const adminBottomItems: LinkItem[] = [
@@ -78,117 +81,213 @@ export default function Sidebar() {
     { href: '/admin/wallet', label: 'Ledger & Adjustments', icon: DollarSign },
   ];
 
-  const renderLink = (item: LinkItem, isChild = false) => {
+  const getInitials = (name?: string) => {
+    if (!name) return 'EX';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const renderItem = (item: LinkItem, isChild = false) => {
     const Icon = item.icon;
-    const isActive = pathname === item.href;
+    const isActive = pathname === item.href || (item.href === '/dashboard' && pathname === '/dashboard');
+
+    if (isActive) {
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`flex items-center justify-between p-2.5 rounded-2xl bg-gradient-to-r from-white via-[#fffdfa] to-[#f7eed6] text-slate-900 border border-[#e5c158] shadow-md shadow-amber-500/10 transition-all duration-200 ${
+            isChild ? 'ml-3' : ''
+          }`}
+        >
+          <div className="flex items-center space-x-3 min-w-0">
+            <div className="w-8 h-8 rounded-xl border border-[#dfa836] bg-amber-500/10 flex items-center justify-center shrink-0">
+              <Icon className="w-4.5 h-4.5 text-[#dfa836]" />
+            </div>
+            <span className="font-extrabold text-sm text-[#0d0d0d] tracking-tight truncate">{item.label}</span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-[#dfa836] shrink-0 ml-1.5" />
+        </Link>
+      );
+    }
+
     return (
       <Link
         key={item.href}
         href={item.href}
-        className={`flex items-center space-x-3 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 ${
-          isChild ? 'pl-7 pr-3.5' : 'px-3.5'
-        } ${
-          isActive
-            ? 'bg-[#005A36] text-white shadow-sm shadow-emerald-950/20 font-black'
-            : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+        className={`flex items-center justify-between p-2.5 rounded-xl border-b border-[#053d29]/50 hover:bg-[#033c28]/60 transition-all duration-200 group ${
+          isChild ? 'ml-3' : ''
         }`}
       >
-        <Icon
-          className={`w-4 h-4 shrink-0 transition-colors ${
-            isActive ? 'text-secondary' : item.accentClass || 'text-slate-400'
-          }`}
-        />
-        <span className="truncate">{item.label}</span>
+        <div className="flex items-center space-x-3 min-w-0">
+          <div className="w-8 h-8 rounded-xl border border-[#d4af37]/60 bg-[#022e1f]/60 flex items-center justify-center shrink-0 group-hover:border-[#d4af37] transition-colors">
+            <Icon className="w-4.5 h-4.5 text-[#d4af37] group-hover:scale-110 transition-transform" />
+          </div>
+          <span className="font-bold text-sm text-slate-100 group-hover:text-amber-200 transition-colors truncate">
+            {item.label}
+          </span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-[#d4af37]/70 group-hover:text-[#d4af37] shrink-0 ml-1.5 transition-transform group-hover:translate-x-0.5" />
       </Link>
     );
   };
 
+  const displayName = isAdminRoute
+    ? admin?.phone || 'Admin Manager'
+    : user?.full_name || user?.phone || 'Rasel Hossain';
+
+  const initials = getInitials(displayName);
+  const designation = isAdminRoute
+    ? 'System Admin'
+    : user?.designation?.name || 'Premium Member';
+
   return (
-    <aside className="hidden lg:flex flex-col w-64 shrink-0 bg-white/95 backdrop-blur-xl border-r border-slate-200/90 p-4 space-y-4 overflow-y-auto z-20 h-screen sticky top-0">
-      {/* Brand Header */}
-      <Link href={isAdminRoute ? '/admin/dashboard' : '/dashboard'} className="flex items-center space-x-2.5 pb-3 border-b border-slate-100 shrink-0 group">
+    <aside className="hidden lg:flex flex-col w-72 shrink-0 bg-gradient-to-b from-[#01281a] via-[#011f15] to-[#00170f] border-r border-[#d4af37]/30 p-3.5 space-y-3 overflow-y-auto z-20 h-screen sticky top-0 shadow-2xl custom-scrollbar">
+      {/* Brand Header Logo */}
+      <Link href={isAdminRoute ? '/admin/dashboard' : '/dashboard'} className="flex items-center justify-center pt-1 pb-2 shrink-0 group">
         <img
           src="/logo.png"
           alt="EarnX Capital"
-          className="h-10 w-auto object-contain transition-transform group-hover:scale-105"
+          className="h-11 w-auto object-contain transition-transform group-hover:scale-105"
         />
       </Link>
 
-      {/* Role Indicator Banner */}
-      <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-3 flex items-center space-x-3 shrink-0">
-        <div className="w-8 h-8 rounded-xl bg-[#005A36] flex items-center justify-center text-secondary font-black text-xs shrink-0">
-          {isAdminRoute ? 'A' : 'U'}
-        </div>
-        <div className="flex flex-col overflow-hidden flex-1">
-          <span className="text-xs font-extrabold text-slate-900 truncate">
-            {isAdminRoute ? 'Admin Control' : user?.full_name || user?.phone}
-          </span>
-          <span className="text-[10px] font-bold text-primary truncate">
-            {isAdminRoute ? admin?.phone : user?.designation?.name || 'Member'}
-          </span>
-        </div>
-        {isDashboardRoute && user && (
-          <span className="text-[10px] font-extrabold text-primary bg-emerald-100/80 border border-emerald-200/80 px-2 py-0.5 rounded-lg shrink-0 font-mono">
-            ৳{Number(user.wallet_balance || 0).toFixed(0)}
-          </span>
-        )}
-      </div>
+      {/* User / Admin Profile Banner Card */}
+      <Link
+        href={isAdminRoute ? '/admin/settings' : '/dashboard/settings'}
+        className="bg-[#023322]/80 border border-[#d4af37]/35 hover:border-[#d4af37] rounded-2xl p-2.5 flex items-center justify-between transition-all duration-200 group shrink-0"
+      >
+        <div className="flex items-center space-x-2.5 min-w-0">
+          {/* Avatar with Gold border */}
+          <div className="w-10 h-10 rounded-full border-2 border-[#d4af37] bg-gradient-to-br from-[#044830] to-[#011c13] flex items-center justify-center text-[#d4af37] font-black text-sm shrink-0 shadow-md">
+            {initials}
+          </div>
 
-      {/* Navigation Items */}
-      <nav className="flex-1 space-y-1 overflow-y-auto pr-1">
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-extrabold text-white group-hover:text-amber-300 transition-colors truncate">
+              {displayName}
+            </span>
+
+            {/* Premium Member / Designation */}
+            <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+              <Crown className="w-3 h-3 shrink-0" />
+              <span className="truncate">{designation}</span>
+            </div>
+
+            {/* Verification Status */}
+            <div className="flex items-center space-x-1 text-[#10b981] text-[10px] font-bold mt-0.5">
+              <CheckCircle2 className="w-3 h-3 shrink-0" />
+              <span>Verified Account</span>
+            </div>
+          </div>
+        </div>
+
+        <ChevronRight className="w-4 h-4 text-[#d4af37] group-hover:translate-x-1 transition-transform shrink-0 ml-1" />
+      </Link>
+
+      {/* Navigation List */}
+      <nav className="flex-1 space-y-0.5 overflow-y-auto pr-0.5 custom-scrollbar">
         {isAdminRoute ? (
           <>
-            {/* Top admin links */}
-            {adminTopItems.map((item) => renderLink(item))}
+            {adminTopItems.map((item) => renderItem(item))}
 
-            {/* Approvals Queue Group (collapsible) */}
-            <div className="pt-1 pb-0.5">
+            {/* Approvals Queue Collapsible */}
+            <div className="py-0.5">
               <button
                 onClick={() => setApprovalsOpen((o) => !o)}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all cursor-pointer ${
-                  isApprovalsSection
-                    ? 'text-primary bg-emerald-50/70 border-l-2 border-primary'
-                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl border-b border-[#053d29]/50 hover:bg-[#033c28]/60 text-slate-100 transition-all cursor-pointer ${
+                  isApprovalsSection ? 'bg-[#033c28]/80 text-amber-300' : ''
                 }`}
               >
-                <span className="flex items-center space-x-2 truncate">
-                  <UserCheck className="w-3.5 h-3.5 shrink-0 text-primary" />
-                  <span className="truncate">Approvals Queue</span>
-                </span>
+                <div className="flex items-center space-x-3.5 min-w-0">
+                  <div className="w-9 h-9 rounded-xl border border-[#d4af37]/50 bg-[#022e1f]/60 flex items-center justify-center shrink-0">
+                    <UserCheck className="w-5 h-5 text-[#d4af37]" />
+                  </div>
+                  <span className="font-medium text-sm truncate">Approvals Queue</span>
+                </div>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
+                  className={`w-4 h-4 text-[#d4af37] transition-transform duration-200 ${
                     approvalsOpen ? 'rotate-180' : 'rotate-0'
                   }`}
                 />
               </button>
 
               <div
-                className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                  approvalsOpen ? 'max-h-40 opacity-100 mt-0.5' : 'max-h-0 opacity-0'
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  approvalsOpen ? 'max-h-48 opacity-100 mt-1 space-y-1' : 'max-h-0 opacity-0'
                 }`}
               >
-                <div className="space-y-0.5">
-                  {approvalItems.map((item) => renderLink(item, true))}
-                </div>
+                {approvalItems.map((item) => renderItem(item, true))}
               </div>
             </div>
 
-            {/* Bottom admin links */}
-            {adminBottomItems.map((item) => renderLink(item))}
+            {adminBottomItems.map((item) => renderItem(item))}
           </>
         ) : (
-          userItems.map((item) => renderLink(item))
+          userItems.map((item) => renderItem(item))
         )}
       </nav>
 
-      {/* Sidebar Footer with Logout button */}
-      <div className="pt-3 border-t border-slate-100 shrink-0">
+      {/* Bottom Promo Card: Grow Your Wealth With EarnX */}
+      <div className="border border-[#d4af37]/35 bg-gradient-to-b from-[#033221] to-[#011a12] rounded-2xl p-3.5 relative overflow-hidden shrink-0 shadow-lg">
+        <div className="flex items-center justify-between">
+          {/* 3D Gold Coins Graphic */}
+          <div className="relative w-16 h-16 shrink-0">
+            <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="goldRim" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#FFE066" />
+                  <stop offset="50%" stopColor="#D4AF37" />
+                  <stop offset="100%" stopColor="#996515" />
+                </linearGradient>
+                <linearGradient id="goldInner" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#F5D77F" />
+                  <stop offset="100%" stopColor="#B8860B" />
+                </linearGradient>
+              </defs>
+              <ellipse cx="35" cy="70" rx="28" ry="14" fill="#503504" opacity="0.7" />
+              <ellipse cx="35" cy="67" rx="28" ry="14" fill="url(#goldRim)" />
+              <ellipse cx="35" cy="64" rx="24" ry="11" fill="url(#goldInner)" />
+
+              <ellipse cx="65" cy="62" rx="28" ry="14" fill="#503504" opacity="0.7" />
+              <ellipse cx="65" cy="59" rx="28" ry="14" fill="url(#goldRim)" />
+              <ellipse cx="65" cy="56" rx="24" ry="11" fill="url(#goldInner)" />
+
+              <ellipse cx="48" cy="38" rx="30" ry="30" fill="url(#goldRim)" />
+              <ellipse cx="48" cy="38" rx="26" ry="26" fill="url(#goldInner)" />
+              <circle cx="48" cy="38" r="21" fill="none" stroke="#FFE066" strokeWidth="1.5" strokeDasharray="3 2" />
+              <path d="M38 28 L45 38 L37 48 H42 L48 40 L54 48 H59 L51 38 L58 28 H53 L48 35 L43 28 Z" fill="#FFE066" stroke="#805307" strokeWidth="0.5" />
+            </svg>
+          </div>
+
+          <div className="flex flex-col text-right pl-2 min-w-0">
+            <span className="text-[#10b981] font-bold text-xs flex items-center justify-end gap-1">
+              Grow Your Wealth <ExternalLink className="w-3 h-3" />
+            </span>
+            <span className="text-white font-black text-lg leading-tight mt-0.5">
+              With EarnX
+            </span>
+            <span className="text-slate-300 text-[11px] font-medium mt-0.5 leading-tight truncate">
+              Smart Investment
+            </span>
+            <span className="text-slate-400 text-[10px] font-medium leading-tight truncate">
+              Secure Future
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Logout Action */}
+      <div className="pt-1 shrink-0">
         <button
           onClick={() => {
             if (isAdminRoute) logoutAdmin();
             else logoutUser();
           }}
-          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-extrabold text-xs transition-colors border border-rose-200/80 cursor-pointer"
+          className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#032e1f] hover:bg-rose-950/40 text-amber-200 hover:text-rose-300 rounded-xl font-bold text-xs transition-colors border border-[#d4af37]/30 hover:border-rose-500/40 cursor-pointer"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           <span>Log Out</span>

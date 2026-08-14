@@ -227,63 +227,14 @@ export default function UserInvestmentsPage() {
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
       {/* Top 2 Metric Cards */}
-      <div className="grid grid-cols-2 gap-3.5 sm:gap-5">
-        {/* Card 1: Available Wallet Balance */}
-        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-sm min-w-0">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
-            Available Wallet
-          </span>
-
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100/80 flex items-center justify-center text-primary shrink-0">
-              <Wallet className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xl sm:text-3xl font-black text-slate-900 font-mono tracking-tight truncate">
-                ৳{walletBal.toLocaleString()}
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-primary truncate">Main Wallet</div>
-            </div>
-          </div>
-
-          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-slate-500 truncate">
-            <span className="truncate">invest & upgrade</span>
-          </div>
-        </div>
-
-        {/* Card 2: Active Invested Capital */}
-        <div className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-3 shadow-sm min-w-0">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest truncate">
-            Active Investment
-          </span>
-
-          <div className="flex items-center space-x-3 min-w-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
-              <DollarSign className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xl sm:text-3xl font-black text-[#854D0E] font-mono tracking-tight truncate">
-                ৳{activeInv ? Number(activeInv.amount).toLocaleString() : 0}
-              </div>
-              <div className="text-xs sm:text-sm font-extrabold text-[#854D0E] truncate">
-                {activeInv ? activeInv.plan?.title || 'Invested Package' : 'No Package'}
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-[#854D0E] truncate">
-            <span className="truncate">Monthly Return: {activeInv ? `${activeInv.monthly_return_percent}%` : '0%'}</span>
-          </div>
-        </div>
-      </div>
-
+    
       {/* Active Investment Status Banner Card (if user has active investment) */}
       {activeInv && (
-        <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-4">
+        <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1.5 min-w-0">
               <div className="flex items-center space-x-2">
-                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider text-white shrink-0">
+                <span className="bg-white/10 border border-[#d4af37]/40 px-3 py-1 rounded-xl text-xs font-black uppercase tracking-wider text-amber-200 shrink-0">
                   Active Package
                 </span>
                 <StatusBadge status={activeInv.status} />
@@ -291,8 +242,8 @@ export default function UserInvestmentsPage() {
               <h2 className="text-lg sm:text-2xl font-black text-white truncate">
                 {activeInv.plan?.title || 'Investment Package'} — ৳{Number(activeInv.amount).toLocaleString()}
               </h2>
-              <p className="text-xs sm:text-sm text-emerald-100/90 font-medium truncate">
-                Monthly Return: <strong className="text-secondary font-mono">{Number(activeInv.monthly_return_percent)}%</strong> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
+              <p className="text-xs sm:text-sm text-slate-300 font-semibold truncate">
+                Monthly Return: <strong className="text-[#f3ba2f] font-mono">{Number(activeInv.monthly_return_percent)}%</strong> (৳{Number(activeInv.monthly_payout_amount).toLocaleString()} / mo)
               </p>
             </div>
 
@@ -300,9 +251,9 @@ export default function UserInvestmentsPage() {
               {activeInv.status === RequestStatus.APPROVED && (
                 <button
                   onClick={() => handleOpenWithdrawCapital(activeInv)}
-                  className="py-2.5 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 shadow-sm transition-all shrink-0 cursor-pointer"
+                  className="py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 shadow-md transition-all shrink-0 cursor-pointer"
                 >
-                  <MinusCircle className="w-4 h-4 shrink-0" />
+                  <MinusCircle className="w-4 h-4 shrink-0 text-slate-950" />
                   <span className="truncate">Withdraw Capital</span>
                 </button>
               )}
@@ -337,19 +288,40 @@ export default function UserInvestmentsPage() {
       {/* Investment Plans Grid */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center space-x-2 truncate">
-            <span className="truncate">Investment Plans</span>
+          <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 truncate">
+            <TrendingUp className="w-5 h-5 text-[#01281a] shrink-0" />
+            <span className="truncate">Available Investment Packages</span>
           </h2>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[1, 2, 3].map((n) => (
-              <div key={n} className="h-64 bg-slate-100 animate-pulse rounded-2xl"></div>
+              <div
+                key={n}
+                className="rounded-3xl border border-[#d4af37]/35 bg-gradient-to-br from-[#023322] via-[#012418] to-[#011a12] p-5 sm:p-6 space-y-5 animate-pulse shadow-xl"
+              >
+                <div className="space-y-2">
+                  <div className="h-6 w-1/2 bg-[#03442e] rounded-lg"></div>
+                  <div className="h-3.5 w-3/4 bg-[#03442e]/60 rounded-md"></div>
+                </div>
+                <div className="h-20 bg-[#011f15] border border-[#d4af37]/25 rounded-2xl p-4 flex justify-between items-center">
+                  <div className="space-y-2 w-1/2">
+                    <div className="h-3 w-1/3 bg-[#03442e] rounded"></div>
+                    <div className="h-7 w-2/3 bg-[#03442e] rounded-lg"></div>
+                  </div>
+                  <div className="w-10 h-10 bg-[#03442e] border border-[#d4af37]/30 rounded-xl"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-14 bg-[#011a12] border border-[#d4af37]/20 rounded-2xl"></div>
+                  <div className="h-14 bg-[#011a12] border border-[#d4af37]/20 rounded-2xl"></div>
+                </div>
+                <div className="h-12 bg-gradient-to-r from-amber-400/20 to-amber-500/20 rounded-2xl border border-amber-400/30"></div>
+              </div>
             ))}
           </div>
         ) : plans.length === 0 ? (
-          <div className="bg-white rounded-2xl p-8 text-center border border-slate-200/90 text-slate-500 shadow-sm">
+          <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-3xl p-8 text-center text-slate-300 font-bold shadow-lg">
             No investment plans available at the moment. Please check back soon!
           </div>
         ) : (
@@ -367,76 +339,76 @@ export default function UserInvestmentsPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`group relative bg-white/95 backdrop-blur-xl rounded-3xl border transition-all duration-500 hover:-translate-y-1 flex flex-col justify-between overflow-hidden p-5 sm:p-6 space-y-5 min-w-0 ${
-                    isPopular
-                      ? 'border-primary/80 shadow-[0_12px_30px_rgba(0,90,54,0.1)] hover:shadow-[0_20px_45px_rgba(0,90,54,0.18)]'
-                      : 'border-slate-200/90 shadow-[0_8px_25px_rgba(0,0,0,0.04)] hover:shadow-[0_16px_35px_rgba(0,0,0,0.08)]'
-                  }`}
+                  className="group relative rounded-3xl border border-[#d4af37]/45 bg-gradient-to-br from-[#023322] via-[#012418] to-[#011a12] text-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#d4af37] flex flex-col justify-between overflow-hidden p-5 sm:p-6 space-y-5 min-w-0 shadow-xl"
                 >
-                  {/* Popular Badge */}
-                  {isPopular && (
-                    <div className="absolute top-0 right-0 bg-[#005A36] text-secondary text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-bl-2xl shadow-sm flex items-center space-x-1 shrink-0">
-                      <Sparkles className="w-3 h-3 text-secondary" />
+                  {/* Badge */}
+                  {isPopular ? (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-bl-2xl shadow-md flex items-center space-x-1 shrink-0">
+                      <Sparkles className="w-3 h-3 text-slate-950" />
                       <span>Best Value</span>
+                    </div>
+                  ) : (
+                    <div className="absolute top-0 right-0 bg-[#013825] border-l border-b border-[#d4af37]/40 text-amber-200 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-2xl shrink-0">
+                      <span>Guaranteed Yield</span>
                     </div>
                   )}
 
                   <div className="space-y-4 min-w-0">
-                    {/* Title & Category */}
+                    {/* Title & Subtitle */}
                     <div className="min-w-0 space-y-0.5">
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight truncate">
+                      <h3 className="text-lg sm:text-xl font-black tracking-tight text-white truncate">
                         {plan.title}
                       </h3>
-                      <p className="text-xs text-slate-500 font-semibold truncate">
-                        Guaranteed Monthly Return Plan
+                      <p className="text-xs font-semibold text-slate-300 truncate">
+                        Guaranteed Monthly Dividend Package
                       </p>
                     </div>
 
-                    {/* Price Card Tag */}
-                    <div className="bg-emerald-50/90 border border-emerald-200/80 rounded-2xl p-3.5 flex items-center justify-between min-w-0 shadow-xs">
+                    {/* Price Tag Box */}
+                    <div className="rounded-2xl p-4 flex items-center justify-between min-w-0 border bg-[#011f15] border-[#d4af37]/35 text-white shadow-inner">
                       <div className="min-w-0">
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest block truncate">
+                        <span className="text-[10px] font-black uppercase tracking-widest block truncate text-amber-200">
                           Package Price
                         </span>
-                        <span className="text-2xl sm:text-3xl font-black text-primary font-mono tracking-tight truncate block">
+                        <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight truncate block text-white">
                           ৳{packageAmt.toLocaleString()}
                         </span>
                       </div>
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                        <TrendingUp className="w-5 h-5" />
+                      <div className="w-11 h-11 rounded-xl border border-[#d4af37]/50 bg-[#023322] flex items-center justify-center text-[#f3ba2f] shrink-0 shadow-md">
+                        <TrendingUp className="w-5.5 h-5.5" />
                       </div>
                     </div>
 
-                    {/* Stats Grid */}
+                    {/* Return Rate & Dividend Metrics */}
                     <div className="grid grid-cols-2 gap-2.5 pt-1">
-                      <div className="bg-slate-50/90 border border-slate-100 p-3 rounded-2xl min-w-0 space-y-0.5">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block truncate">
+                      <div className="border border-[#d4af37]/30 p-3 rounded-2xl bg-[#011a12] min-w-0 space-y-0.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider block truncate text-amber-300">
                           Monthly Return
                         </span>
-                        <div className="text-base sm:text-lg font-black text-primary font-mono truncate">
+                        <div className="text-base sm:text-lg font-black font-mono truncate text-amber-200">
                           {returnPct}% / mo
                         </div>
                       </div>
 
-                      <div className="bg-slate-50/90 border border-slate-100 p-3 rounded-2xl min-w-0 space-y-0.5">
-                        <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block truncate">
+                      <div className="border border-[#d4af37]/30 p-3 rounded-2xl bg-[#011a12] min-w-0 space-y-0.5">
+                        <span className="text-[10px] font-black uppercase tracking-wider block truncate text-amber-300">
                           Est. Dividend
                         </span>
-                        <div className="text-base sm:text-lg font-black text-slate-900 font-mono truncate">
+                        <div className="text-base sm:text-lg font-black font-mono truncate text-white">
                           ৳{monthlyDividend.toLocaleString()}
                         </div>
                       </div>
                     </div>
 
-                    {/* Duration Info Row */}
-                    <div className="flex items-center justify-between bg-slate-50/80 px-3.5 py-2.5 rounded-xl border border-slate-100 text-xs font-bold text-slate-600 min-w-0">
-                      <span className="text-slate-400 font-medium shrink-0">Plan Duration:</span>
+                    {/* Plan Duration Badge */}
+                    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-[#d4af37]/30 bg-[#011f15] text-xs font-bold min-w-0">
+                      <span className="text-slate-300 font-medium shrink-0">Plan Duration:</span>
                       {plan.is_lifetime ? (
-                        <span className="font-extrabold text-primary bg-emerald-100/80 px-2.5 py-0.5 rounded-lg border border-emerald-200 text-[11px] shrink-0">
+                        <span className="font-black text-amber-200 bg-[#023322] border border-[#d4af37]/40 px-2.5 py-0.5 rounded-lg text-[11px] shrink-0">
                           Lifetime Payouts
                         </span>
                       ) : (
-                        <span className="font-extrabold text-slate-900 font-mono truncate">
+                        <span className="font-black font-mono truncate text-white">
                           {plan.duration_months} Months
                         </span>
                       )}
@@ -446,14 +418,14 @@ export default function UserInvestmentsPage() {
                   {/* Action Button */}
                   <div className="pt-2">
                     {isCurrentPackage ? (
-                      <div className="w-full py-3 px-4 rounded-2xl font-black text-xs bg-emerald-100/90 text-primary border border-emerald-200 text-center tracking-wide shadow-xs">
+                      <div className="w-full py-3.5 px-4 rounded-2xl font-black text-xs bg-[#023322] text-amber-200 border border-[#d4af37]/50 text-center tracking-wide shadow-md">
                         ✓ Active Package
                       </div>
                     ) : isHigherPackage ? (
                       <button
                         onClick={() => handleOpenInvestOrUpgrade(plan)}
                         disabled={activeInv?.status === RequestStatus.PENDING}
-                        className="w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md shadow-amber-500/20 disabled:opacity-50 cursor-pointer group-hover:scale-[1.01]"
+                        className="w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 shadow-md disabled:opacity-50 cursor-pointer"
                       >
                         <ArrowUpRight className="w-4 h-4 text-slate-950 shrink-0" />
                         <span className="truncate">Upgrade Package</span>
@@ -462,11 +434,7 @@ export default function UserInvestmentsPage() {
                       <button
                         onClick={() => handleOpenInvestOrUpgrade(plan)}
                         disabled={!!activeInv}
-                        className={`w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-40 cursor-pointer group-hover:scale-[1.01] ${
-                          isPopular
-                            ? 'bg-[#005A36] hover:bg-[#044D2F] text-white shadow-md shadow-emerald-950/20'
-                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'
-                        }`}
+                        className="w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 disabled:opacity-40 cursor-pointer shadow-md"
                       >
                         <Zap className="w-4 h-4 fill-current shrink-0" />
                         <span className="truncate">Invest Now</span>
@@ -481,9 +449,9 @@ export default function UserInvestmentsPage() {
       </div>
 
       {/* Active Investments History Table */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-sm p-4 sm:p-6 space-y-4 overflow-hidden">
-        <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center space-x-2 truncate">
-          <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-6 space-y-4 overflow-hidden">
+        <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 truncate">
+          <ShieldCheck className="w-5 h-5 text-[#01281a] shrink-0" />
           <span className="truncate">My Investment History & Returns</span>
         </h2>
 
@@ -500,54 +468,54 @@ export default function UserInvestmentsPage() {
       {selectedPlan && !showUpgradeModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div className="min-w-0 flex-1">
-                <h3 className="text-xl font-extrabold text-slate-900 truncate">Subscribe to {selectedPlan.title}</h3>
-                <p className="text-xs text-slate-500 truncate">Fixed Package Subscription</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">Subscribe to {selectedPlan.title}</h3>
+                <p className="text-xs text-slate-500 font-semibold truncate">Fixed Package Subscription</p>
               </div>
               <button
                 onClick={() => setSelectedPlan(null)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold shrink-0 ml-2"
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold shrink-0 ml-2 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4">
-              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 space-y-2">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
                 <div className="flex justify-between text-xs text-slate-600 truncate">
-                  <span className="shrink-0">Package Amount:</span>
+                  <span className="shrink-0 font-bold">Package Amount:</span>
                   <span className="font-black text-slate-900 text-base font-mono truncate">
                     ৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600 truncate">
-                  <span className="shrink-0">Monthly Return Rate:</span>
-                  <span className="font-extrabold text-primary font-mono truncate">
+                  <span className="shrink-0 font-bold">Monthly Return Rate:</span>
+                  <span className="font-black text-[#01281a] font-mono truncate">
                     {Number(selectedPlan.monthly_return_percent)}% / month
                   </span>
                 </div>
               </div>
 
-              <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-200 flex items-center justify-between text-emerald-900 min-w-0">
-                <span className="text-xs font-semibold shrink-0">Estimated Monthly Dividend:</span>
-                <span className="text-lg font-black text-primary font-mono truncate">
+              <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 p-4 rounded-xl flex items-center justify-between text-white min-w-0 shadow-md">
+                <span className="text-xs font-bold text-slate-300 shrink-0">Estimated Monthly Dividend:</span>
+                <span className="text-lg font-black text-amber-200 font-mono truncate">
                   ৳{((Number(selectedPlan.amount || selectedPlan.min_amount) * Number(selectedPlan.monthly_return_percent)) / 100).toLocaleString()}
                 </span>
               </div>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 pt-2">
               <button
                 onClick={() => setSelectedPlan(null)}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100 truncate"
+                className="flex-1 py-3 rounded-xl border border-slate-300 font-black text-xs text-slate-700 hover:bg-slate-100 truncate cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleInvest}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white disabled:opacity-50 font-extrabold text-xs shadow-sm truncate"
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
               >
                 {submitting ? 'Processing...' : 'Confirm & Invest'}
               </button>
@@ -560,17 +528,17 @@ export default function UserInvestmentsPage() {
       {selectedPlan && showUpgradeModal && activeInv && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div className="min-w-0 flex-1">
-                <h3 className="text-xl font-extrabold text-slate-900 truncate">Upgrade Package</h3>
-                <p className="text-xs text-slate-500 truncate">Upgrade from {activeInv.plan?.title || 'Current Package'} to {selectedPlan.title}</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">Upgrade Package</h3>
+                <p className="text-xs text-slate-500 font-semibold truncate">Upgrade from {activeInv.plan?.title || 'Current Package'} to {selectedPlan.title}</p>
               </div>
               <button
                 onClick={() => {
                   setSelectedPlan(null);
                   setShowUpgradeModal(false);
                 }}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold shrink-0 ml-2"
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold shrink-0 ml-2 cursor-pointer"
               >
                 ✕
               </button>
@@ -579,47 +547,47 @@ export default function UserInvestmentsPage() {
             <div className="space-y-4">
               <div className="space-y-2 text-xs">
                 <div className="flex justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 truncate">
-                  <span className="text-slate-600 font-medium truncate">Current ({activeInv.plan?.title}):</span>
-                  <span className="font-extrabold text-slate-900 font-mono truncate">৳{Number(activeInv.amount).toLocaleString()}</span>
+                  <span className="text-slate-600 font-bold truncate">Current ({activeInv.plan?.title}):</span>
+                  <span className="font-black text-slate-900 font-mono truncate">৳{Number(activeInv.amount).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between p-3 rounded-xl bg-amber-50 border border-amber-200 truncate">
-                  <span className="text-[#854D0E] font-medium truncate">Target ({selectedPlan.title}):</span>
-                  <span className="font-extrabold text-[#854D0E] font-mono truncate">৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}</span>
+                  <span className="text-[#854D0E] font-bold truncate">Target ({selectedPlan.title}):</span>
+                  <span className="font-black text-[#854D0E] font-mono truncate">৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()}</span>
                 </div>
               </div>
 
               {/* Remaining Amount Highlight Card */}
-              <div className="bg-[#005A36] text-white p-4 rounded-xl space-y-1">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-secondary">
+              <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 text-white p-4 rounded-xl space-y-1 shadow-md">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-200">
                   Remaining Amount to Pay
                 </span>
-                <p className="text-3xl font-black font-mono truncate">
+                <p className="text-3xl font-black font-mono truncate text-white">
                   ৳{(Number(selectedPlan.amount || selectedPlan.min_amount) - Number(activeInv.amount)).toLocaleString()}
                 </p>
-                <p className="text-[11px] text-emerald-100">
+                <p className="text-[11px] text-slate-300 font-medium">
                   Pay this remaining amount to Admin to activate your upgraded {selectedPlan.title} package.
                 </p>
               </div>
 
-              <p className="text-[11px] text-slate-500 italic">
+              <p className="text-[11px] text-slate-500 font-semibold italic">
                 * Note: Your upgrade request will be set to Pending. Admin will verify your payment and update your active package status.
               </p>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 pt-2">
               <button
                 onClick={() => {
                   setSelectedPlan(null);
                   setShowUpgradeModal(false);
                 }}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100 truncate"
+                className="flex-1 py-3 rounded-xl border border-slate-300 font-black text-xs text-slate-700 hover:bg-slate-100 truncate cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUpgrade}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#854D0E] font-extrabold text-xs disabled:opacity-50 truncate"
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
               >
                 {submitting ? 'Submitting Request...' : 'Confirm Upgrade Request'}
               </button>
@@ -632,14 +600,14 @@ export default function UserInvestmentsPage() {
       {showWithdrawModal && activeInv && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div className="min-w-0 flex-1">
-                <h3 className="text-xl font-extrabold text-slate-900 truncate">Withdraw Invested Capital</h3>
-                <p className="text-xs text-slate-500 truncate">Reduce your active investment principal</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">Withdraw Invested Capital</h3>
+                <p className="text-xs text-slate-500 font-semibold truncate">Reduce your active investment principal</p>
               </div>
               <button
                 onClick={() => setShowWithdrawModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold shrink-0 ml-2"
+                className="text-slate-400 hover:text-slate-700 text-lg font-bold shrink-0 ml-2 cursor-pointer"
               >
                 ✕
               </button>
@@ -647,46 +615,46 @@ export default function UserInvestmentsPage() {
 
             <div className="space-y-4">
               <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-[#854D0E] text-xs space-y-1">
-                <div className="flex justify-between font-extrabold truncate">
+                <div className="flex justify-between font-black truncate">
                   <span>Current Invested Capital:</span>
                   <span className="font-mono">৳{Number(activeInv.amount).toLocaleString()}</span>
                 </div>
-                <p className="text-[11px] text-[#854D0E]">
+                <p className="text-[11px] font-semibold text-[#854D0E]">
                   Withdrawal reduces your invested package capital. This will not touch your main wallet balance.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-extrabold text-slate-700">Enter Withdrawal Amount (৳)</label>
+                <label className="text-xs font-black text-slate-700">Enter Withdrawal Amount (৳)</label>
                 <input
                   type="number"
                   min={1}
                   max={Number(activeInv.amount)}
                   value={withdrawAmount}
                   onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary font-extrabold text-slate-900 text-sm font-mono"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#01281a] font-black text-slate-900 text-sm font-mono"
                 />
               </div>
 
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between text-slate-700 font-medium truncate">
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between text-slate-700 font-semibold truncate">
                 <span className="shrink-0">Remaining Capital:</span>
-                <span className="font-extrabold text-slate-900 font-mono truncate">
+                <span className="font-black text-slate-900 font-mono truncate">
                   ৳{Math.max(0, Number(activeInv.amount) - withdrawAmount).toLocaleString()}
                 </span>
               </div>
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 pt-2">
               <button
                 onClick={() => setShowWithdrawModal(false)}
-                className="flex-1 py-3 rounded-xl border border-slate-300 font-extrabold text-xs text-slate-700 hover:bg-slate-100 truncate"
+                className="flex-1 py-3 rounded-xl border border-slate-300 font-black text-xs text-slate-700 hover:bg-slate-100 truncate cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleWithdrawCapital}
                 disabled={submitting || withdrawAmount <= 0 || withdrawAmount > Number(activeInv.amount)}
-                className="flex-1 py-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#854D0E] font-extrabold text-xs disabled:opacity-50 truncate"
+                className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
               >
                 {submitting ? 'Submitting...' : 'Confirm Withdrawal Request'}
               </button>

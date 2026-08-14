@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { apiFetch } from '../../../lib/api';
 import { AlertBanner } from '../../../components/common/AlertBanner';
+import { GoldenCoinsIcon } from '../../../components/common/GoldenCoinsIcon';
 import {
   Coins,
   Save,
@@ -236,68 +237,70 @@ export default function AdminCoinsPage() {
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
       {/* Top 2 Metric Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Card 1: Spendable Coins */}
-        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest">
-            Spendable Coins
+        <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white">
+          <span className="text-[11px] font-black text-amber-200 uppercase tracking-widest flex items-center gap-1.5">
+            Spendable <GoldenCoinsIcon size={20} />
           </span>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-100/80 flex items-center justify-center text-primary shrink-0">
-              <Coins className="w-6 h-6 sm:w-7 sm:h-7" />
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-xl border border-[#d4af37]/60 bg-amber-500/10 flex items-center justify-center shrink-0">
+              <GoldenCoinsIcon size={32} />
             </div>
             <div>
-              <div className="text-2xl sm:text-4xl font-black text-slate-900 font-mono tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()}
+                <GoldenCoinsIcon size={24} />
               </div>
-              <div className="text-xs sm:text-sm font-extrabold text-primary">Total Available</div>
+              <div className="text-xs font-bold text-slate-300">Total Available</div>
             </div>
           </div>
-          <div className="pt-1 flex items-center space-x-1 text-xs font-bold text-primary">
-            <TrendingUp className="w-4 h-4 text-primary" />
+          <div className="pt-1 flex items-center space-x-1.5 text-xs font-extrabold text-[#10b981]">
+            <TrendingUp className="w-4 h-4" />
             <span>{statsData?.stats.user_count || 0} system users</span>
           </div>
         </div>
 
         {/* Card 2: Locked Coins */}
-        <div className="bg-[#FFF8F3] border border-amber-100/90 rounded-2xl p-4 sm:p-5 flex flex-col justify-between space-y-4 shadow-sm">
-          <span className="text-[10px] sm:text-xs font-extrabold text-slate-400 uppercase tracking-widest">
-            Locked Coins
+        <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white">
+          <span className="text-[11px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+            Locked <GoldenCoinsIcon size={20} />
           </span>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-100/80 flex items-center justify-center text-amber-800 shrink-0">
-              <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-xl border border-amber-500/60 bg-amber-500/10 flex items-center justify-center text-[#f3ba2f] shrink-0">
+              <Lock className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-2xl sm:text-4xl font-black text-[#854D0E] font-mono tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-amber-100 font-mono tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()}
+                <GoldenCoinsIcon size={24} />
               </div>
-              <div className="text-xs sm:text-sm font-extrabold text-[#854D0E]">Premium Locked</div>
+              <div className="text-xs font-bold text-amber-300">Premium Locked</div>
             </div>
           </div>
           <div className="pt-1">
-            <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-[#FFF0E5] text-[#854D0E] border border-amber-200/80 font-mono">
-              ৳{coinPrice} / Coin
+            <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-[#3d2705] text-amber-200 border border-amber-500/40 font-mono inline-flex items-center gap-1">
+              ৳{coinPrice} / <GoldenCoinsIcon size={16} />
             </span>
           </div>
         </div>
       </div>
 
       {/* Global Coin Configuration */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
         <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
             <Sliders className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Global Coin Parameters</h2>
-            <p className="text-[11px] font-medium text-slate-400">Configure pricing, premium rewards, and referral requirements</p>
+            <h2 className="text-base sm:text-lg font-black text-slate-900">Global Coin Parameters</h2>
+            <p className="text-xs font-bold text-slate-400">Configure pricing, premium rewards, and referral requirements</p>
           </div>
         </div>
 
         <form onSubmit={handleSaveConfigs} className="space-y-4">
           {/* Config Item 1 */}
-          <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200/80 bg-white space-y-2">
+          <div className="p-3.5 sm:p-4 rounded-xl border border-slate-200 bg-white space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <DollarSign className="w-4 h-4 text-slate-400" />
@@ -306,14 +309,14 @@ export default function AdminCoinsPage() {
             </div>
             <p className="text-[11px] text-slate-400 font-medium">Price in BDT per coin when user purchases using wallet balance.</p>
             <div className="relative">
-              <DollarSign className="w-5 h-5 text-primary absolute left-3.5 top-3" />
+              <DollarSign className="w-5 h-5 text-[#01281a] absolute left-3.5 top-3" />
               <input
                 type="number"
                 step="0.01"
                 min="0.1"
                 value={coinPrice}
                 onChange={(e) => setCoinPrice(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a] text-sm"
               />
             </div>
           </div>

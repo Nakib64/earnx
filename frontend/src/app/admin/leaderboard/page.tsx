@@ -225,30 +225,30 @@ export default function AdminLeaderboardPage() {
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
-      {/* Top Banner — Coins Page Theme */}
-      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <Trophy className="w-6 h-6 text-secondary" />
+      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
+      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-3">
+        <div className="flex items-start space-x-3.5">
+          <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
+            <Trophy className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1 flex-1">
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
               Top 100 Leaderboard Manager
             </h1>
-            <p className="text-xs text-emerald-100/80 font-medium">
+            <p className="text-xs text-slate-300 font-semibold">
               Drag rows to adjust ranking, upload photos, and manage top earners.
             </p>
           </div>
-          <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-emerald-700/50 text-secondary border border-emerald-500/30 font-mono shrink-0 hidden sm:inline-flex">
+          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
             {entries.length} Entries
           </span>
         </div>
 
         {/* Action Buttons */}
-        <div className="border-t border-emerald-700/60 pt-3 flex flex-wrap gap-2">
+        <div className="border-t border-[#053d29] pt-3 flex flex-wrap gap-2">
           <button
             onClick={handleOpenAdd}
-            className="py-2 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-sm"
+            className="py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Entry</span>
@@ -294,12 +294,12 @@ export default function AdminLeaderboardPage() {
           <table className="w-full text-left text-[10px]">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-extrabold uppercase tracking-wider text-[9px]">
               <tr>
-                <th className="px-2 py-2 w-8 text-center"></th>
+                <th className="px-2 py-2 w-8 text-center hidden lg:table-cell"></th>
                 <th className="px-2.5 py-2">Rank</th>
                 <th className="px-2.5 py-2">Member</th>
-                <th className="px-2.5 py-2 hidden sm:table-cell">Invested</th>
-                <th className="px-2.5 py-2 hidden sm:table-cell">Profit</th>
-                <th className="px-2.5 py-2 hidden sm:table-cell">Badge</th>
+                <th className="px-2.5 py-2 hidden lg:table-cell">Invested</th>
+                <th className="px-2.5 py-2 hidden lg:table-cell">Profit</th>
+                <th className="px-2.5 py-2 hidden lg:table-cell">Badge</th>
                 <th className="px-2.5 py-2 text-right">Actions</th>
               </tr>
             </thead>
@@ -337,7 +337,7 @@ export default function AdminLeaderboardPage() {
                       }`}
                     >
                       {/* Drag Handle */}
-                      <td className="px-2 py-2 text-center text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing">
+                      <td className="px-2 py-2 text-center text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing hidden lg:table-cell">
                         <GripVertical className="w-4 h-4 mx-auto" />
                       </td>
 
@@ -374,21 +374,21 @@ export default function AdminLeaderboardPage() {
                       </td>
 
                       {/* Invested */}
-                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                      <td className="px-2.5 py-2 hidden lg:table-cell">
                         <span className="font-extrabold text-primary font-mono text-xs">
                           ৳{Number(item.invested_amount).toLocaleString()}
                         </span>
                       </td>
 
                       {/* Profit */}
-                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                      <td className="px-2.5 py-2 hidden lg:table-cell">
                         <span className="font-extrabold text-slate-900 font-mono text-xs">
                           ৳{Number(item.profit_earned).toLocaleString()}
                         </span>
                       </td>
 
                       {/* Badge */}
-                      <td className="px-2.5 py-2 hidden sm:table-cell">
+                      <td className="px-2.5 py-2 hidden lg:table-cell">
                         <span className="px-2 py-0.5 rounded-lg text-[9px] font-extrabold bg-amber-50 text-[#854D0E] border border-amber-200 inline-block truncate max-w-[90px]">
                           {item.badge || 'Member'}
                         </span>

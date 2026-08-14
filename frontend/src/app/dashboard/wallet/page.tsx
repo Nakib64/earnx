@@ -200,15 +200,15 @@ export default function WalletPage() {
       {statusMsg && <AlertBanner type={statusMsg.type} message={statusMsg.text} onClose={() => setStatusMsg(null)} />}
 
       {/* Full-Width Hero Wallet Banner */}
-      <div className="relative overflow-hidden bg-[#005A36] rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6">
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
           {/* Balance info */}
           <div className="space-y-3 min-w-0">
             <div className="flex items-center space-x-2">
-              <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider text-white">
+              <span className="bg-white/10 border border-[#d4af37]/40 px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider text-amber-200">
                 Main Wallet Balance
               </span>
-              <span className="bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-emerald-200">
+              <span className="bg-[#023322] border border-[#d4af37]/40 px-2.5 py-0.5 rounded-full text-[10px] font-black text-amber-300">
                 ACID Ledger
               </span>
             </div>
@@ -217,10 +217,10 @@ export default function WalletPage() {
               <span className="text-3xl sm:text-5xl font-black text-white font-mono tracking-tight truncate">
                 ৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
-              <span className="text-xs sm:text-sm font-extrabold text-emerald-200">Available BDT</span>
+              <span className="text-xs sm:text-sm font-bold text-slate-300">Available BDT</span>
             </div>
 
-            <p className="text-xs text-emerald-100/80 font-medium truncate">
+            <p className="text-xs text-slate-300 font-semibold truncate">
               Instant multi-level payouts, package dividends, and network transfer balance.
             </p>
           </div>
@@ -232,7 +232,7 @@ export default function WalletPage() {
                 setShowTransferModal((prev) => !prev);
                 setShowWithdrawModal(false);
               }}
-              className="bg-secondary hover:bg-[#B89628] text-slate-950 px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:scale-[1.02] transition-all cursor-pointer truncate"
+              className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:scale-[1.02] transition-all cursor-pointer truncate"
             >
               <ArrowRightLeft className="w-4 h-4 text-slate-950 shrink-0" />
               <span className="truncate">Direct Send</span>
@@ -243,9 +243,9 @@ export default function WalletPage() {
                 setShowWithdrawModal((prev) => !prev);
                 setShowTransferModal(false);
               }}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-5 py-3.5 rounded-2xl font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 backdrop-blur-md hover:scale-[1.02] transition-all cursor-pointer truncate"
+              className="bg-[#023322] hover:bg-[#03442e] text-amber-200 border border-[#d4af37]/40 px-5 py-3.5 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-md hover:scale-[1.02] transition-all cursor-pointer truncate"
             >
-              <MinusCircle className="w-4 h-4 text-white shrink-0" />
+              <MinusCircle className="w-4 h-4 text-[#f3ba2f] shrink-0" />
               <span className="truncate">Withdraw</span>
             </button>
           </div>

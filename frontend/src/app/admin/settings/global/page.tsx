@@ -179,37 +179,37 @@ export default function GlobalSettingsPage() {
       {/* Back Link */}
       <Link
         href="/admin/settings"
-        className="inline-flex items-center space-x-1.5 text-xs font-extrabold text-slate-400 hover:text-primary transition-colors"
+        className="inline-flex items-center space-x-1.5 text-xs font-black text-[#01281a] hover:text-[#023c28] transition-colors"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 text-[#d4af37]" />
         <span>Back to Admin Settings</span>
       </Link>
 
-      {/* Top Banner — Coins Page Theme */}
-      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-3">
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <Globe className="w-6 h-6 text-secondary" />
+      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
+      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-3">
+        <div className="flex items-start space-x-3.5">
+          <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
+            <Globe className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1 flex-1">
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-white">
+            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
               Global System Settings
             </h1>
-            <p className="text-xs text-emerald-100/80 font-medium">
+            <p className="text-xs text-slate-300 font-semibold">
               Configure system-wide parameters, premium weekly returns, and trigger payouts.
             </p>
           </div>
         </div>
 
-        {/* Global Payout Trigger Button */}
-        <div className="border-t border-emerald-700/60 pt-3 flex flex-wrap gap-2">
+        {/* Action Controls */}
+        <div className="border-t border-[#053d29] pt-3 flex flex-wrap gap-2">
           <button
             onClick={handleTriggerGlobalPayouts}
             disabled={triggering}
-            className="py-2 px-4 bg-secondary hover:bg-[#B89628] text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-sm disabled:opacity-50"
+            className="py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-md disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`w-4 h-4 ${triggering ? 'animate-spin' : ''}`} />
-            <span>{triggering ? 'Processing Payouts...' : 'Trigger Global Weekly Payouts'}</span>
+            <span>{triggering ? 'Processing Payouts...' : 'Trigger All Premium Weekly Payouts'}</span>
           </button>
         </div>
       </div>
