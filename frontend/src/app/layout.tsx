@@ -37,9 +37,9 @@ export default function RootLayout({
         <Providers>
           <Toaster position="top-right" richColors closeButton />
           <Navbar />
-          <div className="flex-1 flex w-full pb-20 lg:pb-8">
+          <div className="flex-1 flex w-full pb-20 lg:pb-0">
             <Sidebar />
-            <main className="flex-1 w-full  sm:p-6 lg:p-8 overflow-y-auto">{children}</main>
+            <main className="flex-1 w-full overflow-y-auto">{children}</main>
           </div>
           <BottomNav />
         </Providers>

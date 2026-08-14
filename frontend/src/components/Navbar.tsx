@@ -78,8 +78,11 @@ export default function Navbar() {
 
   const publicItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/about', label: 'About Us', icon: Info },
-    { href: '/contact', label: 'Contact Us', icon: PhoneCall },
+    { href: '/about', label: 'About', icon: Info },
+    { href: '/dashboard/coins', label: 'EarnX Coin', icon: Coins },
+    { href: '/dashboard/investments', label: 'Investment', icon: TrendingUp },
+    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
+    { href: '/contact', label: 'Support', icon: Headset },
   ];
 
   const getInitials = (name?: string) => {
@@ -323,7 +326,7 @@ export default function Navbar() {
 
             {/* Desktop Navigation Links for Public Routes */}
             {isPublicRoute && (
-              <nav className="hidden md:flex items-center space-x-8">
+              <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
                 <Link
                   href="/"
                   className={`text-xs sm:text-sm font-bold transition-colors ${
@@ -342,7 +345,37 @@ export default function Navbar() {
                       : 'text-slate-200 hover:text-[#f3ba2f]'
                   }`}
                 >
-                  About Us
+                  About
+                </Link>
+                <Link
+                  href="/dashboard/coins"
+                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/coins'
+                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
+                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                  }`}
+                >
+                  EarnX Coin
+                </Link>
+                <Link
+                  href="/dashboard/investments"
+                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/investments'
+                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
+                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                  }`}
+                >
+                  Investment
+                </Link>
+                <Link
+                  href="/dashboard/leaderboard"
+                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/leaderboard'
+                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
+                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                  }`}
+                >
+                  Leaderboard
                 </Link>
                 <Link
                   href="/contact"
@@ -352,7 +385,7 @@ export default function Navbar() {
                       : 'text-slate-200 hover:text-[#f3ba2f]'
                   }`}
                 >
-                  Contact Us
+                  Support
                 </Link>
               </nav>
             )}
