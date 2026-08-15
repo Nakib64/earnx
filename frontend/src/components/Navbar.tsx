@@ -79,9 +79,6 @@ export default function Navbar() {
   const publicItems = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/about', label: 'About', icon: Info },
-    { href: '/dashboard/coins', label: 'EarnX Coin', icon: Coins },
-    { href: '/dashboard/investments', label: 'Investment', icon: TrendingUp },
-    { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: Trophy },
     { href: '/contact', label: 'Support', icon: Headset },
   ];
 
