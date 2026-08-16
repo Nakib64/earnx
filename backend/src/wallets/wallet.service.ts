@@ -69,17 +69,21 @@ export class WalletService {
     return this.prisma.$transaction(async (tx) => runner(tx), { maxWait: 10000, timeout: 30000 });
   }
 
-  async getUserTransactions(userId: string, page = 1, limit = 20) {
+  async getUserTransactions(userId: string, page = 1, limit = 20, type?: TransactionType) {
     const skip = (page - 1) * limit;
+    const where: Prisma.WalletTransactionWhereInput = { user_id: userId };
+    if (type) {
+      where.type = type;
+    }
     const [transactions, total] = await Promise.all([
       this.prisma.walletTransaction.findMany({
-        where: { user_id: userId },
+        where,
         orderBy: { created_at: 'desc' },
         skip,
         take: limit,
       }),
       this.prisma.walletTransaction.count({
-        where: { user_id: userId },
+        where,
       }),
     ]);
 
@@ -250,13 +254,63 @@ export class WalletService {
     };
   }
 
-  async executeBalanceTransfer(senderId: string, targetReferralCode: string, amount: number) {
+  async searchTransferRecipients(senderId: string, query: string) {
+    const q = query.trim();
+    if (!q) return [];
+
+    const candidates = await this.prisma.user.findMany({
+      where: {
+        id: { not: senderId },
+        OR: [
+          { referral_code: { contains: q, mode: 'insensitive' } },
+          { full_name: { contains: q, mode: 'insensitive' } },
+          { phone: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        referral_code: true,
+      },
+      take: 20,
+    });
+
+    const results: Array<{
+      id: string;
+      full_name: string;
+      phone: string;
+      referral_code: string;
+    }> = [];
+    for (const candidate of candidates) {
+      const isMember = await this.isInSameNetworkTree(senderId, candidate.id);
+      if (isMember) {
+        results.push({
+          id: candidate.id,
+          full_name: candidate.full_name || 'Anonymous User',
+          phone: candidate.phone,
+          referral_code: candidate.referral_code,
+        });
+      }
+      if (results.length >= 10) break;
+    }
+
+    return results;
+  }
+
+  async executeBalanceTransfer(
+    senderId: string,
+    targetReferralCode: string,
+    amount: number,
+    note?: string,
+  ) {
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       throw new BadRequestException('Transfer amount must be greater than zero');
     }
 
     const recipient = await this.verifyTransferRecipient(senderId, targetReferralCode);
+    const formattedNote = note && note.trim() ? ` (Note: ${note.trim()})` : '';
 
     return this.prisma.$transaction(async (tx) => {
       const sender = await tx.user.findUnique({ where: { id: senderId } });
@@ -283,7 +337,7 @@ export class WalletService {
           amount: new Prisma.Decimal(-numAmount),
           balance_before: new Prisma.Decimal(senderBalanceBefore),
           balance_after: new Prisma.Decimal(senderBalanceAfter),
-          description: `Transfer sent to ${recipient.full_name} (${recipient.referral_code})`,
+          description: `Transfer sent to ${recipient.full_name} (${recipient.referral_code})${formattedNote}`,
         },
       });
 
@@ -307,7 +361,7 @@ export class WalletService {
           amount: new Prisma.Decimal(numAmount),
           balance_before: new Prisma.Decimal(recipientBalanceBefore),
           balance_after: new Prisma.Decimal(recipientBalanceAfter),
-          description: `Transfer received from ${sender.full_name || sender.phone} (${sender.referral_code})`,
+          description: `Transfer received from ${sender.full_name || sender.phone} (${sender.referral_code})${formattedNote}`,
         },
       });
 

@@ -288,46 +288,7 @@ export default function UserCoinsPage() {
           </span>
         </div>
 
-        {/* Stacked Presets List matching image */}
-        <div className="space-y-3">
-          {[10, 100, 500].map((preset) => {
-            const cost = preset * currentCoinPrice;
-            const isSelected = buyAmount === preset;
-            return (
-              <div
-                key={preset}
-                onClick={() => setBuyAmount(preset)}
-                className={`p-3.5 sm:p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                  isSelected
-                    ? 'border-[#01281a] bg-amber-50/40 shadow-sm'
-                    : 'border-slate-200 bg-white hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Tag className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm font-black text-slate-900 flex items-center gap-1.5">
-                    +{preset} <GoldenCoinsIcon size={20} />
-                  </span>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setBuyAmount(preset);
-                  }}
-                  className={`py-2 px-5 rounded-xl font-black text-xs font-mono transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
-                      : 'bg-slate-100 hover:bg-[#01281a] text-slate-800 hover:text-amber-200'
-                  }`}
-                >
-                  ৳ {cost.toLocaleString()}
-                </button>
-              </div>
-            );
-          })}
-        </div>
 
         {/* Custom Quantity Form & Confirm Button */}
         <form onSubmit={handleBuyCoins} className="pt-2 space-y-4">

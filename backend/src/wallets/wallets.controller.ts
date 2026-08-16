@@ -23,15 +23,26 @@ export class WalletsController {
     @Request() req: any,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('type') type?: TransactionType,
   ) {
     return this.walletService.getUserTransactions(
       req.user.id,
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 20,
+      type,
     );
   }
 
   // Network Balance Transfer (User)
+  @UseGuards(UserJwtGuard)
+  @Get('wallet/search-recipients')
+  async searchRecipients(
+    @Request() req: any,
+    @Query('query') query: string,
+  ) {
+    return this.walletService.searchTransferRecipients(req.user.id, query || '');
+  }
+
   @UseGuards(UserJwtGuard)
   @Get('wallet/verify-recipient')
   async verifyRecipient(
@@ -47,11 +58,13 @@ export class WalletsController {
     @Request() req: any,
     @Body('target_referral_code') targetReferralCode: string,
     @Body('amount') amount: number,
+    @Body('note') note?: string,
   ) {
     return this.walletService.executeBalanceTransfer(
       req.user.id,
       targetReferralCode,
       Number(amount),
+      note,
     );
   }
 

@@ -216,32 +216,7 @@ function ReferralContent() {
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
       {/* Top 3 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Card 1: Referral Code */}
-        <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white min-w-0">
-          <div className="flex items-center justify-between min-w-0">
-            <span className="text-[11px] font-black text-amber-200 uppercase tracking-widest truncate">
-              Referral Code
-            </span>
-            <div className="w-9 h-9 rounded-xl border border-[#d4af37]/60 bg-amber-500/10 flex items-center justify-center text-[#f3ba2f] shrink-0">
-              <Network className="w-5 h-5" />
-            </div>
-          </div>
-
-          <div className="min-w-0 space-y-0.5">
-            <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight break-all">
-              {user?.referral_code || '---'}
-            </div>
-            <div className="text-xs font-bold text-slate-300 truncate">Your Referral Code</div>
-          </div>
-
-          <button
-            onClick={copyCode}
-            className="w-full bg-[#03442e] hover:bg-[#04593d] text-amber-200 border border-[#d4af37]/30 font-black text-xs py-2.5 px-3.5 rounded-xl flex items-center justify-between transition-colors mt-1 cursor-pointer"
-          >
-            <span>{copied ? 'Copied Code!' : 'Copy Code'}</span>
-            {copied ? <Check className="w-4 h-4 text-[#f3ba2f]" /> : <Copy className="w-4 h-4 text-[#f3ba2f]" />}
-          </button>
-        </div>
+    
 
         {/* Card 2: Earning Designation */}
         <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white min-w-0">
@@ -307,7 +282,7 @@ function ReferralContent() {
           id="referral-search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search member by name, phone, or referral code..."
+          placeholder="Search member by name, phone, or user code..."
           className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200/90 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all"
         />
         {searchTerm && (
