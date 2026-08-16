@@ -27,6 +27,13 @@ export class UsersController {
     return this.usersService.getReferralTree(req.user.id, maxDepth);
   }
 
+  // User Search by User Code or Phone (Debounced Auto-complete)
+  @UseGuards(UserJwtGuard)
+  @Get('users/search-by-code')
+  async searchUsers(@Query('q') query?: string) {
+    return this.usersService.searchUsers(query || '');
+  }
+
   // Admin User List & Management
   @UseGuards(AdminJwtGuard)
   @Get('admin/users')

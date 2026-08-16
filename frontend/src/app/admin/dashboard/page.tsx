@@ -19,6 +19,7 @@ import {
   UserCheck,
   DollarSign,
   Globe,
+  Megaphone,
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -167,6 +168,7 @@ export default function AdminDashboardPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           {[
+            { href: '/admin/notices', icon: Megaphone, label: 'Notice Board', desc: 'Post announcements' },
             { href: '/admin/coins', icon: Coins, label: 'Coin Rate', desc: 'Market rates & sales' },
             { href: '/admin/investments', icon: TrendingUp, label: 'Investments', desc: 'Plans & returns' },
             { href: '/admin/leaderboard', icon: Trophy, label: 'Leaderboard', desc: 'Top 100 rankings' },

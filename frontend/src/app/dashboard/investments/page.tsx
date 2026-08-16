@@ -81,9 +81,10 @@ export default function UserInvestmentsPage() {
     });
 
     if (res.success) {
+      const amt = Number(selectedPlan.amount || selectedPlan.min_amount);
       setMessage({
         type: 'success',
-        text: 'Investment request submitted successfully! It is now pending admin approval.',
+        text: `Investment activated! ৳${amt.toLocaleString()} has been deducted from your account balance.`,
       });
       setSelectedPlan(null);
       await refreshUserProfile();
@@ -100,6 +101,9 @@ export default function UserInvestmentsPage() {
     setSubmitting(true);
     setMessage(null);
 
+    const targetAmt = Number(selectedPlan.amount || selectedPlan.min_amount);
+    const remainingToPay = targetAmt - Number(activeInv.amount);
+
     const res = await apiFetch<UserInvestment>('/investments/upgrade', {
       method: 'POST',
       body: JSON.stringify({
@@ -111,7 +115,7 @@ export default function UserInvestmentsPage() {
     if (res.success) {
       setMessage({
         type: 'success',
-        text: 'Upgrade request submitted successfully! Please complete the remaining payment. Admin will update your status upon verification.',
+        text: `Package upgraded to ${selectedPlan.title}! ৳${remainingToPay.toLocaleString()} has been deducted from your account balance.`,
       });
       setSelectedPlan(null);
       setShowUpgradeModal(false);
@@ -132,30 +136,33 @@ export default function UserInvestmentsPage() {
     setMessage(null);
   };
 
-  // Handle Capital Withdrawal Request
+  // Handle Capital Withdrawal (Direct & Instant 100% Wallet Refund)
   const handleWithdrawCapital = async () => {
     if (!activeInv) return;
     setSubmitting(true);
     setMessage(null);
 
+    const totalAmt = Number(activeInv.amount);
+    const planTitle = activeInv.plan?.title || 'Investment Package';
+
     const res = await apiFetch<UserInvestment>('/investments/withdraw-capital', {
       method: 'POST',
       body: JSON.stringify({
         investmentId: activeInv.id,
-        amount: withdrawAmount,
+        amount: totalAmt,
       }),
     });
 
     if (res.success) {
       setMessage({
         type: 'success',
-        text: 'Capital withdrawal request submitted! Your invested principal will decrease once approved by Admin. Main wallet balance is untouched.',
+        text: `Capital withdrawal complete! ৳${totalAmt.toLocaleString()} has been refunded directly to your account balance, and the ${planTitle} package has been closed.`,
       });
       setShowWithdrawModal(false);
       await refreshUserProfile();
       await fetchData();
     } else {
-      setMessage({ type: 'error', text: res.error?.message || 'Failed to submit capital withdrawal request' });
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to withdraw capital' });
     }
     setSubmitting(false);
   };
@@ -490,6 +497,12 @@ export default function UserInvestmentsPage() {
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-slate-600 truncate">
+                  <span className="shrink-0 font-bold">Your Account Balance:</span>
+                  <span className="font-black text-primary font-mono truncate">
+                    ৳{walletBal.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-slate-600 truncate pt-1 border-t border-slate-200">
                   <span className="shrink-0 font-bold">Monthly Return Rate:</span>
                   <span className="font-black text-[#01281a] font-mono truncate">
                     {Number(selectedPlan.monthly_return_percent)}% / month
@@ -503,6 +516,10 @@ export default function UserInvestmentsPage() {
                   ৳{((Number(selectedPlan.amount || selectedPlan.min_amount) * Number(selectedPlan.monthly_return_percent)) / 100).toLocaleString()}
                 </span>
               </div>
+
+              <p className="text-[11px] text-slate-500 font-semibold italic">
+                * ৳{Number(selectedPlan.amount || selectedPlan.min_amount).toLocaleString()} will be deducted directly from your account balance to activate this investment.
+              </p>
             </div>
 
             <div className="flex space-x-3 pt-2">
@@ -514,10 +531,10 @@ export default function UserInvestmentsPage() {
               </button>
               <button
                 onClick={handleInvest}
-                disabled={submitting}
+                disabled={submitting || walletBal < Number(selectedPlan.amount || selectedPlan.min_amount)}
                 className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
               >
-                {submitting ? 'Processing...' : 'Confirm & Invest'}
+                {submitting ? 'Processing...' : walletBal < Number(selectedPlan.amount || selectedPlan.min_amount) ? 'Insufficient Account Balance' : 'Confirm & Deduct Balance'}
               </button>
             </div>
           </div>
@@ -559,19 +576,15 @@ export default function UserInvestmentsPage() {
               {/* Remaining Amount Highlight Card */}
               <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 text-white p-4 rounded-xl space-y-1 shadow-md">
                 <span className="text-[11px] font-black uppercase tracking-wider text-amber-200">
-                  Remaining Amount to Pay
+                  Upgrade Cost (Deducted from Wallet)
                 </span>
                 <p className="text-3xl font-black font-mono truncate text-white">
                   ৳{(Number(selectedPlan.amount || selectedPlan.min_amount) - Number(activeInv.amount)).toLocaleString()}
                 </p>
                 <p className="text-[11px] text-slate-300 font-medium">
-                  Pay this remaining amount to Admin to activate your upgraded {selectedPlan.title} package.
+                  This remaining upgrade cost will be deducted directly from your account balance (Current Balance: ৳{walletBal.toLocaleString()}).
                 </p>
               </div>
-
-              <p className="text-[11px] text-slate-500 font-semibold italic">
-                * Note: Your upgrade request will be set to Pending. Admin will verify your payment and update your active package status.
-              </p>
             </div>
 
             <div className="flex space-x-3 pt-2">
@@ -602,8 +615,8 @@ export default function UserInvestmentsPage() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-start border-b border-slate-100 pb-3">
               <div className="min-w-0 flex-1">
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">Withdraw Invested Capital</h3>
-                <p className="text-xs text-slate-500 font-semibold truncate">Reduce your active investment principal</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">Withdraw Total Invested Capital</h3>
+                <p className="text-xs text-slate-500 font-semibold truncate">Refund 100% of your invested capital to your wallet</p>
               </div>
               <button
                 onClick={() => setShowWithdrawModal(false)}
@@ -614,33 +627,26 @@ export default function UserInvestmentsPage() {
             </div>
 
             <div className="space-y-4">
-              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 text-[#854D0E] text-xs space-y-1">
-                <div className="flex justify-between font-black truncate">
-                  <span>Current Invested Capital:</span>
-                  <span className="font-mono">৳{Number(activeInv.amount).toLocaleString()}</span>
-                </div>
-                <p className="text-[11px] font-semibold text-[#854D0E]">
-                  Withdrawal reduces your invested package capital. This will not touch your main wallet balance.
+              {/* Total Capital Refund Highlight Card */}
+              <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 text-white p-5 rounded-2xl space-y-2 shadow-md">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-200">
+                  Total Active Invested Capital
+                </span>
+                <p className="text-3xl font-black font-mono truncate text-white">
+                  ৳{Number(activeInv.amount).toLocaleString()}
+                </p>
+                <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                  100% of this invested capital (৳{Number(activeInv.amount).toLocaleString()}) will be refunded directly to your account balance instantly upon confirmation, and your investment package will be deleted.
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-700">Enter Withdrawal Amount (৳)</label>
-                <input
-                  type="number"
-                  min={1}
-                  max={Number(activeInv.amount)}
-                  value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#01281a] font-black text-slate-900 text-sm font-mono"
-                />
-              </div>
-
-              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs flex justify-between text-slate-700 font-semibold truncate">
-                <span className="shrink-0">Remaining Capital:</span>
-                <span className="font-black text-slate-900 font-mono truncate">
-                  ৳{Math.max(0, Number(activeInv.amount) - withdrawAmount).toLocaleString()}
-                </span>
+              <div className="bg-amber-50 p-3.5 rounded-xl border border-amber-200 text-[#854D0E] text-xs font-semibold space-y-1">
+                <p className="font-extrabold text-[#854D0E]">
+                  ⚡ Direct & Instant Refund:
+                </p>
+                <p className="text-[11px] leading-snug">
+                  Capital withdrawal refunds 100% of your active invested principal to your account balance immediately. Your active package will be deleted.
+                </p>
               </div>
             </div>
 
@@ -653,10 +659,10 @@ export default function UserInvestmentsPage() {
               </button>
               <button
                 onClick={handleWithdrawCapital}
-                disabled={submitting || withdrawAmount <= 0 || withdrawAmount > Number(activeInv.amount)}
+                disabled={submitting}
                 className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
               >
-                {submitting ? 'Submitting...' : 'Confirm Withdrawal Request'}
+                {submitting ? 'Processing Refund...' : 'Confirm & Refund 100% Capital'}
               </button>
             </div>
           </div>

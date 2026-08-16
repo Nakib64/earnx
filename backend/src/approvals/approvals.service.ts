@@ -17,7 +17,29 @@ export class ApprovalsService {
     private readonly commissionService: CommissionService,
     private readonly walletService: WalletService,
     private readonly coinsService: CoinsService,
-  ) { }
+  ) {}
+
+  private async generateSerialUserCode(tx: any): Promise<string> {
+    const existingUsers = await tx.user.findMany({
+      where: {
+        referral_code: { startsWith: 'EX' },
+      },
+      select: { referral_code: true },
+    });
+
+    let maxNum = 0;
+    for (const u of existingUsers) {
+      const match = u.referral_code.match(/\d+/);
+      if (match) {
+        const num = parseInt(match[0], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    }
+
+    const nextNum = maxNum + 1;
+    const padded = String(nextNum).padStart(4, '0');
+    return `EX${padded}`;
+  }
 
   // ==========================================
   // ACTIVATION REQUESTS
@@ -96,10 +118,19 @@ export class ApprovalsService {
         },
       });
 
-      // 2. Activate user
+      // 2. Activate user & assign serial user code (EX0001, EX0002...)
+      const targetUser = await tx.user.findUnique({ where: { id: request.user_id } });
+      let userCode = targetUser?.referral_code;
+      if (!userCode || !userCode.startsWith('EX')) {
+        userCode = await this.generateSerialUserCode(tx);
+      }
+
       await tx.user.update({
         where: { id: request.user_id },
-        data: { status: UserStatus.ACTIVE },
+        data: {
+          status: UserStatus.ACTIVE,
+          referral_code: userCode,
+        },
       });
 
       // 3. Trigger activation commissions payout

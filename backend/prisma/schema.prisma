@@ -58,6 +58,10 @@ model User {
   phone                      String            @unique
   password_hash              String
   full_name                  String?
+  email                      String?
+  country                    String?           @default("Bangladesh")
+  national_id                String?
+  avatar_url                 String?
   referral_code              String            @unique
   referred_by_id             String?
   status                     UserStatus        @default(DISABLED)
@@ -260,3 +264,13 @@ model LeaderboardEntry {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 }
+
+model Notice {
+  id         String   @id @default(uuid())
+  title      String   @default("Notice board")
+  content    String
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+

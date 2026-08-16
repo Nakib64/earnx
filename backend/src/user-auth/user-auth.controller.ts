@@ -28,7 +28,16 @@ export class UserAuthController {
   @Patch('profile')
   async updateProfile(
     @Request() req: any,
-    @Body() dto: { full_name?: string; current_password?: string; new_password?: string },
+    @Body()
+    dto: {
+      full_name?: string;
+      email?: string;
+      country?: string;
+      national_id?: string;
+      avatar_url?: string;
+      current_password?: string;
+      new_password?: string;
+    },
   ) {
     return this.userAuthService.updateProfile(req.user.id, dto);
   }

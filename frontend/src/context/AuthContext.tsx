@@ -118,6 +118,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('earnx_user_token');
     setUserToken(null);
     setUser(null);
+    if (typeof window !== 'undefined') {
+      window.location.replace('/');
+    }
   };
 
   const logoutAdmin = () => {
@@ -125,6 +128,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('earnx_admin_token');
     setAdminToken(null);
     setAdmin(null);
+    if (typeof window !== 'undefined') {
+      window.location.replace('/');
+    }
   };
 
   return (

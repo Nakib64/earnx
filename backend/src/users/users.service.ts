@@ -57,6 +57,33 @@ export class UsersService {
     };
   }
 
+  async searchUsers(query: string) {
+    if (!query || query.trim().length < 1) return [];
+    const q = query.trim();
+
+    return this.prisma.user.findMany({
+      where: {
+        OR: [
+          { referral_code: { contains: q, mode: 'insensitive' } },
+          { phone: { contains: q, mode: 'insensitive' } },
+          { full_name: { contains: q, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        referral_code: true,
+        status: true,
+        is_premium: true,
+        designation: {
+          select: { name: true, stars: true },
+        },
+      },
+      take: 10,
+    });
+  }
+
   // Admin User Management
   async getAllUsers(
     page = 1,
@@ -152,9 +179,30 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
+    let userCode = user.referral_code;
+    if (status === UserStatus.ACTIVE && (!userCode || !userCode.startsWith('EX'))) {
+      const existingUsers = await this.prisma.user.findMany({
+        where: { referral_code: { startsWith: 'EX' } },
+        select: { referral_code: true },
+      });
+      let maxNum = 0;
+      for (const u of existingUsers) {
+        const match = u.referral_code.match(/\d+/);
+        if (match) {
+          const num = parseInt(match[0], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      }
+      const nextNum = maxNum + 1;
+      userCode = `EX${String(nextNum).padStart(4, '0')}`;
+    }
+
     return this.prisma.user.update({
       where: { id: userId },
-      data: { status },
+      data: {
+        status,
+        ...(userCode ? { referral_code: userCode } : {}),
+      },
     });
   }
 

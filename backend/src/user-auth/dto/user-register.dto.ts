@@ -16,5 +16,21 @@ export class UserRegisterDto {
 
   @IsString()
   @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  country?: string;
+
+  @IsString()
+  @IsOptional()
+  national_id?: string;
+
+  @IsString()
+  @IsOptional()
+  avatar_url?: string;
+
+  @IsString()
+  @IsOptional()
   referral_code?: string;
 }

@@ -112,28 +112,66 @@ export class InvestmentsService {
     }
 
     const planAmount = Number(plan.amount) > 0 ? Number(plan.amount) : Number(plan.min_amount);
+    const userBal = Number(user.wallet_balance);
+
+    if (userBal < planAmount) {
+      throw new BadRequestException(
+        `Insufficient account balance. You have ৳${userBal.toLocaleString()} in your wallet, but ৳${planAmount.toLocaleString()} is required for this package.`,
+      );
+    }
+
     const returnPercent = Number(plan.monthly_return_percent);
     const monthlyPayout = (planAmount * returnPercent) / 100;
     const isLifetime = plan.is_lifetime || false;
 
-    return this.prisma.userInvestment.create({
-      data: {
-        user_id: userId,
-        plan_id: planId,
-        amount: new Prisma.Decimal(planAmount),
-        monthly_return_percent: new Prisma.Decimal(returnPercent),
-        monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
-        status: RequestStatus.PENDING,
-        request_type: 'NEW',
-        total_payouts_made: 0,
-        max_payouts: isLifetime ? null : (plan.duration_months || 12),
-        is_lifetime: isLifetime,
-      },
-      include: { plan: true, pending_plan: true },
-    });
+    const now = new Date();
+    const nextPayout = new Date();
+    nextPayout.setMonth(now.getMonth() + 1);
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Deduct package price from user's account balance
+      const newBal = userBal - planAmount;
+      await tx.user.update({
+        where: { id: userId },
+        data: { wallet_balance: new Prisma.Decimal(newBal) },
+      });
+
+      // 2. Log wallet transaction
+      await tx.walletTransaction.create({
+        data: {
+          user_id: userId,
+          type: TransactionType.WITHDRAW,
+          amount: new Prisma.Decimal(planAmount),
+          balance_before: new Prisma.Decimal(userBal),
+          balance_after: new Prisma.Decimal(newBal),
+          description: `Investment package purchase: ${plan.title} (৳${planAmount.toLocaleString()})`,
+        },
+      });
+
+      // 3. Create active investment record
+      return tx.userInvestment.create({
+        data: {
+          user_id: userId,
+          plan_id: planId,
+          amount: new Prisma.Decimal(planAmount),
+          monthly_return_percent: new Prisma.Decimal(returnPercent),
+          monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
+          status: RequestStatus.APPROVED,
+          request_type: 'NEW',
+          total_payouts_made: 0,
+          max_payouts: isLifetime ? null : (plan.duration_months || 12),
+          is_lifetime: isLifetime,
+          next_payout_at: nextPayout,
+        },
+        include: { plan: true, pending_plan: true },
+      });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async requestUpgrade(userId: string, currentInvestmentId: string, targetPlanId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
     const inv = await this.prisma.userInvestment.findFirst({
       where: { id: currentInvestmentId, user_id: userId },
       include: { plan: true },
@@ -156,42 +194,105 @@ export class InvestmentsService {
     }
 
     const remainingToPay = targetAmt - currentAmt;
+    const userBal = Number(user.wallet_balance);
 
-    return this.prisma.userInvestment.update({
-      where: { id: currentInvestmentId },
-      data: {
-        request_type: 'UPGRADE',
-        pending_plan_id: targetPlanId,
-        pending_amount: new Prisma.Decimal(remainingToPay),
-        status: RequestStatus.PENDING,
-      },
-      include: { plan: true, pending_plan: true },
-    });
+    if (userBal < remainingToPay) {
+      throw new BadRequestException(
+        `Insufficient account balance. Upgrading from ৳${currentAmt.toLocaleString()} to ৳${targetAmt.toLocaleString()} requires ৳${remainingToPay.toLocaleString()}, but your current wallet balance is ৳${userBal.toLocaleString()}.`,
+      );
+    }
+
+    const returnPercent = Number(targetPlan.monthly_return_percent);
+    const monthlyPayout = (targetAmt * returnPercent) / 100;
+    const isLifetime = targetPlan.is_lifetime || false;
+
+    const now = new Date();
+    const nextPayout = inv.next_payout_at || new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Deduct remaining upgrade cost from account balance
+      const newBal = userBal - remainingToPay;
+      await tx.user.update({
+        where: { id: userId },
+        data: { wallet_balance: new Prisma.Decimal(newBal) },
+      });
+
+      // 2. Log transaction
+      await tx.walletTransaction.create({
+        data: {
+          user_id: userId,
+          type: TransactionType.WITHDRAW,
+          amount: new Prisma.Decimal(remainingToPay),
+          balance_before: new Prisma.Decimal(userBal),
+          balance_after: new Prisma.Decimal(newBal),
+          description: `Investment package upgrade to ${targetPlan.title} (৳${remainingToPay.toLocaleString()})`,
+        },
+      });
+
+      // 3. Update investment to new target package
+      return tx.userInvestment.update({
+        where: { id: currentInvestmentId },
+        data: {
+          plan_id: targetPlanId,
+          amount: new Prisma.Decimal(targetAmt),
+          monthly_return_percent: new Prisma.Decimal(returnPercent),
+          monthly_payout_amount: new Prisma.Decimal(monthlyPayout),
+          is_lifetime: isLifetime,
+          max_payouts: isLifetime ? null : (targetPlan.duration_months || 12),
+          status: RequestStatus.APPROVED,
+          request_type: 'NEW',
+          pending_plan_id: null,
+          pending_amount: null,
+          next_payout_at: nextPayout,
+        },
+        include: { plan: true, pending_plan: true },
+      });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
-  async requestCapitalWithdrawal(userId: string, investmentId: string, withdrawAmount: number) {
+  async requestCapitalWithdrawal(userId: string, investmentId: string, withdrawAmount?: number) {
     const inv = await this.prisma.userInvestment.findFirst({
       where: { id: investmentId, user_id: userId },
+      include: { plan: true },
     });
     if (!inv) throw new NotFoundException('Active investment record not found');
-    if (inv.status === RequestStatus.PENDING) {
-      throw new BadRequestException('You already have a pending request on this investment.');
-    }
 
     const currentAmt = Number(inv.amount);
-    if (withdrawAmount <= 0 || withdrawAmount > currentAmt) {
-      throw new BadRequestException(`Withdrawal amount must be between ৳1 and ৳${currentAmt}`);
+    if (currentAmt <= 0) {
+      throw new BadRequestException('This investment has no active capital to withdraw.');
     }
 
-    return this.prisma.userInvestment.update({
-      where: { id: investmentId },
-      data: {
-        request_type: 'WITHDRAWAL',
-        pending_amount: new Prisma.Decimal(withdrawAmount),
-        status: RequestStatus.PENDING,
-      },
-      include: { plan: true, pending_plan: true },
-    });
+    const planTitle = inv.plan?.title || 'Investment Package';
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Directly credit 100% of capital back to user's account balance
+      const user = await tx.user.findUnique({ where: { id: userId } });
+      if (user) {
+        const userBalBefore = Number(user.wallet_balance);
+        const userBalAfter = userBalBefore + currentAmt;
+
+        await tx.user.update({
+          where: { id: userId },
+          data: { wallet_balance: new Prisma.Decimal(userBalAfter) },
+        });
+
+        await tx.walletTransaction.create({
+          data: {
+            user_id: userId,
+            type: TransactionType.INVESTMENT_PAYOUT,
+            amount: new Prisma.Decimal(currentAmt),
+            balance_before: new Prisma.Decimal(userBalBefore),
+            balance_after: new Prisma.Decimal(userBalAfter),
+            description: `Direct investment capital withdrawal refund: ${planTitle} (৳${currentAmt.toLocaleString()})`,
+          },
+        });
+      }
+
+      // 2. Immediately delete the investment package record
+      return tx.userInvestment.delete({
+        where: { id: investmentId },
+      });
+    }, { maxWait: 10000, timeout: 30000 });
   }
 
   async getUserInvestments(userId: string) {
@@ -252,39 +353,46 @@ export class InvestmentsService {
       });
     }
 
-    if (inv.request_type === 'WITHDRAWAL' && inv.pending_amount) {
-      const withdrawAmt = Number(inv.pending_amount);
-      const newAmount = Number(inv.amount) - withdrawAmt;
+    if (inv.request_type === 'WITHDRAWAL') {
+      const refundAmt = Number(inv.pending_amount) || Number(inv.amount);
 
-      if (newAmount <= 0) {
-        return this.prisma.userInvestment.update({
+      return this.prisma.$transaction(async (tx) => {
+        // Refund 100% of capital back to user's wallet
+        const user = await tx.user.findUnique({ where: { id: inv.user_id } });
+        if (user && refundAmt > 0) {
+          const userBalBefore = Number(user.wallet_balance);
+          const userBalAfter = userBalBefore + refundAmt;
+
+          await tx.user.update({
+            where: { id: inv.user_id },
+            data: { wallet_balance: new Prisma.Decimal(userBalAfter) },
+          });
+
+          await tx.walletTransaction.create({
+            data: {
+              user_id: inv.user_id,
+              type: TransactionType.WITHDRAW,
+              amount: new Prisma.Decimal(refundAmt),
+              balance_before: new Prisma.Decimal(userBalBefore),
+              balance_after: new Prisma.Decimal(userBalAfter),
+              description: `Invested capital withdrawal refund (100% total refund)`,
+            },
+          });
+        }
+
+        return tx.userInvestment.update({
           where: { id },
           data: {
             amount: new Prisma.Decimal(0),
             monthly_payout_amount: new Prisma.Decimal(0),
-            status: RequestStatus.REJECTED,
+            status: RequestStatus.REJECTED, // Terminated/closed
             request_type: 'NEW',
             pending_amount: null,
             next_payout_at: null,
           },
           include: { user: true, plan: true, pending_plan: true },
         });
-      }
-
-      const returnPercent = Number(inv.monthly_return_percent);
-      const newMonthlyPayout = (newAmount * returnPercent) / 100;
-
-      return this.prisma.userInvestment.update({
-        where: { id },
-        data: {
-          amount: new Prisma.Decimal(newAmount),
-          monthly_payout_amount: new Prisma.Decimal(newMonthlyPayout),
-          status: RequestStatus.APPROVED,
-          request_type: 'NEW',
-          pending_amount: null,
-        },
-        include: { user: true, plan: true, pending_plan: true },
-      });
+      }, { maxWait: 10000, timeout: 30000 });
     }
 
     return this.prisma.userInvestment.update({

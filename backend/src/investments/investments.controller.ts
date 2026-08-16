@@ -20,6 +20,7 @@ export class InvestmentsController {
   // ================= USER ENDPOINTS =================
 
   @Get('plans')
+  @Get('active-plans')
   async getPublicPlans() {
     return this.investmentsService.getActivePlans();
   }
@@ -50,12 +51,12 @@ export class InvestmentsController {
   @Post('withdraw-capital')
   async requestCapitalWithdrawal(
     @Request() req,
-    @Body() body: { investmentId: string; amount: number },
+    @Body() body: { investmentId: string; amount?: number },
   ) {
     return this.investmentsService.requestCapitalWithdrawal(
       req.user.id,
       body.investmentId,
-      Number(body.amount),
+      body.amount !== undefined && !isNaN(Number(body.amount)) ? Number(body.amount) : undefined,
     );
   }
 

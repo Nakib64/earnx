@@ -63,6 +63,10 @@ export interface User {
   id: string;
   phone: string;
   full_name: string | null;
+  email?: string | null;
+  country?: string | null;
+  national_id?: string | null;
+  avatar_url?: string | null;
   referral_code: string;
   referred_by_id?: string | null;
   status: UserStatus;

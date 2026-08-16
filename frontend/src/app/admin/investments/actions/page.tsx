@@ -262,7 +262,7 @@ export default function AdminInvestmentActionsPage() {
                   {viewInvestment.request_type === 'UPGRADE'
                     ? `Upgrade to ${viewInvestment.pending_plan?.title || 'New Plan'} (৳${Number(viewInvestment.pending_amount || 0).toLocaleString()})`
                     : viewInvestment.request_type === 'WITHDRAWAL'
-                    ? `Withdraw Capital: ৳${Number(viewInvestment.pending_amount || 0).toLocaleString()}`
+                    ? `Withdraw 100% Capital: ৳${Number(viewInvestment.pending_amount || viewInvestment.amount || 0).toLocaleString()}`
                     : 'New Package Request'}
                 </span>
               )}

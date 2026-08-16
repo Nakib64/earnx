@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Wallet, Coins, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, Coins, ShoppingBag } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function BottomNav() {
@@ -17,7 +17,7 @@ export default function BottomNav() {
   const navItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
     { href: '/dashboard/coins', label: 'Coins', icon: Coins },
-    { href: '/dashboard/investments', label: 'Invest', icon: TrendingUp },
+    { href: '/dashboard/purchase', label: 'Purchase', icon: ShoppingBag },
     { href: '/dashboard/referral', label: 'Network', icon: Users },
     { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
   ];

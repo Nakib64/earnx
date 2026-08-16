@@ -24,6 +24,8 @@ import {
   Crown,
   CheckCircle2,
   ExternalLink,
+  ShoppingBag,
+  Megaphone,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -51,16 +53,19 @@ export default function Sidebar() {
 
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Account Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard/purchase', label: 'Purchase Package', icon: ShoppingBag },
     { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
     { href: '/dashboard/referral', label: 'Team Lead Report', icon: Users },
     { href: '/dashboard/coins', label: 'Coin', icon: Coins },
     { href: '/dashboard/investments', label: 'Investment', icon: TrendingUp },
+    { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/dashboard/settings', label: 'Account Setting', icon: Settings },
     { href: '/contact', label: 'Support', icon: Headset },
   ];
 
   const adminTopItems: LinkItem[] = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
     { href: '/admin/investments/actions', label: 'Investment Actions', icon: UserCheck },
@@ -231,55 +236,7 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* Bottom Promo Card: Grow Your Wealth With EarnX */}
-      <div className="border border-[#d4af37]/35 bg-gradient-to-b from-[#033221] to-[#011a12] rounded-2xl p-3.5 relative overflow-hidden shrink-0 shadow-lg">
-        <div className="flex items-center justify-between">
-          {/* 3D Gold Coins Graphic */}
-          <div className="relative w-16 h-16 shrink-0">
-            <svg className="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="goldRim" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#FFE066" />
-                  <stop offset="50%" stopColor="#D4AF37" />
-                  <stop offset="100%" stopColor="#996515" />
-                </linearGradient>
-                <linearGradient id="goldInner" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#F5D77F" />
-                  <stop offset="100%" stopColor="#B8860B" />
-                </linearGradient>
-              </defs>
-              <ellipse cx="35" cy="70" rx="28" ry="14" fill="#503504" opacity="0.7" />
-              <ellipse cx="35" cy="67" rx="28" ry="14" fill="url(#goldRim)" />
-              <ellipse cx="35" cy="64" rx="24" ry="11" fill="url(#goldInner)" />
-
-              <ellipse cx="65" cy="62" rx="28" ry="14" fill="#503504" opacity="0.7" />
-              <ellipse cx="65" cy="59" rx="28" ry="14" fill="url(#goldRim)" />
-              <ellipse cx="65" cy="56" rx="24" ry="11" fill="url(#goldInner)" />
-
-              <ellipse cx="48" cy="38" rx="30" ry="30" fill="url(#goldRim)" />
-              <ellipse cx="48" cy="38" rx="26" ry="26" fill="url(#goldInner)" />
-              <circle cx="48" cy="38" r="21" fill="none" stroke="#FFE066" strokeWidth="1.5" strokeDasharray="3 2" />
-              <path d="M38 28 L45 38 L37 48 H42 L48 40 L54 48 H59 L51 38 L58 28 H53 L48 35 L43 28 Z" fill="#FFE066" stroke="#805307" strokeWidth="0.5" />
-            </svg>
-          </div>
-
-          <div className="flex flex-col text-right pl-2 min-w-0">
-            <span className="text-[#10b981] font-bold text-xs flex items-center justify-end gap-1">
-              Grow Your Wealth <ExternalLink className="w-3 h-3" />
-            </span>
-            <span className="text-white font-black text-lg leading-tight mt-0.5">
-              With EarnX
-            </span>
-            <span className="text-slate-300 text-[11px] font-medium mt-0.5 leading-tight truncate">
-              Smart Investment
-            </span>
-            <span className="text-slate-400 text-[10px] font-medium leading-tight truncate">
-              Secure Future
-            </span>
-          </div>
-        </div>
-      </div>
-
+    
       {/* Logout Action */}
       <div className="pt-1 shrink-0">
         <button

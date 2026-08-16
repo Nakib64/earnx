@@ -13,6 +13,8 @@ import { PremiumModule } from './premium/premium.module';
 import { InvestmentsModule } from './investments/investments.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { CoinsModule } from './coins/coins.module';
+import { NoticesModule } from './notices/notices.module';
+import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { CoinsModule } from './coins/coins.module';
     InvestmentsModule,
     LeaderboardModule,
     CoinsModule,
+    NoticesModule,
+    PurchasesModule,
   ],
 })
 export class AppModule {}

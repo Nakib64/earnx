@@ -13,25 +13,27 @@ export class UserAuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  private async generateUniqueReferralCode(): Promise<string> {
-    const totalUsers = await this.prisma.user.count();
-    let nextNum = totalUsers + 1;
-    let isUnique = false;
-    let code = '';
+  public async generateUniqueReferralCode(tx?: any): Promise<string> {
+    const prisma = tx || this.prisma;
+    const existingUsers = await prisma.user.findMany({
+      where: {
+        referral_code: { startsWith: 'EX' },
+      },
+      select: { referral_code: true },
+    });
 
-    while (!isUnique) {
-      const padded = String(nextNum).padStart(4, '0');
-      code = `EX-${padded}`;
-      const existing = await this.prisma.user.findUnique({
-        where: { referral_code: code },
-      });
-      if (!existing) {
-        isUnique = true;
-      } else {
-        nextNum++;
+    let maxNum = 0;
+    for (const u of existingUsers) {
+      const match = u.referral_code.match(/\d+/);
+      if (match) {
+        const num = parseInt(match[0], 10);
+        if (num > maxNum) maxNum = num;
       }
     }
-    return code;
+
+    const nextNum = maxNum + 1;
+    const padded = String(nextNum).padStart(4, '0');
+    return `EX${padded}`;
   }
 
   async register(dto: UserRegisterDto) {
@@ -64,6 +66,10 @@ export class UserAuthService {
         phone: dto.phone.trim(),
         password_hash: passwordHash,
         full_name: dto.full_name?.trim() || null,
+        email: dto.email?.trim() || null,
+        country: dto.country?.trim() || 'Bangladesh',
+        national_id: dto.national_id?.trim() || null,
+        avatar_url: dto.avatar_url?.trim() || null,
         referral_code: newReferralCode,
         referred_by_id: referredById,
         status: UserStatus.DISABLED, // Default DISABLED
@@ -146,7 +152,15 @@ export class UserAuthService {
 
   async updateProfile(
     userId: string,
-    dto: { full_name?: string; current_password?: string; new_password?: string },
+    dto: {
+      full_name?: string;
+      email?: string;
+      country?: string;
+      national_id?: string;
+      avatar_url?: string;
+      current_password?: string;
+      new_password?: string;
+    },
   ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -160,6 +174,18 @@ export class UserAuthService {
 
     if (dto.full_name !== undefined) {
       updateData.full_name = dto.full_name.trim() || null;
+    }
+    if (dto.email !== undefined) {
+      updateData.email = dto.email.trim() || null;
+    }
+    if (dto.country !== undefined) {
+      updateData.country = dto.country.trim() || 'Bangladesh';
+    }
+    if (dto.national_id !== undefined) {
+      updateData.national_id = dto.national_id.trim() || null;
+    }
+    if (dto.avatar_url !== undefined) {
+      updateData.avatar_url = dto.avatar_url.trim() || null;
     }
 
     if (dto.new_password) {
