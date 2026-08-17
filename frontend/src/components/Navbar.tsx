@@ -331,14 +331,6 @@ export default function Navbar() {
                 <div className="h-9 w-24 bg-emerald-950/60 animate-pulse rounded-xl" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
-                  {/* Balance Badge */}
-                  <div className="flex bg-[#023322] border border-[#d4af37]/40 px-3 py-1.5 rounded-xl items-center space-x-1.5">
-                    <Wallet className="w-4 h-4 text-[#f3ba2f]" />
-                    <span className="text-xs font-black text-amber-200 font-mono">
-                      ৳{Number(user.wallet_balance || 0).toFixed(2)}
-                    </span>
-                  </div>
-
                   {/* Public link to dashboard */}
                   {isPublicRoute && (
                     <Link
