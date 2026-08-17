@@ -113,7 +113,7 @@ export default function Navbar() {
       }`}
     >
       <div
-        className={`bg-gradient-to-b from-[#01281a] via-[#011f15] to-[#00170f] text-white w-80 max-w-[88vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out border-r border-[#d4af37]/35 ${
+        className={`bg-gradient-to-b from-[#01281a] via-[#011f15] to-[#00170f] text-white w-68 sm:w-72 max-w-[75vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out border-r border-[#d4af37]/35 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -127,7 +127,7 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="EarnX Capital"
-              className="h-9 w-auto object-contain"
+              className="h-8 sm:h-9 w-auto object-contain bg-white rounded-lg px-2.5 py-1 shadow-sm"
             />
           </Link>
           <button
@@ -283,7 +283,7 @@ export default function Navbar() {
                 <img
                   src="/logo.png"
                   alt="EarnX Capital"
-                  className="h-10 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105"
+                  className="h-9 sm:h-10 w-auto object-contain bg-white rounded-lg px-3 py-1 shadow-sm transition-transform group-hover:scale-105"
                 />
               </Link>
             </div>
@@ -311,36 +311,7 @@ export default function Navbar() {
                 >
                   About
                 </Link>
-                <Link
-                  href="/dashboard/coins"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
-                    pathname === '/dashboard/coins'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
-                  }`}
-                >
-                  EarnX Coin
-                </Link>
-                <Link
-                  href="/dashboard/purchase"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
-                    pathname === '/dashboard/purchase'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
-                  }`}
-                >
-                  Purchase Package
-                </Link>
-                <Link
-                  href="/dashboard/leaderboard"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
-                    pathname === '/dashboard/leaderboard'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
-                  }`}
-                >
-                  Leaderboard
-                </Link>
+              
                 <Link
                   href="/contact"
                   className={`text-xs sm:text-sm font-bold transition-colors ${

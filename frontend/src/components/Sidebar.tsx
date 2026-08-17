@@ -156,7 +156,7 @@ export default function Sidebar() {
         <img
           src="/logo.png"
           alt="EarnX Capital"
-          className="h-11 w-auto object-contain transition-transform group-hover:scale-105"
+          className="h-10 w-auto object-contain bg-white rounded-lg px-3 py-1 shadow-sm transition-transform group-hover:scale-105"
         />
       </Link>
 

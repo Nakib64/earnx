@@ -68,10 +68,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiFetch<User>('/auth/me', { token: uToken });
         if (res.success && res.data) {
           setUser(res.data);
-        } else if (res.statusCode === 401) {
+        } else {
           deleteCookie('earnx_user_token');
           localStorage.removeItem('earnx_user_token');
           setUserToken(null);
+          setUser(null);
         }
       }
 
@@ -80,10 +81,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiFetch<Admin>('/admin/auth/me', { token: aToken, isAdmin: true });
         if (res.success && res.data) {
           setAdmin(res.data);
-        } else if (res.statusCode === 401) {
+        } else {
           deleteCookie('earnx_admin_token');
           localStorage.removeItem('earnx_admin_token');
           setAdminToken(null);
+          setAdmin(null);
         }
       }
 
