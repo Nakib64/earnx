@@ -16,6 +16,7 @@ interface TreeMember {
   full_name: string | null;
   referral_code: string;
   status?: string;
+  is_premium?: boolean;
   created_at?: string;
   referred_by_id?: string | null;
   designation?: { name: string; stars?: number } | null;
@@ -88,15 +89,17 @@ function ReferralContent() {
 
       Object.values(tree).forEach((level: TreeMember[]) => {
         level.forEach((member) => {
-          flat.push(member);
-          const pid = member.referred_by_id ?? user.id;
-          if (!byParent.has(pid)) byParent.set(pid, []);
-          byParent.get(pid)!.push(member);
+          if (member.is_premium) {
+            flat.push(member);
+            const pid = member.referred_by_id ?? user.id;
+            if (!byParent.has(pid)) byParent.set(pid, []);
+            byParent.get(pid)!.push(member);
+          }
         });
       });
 
       if (!byParent.has(user.id) && tree[1]?.length) {
-        byParent.set(user.id, tree[1]);
+        byParent.set(user.id, tree[1].filter((m) => m.is_premium));
       }
 
       setTreeByParent(byParent);
@@ -210,9 +213,19 @@ function ReferralContent() {
         },
       },
       {
-        key: 'status',
-        header: 'Status',
-        render: (m) => <StatusBadge status={(m.status as any) ?? 'DISABLED'} />,
+        key: 'account_type',
+        header: 'Account Type',
+        render: (m) =>
+          m.is_premium ? (
+            <span className="inline-flex items-center space-x-1 text-[10px] font-black text-amber-300 bg-[#023322] border border-amber-500/40 px-2.5 py-1 rounded-full shadow-sm">
+              <Crown className="w-3 h-3 text-[#f3ba2f]" />
+              <span>Premium Member</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
+              <span>Standard Member</span>
+            </span>
+          ),
       },
       {
         key: 'referrals_joined',

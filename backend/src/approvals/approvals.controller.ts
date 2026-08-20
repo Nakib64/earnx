@@ -19,11 +19,8 @@ export class ApprovalsController {
   // USER ACTIVATION REQUESTS
   @UseGuards(UserJwtGuard)
   @Post('requests/activation')
-  async submitActivation(
-    @Request() req: any,
-    @Body('referral_code') referralCode?: string,
-  ) {
-    return this.approvalsService.submitActivationRequest(req.user.id, referralCode);
+  async submitActivation(@Request() req: any) {
+    return this.approvalsService.submitActivationRequest(req.user.id);
   }
 
   @UseGuards(UserJwtGuard)

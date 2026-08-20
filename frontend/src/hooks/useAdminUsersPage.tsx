@@ -6,7 +6,9 @@ import { ColumnDef } from '../components/common/DataTable';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { BreadcrumbItem } from '../components/users/UserBreadcrumbs';
 import { RowActionsMenu } from '../components/users/RowActionsMenu';
-import { Award } from 'lucide-react';
+import { Award, Crown } from 'lucide-react';
+import { apiFetch } from '../lib/api';
+import { toast } from 'sonner';
 
 import { useUserTreeData } from './useUserTreeData';
 import { useUserStatusActions } from './useUserStatusActions';
@@ -57,13 +59,16 @@ export interface UseAdminUsersPageReturn {
   handleStatusChangeConfirm: () => Promise<void>;
   handleBalanceAdjustSubmit: (user: User, rawAmount: number, type: 'ADD' | 'SUBTRACT', reason: string) => Promise<void>;
   handleAssignDesignation: () => Promise<void>;
+  updatingPremium: boolean;
   openBadgeModal: (user: User) => void;
   openStatusConfirmModal: (e: React.MouseEvent, user: User, newStatus: UserStatus) => void;
+  handleTogglePremium: (targetUser: User, isPremium: boolean) => Promise<void>;
   loadData: () => Promise<void>;
 }
 
 export function useAdminUsersPage(): UseAdminUsersPageReturn {
   const [detailModalUser, setDetailModalUser] = useState<User | null>(null);
+  const [updatingPremium, setUpdatingPremium] = useState(false);
 
   // 1. Sub-hook: Tree Data, Breadcrumbs & Fetching
   const {
@@ -194,6 +199,42 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     });
   }, [triggerDeleteUser, selectedUserForCards, setSelectedUserForCards, loadData]);
 
+  const handleTogglePremium = useCallback(
+    async (targetUser: User, isPremium: boolean) => {
+      if (updatingPremium) return;
+      setUpdatingPremium(true);
+
+      try {
+        const res = await apiFetch<any>(`/admin/users/${targetUser.id}/premium`, {
+          method: 'PATCH',
+          body: JSON.stringify({ is_premium: isPremium }),
+          isAdmin: true,
+        });
+
+        if (res.success) {
+          toast.success(
+            isPremium
+              ? `User ${targetUser.full_name || targetUser.phone} is now a Premium Member!`
+              : `Removed Premium status from ${targetUser.full_name || targetUser.phone}.`
+          );
+          setUsers((prev) =>
+            prev.map((u) => (u.id === targetUser.id ? { ...u, is_premium: isPremium } : u)),
+          );
+          if (selectedUserForCards?.id === targetUser.id) {
+            setSelectedUserForCards((prev) => (prev ? { ...prev, is_premium: isPremium } : null));
+          }
+        } else {
+          toast.error(res.error?.message || 'Failed to update Premium status.');
+        }
+      } catch (err: any) {
+        toast.error(err.message || 'Failed to update Premium status.');
+      } finally {
+        setUpdatingPremium(false);
+      }
+    },
+    [updatingPremium, setUsers, selectedUserForCards, setSelectedUserForCards],
+  );
+
   const userColumns = useMemo<ColumnDef<User>[]>(
     () => [
       {
@@ -241,6 +282,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
           );
         },
       },
+    
       {
         key: 'wallet_actions',
         header: 'Wallet & Actions',
@@ -301,8 +343,10 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     handleStatusChangeConfirm,
     handleBalanceAdjustSubmit,
     handleAssignDesignation,
+    updatingPremium,
     openBadgeModal,
     openStatusConfirmModal,
+    handleTogglePremium,
     loadData,
   };
 }

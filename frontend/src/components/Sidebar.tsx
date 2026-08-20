@@ -142,12 +142,12 @@ export default function Sidebar() {
 
   const displayName = isAdminRoute
     ? admin?.phone || 'Admin Manager'
-    : user?.full_name || user?.phone || 'Rasel Hossain';
+    : user?.full_name || user?.phone || '';
 
   const initials = getInitials(displayName);
   const designation = isAdminRoute
     ? 'System Admin'
-    : user?.designation?.name || 'Premium Member';
+    : user?.designation?.name || '';
 
   return (
     <aside className="hidden lg:flex flex-col w-72 shrink-0 bg-gradient-to-b from-[#01281a] via-[#011f15] to-[#00170f] border-r border-[#d4af37]/30 p-3.5 space-y-3 overflow-y-auto z-20 h-screen sticky top-0 shadow-2xl custom-scrollbar">
@@ -176,17 +176,26 @@ export default function Sidebar() {
               {displayName}
             </span>
 
-            {/* Premium Member / Designation */}
-            <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
-              <Crown className="w-3 h-3 shrink-0" />
-              <span className="truncate">{designation}</span>
-            </div>
+            {/* Status & Designation Line */}
+            {isAdminRoute ? (
+              <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+                <Crown className="w-3 h-3 shrink-0" />
+                <span className="truncate">System Admin</span>
+              </div>
+            ) : user?.is_premium || user?.designation?.name ? (
+              <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+                <Crown className="w-3 h-3 shrink-0" />
+                <span className="truncate">
+                  {user?.is_premium ? 'Premium Member' : user?.designation?.name}
+                </span>
+              </div>
+            ) : user?.status === 'ACTIVE' ? (
+              <div className="flex items-center space-x-1 text-emerald-400 text-[11px] font-bold mt-0.5">
+                <CheckCircle2 className="w-3 h-3 shrink-0" />
+                <span className="truncate">Active Member</span>
+              </div>
+            ) : null}
 
-            {/* Verification Status */}
-            <div className="flex items-center space-x-1 text-[#10b981] text-[10px] font-bold mt-0.5">
-              <CheckCircle2 className="w-3 h-3 shrink-0" />
-              <span>Verified Account</span>
-            </div>
           </div>
         </div>
 

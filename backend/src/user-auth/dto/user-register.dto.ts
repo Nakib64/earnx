@@ -29,8 +29,4 @@ export class UserRegisterDto {
   @IsString()
   @IsOptional()
   avatar_url?: string;
-
-  @IsString()
-  @IsOptional()
-  referral_code?: string;
 }

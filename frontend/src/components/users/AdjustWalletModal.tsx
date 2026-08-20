@@ -9,7 +9,7 @@ interface AdjustWalletModalProps {
   isOpen: boolean;
   adjusting: boolean;
   onClose: () => void;
-  onSubmit: (user: User, amount: number, type: 'ADD' | 'SUBTRACT', reason: string) => Promise<void>;
+  onSubmit: (user: User, amount: number, type: 'ADD' | 'SUBTRACT', reason: string) => Promise<void> | void;
 }
 
 export function AdjustWalletModal({

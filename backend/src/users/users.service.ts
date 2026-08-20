@@ -24,13 +24,17 @@ export class UsersService {
       if (currentParentIds.length === 0) break;
 
       const downlines = await this.prisma.user.findMany({
-        where: { referred_by_id: { in: currentParentIds } },
+        where: {
+          referred_by_id: { in: currentParentIds },
+          is_premium: true,
+        },
         select: {
           id: true,
           phone: true,
           full_name: true,
           referral_code: true,
           status: true,
+          is_premium: true,
           created_at: true,
           referred_by_id: true,
           designation: {
@@ -108,16 +112,8 @@ export class UsersService {
 
       const parentId = parentUser ? parentUser.id : referredById;
 
-      where.AND = [
-        { id: { not: parentId } },
-        {
-          OR: [
-            { referred_by_id: parentId },
-            { referred_by_id: referredById },
-            { referred_by: { referral_code: referredById } },
-          ],
-        },
-      ];
+      where.is_premium = true;
+      where.referred_by_id = parentId;
     } else if (hasDesignation) {
       where.designation_id = { not: null };
     }
@@ -147,6 +143,8 @@ export class UsersService {
           full_name: true,
           referral_code: true,
           status: true,
+          is_premium: true,
+          designation_id: true,
           wallet_balance: true,
           created_at: true,
           designation: true,
@@ -204,6 +202,37 @@ export class UsersService {
         ...(userCode ? { referral_code: userCode } : {}),
       },
     });
+  }
+
+  async updateUserPremium(userId: string, isPremium: boolean) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) throw new NotFoundException('User not found');
+
+    if (isPremium) {
+      const now = new Date();
+      const expiresAt = new Date();
+      expiresAt.setDate(now.getDate() + 365);
+
+      return this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          is_premium: true,
+          premium_started_at: now,
+          premium_expires_at: expiresAt,
+        },
+      });
+    } else {
+      return this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          is_premium: false,
+          premium_started_at: null,
+          premium_expires_at: null,
+        },
+      });
+    }
   }
 
   async assignDesignation(

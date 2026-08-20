@@ -47,17 +47,6 @@ export class UserAuthService {
 
     let referredById: string | null = null;
 
-    if (dto.referral_code) {
-      const referrer = await this.prisma.user.findUnique({
-        where: { referral_code: dto.referral_code.trim().toUpperCase() },
-      });
-
-      if (!referrer) {
-        throw new BadRequestException('Invalid referral code');
-      }
-      referredById = referrer.id;
-    }
-
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const newReferralCode = await this.generateUniqueReferralCode();
 

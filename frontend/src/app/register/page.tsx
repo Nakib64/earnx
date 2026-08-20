@@ -37,14 +37,8 @@ function RegisterForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [referralCode, setReferralCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const ref = searchParams?.get('ref');
-    if (ref) setReferralCode(ref);
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +65,6 @@ function RegisterForm() {
         email: email.trim() || undefined,
         country: country || 'Bangladesh',
         national_id: nationalId.trim() || undefined,
-        referral_code: referralCode ? referralCode.toUpperCase() : undefined,
       }),
     });
 
@@ -239,22 +232,7 @@ function RegisterForm() {
             </div>
           </div>
 
-          {/* 7. Referral Code */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">
-              Sponsor User Code / Referral Code <span className="normal-case text-slate-400 font-medium">(Optional)</span>
-            </label>
-            <div className="relative">
-              <Share2 className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                placeholder="EX0001"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a] text-xs sm:text-sm font-mono tracking-wider"
-              />
-            </div>
-          </div>
+
 
           <button
             type="submit"

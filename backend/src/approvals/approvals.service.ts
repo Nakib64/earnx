@@ -45,7 +45,7 @@ export class ApprovalsService {
   // ACTIVATION REQUESTS
   // ==========================================
 
-  async submitActivationRequest(userId: string, referralCode?: string) {
+  async submitActivationRequest(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -61,30 +61,10 @@ export class ApprovalsService {
       throw new BadRequestException('Activation request is already pending approval');
     }
 
-    let referrerId = user.referred_by_id;
-
-    // If referral code passed, validate & link
-    if (referralCode && !referrerId) {
-      const referrer = await this.prisma.user.findUnique({
-        where: { referral_code: referralCode },
-      });
-      if (!referrer) {
-        throw new BadRequestException('Invalid referral code');
-      }
-      if (referrer.id === userId) {
-        throw new BadRequestException('You cannot refer yourself');
-      }
-      referrerId = referrer.id;
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { referred_by_id: referrerId },
-      });
-    }
-
     return this.prisma.activationRequest.create({
       data: {
         user_id: userId,
-        referrer_id: referrerId,
+        referrer_id: user.referred_by_id,
         status: RequestStatus.PENDING,
       },
     });

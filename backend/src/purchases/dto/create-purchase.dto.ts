@@ -17,8 +17,4 @@ export class CreatePurchaseDto {
   @IsString()
   @IsOptional()
   investment_plan_id?: string;
-
-  @IsString()
-  @IsOptional()
-  sponsor_user_code?: string;
 }

@@ -52,13 +52,7 @@ export default function PurchasePage() {
   const [selectedTargetUser, setSelectedTargetUser] = useState<UserSearchResult | null>(null);
   const [showTargetDropdown, setShowTargetDropdown] = useState(false);
 
-  // Sponsor User Search state (Optional)
-  const [sponsorQuery, setSponsorQuery] = useState('');
-  const debouncedSponsorQuery = useDebounce(sponsorQuery, 300);
-  const [sponsorResults, setSponsorResults] = useState<UserSearchResult[]>([]);
-  const [searchingSponsor, setSearchingSponsor] = useState(false);
-  const [selectedSponsorUser, setSelectedSponsorUser] = useState<UserSearchResult | null>(null);
-  const [showSponsorDropdown, setShowSponsorDropdown] = useState(false);
+
 
   // Modal Dialog States
   const [submitting, setSubmitting] = useState(false);
@@ -123,40 +117,10 @@ export default function PurchasePage() {
     searchTarget();
   }, [debouncedTargetQuery]);
 
-  // Debounced search for Sponsor User
-  useEffect(() => {
-    if (!debouncedSponsorQuery.trim()) {
-      setSponsorResults([]);
-      setShowSponsorDropdown(false);
-      return;
-    }
-
-    const searchSponsor = async () => {
-      setSearchingSponsor(true);
-      const res = await apiFetch<any>(
-        `/users/search-by-code?q=${encodeURIComponent(debouncedSponsorQuery.trim())}`
-      );
-      if (res.success && Array.isArray(res.data)) {
-        setSponsorResults(res.data);
-        setShowSponsorDropdown(true);
-      }
-      setSearchingSponsor(false);
-    };
-
-    searchSponsor();
-  }, [debouncedSponsorQuery]);
-
-  // Selectors
   const handleSelectTargetUser = (u: UserSearchResult) => {
     setSelectedTargetUser(u);
     setTargetQuery(u.referral_code);
     setShowTargetDropdown(false);
-  };
-
-  const handleSelectSponsorUser = (u: UserSearchResult) => {
-    setSelectedSponsorUser(u);
-    setSponsorQuery(u.referral_code);
-    setShowSponsorDropdown(false);
   };
 
   const handleSelectSelfAsTarget = () => {
@@ -213,16 +177,38 @@ export default function PurchasePage() {
       return;
     }
 
-    if (packageType === 'PREMIUM' && selectedTargetUser.is_premium) {
-      setModalState({
-        isOpen: true,
-        type: 'DUPLICATE_ERROR',
-        title: 'Already Premium Member',
-        message: `User "${selectedTargetUser.full_name || selectedTargetUser.phone}" (User Code: ${
-          selectedTargetUser.referral_code
-        }) is already a Premium Member. Premium Subscription cannot be purchased again.`,
-      });
-      return;
+    if (packageType === 'PREMIUM') {
+      if (selectedTargetUser.id !== user?.id && !user?.is_premium) {
+        setModalState({
+          isOpen: true,
+          type: 'DUPLICATE_ERROR',
+          title: 'Premium Status Required',
+          message: 'You must be a Premium Member yourself in order to purchase Premium status for other users.',
+        });
+        return;
+      }
+      if (selectedTargetUser.status !== 'ACTIVE') {
+        setModalState({
+          isOpen: true,
+          type: 'DUPLICATE_ERROR',
+          title: 'Account Not Active',
+          message: `User "${selectedTargetUser.full_name || selectedTargetUser.phone}" (User Code: ${
+            selectedTargetUser.referral_code
+          }) is not an ACTIVE account. An account must be activated before taking Premiumship.`,
+        });
+        return;
+      }
+      if (selectedTargetUser.is_premium) {
+        setModalState({
+          isOpen: true,
+          type: 'DUPLICATE_ERROR',
+          title: 'Already Premium Member',
+          message: `User "${selectedTargetUser.full_name || selectedTargetUser.phone}" (User Code: ${
+            selectedTargetUser.referral_code
+          }) is already a Premium Member. Premium Subscription cannot be purchased again.`,
+        });
+        return;
+      }
     }
 
     if (packageType === 'INVESTMENT' && !selectedPlanId) {
@@ -260,7 +246,6 @@ export default function PurchasePage() {
       )} using your account balance?`,
       details: {
         target: selectedTargetUser,
-        sponsor: selectedSponsorUser,
         packageType,
         price: currentPrice,
       },
@@ -278,7 +263,6 @@ export default function PurchasePage() {
         target_user_code: selectedTargetUser.referral_code,
         package_type: packageType,
         investment_plan_id: packageType === 'INVESTMENT' ? selectedPlanId : undefined,
-        sponsor_user_code: selectedSponsorUser?.referral_code || undefined,
       }),
     });
 
@@ -474,68 +458,7 @@ export default function PurchasePage() {
           </div>
         )}
 
-        {/* 4. Sponsor / Referral User Search (Optional - Only for ACTIVATION & PREMIUM) */}
-        {packageType !== 'INVESTMENT' && (
-          <div className="space-y-1.5 pt-2 border-t border-slate-100">
-            <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-              Sponsor / Referral User Code <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search Sponsor Code or Phone..."
-                value={sponsorQuery}
-                onChange={(e) => setSponsorQuery(e.target.value)}
-                onFocus={() => sponsorResults.length > 0 && setShowSponsorDropdown(true)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
-              />
-              {searchingSponsor && (
-                <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
-                  Searching...
-                </span>
-              )}
 
-              {/* Sponsor Dropdown Suggestions */}
-              {showSponsorDropdown && sponsorResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
-                  {sponsorResults.map((u) => (
-                    <button
-                      key={u.id}
-                      type="button"
-                      onClick={() => handleSelectSponsorUser(u)}
-                      className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
-                    >
-                      <div>
-                        <div className="text-xs font-black text-slate-900">
-                          {u.full_name || 'No Name'}
-                        </div>
-                        <div className="text-[10px] text-slate-500 font-mono">
-                          Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Auto-filled Sponsor Details */}
-            {selectedSponsorUser && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 mt-2">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase">Sponsor Name</label>
-                  <div className="text-xs font-bold text-slate-900">{selectedSponsorUser.full_name || '—'}</div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase">Sponsor Phone / Code</label>
-                  <div className="text-xs font-mono font-bold text-[#005A36]">
-                    {selectedSponsorUser.phone} ({selectedSponsorUser.referral_code})
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Total Cost & Submit */}
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -83,7 +83,7 @@ export default function DashboardPage() {
       await apiFetch('/requests/activation', { method: 'POST' });
       setMessage({
         type: 'success',
-        text: 'Activation request submitted! Waiting for approval from your referrer or admin.',
+        text: 'Activation request submitted! Waiting for approval from admin.',
       });
       await refreshUserProfile();
     } catch (err: any) {

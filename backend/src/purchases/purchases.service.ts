@@ -69,26 +69,7 @@ export class PurchasesService {
       throw new NotFoundException(`Target user with code/phone "${cleanCode}" was not found.`);
     }
 
-    // 2. Find optional Sponsor User if provided
-    let sponsorUser: any = null;
-    if (dto.sponsor_user_code && dto.sponsor_user_code.trim()) {
-      const cleanSponsorCode = dto.sponsor_user_code.trim();
-      sponsorUser = await this.prisma.user.findFirst({
-        where: {
-          OR: [
-            { referral_code: { equals: cleanSponsorCode, mode: 'insensitive' } },
-            { phone: { equals: cleanSponsorCode } },
-            { id: cleanSponsorCode },
-          ],
-        },
-      });
-      if (!sponsorUser) {
-        throw new NotFoundException(`Sponsor user with code/phone "${cleanSponsorCode}" was not found.`);
-      }
-      if (sponsorUser.id === targetUser.id) {
-        throw new BadRequestException('A user cannot be their own sponsor.');
-      }
-    }
+
 
     // 3. Package Validation & Duplicate Package Checks
     let packageCost = 0;
@@ -103,6 +84,16 @@ export class PurchasesService {
       const feeVal = await this.systemConfigService.getValue('ACTIVATION_FEE', '500');
       packageCost = parseFloat(feeVal) || 500;
     } else if (dto.package_type === PackageType.PREMIUM) {
+      if (payer.id !== targetUser.id && !payer.is_premium) {
+        throw new BadRequestException(
+          'You must be a Premium Member yourself in order to purchase Premium status for other users.'
+        );
+      }
+      if (targetUser.status !== UserStatus.ACTIVE) {
+        throw new BadRequestException(
+          `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is not an ACTIVE account. An account must be activated before taking Premiumship.`
+        );
+      }
       if (targetUser.is_premium) {
         throw new BadRequestException(
           `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is already a Premium Member. Premium subscription cannot be purchased again.`
@@ -158,10 +149,6 @@ export class PurchasesService {
           referral_code: userCode,
         };
 
-        if (sponsorUser && !targetUser.referred_by_id) {
-          updateData.referred_by_id = sponsorUser.id;
-        }
-
         await tx.user.update({
           where: { id: targetUser.id },
           data: updateData,
@@ -173,19 +160,14 @@ export class PurchasesService {
           CommissionType.ACTIVATION,
           tx
         );
-        const refId = sponsorUser ? sponsorUser.id : targetUser.referred_by_id;
-        if (refId) {
-          await this.coinsService.checkAndUnlockForReferrer(refId, tx);
+        if (targetUser.referred_by_id) {
+          await this.coinsService.checkAndUnlockForReferrer(targetUser.referred_by_id, tx);
         }
       } else if (dto.package_type === PackageType.PREMIUM) {
         const updateData: any = {
           is_premium: true,
           premium_started_at: new Date(),
         };
-
-        if (sponsorUser && !targetUser.referred_by_id) {
-          updateData.referred_by_id = sponsorUser.id;
-        }
 
         await tx.user.update({
           where: { id: targetUser.id },
@@ -204,12 +186,7 @@ export class PurchasesService {
         const monthlyPayoutNum = (amountNum * returnPercentNum) / 100;
         const durationMonths = investmentPlan.duration_months || 12;
 
-        if (sponsorUser && !targetUser.referred_by_id) {
-          await tx.user.update({
-            where: { id: targetUser.id },
-            data: { referred_by_id: sponsorUser.id },
-          });
-        }
+
 
         await tx.userInvestment.create({
           data: {

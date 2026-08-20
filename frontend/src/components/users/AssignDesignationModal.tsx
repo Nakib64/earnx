@@ -15,7 +15,7 @@ interface AssignDesignationModalProps {
   onClose: () => void;
   onTargetDesignationChange: (id: string) => void;
   onTargetSponsorIdChange: (id: string) => void;
-  onSubmit: () => Promise<void>;
+  onSubmit: () => Promise<void> | void;
 }
 
 export function AssignDesignationModal({

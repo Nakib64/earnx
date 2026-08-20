@@ -69,6 +69,12 @@ export class UsersController {
   }
 
   @UseGuards(AdminJwtGuard)
+  @Patch('admin/users/:id/premium')
+  async updateUserPremium(@Param('id') id: string, @Body('is_premium') isPremium: boolean) {
+    return this.usersService.updateUserPremium(id, isPremium);
+  }
+
+  @UseGuards(AdminJwtGuard)
   @Patch('admin/users/:id/designation')
   async assignDesignation(
     @Param('id') id: string,

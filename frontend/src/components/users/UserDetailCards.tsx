@@ -5,13 +5,15 @@ import { User, WalletTransaction, UserStatus } from '../../types';
 import { apiFetch } from '../../lib/api';
 import { DataTable, ColumnDef } from '../common/DataTable';
 import { StatusBadge } from '../common/StatusBadge';
-import { Users, Wallet, Award, DollarSign, Trash2, Shield, RefreshCw, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Users, Wallet, Award, DollarSign, Trash2, Shield, RefreshCw, ChevronLeft, ChevronRight, CheckCircle2, Crown } from 'lucide-react';
 
 interface UserDetailCardsProps {
   user: User | null;
   onAdjustBalance: (user: User) => void;
   onAssignBadge: (user: User) => void;
   onToggleStatus: (e: React.MouseEvent, user: User, newStatus: UserStatus) => void;
+  onTogglePremium?: (user: User, isPremium: boolean) => void;
+  updatingPremium?: boolean;
   onDeleteUser: (user: User) => void;
 }
 
@@ -20,6 +22,8 @@ export function UserDetailCards({
   onAdjustBalance,
   onAssignBadge,
   onToggleStatus,
+  onTogglePremium,
+  updatingPremium,
   onDeleteUser,
 }: UserDetailCardsProps) {
   // Direct Downlines Data
@@ -60,6 +64,7 @@ export function UserDetailCards({
 
     // Fetch Direct Downlines
     setLoadingDownlines(true);
+    setDownlines([]); // Clear stale downlines immediately
     const resDownlines = await apiFetch<any>(`/admin/users?referred_by_id=${user.id}&limit=100`, { isAdmin: true });
     if (resDownlines.success && resDownlines.data) {
       setDownlines(resDownlines.data.data || (Array.isArray(resDownlines.data) ? resDownlines.data : []));
@@ -160,8 +165,20 @@ export function UserDetailCards({
               {user.designation?.name || 'Unbadged Member'}
             </span>
           </div>
+          <div className="flex items-center space-x-1.5 pt-0.5">
+            {user.is_premium ? (
+              <span className="inline-flex items-center space-x-1 text-[10px] font-black text-amber-300 bg-[#023322] border border-amber-500/40 px-2 py-0.5 rounded-full shadow-xs">
+                <Crown className="w-3 h-3 text-[#f3ba2f]" />
+                <span>Premium Member</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+                <span>Standard Member</span>
+              </span>
+            )}
+          </div>
           {user.designation && (
-            <div className="text-[11px] text-slate-600 font-mono font-bold">
+            <div className="text-[11px] text-slate-600 font-mono font-bold pt-0.5">
               Stars: {user.designation.stars}★ · Max Level Depth: {user.designation.max_level}
             </div>
           )}
@@ -204,6 +221,39 @@ export function UserDetailCards({
             >
               Badge
             </button>
+
+            {/* Toggle Premium Status Action Button */}
+            {onTogglePremium && (
+              user.is_premium ? (
+                <button
+                  onClick={() => !updatingPremium && onTogglePremium(user, false)}
+                  disabled={updatingPremium}
+                  className="py-1 px-2.5 bg-amber-50 text-amber-800 hover:bg-amber-100 disabled:opacity-60 rounded-lg font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-amber-300 cursor-pointer disabled:cursor-not-allowed"
+                  title="Remove Premium status from user"
+                >
+                  {updatingPremium ? (
+                    <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                  ) : (
+                    <Crown className="w-3 h-3 text-amber-600" />
+                  )}
+                  <span>{updatingPremium ? 'Updating...' : 'Remove Premium'}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => !updatingPremium && onTogglePremium(user, true)}
+                  disabled={updatingPremium}
+                  className="py-1 px-2.5 bg-[#023322] text-amber-300 hover:bg-[#034932] disabled:opacity-60 rounded-lg font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-amber-500/40 shadow-xs cursor-pointer disabled:cursor-not-allowed"
+                  title="Make user a Premium Member"
+                >
+                  {updatingPremium ? (
+                    <RefreshCw className="w-3 h-3 text-[#f3ba2f] animate-spin" />
+                  ) : (
+                    <Crown className="w-3 h-3 text-[#f3ba2f]" />
+                  )}
+                  <span>{updatingPremium ? 'Updating...' : 'Make Premium'}</span>
+                </button>
+              )
+            )}
 
             {user.status === UserStatus.DISABLED && (
               <button

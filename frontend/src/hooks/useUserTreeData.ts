@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiFetch } from '../lib/api';
 import { User, Designation } from '../types';
@@ -35,6 +35,8 @@ export function useUserTreeData(): UseUserTreeDataReturn {
   const [loading, setLoading] = useState(true);
   const [selectedUserForCards, setSelectedUserForCards] = useState<User | null>(null);
 
+  const requestIdRef = useRef(0);
+
   const searchParams = useSearchParams();
   const queryParentId = searchParams ? searchParams.get('parentId') : null;
   const queryParentName = searchParams ? searchParams.get('parentName') : null;
@@ -61,40 +63,64 @@ export function useUserTreeData(): UseUserTreeDataReturn {
   }, [queryParentId, queryParentName]);
 
   const loadData = useCallback(async () => {
+    const currentRequestId = ++requestIdRef.current;
     setLoading(true);
+    setUsers([]); // Clear stale table data immediately while fetching new level
 
     let url = `/admin/users?page=1&limit=100`;
 
-    if (debouncedSearch.trim()) {
-      url += `&search=${encodeURIComponent(debouncedSearch.trim())}`;
+    const activeSearch = searchTerm.trim() ? debouncedSearch.trim() : '';
+
+    if (activeSearch) {
+      url += `&search=${encodeURIComponent(activeSearch)}`;
     } else if (currentParent.id !== null) {
       url += `&referred_by_id=${currentParent.id}`;
     } else {
       url += `&has_designation=true`;
     }
 
-    const [usersRes, desRes] = await Promise.all([
-      apiFetch<User[]>(url, { isAdmin: true }),
-      apiFetch<Designation[]>('/admin/designations', { isAdmin: true }),
-    ]);
+    try {
+      const fetchDesignations = designations.length === 0;
+      const [usersRes, desRes] = await Promise.all([
+        apiFetch<User[]>(url, { isAdmin: true }),
+        fetchDesignations
+          ? apiFetch<Designation[]>('/admin/designations', { isAdmin: true })
+          : Promise.resolve({ success: true, data: null, message: '' }),
+      ]);
 
-    if (usersRes.success && usersRes.data) {
-      const dataArr = (usersRes.data as any).data || (Array.isArray(usersRes.data) ? usersRes.data : []);
-      setUsers(dataArr);
+      // If a newer request was dispatched while this request was in flight, ignore this response!
+      if (currentRequestId !== requestIdRef.current) return;
+
+      if (usersRes.success && usersRes.data) {
+        const dataArr = (usersRes.data as any).data || (Array.isArray(usersRes.data) ? usersRes.data : []);
+        setUsers(dataArr);
+      } else {
+        setUsers([]);
+      }
+      if (fetchDesignations && desRes.success && desRes.data) {
+        setDesignations(desRes.data);
+      }
+    } finally {
+      if (currentRequestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
-    if (desRes.success && desRes.data) {
-      setDesignations(desRes.data);
-    }
-    setLoading(false);
-  }, [currentParent.id, debouncedSearch]);
+  }, [currentParent.id, debouncedSearch, searchTerm === '']);
 
   useEffect(() => {
     if (admin) loadData();
   }, [admin, loadData]);
 
+  // Show loading skeleton while user is actively typing search term before debounce fires
+  const isDebouncing = searchTerm.trim() !== '' && searchTerm.trim() !== debouncedSearch.trim();
+  const effectiveLoading = loading || isDebouncing;
+
   const handleRowClick = useCallback((user: User) => {
+    requestIdRef.current++; // Invalidate any pending in-flight requests immediately
     setSelectedUserForCards(user);
     setSearchTerm('');
+    setUsers([]); // Clear stale table rows immediately on row click
+    setLoading(true);
     setBreadcrumbs((prev) => {
       const lastCrumb = prev[prev.length - 1];
       if (lastCrumb?.id === user.id) {
@@ -108,7 +134,10 @@ export function useUserTreeData(): UseUserTreeDataReturn {
   }, []);
 
   const handleBreadcrumbClick = useCallback((index: number) => {
+    requestIdRef.current++; // Invalidate any pending in-flight requests immediately
     setSearchTerm('');
+    setUsers([]); // Clear stale table rows immediately on breadcrumb navigation
+    setLoading(true);
     setBreadcrumbs((prev) => prev.slice(0, index + 1));
   }, []);
 
@@ -119,7 +148,7 @@ export function useUserTreeData(): UseUserTreeDataReturn {
     setDesignations,
     searchTerm,
     setSearchTerm,
-    loading,
+    loading: effectiveLoading,
     breadcrumbs,
     setBreadcrumbs,
     currentParent,
@@ -130,3 +159,4 @@ export function useUserTreeData(): UseUserTreeDataReturn {
     handleBreadcrumbClick,
   };
 }
+

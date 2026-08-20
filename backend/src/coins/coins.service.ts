@@ -35,11 +35,11 @@ export class CoinsService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    // Count active direct referrals
+    // Count active direct premium referrals
     const activeReferralCount = await this.prisma.user.count({
       where: {
         referred_by_id: userId,
-        status: UserStatus.ACTIVE,
+        is_premium: true,
       },
     });
 
