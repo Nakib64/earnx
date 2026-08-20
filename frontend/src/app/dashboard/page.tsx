@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '../../context/AuthContext';
 import { apiFetch } from '../../lib/api';
 import MarketOverviewChart from '../../components/dashboard/MarketOverviewChart';
@@ -13,19 +12,15 @@ import {
   Check,
   Zap,
   ChevronRight,
-  Star,
-  Award,
   AlertTriangle,
   TrendingUp,
   Trophy,
   Settings,
   Megaphone,
   CheckCircle,
-  Bell,
-  Calendar,
-  UserPlus,
-  ArrowUpRight,
   ShoppingBag,
+  Link2,
+  Crown,
 } from 'lucide-react';
 
 interface ActiveNotice {
@@ -59,7 +54,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#d4af37]"></div>
         <p className="text-sm font-medium text-slate-500">Loading your profile...</p>
       </div>
     );
@@ -93,262 +88,376 @@ export default function DashboardPage() {
     }
   };
 
-  const handlePremiumRequest = async () => {
-    setRequestLoading(true);
-    setMessage(null);
-    try {
-      await apiFetch('/requests/premium', { method: 'POST' });
-      setMessage({
-        type: 'success',
-        text: 'Premium upgrade request submitted! Waiting for approval.',
-      });
-      await refreshUserProfile();
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to submit request' });
-    } finally {
-      setRequestLoading(false);
-    }
-  };
-
   const isPremium = (user as any).is_premium;
-  // Get designation name and star count directly from user's designation record in database
-  const designationName = user.designation?.name || 'User';
-  const starCount = user.designation?.stars ?? 0;
+  const firstName = user.full_name?.split(' ')[0] || user.phone;
 
-  // Format today's date
-  const todayDate = new Date();
-  const formattedDate = todayDate.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-  const weekday = todayDate.toLocaleDateString('en-US', { weekday: 'long' });
+  const quickActions = [
+    {
+      href: '/dashboard/wallet',
+      icon: Wallet,
+      label: 'Cash Wallet',
+      desc: 'Available Balance',
+    },
+    {
+      href: '/dashboard/purchase',
+      icon: ShoppingBag,
+      label: 'Purchase Package',
+      desc: 'Buy Activation/Plan',
+    },
+    {
+      href: '/dashboard/investments',
+      icon: TrendingUp,
+      label: 'Invest & Grow',
+      desc: 'Make Profit Daily',
+    },
+    {
+      href: '/dashboard/leaderboard',
+      icon: Trophy,
+      label: 'Top 100',
+      desc: 'Leaderboard Ranking',
+    },
+    {
+      href: '/dashboard/referral',
+      icon: Users,
+      label: 'Referral View',
+      desc: 'View Referral Report',
+    },
+    {
+      href: '/dashboard/wallet',
+      icon: Wallet,
+      label: 'Wallet',
+      desc: 'Ledger & Transaction',
+    },
+  ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8">
-     
-
-      {/* Alert Messages */}
-      {message && (
-        <div
-          className={`p-4 rounded-2xl text-xs sm:text-sm font-semibold flex items-center space-x-2 border ${
-            message.type === 'success'
-              ? 'bg-emerald-50 text-primary border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
-        >
-          {message.type === 'success' ? (
-            <Check className="w-5 h-5 text-primary shrink-0" />
-          ) : (
-            <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
-          )}
-          <span>{message.text}</span>
-        </div>
-      )}
-
-      {/* Notice Board Banner matching Mockup Design - ONLY IF ACTIVE NOTICE EXISTS */}
-      {notice && notice.is_active && notice.content && (
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-          {/* Left Dark Icon Container */}
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0 shadow-md">
-            <Megaphone className="w-6 h-6 sm:w-7 sm:h-7" />
-          </div>
-
-          {/* Notice Text Content */}
-          <div className="space-y-1 flex-1">
-            <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-              {notice.title || 'Notice board'}
-            </h2>
-            <p className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed flex items-center flex-wrap gap-1.5">
-              <span>{notice.content}</span>
-              <CheckCircle className="w-4 h-4 text-emerald-500 fill-emerald-500/10 shrink-0 inline-block" />
-            </p>
-          </div>
-
-          {/* Quick action for unactivated / standard users */}
-          {user.status === 'DISABLED' && (
-            <button
-              onClick={handleActivationRequest}
-              disabled={requestLoading}
-              className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 text-slate-950 font-black text-xs px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center space-x-1.5 shrink-0 cursor-pointer"
-            >
-              <Zap className="w-4 h-4 fill-slate-950 text-slate-950" />
-              <span>{requestLoading ? 'Requesting...' : 'Activate Account'}</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Main 3 Cards Grid Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Card 1: Designation Card matching screenshot */}
-        <div className="relative bg-[#002919] border border-emerald-800/40 rounded-2xl p-6 text-white shadow-xl flex flex-col items-center justify-center text-center space-y-4 overflow-hidden min-h-[300px]">
-          {/* Left Laurel Wreath Branch */}
-          <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-16 h-40 text-emerald-700/60 pointer-events-none"
-            viewBox="0 0 50 120"
-            fill="currentColor"
+    <div className="min-h-screen  text-slate-100 font-sans">
+      <div className="max-w-7xl mx-auto p-3 sm:p-5 lg:p-8 space-y-4 sm:space-y-6">
+        {/* Alert Messages */}
+        {message && (
+          <div
+            className={`p-3.5 sm:p-4 rounded-2xl text-xs sm:text-sm font-semibold flex items-center space-x-2 border ${
+              message.type === 'success'
+                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+                : 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+            }`}
           >
-            <path d="M 40,110 C 25,85 18,55 30,10 C 28,18 20,24 10,22 C 16,32 26,33 32,28 C 24,38 12,42 5,38 C 12,48 24,46 30,42 C 20,54 8,56 2,50 C 9,62 20,60 28,56 C 18,70 6,71 1,65 C 8,78 20,74 27,70 C 18,84 6,85 2,80 C 10,91 22,86 28,82 C 20,95 10,96 6,92 C 14,101 26,96 32,92 Z" />
-          </svg>
+            {message.type === 'success' ? (
+              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+            )}
+            <span>{message.text}</span>
+          </div>
+        )}
 
-          {/* Right Laurel Wreath Branch (Flipped) */}
-          <svg
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-16 h-40 text-emerald-700/60 pointer-events-none transform scale-x-[-1]"
-            viewBox="0 0 50 120"
-            fill="currentColor"
-          >
-            <path d="M 40,110 C 25,85 18,55 30,10 C 28,18 20,24 10,22 C 16,32 26,33 32,28 C 24,38 12,42 5,38 C 12,48 24,46 30,42 C 20,54 8,56 2,50 C 9,62 20,60 28,56 C 18,70 6,71 1,65 C 8,78 20,74 27,70 C 18,84 6,85 2,80 C 10,91 22,86 28,82 C 20,95 10,96 6,92 C 14,101 26,96 32,92 Z" />
-          </svg>
-
-          {/* Title: Designation */}
-          <span className="text-base sm:text-lg font-bold text-[#f3ba2f] tracking-wide z-10">
-            Designation
-          </span>
-
-          {/* Star Rating: Render stars if user has designation */}
-          {starCount > 0 ? (
-            <div className="flex items-center space-x-2 z-10 my-1">
-              {Array.from({ length: starCount }).map((_, i) => (
-                <Star
-                  key={i}
-                  className="w-7 h-7 fill-[#f3ba2f] text-[#f3ba2f] drop-shadow-[0_2px_4px_rgba(243,186,47,0.5)]"
-                />
-              ))}
+        {/* Notice Board Banner */}
+        {notice && notice.is_active && notice.content && (
+          <div className="bg-[#022416] border border-emerald-800/60 rounded-2xl p-4 sm:p-5 shadow-sm flex items-start space-x-3.5 text-white">
+            <div className="w-10 h-10 rounded-xl bg-[#01180f] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
+              <Megaphone className="w-5 h-5" />
             </div>
-          ) : (
-            <div className="z-10 my-1">
-              <span className="text-xs font-semibold text-emerald-300/80 bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-700/40">
-                Standard Member
-              </span>
+            <div className="space-y-0.5 flex-1 min-w-0">
+              <h2 className="text-sm sm:text-base font-black text-white tracking-tight">
+                {notice.title || 'Notice Board'}
+              </h2>
+              <p className="text-xs sm:text-sm font-medium text-slate-300 leading-relaxed">
+                {notice.content}
+              </p>
             </div>
-          )}
-
-          {/* Subtitle: Rank Name */}
-          <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-wide z-10">
-            {designationName}
-          </h3>
-
-          {/* Gold Underline Bar */}
-          <div className="w-14 h-0.5 bg-[#f3ba2f] rounded-full z-10 mt-1"></div>
-        </div>
-
-        {/* Card 2: Market Overview (Trading Chart) */}
-        <div className="md:col-span-1">
-          <MarketOverviewChart />
-        </div>
-
-      
-      </div>
-
-      {/* Referral Link Copy Section */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
-              Your Unique Referral Link
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Share your link to register new downlines into your tree network
-            </p>
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-1" />
           </div>
-          <span className="px-3 py-1.5 bg-emerald-50 text-primary border border-emerald-200/80 rounded-xl text-xs font-mono font-extrabold self-start sm:self-auto">
-            User Code: {user.referral_code}
-          </span>
-        </div>
+        )}
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <input
-            type="text"
-            readOnly
-            value={referralLink}
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono text-slate-700 focus:outline-none truncate"
-          />
-          <button
-            onClick={copyReferral}
-            className="bg-[#005A36] hover:bg-[#044D2F] text-white px-5 py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center space-x-1.5 shrink-0 transition-colors shadow-sm cursor-pointer"
-          >
-            {copied ? <Check className="w-4 h-4 text-secondary" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-          </button>
-        </div>
-      </div>
+        {/* ── 1. HERO HEADER SECTION ── */}
+        <div className="relative overflow-hidden rounded-[24px] lg:rounded-[28px] bg-gradient-to-br from-[#012215] via-[#022e1d] to-[#01160d] border border-emerald-900/60 p-4 sm:p-5 lg:p-6 text-white shadow-xl">
+          {/* Ambient Glows */}
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-[#d4af37]/10 blur-3xl pointer-events-none" />
 
-      {/* Quick Actions Grid matching Mockup Design */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
-            <Zap className="w-5 h-5" />
-          </div>
-          <h2 className="text-base sm:text-lg font-black text-slate-900">Quick Actions</h2>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-          {[
-            {
-              href: '/dashboard/wallet',
-              icon: Wallet,
-              label: 'Cash Wallet',
-              desc: 'Available Balance',
-            },
-            {
-              href: '/dashboard/purchase',
-              icon: ShoppingBag,
-              label: 'Purchase Package',
-              desc: 'Buy Activation/Plan',
-            },
-            {
-              href: '/dashboard/investments',
-              icon: TrendingUp,
-              label: 'Invest & Grow',
-              desc: 'Make Profit Daily',
-            },
-            {
-              href: '/dashboard/leaderboard',
-              icon: Trophy,
-              label: 'Top 100',
-              desc: 'Leaderboard Ranking',
-            },
-            {
-              href: '/dashboard/referral',
-              icon: UserPlus,
-              label: 'Referral View',
-              desc: 'View Referral Report',
-            },
-            {
-              href: '/dashboard/wallet',
-              icon: Wallet,
-              label: 'Wallet',
-              desc: 'Ledger & Transaction',
-            },
-            {
-              href: '/dashboard/settings',
-              icon: Settings,
-              label: 'Account Setting',
-              desc: 'Profile & Security',
-            },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={idx}
-                href={item.href}
-                className="flex flex-col items-center justify-center text-center p-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-all hover:border-[#d4af37] group shadow-2xs"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] group-hover:scale-105 transition-all shadow-sm mb-2.5">
-                  <Icon className="w-6 h-6" />
+          <div className="relative z-10 flex flex-row items-center justify-between gap-4 lg:gap-6">
+            {/* Left Info */}
+            <div className="space-y-2 sm:space-y-2.5 max-w-md lg:max-w-xl">
+              {/* Greeting & Name */}
+              <div>
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ring-2 ring-emerald-500/20" />
+                  <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+                    Welcome Back
+                  </p>
                 </div>
-                <span className="text-xs font-black text-slate-900 group-hover:text-[#01281a] transition-colors leading-tight truncate max-w-full">
-                  {item.label}
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 drop-shadow-sm">
+                  <span>{firstName}</span>
+                  <span className="text-base sm:text-lg">👋</span>
+                </h1>
+              </div>
+
+              {/* Status & Wallet Badges */}
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                {isPremium ? (
+                  <div className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500/15 via-yellow-500/25 to-amber-600/15 border border-[#d4af37]/60 text-[#fbbf24] text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_0_12px_rgba(212,175,55,0.15)] backdrop-blur-md">
+                    <Crown className="w-3 h-3 fill-[#fbbf24] text-[#fbbf24]" />
+                    <span>Premium</span>
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center gap-1 bg-emerald-950/70 border border-emerald-700/60 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md">
+                    <span>Standard</span>
+                  </div>
+                )}
+
+                {user.wallet_balance !== undefined && (
+                  <div className="inline-flex items-center gap-1 bg-white/[0.06] border border-white/10 text-slate-200 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md">
+                    <Wallet className="w-3 h-3 text-emerald-400" />
+                    <span>৳{Number(user.wallet_balance).toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Total Earnings Stat Box */}
+              <div className="pt-0.5">
+                <div className="inline-flex items-center gap-2.5 bg-white/[0.04] border border-emerald-500/20 backdrop-blur-md rounded-xl px-3 py-1.5 shadow-sm">
+                  <div className="flex items-center gap-1 text-slate-400 text-[10px] sm:text-[11px] font-semibold tracking-wide">
+                    <TrendingUp className="w-3 h-3 text-emerald-400" />
+                    <span>Earnings:</span>
+                  </div>
+                  <span className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 tracking-tight">
+                    +12.48%
+                  </span>
+                  <span className="inline-flex items-center text-[9px] font-black bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-1 py-0.2 rounded">
+                    ▲ 24H
+                  </span>
+                </div>
+              </div>
+
+              {/* Account Activation button for unactivated users */}
+              {user.status === 'DISABLED' && (
+                <button
+                  onClick={handleActivationRequest}
+                  disabled={requestLoading}
+                  className="mt-1 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-[11px] px-3.5 py-1.5 rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
+                >
+                  <Zap className="w-3.5 h-3.5 fill-slate-950" />
+                  <span>{requestLoading ? 'Requesting...' : 'Activate Account'}</span>
+                </button>
+              )}
+            </div>
+
+            {/* Right: 3D Rising Pedestal Artwork */}
+            <div className="w-32 h-24 sm:w-36 sm:h-28 lg:w-44 lg:h-36 relative shrink-0 flex items-center justify-center">
+              <svg
+                viewBox="0 0 200 160"
+                className="w-full h-full drop-shadow-2xl overflow-visible"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="barG1" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="50%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                  <linearGradient id="barG2" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#059669" />
+                    <stop offset="50%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#047857" />
+                  </linearGradient>
+                  <linearGradient id="arrowG" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#047857" />
+                    <stop offset="60%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#a7f3d0" />
+                  </linearGradient>
+                  <linearGradient id="crownGoldG" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#d97706" />
+                    <stop offset="50%" stopColor="#fbbf24" />
+                    <stop offset="100%" stopColor="#fef08a" />
+                  </linearGradient>
+                  <linearGradient id="pedestalG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#064e3b" />
+                    <stop offset="100%" stopColor="#022c22" />
+                  </linearGradient>
+                  <linearGradient id="avatarG" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#059669" />
+                    <stop offset="100%" stopColor="#022c22" />
+                  </linearGradient>
+                </defs>
+
+                {/* Pedestal Base */}
+                <ellipse cx="100" cy="135" rx="85" ry="20" fill="url(#pedestalG)" stroke="#047857" strokeWidth="2" />
+                <ellipse cx="100" cy="130" rx="75" ry="16" fill="#012217" opacity="0.8" />
+
+                {/* Curved Arrow Rising */}
+                <path
+                  d="M 25 110 Q 55 50 115 25"
+                  fill="none"
+                  stroke="url(#arrowG)"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  filter="drop-shadow(0 0 6px rgba(52,211,153,0.6))"
+                />
+                <polygon points="112,18 128,22 118,34" fill="#6ee7b7" />
+
+                {/* Ascending 3D Columns */}
+                {/* Bar 1 */}
+                <g transform="translate(38, 90)">
+                  <path d="M 0 10 L 0 35 A 10 5 0 0 0 20 35 L 20 10 Z" fill="url(#barG2)" />
+                  <ellipse cx="10" cy="10" rx="10" ry="5" fill="#6ee7b7" />
+                </g>
+                {/* Bar 2 */}
+                <g transform="translate(62, 70)">
+                  <path d="M 0 10 L 0 55 A 11 5.5 0 0 0 22 55 L 22 10 Z" fill="url(#barG1)" />
+                  <ellipse cx="11" cy="10" rx="11" ry="5.5" fill="#a7f3d0" />
+                </g>
+                {/* Bar 3 */}
+                <g transform="translate(88, 48)">
+                  <path d="M 0 10 L 0 78 A 12 6 0 0 0 24 78 L 24 10 Z" fill="url(#barG1)" />
+                  <ellipse cx="12" cy="10" rx="12" ry="6" fill="#d1fae5" />
+                </g>
+
+                {/* User Token with Golden Crown */}
+                <g transform="translate(120, 52)">
+                  {/* Golden Crown */}
+                  <path
+                    d="M 12 3 L 18 12 L 28 0 L 38 12 L 44 3 L 40 16 L 16 16 Z"
+                    fill="url(#crownGoldG)"
+                    filter="drop-shadow(0 2px 5px rgba(251,191,36,0.8))"
+                  />
+                  {/* Token Disc */}
+                  <circle cx="28" cy="38" r="24" fill="url(#avatarG)" stroke="#34d399" strokeWidth="2.5" />
+                  <circle cx="28" cy="38" r="20" fill="#064e3b" />
+                  {/* User Silhouette */}
+                  <circle cx="28" cy="32" r="6" fill="#a7f3d0" />
+                  <path d="M 18 46 A 10 10 0 0 1 38 46 Z" fill="#a7f3d0" />
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* ── DESKTOP 2-COLUMN GRID / MOBILE SINGLE COLUMN ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+          {/* ── LEFT COLUMN (7 COLS ON DESKTOP): Charts & Referral Link ── */}
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+            {/* ── 2. MARKET OVERVIEW CARD ── */}
+            <MarketOverviewChart />
+
+            {/* ── 3. UNIQUE REFERRAL LINK CARD ── */}
+            <div className="bg-white border border-slate-100 rounded-[28px] p-5 sm:p-6 shadow-sm space-y-3.5 text-slate-900">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  {/* Green Squircle with Chain Icon */}
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d1fae5] to-[#a7f3d0] flex items-center justify-center text-[#065f46] shrink-0 shadow-xs">
+                    <Link2 className="w-6 h-6 rotate-[-45deg] stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                      Your Unique Referral Link
+                    </h3>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
+                      Share your link to register new downlines into your tree network
+                    </p>
+                  </div>
+                </div>
+
+                <span className="px-2.5 py-1 bg-[#eafaf1] text-[#059669] border border-[#bbf7d0] rounded-xl text-[11px] sm:text-xs font-mono font-extrabold shrink-0">
+                  User Code: {user.referral_code}
                 </span>
-                <span className="text-[10px] text-slate-500 font-bold truncate max-w-full mt-1">
-                  {item.desc}
-                </span>
-              </Link>
-            );
-          })}
+              </div>
+
+              {/* Link Box and Copy Button */}
+              <div className="flex items-center gap-2 pt-0.5">
+                <div className="flex-1 bg-slate-50 border border-slate-200/90 rounded-2xl px-3.5 py-2.5 text-[11px] sm:text-xs font-mono text-slate-700 truncate">
+                  {referralLink}
+                </div>
+                <button
+                  onClick={copyReferral}
+                  className="w-10 h-10 bg-[#012b1d] hover:bg-[#02402b] text-[#10b981] rounded-2xl flex items-center justify-center shrink-0 transition-all shadow-sm cursor-pointer"
+                  title="Copy Link"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT COLUMN (5 COLS ON DESKTOP): Quick Actions & Settings ── */}
+          <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+            {/* ── 4. QUICK ACTIONS CARD ── */}
+            <div className="space-y-3">
+              {/* Header */}
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center space-x-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-700/50 flex items-center justify-center text-emerald-400">
+                    <Zap className="w-3.5 h-3.5 fill-emerald-400" />
+                  </div>
+                  <h2 className="text-sm sm:text-base font-extrabold text-white tracking-tight">Quick Actions</h2>
+                </div>
+
+                <Link
+                  href="/dashboard/wallet"
+                  className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-0.5 transition-colors"
+                >
+                  <span>View All</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              {/* 3 Columns x 2 Rows Grid */}
+              <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
+                {quickActions.map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={idx}
+                      href={item.href}
+                      className="relative overflow-hidden flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-gradient-to-b from-[#032e1f] via-[#012216] to-[#01140c] border border-emerald-800/40 hover:border-emerald-500/60 shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:shadow-[0_4px_20px_rgba(16,185,129,0.15)] transition-all group cursor-pointer"
+                    >
+                      {/* Subtle top inner glow */}
+                      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+                      
+                      {/* Golden Icon */}
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-[#fbbf24] group-hover:scale-110 transition-transform mb-1.5">
+                        <Icon className="w-6 h-6 stroke-[1.8]" />
+                      </div>
+
+                      {/* Title with Chevron */}
+                      <span className="text-[11px] sm:text-xs font-extrabold text-white group-hover:text-emerald-300 transition-colors flex items-center justify-center gap-0.5 leading-tight text-center">
+                        <span>{item.label}</span>
+                        <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-emerald-300 shrink-0" />
+                      </span>
+
+                      {/* Subtitle */}
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 font-medium mt-0.5 leading-tight">
+                        {item.desc}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── 5. ACCOUNT SETTING ROW ── */}
+            <Link
+              href="/dashboard/settings"
+              className="flex items-center justify-between bg-[#e2f5ea] hover:bg-[#d8f0e2] border border-[#bbf0d0] rounded-2xl px-4 sm:px-5 py-3.5 shadow-xs transition-all group cursor-pointer"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-[#059669] flex items-center justify-center text-white shrink-0 shadow-xs">
+                  <Settings className="w-4 h-4 stroke-[2.2]" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                    Account Setting
+                  </h4>
+                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Profile & Security</p>
+                </div>
+              </div>
+
+              <ChevronRight className="w-4 h-4 text-[#059669] group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

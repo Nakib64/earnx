@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CoinsService } from '../coins/coins.service';
 import { UserStatus } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly coinsService: CoinsService,
+  ) {}
 
   /**
    * Returns downlines grouped dynamically by relative level depth (Level 1, Level 2, Level 3...).
@@ -82,6 +86,9 @@ export class UsersService {
         is_premium: true,
         designation: {
           select: { name: true, stars: true },
+        },
+        referred_by: {
+          select: { id: true, full_name: true, phone: true, referral_code: true },
         },
       },
       take: 10,
@@ -215,7 +222,7 @@ export class UsersService {
       const expiresAt = new Date();
       expiresAt.setDate(now.getDate() + 365);
 
-      return this.prisma.user.update({
+      await this.prisma.user.update({
         where: { id: userId },
         data: {
           is_premium: true,
@@ -223,6 +230,11 @@ export class UsersService {
           premium_expires_at: expiresAt,
         },
       });
+
+      // Grant locked premium bonus coins (idempotent — skips if already granted)
+      await this.coinsService.grantLockedCoinsOnPremium(userId);
+
+      return this.prisma.user.findUnique({ where: { id: userId } });
     } else {
       return this.prisma.user.update({
         where: { id: userId },

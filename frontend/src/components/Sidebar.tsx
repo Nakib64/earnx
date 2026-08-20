@@ -15,8 +15,6 @@ import {
   TrendingUp,
   Trophy,
   LogOut,
-  Star,
-  ChevronDown,
   ChevronRight,
   Coins,
   Globe,
@@ -42,9 +40,7 @@ export default function Sidebar() {
 
   const isDashboardRoute = pathname?.startsWith('/dashboard');
   const isAdminRoute = pathname?.startsWith('/admin');
-  const isApprovalsSection = pathname?.startsWith('/admin/approvals');
 
-  const [approvalsOpen, setApprovalsOpen] = useState(!!isApprovalsSection);
 
   // Hide sidebar on public pages, or if user/admin isn't logged in
   if (isAdminRoute && !admin && !isLoading && !adminToken) return null;
@@ -76,10 +72,7 @@ export default function Sidebar() {
     { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
   ];
 
-  const approvalItems: LinkItem[] = [
-    { href: '/admin/approvals/activations', label: 'Activations', icon: UserCheck },
-    { href: '/admin/approvals/premium', label: 'Premium Upgrades', icon: Star },
-  ];
+
 
   const adminBottomItems: LinkItem[] = [
     { href: '/admin/commissions', label: 'Commission Rules', icon: Layers },
@@ -207,36 +200,6 @@ export default function Sidebar() {
         {isAdminRoute ? (
           <>
             {adminTopItems.map((item) => renderItem(item))}
-
-            {/* Approvals Queue Collapsible */}
-            <div className="py-0.5">
-              <button
-                onClick={() => setApprovalsOpen((o) => !o)}
-                className={`w-full flex items-center justify-between p-2.5 rounded-xl border-b border-[#053d29]/50 hover:bg-[#033c28]/60 text-slate-100 transition-all cursor-pointer ${
-                  isApprovalsSection ? 'bg-[#033c28]/80 text-amber-300' : ''
-                }`}
-              >
-                <div className="flex items-center space-x-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-xl border border-[#d4af37]/50 bg-[#022e1f]/60 flex items-center justify-center shrink-0">
-                    <UserCheck className="w-5 h-5 text-[#d4af37]" />
-                  </div>
-                  <span className="font-medium text-sm truncate">Approvals Queue</span>
-                </div>
-                <ChevronDown
-                  className={`w-4 h-4 text-[#d4af37] transition-transform duration-200 ${
-                    approvalsOpen ? 'rotate-180' : 'rotate-0'
-                  }`}
-                />
-              </button>
-
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  approvalsOpen ? 'max-h-48 opacity-100 mt-1 space-y-1' : 'max-h-0 opacity-0'
-                }`}
-              >
-                {approvalItems.map((item) => renderItem(item, true))}
-              </div>
-            </div>
 
             {adminBottomItems.map((item) => renderItem(item))}
           </>

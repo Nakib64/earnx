@@ -22,6 +22,12 @@ interface UserSearchResult {
   referral_code: string;
   status: 'DISABLED' | 'ACTIVE';
   is_premium: boolean;
+  referred_by?: {
+    id: string;
+    full_name: string | null;
+    phone: string;
+    referral_code: string;
+  } | null;
 }
 
 interface InvestmentPlan {
@@ -51,6 +57,14 @@ export default function PurchasePage() {
   const [searchingTarget, setSearchingTarget] = useState(false);
   const [selectedTargetUser, setSelectedTargetUser] = useState<UserSearchResult | null>(null);
   const [showTargetDropdown, setShowTargetDropdown] = useState(false);
+
+  // Referrer / Sponsor Search state (for PREMIUM package)
+  const [referrerQuery, setReferrerQuery] = useState('');
+  const debouncedReferrerQuery = useDebounce(referrerQuery, 300);
+  const [referrerResults, setReferrerResults] = useState<UserSearchResult[]>([]);
+  const [searchingReferrer, setSearchingReferrer] = useState(false);
+  const [selectedReferrerUser, setSelectedReferrerUser] = useState<UserSearchResult | null>(null);
+  const [showReferrerDropdown, setShowReferrerDropdown] = useState(false);
 
 
 
@@ -102,6 +116,12 @@ export default function PurchasePage() {
       return;
     }
 
+    // If query matches the already selected user, keep dropdown closed
+    if (selectedTargetUser && selectedTargetUser.referral_code.toLowerCase() === debouncedTargetQuery.trim().toLowerCase()) {
+      setShowTargetDropdown(false);
+      return;
+    }
+
     const searchTarget = async () => {
       setSearchingTarget(true);
       const res = await apiFetch<any>(
@@ -115,7 +135,7 @@ export default function PurchasePage() {
     };
 
     searchTarget();
-  }, [debouncedTargetQuery]);
+  }, [debouncedTargetQuery, selectedTargetUser]);
 
   const handleSelectTargetUser = (u: UserSearchResult) => {
     setSelectedTargetUser(u);
@@ -135,6 +155,84 @@ export default function PurchasePage() {
     };
     handleSelectTargetUser(selfObj);
   };
+
+  // Debounced search for Referrer / Sponsor User
+  useEffect(() => {
+    if (!debouncedReferrerQuery.trim()) {
+      setReferrerResults([]);
+      setShowReferrerDropdown(false);
+      return;
+    }
+
+    // If query matches the already selected referrer, keep dropdown closed
+    if (selectedReferrerUser && selectedReferrerUser.referral_code.toLowerCase() === debouncedReferrerQuery.trim().toLowerCase()) {
+      setShowReferrerDropdown(false);
+      return;
+    }
+
+    const searchReferrer = async () => {
+      setSearchingReferrer(true);
+      const res = await apiFetch<any>(
+        `/users/search-by-code?q=${encodeURIComponent(debouncedReferrerQuery.trim())}`
+      );
+      if (res.success && Array.isArray(res.data)) {
+        setReferrerResults(res.data);
+        setShowReferrerDropdown(true);
+      }
+      setSearchingReferrer(false);
+    };
+
+    searchReferrer();
+  }, [debouncedReferrerQuery, selectedReferrerUser]);
+
+  const handleSelectReferrerUser = (u: UserSearchResult) => {
+    setSelectedReferrerUser(u);
+    setReferrerQuery(u.referral_code);
+    setShowReferrerDropdown(false);
+  };
+
+  const handleSelectSelfAsReferrer = () => {
+    if (!user) return;
+    const selfObj: UserSearchResult = {
+      id: user.id,
+      full_name: user.full_name,
+      phone: user.phone,
+      referral_code: user.referral_code,
+      status: user.status as any,
+      is_premium: user.is_premium || false,
+    };
+    handleSelectReferrerUser(selfObj);
+  };
+
+  const handleSelectTargetSponsorAsReferrer = () => {
+    if (!selectedTargetUser?.referred_by) return;
+    const ref = selectedTargetUser.referred_by;
+    const refObj: UserSearchResult = {
+      id: ref.id,
+      full_name: ref.full_name,
+      phone: ref.phone,
+      referral_code: ref.referral_code,
+      status: 'ACTIVE',
+      is_premium: true,
+    };
+    handleSelectReferrerUser(refObj);
+  };
+
+  // Auto-fill referrer when target user changes (if target user has a sponsor)
+  useEffect(() => {
+    if (selectedTargetUser?.referred_by) {
+      const ref = selectedTargetUser.referred_by;
+      setSelectedReferrerUser({
+        id: ref.id,
+        full_name: ref.full_name,
+        phone: ref.phone,
+        referral_code: ref.referral_code,
+        status: 'ACTIVE',
+        is_premium: true,
+      });
+      setReferrerQuery(ref.referral_code);
+    }
+  }, [selectedTargetUser]);
 
   // Price Calculation
   const getPackagePrice = (): number => {
@@ -263,6 +361,7 @@ export default function PurchasePage() {
         target_user_code: selectedTargetUser.referral_code,
         package_type: packageType,
         investment_plan_id: packageType === 'INVESTMENT' ? selectedPlanId : undefined,
+        referrer_code: packageType === 'PREMIUM' && selectedReferrerUser ? selectedReferrerUser.referral_code : undefined,
       }),
     });
 
@@ -342,123 +441,236 @@ export default function PurchasePage() {
             </button>
           </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search User Code (e.g. EX0001) or Phone..."
-              value={targetQuery}
-              onChange={(e) => setTargetQuery(e.target.value)}
-              onFocus={() => targetResults.length > 0 && setShowTargetDropdown(true)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
-            />
-            {searchingTarget && (
-              <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
-                Searching...
-              </span>
-            )}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search User Code (e.g. EX0001) or Phone..."
+                value={targetQuery}
+                onChange={(e) => {
+                  setTargetQuery(e.target.value);
+                  if (selectedTargetUser && e.target.value.trim().toLowerCase() !== selectedTargetUser.referral_code.toLowerCase()) {
+                    setSelectedTargetUser(null);
+                  }
+                }}
+                onFocus={() => targetResults.length > 0 && !selectedTargetUser && setShowTargetDropdown(true)}
+                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+              />
+              {searchingTarget && (
+                <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
+                  Searching...
+                </span>
+              )}
 
-            {/* Target Dropdown Suggestions */}
-            {showTargetDropdown && targetResults.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
-                {targetResults.map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleSelectTargetUser(u)}
-                    className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="text-xs font-black text-slate-900">
-                        {u.full_name || 'No Name'}
+              {/* Target Dropdown Suggestions */}
+              {showTargetDropdown && targetResults.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                  {targetResults.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => handleSelectTargetUser(u)}
+                      className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="text-xs font-black text-slate-900">
+                          {u.full_name || 'No Name'}
+                        </div>
+                        <div className="text-[10px] text-slate-500 font-mono">
+                          Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
+                        </div>
                       </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
-                        Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
-                      </div>
-                    </div>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                      {u.status} {u.is_premium && '• PREMIUM'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                        {u.status} {u.is_premium && '• PREMIUM'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Auto-filled Target Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Name</label>
-            <input
-              type="text"
-              readOnly
-              value={selectedTargetUser?.full_name || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800"
-            />
+          {/* Auto-filled Target Details */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Name</label>
+              <input
+                type="text"
+                readOnly
+                value={selectedTargetUser?.full_name || '—'}
+                className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Target Phone Number</label>
+              <input
+                type="text"
+                readOnly
+                value={selectedTargetUser?.phone || '—'}
+                className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Code</label>
+              <input
+                type="text"
+                readOnly
+                value={selectedTargetUser?.referral_code || '—'}
+                className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-[#005A36]"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Target Phone Number</label>
-            <input
-              type="text"
-              readOnly
-              value={selectedTargetUser?.phone || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-800"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Code</label>
-            <input
-              type="text"
-              readOnly
-              value={selectedTargetUser?.referral_code || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-[#005A36]"
-            />
-          </div>
-        </div>
 
-        {/* 2. Package Dropdown */}
-        <div className="space-y-1.5">
-          <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-            Select Package Type <span className="text-rose-500">*</span>
-          </label>
-          <select
-            value={packageType}
-            onChange={(e) => setPackageType(e.target.value as any)}
-            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
-          >
-            <option value="ACTIVATION">Account Activation Package (৳{activationFee})</option>
-            <option value="PREMIUM">Premium Subscription Package (৳{premiumFee})</option>
-            <option value="INVESTMENT">Investment Package Plan</option>
-          </select>
-        </div>
-
-        {/* 3. All Investment Plans List Dropdown (shown when packageType === 'INVESTMENT') */}
-        {packageType === 'INVESTMENT' && (
+          {/* 2. Package Dropdown */}
           <div className="space-y-1.5">
             <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-              Select Investment Plan <span className="text-rose-500">*</span>
+              Select Package Type <span className="text-rose-500">*</span>
             </label>
-            {loadingPlans ? (
-              <div className="text-xs text-slate-400 italic">Loading active plans...</div>
-            ) : activePlans.length > 0 ? (
-              <select
-                value={selectedPlanId}
-                onChange={(e) => setSelectedPlanId(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
-              >
-                {activePlans.map((plan) => (
-                  <option key={plan.id} value={plan.id}>
-                    {plan.title} — ৳{Number(plan.amount)} ({plan.monthly_return_percent}% Monthly Return {plan.is_lifetime ? '• Lifetime' : `• ${plan.duration_months} Months`})
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <div className="text-xs text-rose-500 font-bold">No active investment plans available.</div>
-            )}
+            <select
+              value={packageType}
+              onChange={(e) => setPackageType(e.target.value as any)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
+            >
+              <option value="ACTIVATION">Account Activation Package (৳{activationFee})</option>
+              <option value="PREMIUM">Premium Subscription Package (৳{premiumFee})</option>
+              <option value="INVESTMENT">Investment Package Plan</option>
+            </select>
+          </div>
+
+          {/* 3. All Investment Plans List Dropdown (shown when packageType === 'INVESTMENT') */}
+          {packageType === 'INVESTMENT' && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                Select Investment Plan <span className="text-rose-500">*</span>
+              </label>
+              {loadingPlans ? (
+                <div className="text-xs text-slate-400 italic">Loading active plans...</div>
+              ) : activePlans.length > 0 ? (
+                <select
+                  value={selectedPlanId}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
+                >
+                  {activePlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.title} — ৳{Number(plan.amount)} ({plan.monthly_return_percent}% Monthly Return {plan.is_lifetime ? '• Lifetime' : `• ${plan.duration_months} Months`})
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="text-xs text-rose-500 font-bold">No active investment plans available.</div>
+              )}
+            </div>
+          )}
+
+          {/* 4. Referral / Sponsor Code Search & Details (shown when packageType === 'PREMIUM') */}
+          {packageType === 'PREMIUM' && (
+            <div className="space-y-4 pt-4 border-t border-slate-200/80">
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                    Referral Code / Sponsor Code <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center space-x-3 text-xs font-bold">
+                    {selectedTargetUser?.referred_by && (
+                      <button
+                        type="button"
+                        onClick={handleSelectTargetSponsorAsReferrer}
+                        className="text-xs text-purple-700 font-bold hover:underline cursor-pointer flex items-center space-x-1"
+                      >
+                        <span>Use Target's Sponsor</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleSelectSelfAsReferrer}
+                      className="text-xs text-[#005A36] font-bold hover:underline cursor-pointer flex items-center space-x-1"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      <span>Use My Own Code</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search Referral / Sponsor Code (e.g. EX0001) or Phone..."
+                    value={referrerQuery}
+                    onChange={(e) => {
+                      setReferrerQuery(e.target.value);
+                      if (selectedReferrerUser && e.target.value.trim().toLowerCase() !== selectedReferrerUser.referral_code.toLowerCase()) {
+                        setSelectedReferrerUser(null);
+                      }
+                    }}
+                    onFocus={() => referrerResults.length > 0 && !selectedReferrerUser && setShowReferrerDropdown(true)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+                  />
+                  {searchingReferrer && (
+                    <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
+                      Searching...
+                    </span>
+                  )}
+
+                  {/* Referrer Dropdown Suggestions */}
+                  {showReferrerDropdown && referrerResults.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                      {referrerResults.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => handleSelectReferrerUser(u)}
+                          className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
+                        >
+                          <div>
+                            <div className="text-xs font-black text-slate-900">
+                              {u.full_name || 'No Name'}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-mono">
+                              Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                            {u.status} {u.is_premium && '• PREMIUM'}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+            {/* Auto-filled Referrer Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+              <div>
+                <label className="block text-[10px] font-bold text-purple-700 uppercase">Referral User Name</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={selectedReferrerUser?.full_name || '—'}
+                  className="w-full bg-white border border-purple-200/80 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-purple-700 uppercase">Referral Phone Number</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={selectedReferrerUser?.phone || '—'}
+                  className="w-full bg-white border border-purple-200/80 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-800"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-purple-700 uppercase">Referral Code</label>
+                <input
+                  type="text"
+                  readOnly
+                  value={selectedReferrerUser?.referral_code || '—'}
+                  className="w-full bg-white border border-purple-200/80 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-purple-800"
+                />
+              </div>
+            </div>
           </div>
         )}
-
-
 
         {/* Total Cost & Submit */}
         <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">

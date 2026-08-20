@@ -69,7 +69,26 @@ export class PurchasesService {
       throw new NotFoundException(`Target user with code/phone "${cleanCode}" was not found.`);
     }
 
-
+    // 2. Validate Referrer User if provided
+    let referrerUser: any = null;
+    if (dto.referrer_code && dto.referrer_code.trim()) {
+      const cleanRefCode = dto.referrer_code.trim();
+      referrerUser = await this.prisma.user.findFirst({
+        where: {
+          OR: [
+            { referral_code: { equals: cleanRefCode, mode: 'insensitive' } },
+            { phone: { equals: cleanRefCode } },
+            { id: cleanRefCode },
+          ],
+        },
+      });
+      if (!referrerUser) {
+        throw new NotFoundException(`Referral user with code/phone "${cleanRefCode}" was not found.`);
+      }
+      if (referrerUser.id === targetUser.id) {
+        throw new BadRequestException('Target user cannot be their own referral sponsor.');
+      }
+    }
 
     // 3. Package Validation & Duplicate Package Checks
     let packageCost = 0;
@@ -126,7 +145,7 @@ export class PurchasesService {
       );
     }
 
-    // 5. Execute DB Transaction
+    // 5. Execute DB Transaction (timeout extended to 30s for multi-level commission chain)
     return this.prisma.$transaction(async (tx) => {
       // A. Deduct Payer Balance using WalletService
       await this.walletService.processTransaction(
@@ -169,6 +188,10 @@ export class PurchasesService {
           premium_started_at: new Date(),
         };
 
+        if (referrerUser) {
+          updateData.referred_by_id = referrerUser.id;
+        }
+
         await tx.user.update({
           where: { id: targetUser.id },
           data: updateData,
@@ -180,6 +203,9 @@ export class PurchasesService {
           CommissionType.PREMIUM,
           tx
         );
+
+        // Grant locked premium bonus coins (same as approval flow)
+        await this.coinsService.grantLockedCoinsOnPremium(targetUser.id, tx);
       } else if (dto.package_type === PackageType.INVESTMENT) {
         const amountNum = Number(investmentPlan.amount);
         const returnPercentNum = Number(investmentPlan.monthly_return_percent);
@@ -223,6 +249,6 @@ export class PurchasesService {
         },
         remaining_balance: Number(updatedPayer?.wallet_balance || 0),
       };
-    });
+    }, { timeout: 30000, maxWait: 5000 });
   }
 }

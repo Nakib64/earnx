@@ -8,85 +8,76 @@ interface CandleData {
   high: number;
   low: number;
   close: number;
-  time: string;
+  time?: string;
 }
 
-// Exact 29 candle waveform matching the provided screenshot
-const mock7DCandles: CandleData[] = [
-  { open: 154, high: 158, low: 152, close: 157, time: '1' },
-  { open: 157, high: 161, low: 155, close: 160, time: '2' },
-  { open: 160, high: 161, low: 156, close: 157, time: '3' },
-  { open: 157, high: 165, low: 156, close: 164, time: '4' },
-  { open: 164, high: 171, low: 163, close: 169, time: '5' },
-  { open: 169, high: 170, low: 164, close: 165, time: '6' },
-  { open: 165, high: 166, low: 158, close: 159, time: '7' },
-  { open: 159, high: 163, low: 158, close: 162, time: '8' },
-  { open: 162, high: 163, low: 155, close: 156, time: '9' },
-  { open: 156, high: 157, low: 150, close: 151, time: '10' },
-  { open: 151, high: 156, low: 150, close: 155, time: '11' },
-  { open: 155, high: 156, low: 151, close: 152, time: '12' },
-  { open: 152, high: 160, low: 151, close: 159, time: '13' },
-  { open: 159, high: 168, low: 158, close: 167, time: '14' },
-  { open: 167, high: 176, low: 166, close: 175, time: '15' },
-  { open: 175, high: 189.45, low: 174, close: 187, time: '16' }, // High $189.45 (Peak)
-  { open: 187, high: 188, low: 178, close: 179, time: '17' },
-  { open: 179, high: 180, low: 170, close: 171, time: '18' },
-  { open: 171, high: 172, low: 163, close: 164, time: '19' },
-  { open: 164, high: 172, low: 163, close: 170, time: '20' },
-  { open: 170, high: 171, low: 158, close: 159, time: '21' },
-  { open: 159, high: 160, low: 148, close: 149, time: '22' },
-  { open: 149, high: 150, low: 142.35, close: 143, time: '23' }, // Low $142.35 (Trough)
-  { open: 143, high: 156, low: 142, close: 155, time: '24' },
-  { open: 155, high: 167, low: 154, close: 166, time: '25' },
-  { open: 166, high: 167, low: 158, close: 159, time: '26' },
-  { open: 159, high: 165, low: 158, close: 164, time: '27' },
-  { open: 164, high: 165, low: 153, close: 154, time: '28' },
-  { open: 154, high: 155, low: 146, close: 147, time: '29' },
+// Candlesticks matching the exact curve in the mockup
+const candleData: CandleData[] = [
+  { open: 155, high: 160, low: 154, close: 159 },
+  { open: 159, high: 164, low: 158, close: 162 },
+  { open: 162, high: 166, low: 160, close: 165 },
+  { open: 165, high: 172, low: 164, close: 170 },
+  { open: 170, high: 174, low: 166, close: 168 },
+  { open: 168, high: 169, low: 161, close: 163 },
+  { open: 163, high: 167, low: 162, close: 166 },
+  { open: 166, high: 175, low: 165, close: 174 },
+  { open: 174, high: 184, low: 172, close: 182 },
+  { open: 182, high: 189.45, low: 180, close: 188 }, // Peak High $189.45
+  { open: 188, high: 189, low: 178, close: 180 },
+  { open: 180, high: 182, low: 171, close: 173 },
+  { open: 173, high: 175, low: 165, close: 167 },
+  { open: 167, high: 168, low: 158, close: 160 },
+  { open: 160, high: 162, low: 148, close: 150 },
+  { open: 150, high: 152, low: 142.35, close: 144 }, // Trough Low $142.35
+  { open: 144, high: 156, low: 143, close: 154 },
+  { open: 154, high: 168, low: 153, close: 166 },
+  { open: 166, high: 172, low: 164, close: 170 },
+  { open: 170, high: 171, low: 162, close: 164 },
+  { open: 164, high: 168, low: 162, close: 167 },
+  { open: 167, high: 168, low: 156, close: 158 },
+  { open: 158, high: 160, low: 150, close: 152 },
+];
+
+// Bottom dotted waveform points
+const bottomWave = [
+  { x: 20, y: 155 },
+  { x: 50, y: 152 },
+  { x: 90, y: 142 },
+  { x: 130, y: 150 },
+  { x: 170, y: 158 },
+  { x: 210, y: 155 },
+  { x: 250, y: 144 },
+  { x: 290, y: 143 },
+  { x: 330, y: 148 },
+  { x: 370, y: 144 },
+  { x: 400, y: 152 },
 ];
 
 export default function MarketOverviewChart() {
   const [timeframe, setTimeframe] = useState<'1D' | '7D' | '1M'>('7D');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const candles = mock7DCandles;
+  const minPrice = 135;
+  const maxPrice = 195;
 
-  // Chart bounds matching screenshot ratios
-  const minPrice = 136;
-  const maxPrice = 196;
-
-  const svgWidth = 460;
-  const svgHeight = 220;
-  const paddingTop = 35;
-  const paddingBottom = 30;
-  const chartHeight = svgHeight - paddingTop - paddingBottom;
+  const svgWidth = 440;
+  const svgHeight = 175;
+  const chartRightMargin = 45; // Space for Y-axis labels
+  const chartWidth = svgWidth - chartRightMargin;
 
   const getY = (price: number) => {
     const ratio = (price - minPrice) / (maxPrice - minPrice);
-    return svgHeight - paddingBottom - ratio * chartHeight;
+    return svgHeight - 35 - ratio * (svgHeight - 55);
   };
 
-  const candleCount = candles.length;
-  const step = svgWidth / (candleCount + 1);
-
-  // Peak (index 15) and Trough (index 22)
-  const highX = step * 16;
-  const highY = getY(189.45);
-
-  const lowX = step * 23;
-  const lowY = getY(142.35);
-
-  // Bottom teal sparkline points
-  const bottomPoints = candles.map((c, i) => {
-    const x = step * (i + 1);
-    const y = svgHeight - 12 + Math.sin(i * 0.7) * 2;
-    return { x, y };
-  });
+  const candleStep = (chartWidth - 20) / candleData.length;
+  const yLabels = [190, 180, 170, 160, 150, 140];
 
   return (
-    <div className="bg-white border border-slate-100/90 rounded-2xl p-5 shadow-xs flex flex-col justify-between h-full min-h-[300px]">
-      {/* Header & Timeframe Selector */}
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-bold text-slate-900 tracking-tight">
+    <div className="bg-white rounded-[28px] p-5 sm:p-6 shadow-sm border border-slate-100/80">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
           Market Overview
         </h3>
 
@@ -94,7 +85,7 @@ export default function MarketOverviewChart() {
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value as any)}
-            className="appearance-none bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-3.5 py-1.5 pr-7 rounded-lg border border-slate-200 cursor-pointer focus:outline-none shadow-2xs"
+            className="appearance-none bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-extrabold px-3.5 py-1.5 pr-7 rounded-xl border border-slate-200 cursor-pointer focus:outline-none"
           >
             <option value="1D">1D</option>
             <option value="7D">7D</option>
@@ -104,114 +95,113 @@ export default function MarketOverviewChart() {
         </div>
       </div>
 
-      {/* SVG Candlestick Chart */}
-      <div className="relative w-full overflow-hidden flex-1 flex items-center">
+      {/* High / Low Pills */}
+      <div className="flex items-center gap-2.5 mb-2">
+        <span className="inline-flex items-center gap-1.5 bg-[#e8faf0] text-[#059669] text-xs font-bold px-3 py-1 rounded-xl border border-[#c1f2d6]">
+          <span>High: $189.45</span>
+          <span className="w-4 h-4 rounded-full bg-[#059669] text-white text-[9px] flex items-center justify-center font-black">
+            ↗
+          </span>
+        </span>
+        <span className="inline-flex items-center gap-1.5 bg-[#fef2f2] text-[#e11d48] text-xs font-bold px-3 py-1 rounded-xl border border-[#fed7d7]">
+          <span>Low: $142.35</span>
+          <span className="w-4 h-4 rounded-full bg-[#e11d48] text-white text-[9px] flex items-center justify-center font-black">
+            ↘
+          </span>
+        </span>
+      </div>
+
+      {/* SVG Canvas */}
+      <div className="relative w-full overflow-hidden pt-1">
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           className="w-full h-auto overflow-visible select-none"
         >
-          {/* Subtle Background Grid Lines */}
-          {[140, 155, 170, 185].map((price) => (
-            <line
-              key={price}
-              x1={0}
-              y1={getY(price)}
-              x2={svgWidth}
-              y2={getY(price)}
-              stroke="#f8fafc"
-              strokeWidth={1}
-            />
-          ))}
+          {/* Y Axis Numbers on the right */}
+          {yLabels.map((val) => {
+            const y = getY(val);
+            return (
+              <text
+                key={val}
+                x={svgWidth - 5}
+                y={y + 3}
+                textAnchor="end"
+                fill="#94a3b8"
+                className="text-[10px] font-medium"
+              >
+                {val}
+              </text>
+            );
+          })}
 
-          {/* High Annotation Text (High: $189.45 in green text) */}
-          <text
-            x={highX}
-            y={highY - 10}
-            textAnchor="middle"
-            fill="#10b981"
-            className="text-[11px] font-bold"
-          >
-            High: $189.45
-          </text>
-
-          {/* Low Annotation Text (Low: $142.35 in red text) */}
-          <text
-            x={lowX}
-            y={lowY + 18}
-            textAnchor="middle"
-            fill="#ef4444"
-            className="text-[11px] font-bold"
-          >
-            Low: $142.35
-          </text>
-
-          {/* Render Candlesticks */}
-          {candles.map((candle, idx) => {
-            const x = step * (idx + 1);
+          {/* Candlesticks */}
+          {candleData.map((candle, idx) => {
+            const x = 15 + idx * candleStep + candleStep / 2;
             const isBullish = candle.close >= candle.open;
-            const color = isBullish ? '#10b981' : '#ef4444'; // Green or Red
+            const color = isBullish ? '#10b981' : '#f43f5e';
 
-            const highYPos = getY(candle.high);
-            const lowYPos = getY(candle.low);
-            const openYPos = getY(candle.open);
-            const closeYPos = getY(candle.close);
+            const highY = getY(candle.high);
+            const lowY = getY(candle.low);
+            const openY = getY(candle.open);
+            const closeY = getY(candle.close);
 
-            const bodyTop = Math.min(openYPos, closeYPos);
-            const bodyHeight = Math.max(Math.abs(closeYPos - openYPos), 4);
-            const candleWidth = 7;
+            const bodyTop = Math.min(openY, closeY);
+            const bodyHeight = Math.max(Math.abs(closeY - openY), 4);
+            const candleWidth = 7.5;
 
             return (
               <g
-                key={idx}
+                key={`candle-${idx}`}
                 onMouseEnter={() => setHoveredIndex(idx)}
                 onMouseLeave={() => setHoveredIndex(null)}
                 className="cursor-pointer"
               >
-                {/* Thin Wick line */}
+                {/* Wick */}
                 <line
                   x1={x}
-                  y1={highYPos}
+                  y1={highY}
                   x2={x}
-                  y2={lowYPos}
+                  y2={lowY}
                   stroke={color}
-                  strokeWidth={1.2}
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
                 />
-                {/* Rectangular Candle Body */}
+                {/* Body */}
                 <rect
                   x={x - candleWidth / 2}
                   y={bodyTop}
                   width={candleWidth}
                   height={bodyHeight}
                   fill={color}
-                  rx={1}
+                  rx={2}
                 />
               </g>
             );
           })}
 
-          {/* Bottom Teal Sparkline & Dots matching Screenshot */}
-          <polyline
+          {/* Bottom green dotted wave line */}
+          <path
+            d={`M ${bottomWave[0].x} ${bottomWave[0].y} Q 70 135, 130 150 T 250 144 T 370 144 T 400 152`}
             fill="none"
-            stroke="#0d9488"
-            strokeWidth={1.2}
-            points={bottomPoints.map((p) => `${p.x},${p.y}`).join(' ')}
-            opacity={0.7}
+            stroke="#10b981"
+            strokeWidth={1.6}
+            opacity={0.85}
           />
-          {bottomPoints.map((p, idx) => (
+          {bottomWave.map((pt, i) => (
             <circle
-              key={`dot-${idx}`}
-              cx={p.x}
-              cy={p.y}
-              r={2.2}
-              fill="#0f766e"
+              key={`dot-${i}`}
+              cx={pt.x}
+              cy={pt.y}
+              r={2.8}
+              fill="#059669"
             />
           ))}
         </svg>
 
         {/* Hover Tooltip */}
         {hoveredIndex !== null && (
-          <div className="absolute top-0 right-0 bg-slate-900 text-white px-2.5 py-1 rounded-md text-[10px] font-mono shadow-md z-10">
-            <span>Price: ${candles[hoveredIndex].close.toFixed(2)}</span>
+          <div className="absolute top-0 right-1 bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[10px] font-mono shadow-md z-10">
+            <span>Price: ${candleData[hoveredIndex].close.toFixed(2)}</span>
           </div>
         )}
       </div>
