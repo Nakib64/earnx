@@ -42,9 +42,16 @@ export default function Sidebar() {
   const isDashboardRoute = pathname?.startsWith('/dashboard');
   const isAdminRoute = pathname?.startsWith('/admin');
 
+  // Hide sidebar on public pages (only show on /dashboard or /admin when authenticated)
+  if (!isDashboardRoute && !isAdminRoute) {
+    return null;
+  }
 
-  // Hide sidebar on public pages, or if user/admin isn't logged in
-  if (!userToken && !adminToken) {
+  if (isDashboardRoute && !userToken) {
+    return null;
+  }
+
+  if (isAdminRoute && !adminToken) {
     return null;
   }
 
