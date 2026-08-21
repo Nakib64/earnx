@@ -49,7 +49,7 @@ export class CommissionService {
       // Source user being activated or upgrading to premium
       const sourceUser = await tx.user.findUnique({
         where: { id: sourceUserId },
-        select: { id: true, phone: true, full_name: true, referred_by_id: true },
+        select: { id: true, phone: true, full_name: true, referral_code: true, referred_by_id: true },
       });
 
       if (!sourceUser || !sourceUser.referred_by_id) {
@@ -94,29 +94,27 @@ export class CommissionService {
               reason: `Upline user (${parent.phone}) at level ${currentLevel} is not ACTIVE`,
             });
           }
-          // Rule 2: For PREMIUM commissions beyond Level 1:
-          // Upline parent must be a Premium subscriber (is_premium === true)
-          else if (commissionType === CommissionType.PREMIUM && currentLevel > 1 && !parent.is_premium) {
+          // Rule 2: For PREMIUM commissions, ALL upline tiers (Level 1 to 5) must be Premium members
+          else if (commissionType === CommissionType.PREMIUM && !parent.is_premium) {
             payoutSummary.push({
               level: currentLevel,
               parentId: parent.id,
               parentPhone: parent.phone,
               amount: payoutAmount,
               qualified: false,
-              reason: `Upline user (${parent.phone}) at level ${currentLevel} is not an active Premium Package subscriber`,
+              reason: `Upline user (${parent.phone}) at level ${currentLevel} is not a Premium member`,
             });
           } else {
-            // Rule 3: Designation + Premium Package level check for upper levels (level 2 to 5):
-            // - Level 1 (Direct Referrer): Qualified if active
-            // - Level 2-5: Qualified ONLY IF parent is Premium AND has a Designation where designation.max_level >= currentLevel
-            const maxUnlockedLevel = (commissionType === CommissionType.PREMIUM && currentLevel > 1)
-              ? (parent.designation ? parent.designation.max_level : 0)
-              : 1;
+            // Rule 3: 5-Level Designation Rank Cap (if parent has a designation with max_level, respects it; otherwise defaults to all 5 levels)
+            const maxUnlockedLevel = parent.designation ? parent.designation.max_level : 5;
 
-            const isQualified = currentLevel === 1 || (parent.is_premium && maxUnlockedLevel >= currentLevel);
+            const isQualified = commissionType === CommissionType.ACTIVATION
+              ? currentLevel === 1
+              : (parent.is_premium && maxUnlockedLevel >= currentLevel);
 
             if (isQualified) {
-              const description = `${commissionType === CommissionType.PREMIUM ? 'Premium' : 'Activation'} Level ${currentLevel} Commission from user (${sourceUser.phone})`;
+              const sourceLabel = sourceUser.full_name || sourceUser.phone;
+              const description = `${commissionType === CommissionType.PREMIUM ? 'Premium' : 'Activation'} Level ${currentLevel} Commission from ${sourceLabel} (${sourceUser.referral_code || sourceUser.phone})`;
 
               await this.walletService.processTransaction(
                 parent.id,
@@ -148,7 +146,7 @@ export class CommissionService {
 
         // Move to next upper parent in the tree
         currentParentId = parent.referred_by_id;
-        currentLevel++;
+        currentLevel += 1;
       }
 
       return payoutSummary;

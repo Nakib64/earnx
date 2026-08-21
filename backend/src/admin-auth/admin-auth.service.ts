@@ -11,7 +11,7 @@ export class AdminAuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(dto: AdminLoginDto) {
+  async login(dto: AdminLoginDto, ipAddress?: string, userAgent?: string) {
     const admin = await this.prisma.admin.findUnique({
       where: { phone: dto.phone.trim() },
     });
@@ -22,7 +22,32 @@ export class AdminAuthService {
 
     const isPasswordValid = await bcrypt.compare(dto.password, admin.password_hash);
     if (!isPasswordValid) {
+      // Record failed login if admin exists
+      try {
+        await (this.prisma as any).adminLoginHistory.create({
+          data: {
+            admin_id: admin.id,
+            ip_address: ipAddress || 'Unknown',
+            user_agent: userAgent || 'Unknown',
+            status: 'FAILED',
+          },
+        });
+      } catch {}
       throw new UnauthorizedException('Invalid phone number or password');
+    }
+
+    // Record successful login history
+    try {
+      await (this.prisma as any).adminLoginHistory.create({
+        data: {
+          admin_id: admin.id,
+          ip_address: ipAddress || 'Unknown',
+          user_agent: userAgent || 'Unknown',
+          status: 'SUCCESS',
+        },
+      });
+    } catch (e) {
+      // Non-blocking log
     }
 
     const payload = { sub: admin.id, phone: admin.phone, role: 'admin' };
@@ -34,6 +59,31 @@ export class AdminAuthService {
         id: admin.id,
         phone: admin.phone,
         name: admin.name,
+      },
+    };
+  }
+
+  async getLoginHistory(adminId: string, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      (this.prisma as any).adminLoginHistory.findMany({
+        where: { admin_id: adminId },
+        orderBy: { created_at: 'desc' },
+        skip,
+        take: limit,
+      }),
+      (this.prisma as any).adminLoginHistory.count({
+        where: { admin_id: adminId },
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
     };
   }

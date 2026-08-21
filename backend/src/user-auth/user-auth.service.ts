@@ -65,6 +65,69 @@ export class UserAuthService {
     return this.otpService.verifyOtp(phone, otp, 'SIGNUP');
   }
 
+  /**
+   * Dispatches 6-digit forgot password OTP via SMS
+   */
+  async sendForgotPasswordOtp(phone: string) {
+    const cleanPhone = phone?.trim();
+    if (!cleanPhone) {
+      throw new BadRequestException('Phone number is required');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { phone: cleanPhone },
+    });
+
+    if (!user) {
+      throw new BadRequestException('No registered account found with this phone number');
+    }
+
+    return this.otpService.generateAndSendOtp(cleanPhone, 'FORGOT_PASSWORD');
+  }
+
+  /**
+   * Verifies OTP and resets user password
+   */
+  async resetForgotPassword(phone: string, otp: string, newPassword: string) {
+    const cleanPhone = phone?.trim();
+    if (!cleanPhone) {
+      throw new BadRequestException('Phone number is required');
+    }
+    if (!newPassword || newPassword.length < 6) {
+      throw new BadRequestException('New password must be at least 6 characters');
+    }
+
+    // 1. Verify OTP with brute force prevention
+    await this.otpService.verifyOtp(cleanPhone, otp, 'FORGOT_PASSWORD');
+
+    // 2. Find and update user password
+    const user = await this.prisma.user.findUnique({
+      where: { phone: cleanPhone },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password_hash: passwordHash },
+    });
+
+    // Invalidate OTP record so it cannot be reused
+    await this.prisma.otpVerification.updateMany({
+      where: { phone: cleanPhone, purpose: 'FORGOT_PASSWORD' },
+      data: { is_verified: false, otp: 'EXPIRED' },
+    });
+
+    return {
+      success: true,
+      message: 'Password has been reset successfully! You can now log in with your new password.',
+    };
+  }
+
   async register(dto: UserRegisterDto & { otp?: string }) {
     const cleanPhone = dto.phone.trim();
     const existingPhone = await this.prisma.user.findUnique({

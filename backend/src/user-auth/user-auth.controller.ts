@@ -18,6 +18,18 @@ export class UserAuthController {
     return this.userAuthService.verifySignupOtp(body.phone, body.otp);
   }
 
+  @Post('forgot-password/send-otp')
+  async sendForgotPasswordOtp(@Body() body: { phone: string }) {
+    return this.userAuthService.sendForgotPasswordOtp(body.phone);
+  }
+
+  @Post('forgot-password/reset')
+  async resetForgotPassword(
+    @Body() body: { phone: string; otp: string; new_password: string },
+  ) {
+    return this.userAuthService.resetForgotPassword(body.phone, body.otp, body.new_password);
+  }
+
   @Post('register')
   async register(@Body() dto: UserRegisterDto & { otp?: string }) {
     return this.userAuthService.register(dto);

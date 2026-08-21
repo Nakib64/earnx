@@ -89,7 +89,7 @@ export default function DashboardPage() {
   };
 
   const isPremium = (user as any).is_premium;
-  const firstName = user.full_name?.split(' ')[0] || user.phone;
+  const firstName = user.full_name || user.phone;
 
   const quickActions = [
     {
@@ -389,7 +389,7 @@ export default function DashboardPage() {
                   <div className="w-7 h-7 rounded-lg bg-emerald-950 border border-emerald-700/50 flex items-center justify-center text-emerald-400">
                     <Zap className="w-3.5 h-3.5 fill-emerald-400" />
                   </div>
-                  <h2 className="text-sm sm:text-base font-extrabold text-white tracking-tight">Quick Actions</h2>
+                  <h2 className="text-sm sm:text-base font-extrabold text-black tracking-tight">Quick Actions</h2>
                 </div>
 
                 <Link

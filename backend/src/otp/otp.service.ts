@@ -15,7 +15,7 @@ export class OtpService {
    */
   async generateAndSendOtp(
     phone: string,
-    purpose: 'SIGNUP' | 'WITHDRAWAL',
+    purpose: 'SIGNUP' | 'WITHDRAWAL' | 'FORGOT_PASSWORD',
     metadata?: { amount?: number },
   ) {
     const cleanPhone = phone.trim();
@@ -74,6 +74,8 @@ export class OtpService {
     // Dispatch SMS based on purpose
     if (purpose === 'SIGNUP') {
       await this.smsService.sendSignupOtp(cleanPhone, otp);
+    } else if (purpose === 'FORGOT_PASSWORD') {
+      await this.smsService.sendForgotPasswordOtp(cleanPhone, otp);
     } else if (purpose === 'WITHDRAWAL') {
       await this.smsService.sendWithdrawalOtp(cleanPhone, otp, metadata?.amount || 0);
     }
@@ -91,7 +93,7 @@ export class OtpService {
   /**
    * Verifies the 6-digit OTP code against brute force attempts (max 5) and expiration (10 min)
    */
-  async verifyOtp(phone: string, code: string, purpose: 'SIGNUP' | 'WITHDRAWAL') {
+  async verifyOtp(phone: string, code: string, purpose: 'SIGNUP' | 'WITHDRAWAL' | 'FORGOT_PASSWORD') {
     const cleanPhone = phone.trim();
     const cleanCode = code.trim();
 

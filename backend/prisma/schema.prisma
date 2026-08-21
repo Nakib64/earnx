@@ -45,12 +45,26 @@ enum CommissionType {
 }
 
 model Admin {
-  id            String   @id @default(uuid())
-  phone         String   @unique
+  id            String              @id @default(uuid())
+  phone         String              @unique
   password_hash String
   name          String
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  created_at    DateTime            @default(now())
+  updated_at    DateTime            @updatedAt
+  login_history AdminLoginHistory[]
+}
+
+model AdminLoginHistory {
+  id         String   @id @default(uuid())
+  admin_id   String
+  admin      Admin    @relation(fields: [admin_id], references: [id], onDelete: Cascade)
+  ip_address String?
+  user_agent String?
+  status     String   @default("SUCCESS")
+  created_at DateTime @default(now())
+
+  @@index([admin_id])
+  @@index([created_at])
 }
 
 model User {

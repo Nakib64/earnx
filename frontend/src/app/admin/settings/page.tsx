@@ -12,9 +12,42 @@ import {
   ShieldCheck,
   Globe,
   ChevronRight,
+  ChevronLeft,
   Phone,
   KeyRound,
+  History,
+  Laptop,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
+
+interface LoginHistoryItem {
+  id: string;
+  ip_address: string;
+  user_agent: string;
+  status: string;
+  created_at: string;
+}
+
+function parseUserAgent(ua: string) {
+  if (!ua || ua === 'Unknown Browser') return 'Web Browser';
+  let browser = 'Browser';
+  if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+  else if (ua.includes('Chrome/')) browser = 'Google Chrome';
+  else if (ua.includes('Firefox/')) browser = 'Mozilla Firefox';
+  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Apple Safari';
+  else if (ua.includes('Opera') || ua.includes('OPR/')) browser = 'Opera';
+
+  let os = '';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+
+  return os ? `${browser} on ${os}` : browser;
+}
 
 export default function AdminSettingsPage() {
   const { admin, refreshAdminProfile } = useAuth();
@@ -27,12 +60,38 @@ export default function AdminSettingsPage() {
   const [savingAdminProfile, setSavingAdminProfile] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Login History State
+  const [history, setHistory] = useState<LoginHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyTotalPages, setHistoryTotalPages] = useState(1);
+  const [historyTotal, setHistoryTotal] = useState(0);
+
   useEffect(() => {
     if (admin) {
       setAdminName(admin.name || '');
       setAdminPhone(admin.phone || '');
     }
   }, [admin]);
+
+  const fetchLoginHistory = async (page = 1) => {
+    setHistoryLoading(true);
+    const res = await apiFetch<any>(`/admin/auth/login-history?page=${page}&limit=10`, {
+      isAdmin: true,
+    });
+    if (res.success && res.data) {
+      setHistory(res.data.data || []);
+      setHistoryTotalPages(res.data.meta?.totalPages || 1);
+      setHistoryTotal(res.data.meta?.total || 0);
+    }
+    setHistoryLoading(false);
+  };
+
+  useEffect(() => {
+    if (admin) {
+      fetchLoginHistory(historyPage);
+    }
+  }, [admin, historyPage]);
 
   const handleUpdateAdminProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,7 +140,7 @@ export default function AdminSettingsPage() {
               Admin Profile & Security
             </h1>
             <p className="text-xs text-slate-300 font-semibold">
-              Update administrator display name, login phone number, and security password.
+              Update administrator display name, login phone number, security password, and review login history.
             </p>
           </div>
         </div>
@@ -191,6 +250,123 @@ export default function AdminSettingsPage() {
             <span>{savingAdminProfile ? 'Saving Profile...' : 'Save Admin Credentials'}</span>
           </button>
         </form>
+      </div>
+
+      {/* ── ADMIN LOGIN HISTORY AUDIT CARD ── */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700 shrink-0">
+              <History className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Admin Login History</h2>
+              <p className="text-[11px] font-medium text-slate-400">Security audit of all recent login events and client details</p>
+            </div>
+          </div>
+          <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono">
+            {historyTotal} Events
+          </span>
+        </div>
+
+        {/* History Table */}
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
+              <tr>
+                <th className="px-4 py-3">Date & Time</th>
+                <th className="px-4 py-3">IP Address</th>
+                <th className="px-4 py-3">Browser / Device</th>
+                <th className="px-4 py-3 text-right">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white font-medium text-slate-700">
+              {historyLoading && history.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-400">
+                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-1.5 text-[#005A36]" />
+                    <span>Loading login audit log...</span>
+                  </td>
+                </tr>
+              ) : history.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-8 text-center text-slate-400">
+                    No login events recorded yet.
+                  </td>
+                </tr>
+              ) : (
+                history.map((item) => (
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3 font-mono font-bold text-slate-900 whitespace-nowrap">
+                      {new Date(item.created_at).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true,
+                      })}
+                    </td>
+                    <td className="px-4 py-3 font-mono">
+                      <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold text-slate-800 text-[11px]">
+                        {item.ip_address || '—'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      <div className="flex items-center space-x-1.5 truncate max-w-[220px]" title={item.user_agent}>
+                        <Laptop className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{parseUserAgent(item.user_agent)}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {item.status === 'SUCCESS' ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Success
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                          <AlertTriangle className="w-3 h-3" />
+                          Failed
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {historyTotalPages > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-xs text-slate-500 font-medium">
+              Page {historyPage} of {historyTotalPages}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                disabled={historyPage <= 1}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Prev</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setHistoryPage((p) => Math.min(historyTotalPages, p + 1))}
+                disabled={historyPage >= historyTotalPages}
+                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Global Settings Shortcut Card */}

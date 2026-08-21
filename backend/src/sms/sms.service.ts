@@ -102,7 +102,15 @@ export class SmsService {
    * Helper to send 6-digit OTP for signup verification (GSM-7 ASCII, single SMS)
    */
   async sendSignupOtp(phone: string, otp: string): Promise<SmsSendResult> {
-    const message = `Your EarnX verification OTP code is: ${otp}.`;
+    const message = `EarnX Capital verification OTP code is: ${otp}.`;
+    return this.sendSms(phone, message);
+  }
+
+  /**
+   * Helper to send 6-digit OTP for password reset (GSM-7 ASCII, single SMS)
+   */
+  async sendForgotPasswordOtp(phone: string, otp: string): Promise<SmsSendResult> {
+    const message = `EarnX Capital password reset OTP code is: ${otp}.`;
     return this.sendSms(phone, message);
   }
 
@@ -110,7 +118,7 @@ export class SmsService {
    * Helper to send 6-digit OTP for withdrawal verification (GSM-7 ASCII, single SMS)
    */
   async sendWithdrawalOtp(phone: string, otp: string, amount: number): Promise<SmsSendResult> {
-    const message = `Your EarnX withdrawal OTP for BDT ${amount.toFixed(2)} is: ${otp}`;
+    const message = `EarnX Capital withdrawal OTP for BDT ${amount.toFixed(2)} is: ${otp}`;
     return this.sendSms(phone, message);
   }
 }
