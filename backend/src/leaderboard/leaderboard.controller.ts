@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -61,6 +62,7 @@ export class LeaderboardController {
 
   @UseGuards(AdminJwtGuard)
   @Put('admin/:id')
+  @Patch('admin/:id')
   async updateEntry(@Param('id') id: string, @Body() body: any) {
     return this.leaderboardService.updateEntry(id, {
       rank: body.rank !== undefined ? Number(body.rank) : undefined,

@@ -499,4 +499,27 @@ export class CoinsService {
       }
     });
   }
+
+  // ==========================================
+  // ADMIN UPDATE COIN CONFIGS
+  // ==========================================
+  async updateAdminCoinConfigs(configs: {
+    COIN_PRICE?: number;
+    PREMIUM_FREE_COINS?: number;
+    PREMIUM_FREE_COINS_REQUIRED_REFERRALS?: number;
+  }) {
+    if (configs.COIN_PRICE !== undefined) {
+      await this.configService.setValue('COIN_PRICE', String(configs.COIN_PRICE));
+    }
+    if (configs.PREMIUM_FREE_COINS !== undefined) {
+      await this.configService.setValue('PREMIUM_FREE_COINS', String(configs.PREMIUM_FREE_COINS));
+    }
+    if (configs.PREMIUM_FREE_COINS_REQUIRED_REFERRALS !== undefined) {
+      await this.configService.setValue(
+        'PREMIUM_FREE_COINS_REQUIRED_REFERRALS',
+        String(configs.PREMIUM_FREE_COINS_REQUIRED_REFERRALS),
+      );
+    }
+    return { success: true, message: 'Coin configurations updated successfully' };
+  }
 }

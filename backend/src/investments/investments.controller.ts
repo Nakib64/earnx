@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -100,6 +101,7 @@ export class InvestmentsController {
 
   @UseGuards(AdminJwtGuard)
   @Put('admin/plans/:id')
+  @Patch('admin/plans/:id')
   async updatePlan(@Param('id') id: string, @Body() body: any) {
     return this.investmentsService.updatePlan(id, body);
   }

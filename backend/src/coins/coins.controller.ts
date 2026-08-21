@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Body,
   UseGuards,
   Request,
@@ -65,6 +66,32 @@ export class CoinsController {
       limit ? parseInt(limit, 10) : 20,
       search,
     );
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Patch('admin/configs')
+  async updateAdminCoinConfigs(
+    @Body()
+    body: {
+      COIN_PRICE?: number;
+      PREMIUM_FREE_COINS?: number;
+      PREMIUM_FREE_COINS_REQUIRED_REFERRALS?: number;
+    },
+  ) {
+    return this.coinsService.updateAdminCoinConfigs(body);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Post('admin/configs')
+  async postAdminCoinConfigs(
+    @Body()
+    body: {
+      COIN_PRICE?: number;
+      PREMIUM_FREE_COINS?: number;
+      PREMIUM_FREE_COINS_REQUIRED_REFERRALS?: number;
+    },
+  ) {
+    return this.coinsService.updateAdminCoinConfigs(body);
   }
 
   @UseGuards(AdminJwtGuard)

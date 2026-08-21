@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { NoticesService } from './notices.service';
 import { CreateNoticeDto } from './dto/create-notice.dto';
 import { UpdateNoticeDto } from './dto/update-notice.dto';
@@ -32,6 +32,7 @@ export class NoticesController {
   // Admin: Update notice
   @UseGuards(AdminJwtGuard)
   @Put('admin/:id')
+  @Patch('admin/:id')
   async updateNotice(@Param('id') id: string, @Body() dto: UpdateNoticeDto) {
     const data = await this.noticesService.updateNotice(id, dto);
     return { success: true, message: 'Notice updated successfully', data };
