@@ -143,31 +143,39 @@ export default function Navbar() {
           <Link
             href={isAdminRoute ? '/admin/settings' : '/dashboard/settings'}
             onClick={() => setMobileMenuOpen(false)}
-            className="mt-3 bg-[#023322]/80 border border-[#d4af37]/35 hover:border-[#d4af37] rounded-2xl p-3 flex items-center justify-between transition-all group shrink-0"
+            className="mt-3 bg-[#023322]/80 border border-[#d4af37]/35 hover:border-[#d4af37] rounded-2xl p-2.5 flex items-center justify-between transition-all duration-200 group shrink-0"
           >
-            <div className="flex items-center space-x-3 min-w-0">
-              <div className="w-11 h-11 rounded-full border-2 border-[#d4af37] bg-gradient-to-br from-[#044830] to-[#011c13] flex items-center justify-center text-[#d4af37] font-black text-sm shrink-0 shadow-md">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              {/* Avatar with Gold border */}
+              <div className="w-10 h-10 rounded-full border-2 border-[#d4af37] bg-gradient-to-br from-[#044830] to-[#011c13] flex items-center justify-center text-[#d4af37] font-black text-sm shrink-0 shadow-md">
                 {initials}
               </div>
 
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors truncate">
-                  {displayName}
+              <div className="flex flex-col min-w-0 justify-center">
+                <span className="text-sm font-extrabold text-white group-hover:text-amber-300 transition-colors truncate">
+                  {isAdminRoute ? (admin?.name || displayName) : displayName}
                 </span>
 
-                <div className="flex items-center space-x-1 text-[#f5c542] text-xs font-semibold mt-0.5">
-                  <Crown className="w-3.5 h-3.5 shrink-0" />
-                  <span className="truncate">{designation}</span>
-                </div>
-
-                <div className="flex items-center space-x-1 text-[#10b981] text-[11px] font-medium mt-0.5">
-                  <CheckCircle2 className="w-3 h-3 shrink-0" />
-                  <span>Verified Account</span>
-                </div>
+                {/* Status & Designation Line (User only) */}
+                {!isAdminRoute && (
+                  user?.is_premium || user?.designation?.name ? (
+                    <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+                      <Crown className="w-3 h-3 shrink-0" />
+                      <span className="truncate">
+                        {user?.is_premium ? 'Premium Member' : user?.designation?.name}
+                      </span>
+                    </div>
+                  ) : user?.status === 'ACTIVE' ? (
+                    <div className="flex items-center space-x-1 text-emerald-400 text-[11px] font-bold mt-0.5">
+                      <CheckCircle2 className="w-3 h-3 shrink-0" />
+                      <span className="truncate">Active Member</span>
+                    </div>
+                  ) : null
+                )}
               </div>
             </div>
 
-            <ChevronRight className="w-4 h-4 text-[#d4af37] shrink-0 ml-1" />
+            <ChevronRight className="w-4 h-4 text-[#d4af37] group-hover:translate-x-1 transition-transform shrink-0 ml-1" />
           </Link>
         )}
 

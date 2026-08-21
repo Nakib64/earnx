@@ -66,8 +66,8 @@ export default function UserSettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 3 * 1024 * 1024) {
-      setStatusMsg({ type: 'error', text: 'Image file size should be less than 3MB.' });
+    if (file.size > 10 * 1024 * 1024) {
+      setStatusMsg({ type: 'error', text: 'Image file size should be less than 10MB.' });
       return;
     }
 
