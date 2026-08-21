@@ -712,7 +712,7 @@ export default function AdminWithdrawalsPage() {
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Code</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Id</label>
                 <input
                   type="text"
                   readOnly

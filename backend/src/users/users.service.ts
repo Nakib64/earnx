@@ -65,21 +65,26 @@ export class UsersService {
     };
   }
 
-  async searchUsers(query: string) {
+  async searchUsers(query: string, codeOnly = false) {
     if (!query || query.trim().length < 1) return [];
     const q = query.trim();
 
+    const whereCondition = codeOnly
+      ? { referral_code: { contains: q, mode: 'insensitive' as const } }
+      : {
+          OR: [
+            { referral_code: { contains: q, mode: 'insensitive' as const } },
+            { phone: { contains: q, mode: 'insensitive' as const } },
+            { full_name: { contains: q, mode: 'insensitive' as const } },
+          ],
+        };
+
     return this.prisma.user.findMany({
-      where: {
-        OR: [
-          { referral_code: { contains: q, mode: 'insensitive' } },
-          { phone: { contains: q, mode: 'insensitive' } },
-          { full_name: { contains: q, mode: 'insensitive' } },
-        ],
-      },
+      where: whereCondition,
       select: {
         id: true,
         full_name: true,
+        email: true,
         phone: true,
         referral_code: true,
         status: true,

@@ -25,6 +25,7 @@ import {
   ShoppingBag,
   Megaphone,
   Banknote,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -100,6 +101,7 @@ export default function Sidebar() {
   const renderItem = (item: LinkItem, isChild = false) => {
     const Icon = item.icon;
     const isActive = pathname === item.href || (item.href === '/dashboard' && pathname === '/dashboard');
+    const isLocked = !isAdminRoute && !user?.is_premium && item.href !== '/dashboard' && item.href !== '/dashboard/settings' && item.href !== '/contact';
 
     if (isActive) {
       return (
@@ -116,7 +118,11 @@ export default function Sidebar() {
             </div>
             <span className="font-extrabold text-sm text-[#0d0d0d] tracking-tight truncate">{item.label}</span>
           </div>
-          <ChevronRight className="w-4 h-4 text-[#dfa836] shrink-0 ml-1.5" />
+          {isLocked ? (
+            <Lock className="w-4 h-4 text-amber-600 shrink-0 ml-1.5" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-[#dfa836] shrink-0 ml-1.5" />
+          )}
         </Link>
       );
     }
@@ -137,7 +143,11 @@ export default function Sidebar() {
             {item.label}
           </span>
         </div>
-        <ChevronRight className="w-4 h-4 text-[#d4af37]/70 group-hover:text-[#d4af37] shrink-0 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+        {isLocked ? (
+          <Lock className="w-3.5 h-3.5 text-[#f3ba2f]/80 group-hover:text-[#f3ba2f] shrink-0 ml-1.5 transition-transform" />
+        ) : (
+          <ChevronRight className="w-4 h-4 text-[#d4af37]/70 group-hover:text-[#d4af37] shrink-0 ml-1.5 transition-transform group-hover:translate-x-0.5" />
+        )}
       </Link>
     );
   };

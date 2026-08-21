@@ -31,7 +31,7 @@ export default function SupportTicketForm() {
   return (
     <section id="support-form" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-       
+
         {/* Right Column: Direct Message Form */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
@@ -42,7 +42,7 @@ export default function SupportTicketForm() {
         >
           <div className="flex items-center space-x-2 border-b border-slate-100 pb-4">
             <MessageSquare className="w-5 h-5 text-[#03442e]" />
-            <h3 className="font-black text-slate-900 text-lg">Send Us a Direct Ticket</h3>
+            <h3 className="font-black text-slate-900 text-lg">Contact Us</h3>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -74,12 +74,12 @@ export default function SupportTicketForm() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">User Code</label>
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">User Id</label>
                 <input
                   type="text"
                   value={userCode}
                   onChange={(e) => setUserCode(e.target.value.toUpperCase())}
-                  placeholder="Enter user code..."
+                  placeholder="Enter user id..."
                   className="w-full bg-[#F4F7F6] border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 uppercase placeholder:normal-case placeholder-slate-400 focus:outline-none focus:border-[#03442e] transition-all"
                 />
               </div>

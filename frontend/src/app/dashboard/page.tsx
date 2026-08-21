@@ -229,17 +229,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Account Activation button for unactivated users */}
-              {user.status === 'DISABLED' && (
-                <button
-                  onClick={handleActivationRequest}
-                  disabled={requestLoading}
-                  className="mt-1 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-500 text-slate-950 font-black text-[11px] px-3.5 py-1.5 rounded-xl shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Zap className="w-3.5 h-3.5 fill-slate-950" />
-                  <span>{requestLoading ? 'Requesting...' : 'Activate Account'}</span>
-                </button>
-              )}
+              
             </div>
 
             {/* Right: 3D Rising Pedestal Artwork */}
@@ -340,43 +330,7 @@ export default function DashboardPage() {
             {/* ── 2. MARKET OVERVIEW CARD ── */}
             <MarketOverviewChart />
 
-            {/* ── 3. UNIQUE REFERRAL LINK CARD ── */}
-            <div className="bg-white border border-slate-100 rounded-[28px] p-5 sm:p-6 shadow-sm space-y-3.5 text-slate-900">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  {/* Green Squircle with Chain Icon */}
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#d1fae5] to-[#a7f3d0] flex items-center justify-center text-[#065f46] shrink-0 shadow-xs">
-                    <Link2 className="w-6 h-6 rotate-[-45deg] stroke-[2.5]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
-                      Your Unique Referral Link
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium">
-                      Share your link to register new downlines into your tree network
-                    </p>
-                  </div>
-                </div>
-
-                <span className="px-2.5 py-1 bg-[#eafaf1] text-[#059669] border border-[#bbf7d0] rounded-xl text-[11px] sm:text-xs font-mono font-extrabold shrink-0">
-                  User Code: {user.referral_code}
-                </span>
-              </div>
-
-              {/* Link Box and Copy Button */}
-              <div className="flex items-center gap-2 pt-0.5">
-                <div className="flex-1 bg-slate-50 border border-slate-200/90 rounded-2xl px-3.5 py-2.5 text-[11px] sm:text-xs font-mono text-slate-700 truncate">
-                  {referralLink}
-                </div>
-                <button
-                  onClick={copyReferral}
-                  className="w-10 h-10 bg-[#012b1d] hover:bg-[#02402b] text-[#10b981] rounded-2xl flex items-center justify-center shrink-0 transition-all shadow-sm cursor-pointer"
-                  title="Copy Link"
-                >
-                  {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+        
           </div>
 
           {/* ── RIGHT COLUMN (5 COLS ON DESKTOP): Quick Actions & Settings ── */}

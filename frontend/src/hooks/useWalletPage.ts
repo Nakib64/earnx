@@ -8,9 +8,12 @@ import { useDebounce } from './useDebounce';
 
 export interface RecipientSuggestion {
   id: string;
-  full_name: string;
+  full_name: string | null;
+  email?: string | null;
   phone: string;
   referral_code: string;
+  status?: string;
+  is_premium?: boolean;
 }
 
 export function useWalletPage() {
@@ -35,6 +38,7 @@ export function useWalletPage() {
 
   const [recipientName, setRecipientName] = useState('');
   const [recipientPhone, setRecipientPhone] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
   const [transferAmount, setTransferAmount] = useState('');
   const [transferNote, setTransferNote] = useState('');
 
@@ -93,9 +97,7 @@ export function useWalletPage() {
     // If query matches the selected user, keep dropdown closed
     if (
       verifiedRecipient &&
-      (verifiedRecipient.referral_code.toLowerCase() === code.toLowerCase() ||
-        verifiedRecipient.phone === code ||
-        (verifiedRecipient.full_name && verifiedRecipient.full_name.toLowerCase() === code.toLowerCase()))
+      verifiedRecipient.referral_code.toLowerCase() === code.toLowerCase()
     ) {
       setShowSuggestions(false);
       setSearchingRecipient(false);
@@ -107,7 +109,7 @@ export function useWalletPage() {
 
     (async () => {
       const res = await apiFetch<any>(
-        `/users/search-by-code?q=${encodeURIComponent(code)}`,
+        `/users/search-by-code?q=${encodeURIComponent(code)}&code_only=true`,
       );
 
       if (res.success && Array.isArray(res.data) && res.data.length > 0) {
@@ -117,7 +119,7 @@ export function useWalletPage() {
       } else {
         setSuggestions([]);
         setShowSuggestions(false);
-        setRecipientError('No member found with this user code or phone.');
+        setRecipientError('No member found with this user code.');
       }
       setSearchingRecipient(false);
     })();
@@ -128,6 +130,7 @@ export function useWalletPage() {
     setTargetReferralCode(userObj.referral_code);
     setRecipientName(userObj.full_name || '');
     setRecipientPhone(userObj.phone || '');
+    setRecipientEmail(userObj.email || '');
     setShowSuggestions(false);
     setSuggestions([]);
     setSearchingRecipient(false);
@@ -186,6 +189,7 @@ export function useWalletPage() {
       setTargetReferralCode('');
       setRecipientName('');
       setRecipientPhone('');
+      setRecipientEmail('');
       setTransferAmount('');
       setTransferNote('');
       setVerifiedRecipient(null);
@@ -239,6 +243,7 @@ export function useWalletPage() {
     setTargetReferralCode,
     recipientName,
     recipientPhone,
+    recipientEmail,
     transferAmount,
     setTransferAmount,
     transferNote,

@@ -4,7 +4,7 @@ import { TransactionType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class WalletService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Execute an atomic wallet transaction.
@@ -171,7 +171,7 @@ export class WalletService {
   // ==========================================
 
   /**
-   * Check if target user is in sender's referral network tree (upline or downline).
+   * Check if target user is in sender's Department members (upline or downline).
    */
   async isInSameNetworkTree(userAId: string, userBId: string): Promise<boolean> {
     if (userAId === userBId) return false;
@@ -243,7 +243,7 @@ export class WalletService {
 
     const isNetworkMember = await this.isInSameNetworkTree(senderId, recipient.id);
     if (!isNetworkMember) {
-      throw new BadRequestException('This user is not in your referral network tree');
+      throw new BadRequestException('This user is not in your Department members');
     }
 
     return {

@@ -48,7 +48,7 @@ export function WalletHeroBanner({
             }`}
           >
             <ArrowRightLeft className="w-4 h-4 text-slate-950 shrink-0" />
-            <span className="truncate">Direct Send</span>
+            <span className="truncate">Balance Transfer</span>
           </button>
 
           <button

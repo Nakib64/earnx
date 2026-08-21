@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Wallet, Coins, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, Coins, ShoppingBag, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function BottomNav() {
@@ -13,6 +13,8 @@ export default function BottomNav() {
   const isDashboardRoute = pathname?.startsWith('/dashboard');
 
   if (!user || !isDashboardRoute) return null;
+
+  const isPremium = Boolean((user as any).is_premium);
 
   const navItems = [
     { href: '/dashboard', label: 'Home', icon: LayoutDashboard },
@@ -41,6 +43,8 @@ export default function BottomNav() {
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           const isActive = activeIndex === idx;
+          const isLocked = !isPremium && item.href !== '/dashboard';
+
           return (
             <Link
               key={item.href}
@@ -51,12 +55,17 @@ export default function BottomNav() {
                   : 'text-slate-300 hover:text-white font-medium'
               }`}
             >
-              <div className="flex flex-col items-center space-y-0.5">
-                <Icon
-                  className={`w-5 h-5 shrink-0 transition-transform duration-300 ${
-                    isActive ? 'text-[#f3ba2f] scale-110 drop-shadow-[0_0_6px_rgba(243,186,47,0.5)]' : 'text-[#d4af37]/70'
-                  }`}
-                />
+              <div className="flex flex-col items-center space-y-0.5 relative">
+                <div className="relative">
+                  <Icon
+                    className={`w-5 h-5 shrink-0 transition-transform duration-300 ${
+                      isActive ? 'text-[#f3ba2f] scale-110 drop-shadow-[0_0_6px_rgba(243,186,47,0.5)]' : 'text-[#d4af37]/70'
+                    }`}
+                  />
+                  {isLocked && (
+                    <Lock className="w-2.5 h-2.5 text-amber-400 absolute -top-1 -right-1.5 drop-shadow-xs" />
+                  )}
+                </div>
                 <span className="text-[10px] tracking-tight font-extrabold">{item.label}</span>
               </div>
             </Link>

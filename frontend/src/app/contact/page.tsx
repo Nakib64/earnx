@@ -64,12 +64,7 @@ export default function ContactPage() {
         <SupportTicketForm />
 
 
-        {/* 5. CTA Banner Component */}
-        <CtaBanner
-          title="Need immediate portfolio assistance?"
-          description="Access your active investments, withdrawal history, and downline team tree on your user dashboard."
-          buttonText="Go to User Dashboard"
-        />
+     
       </div>
 
       {/* Smart Footer Component */}

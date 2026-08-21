@@ -18,6 +18,7 @@ import {
 interface UserSearchResult {
   id: string;
   full_name: string | null;
+  email?: string | null;
   phone: string;
   referral_code: string;
   status: 'DISABLED' | 'ACTIVE';
@@ -125,7 +126,7 @@ export default function PurchasePage() {
     const searchTarget = async () => {
       setSearchingTarget(true);
       const res = await apiFetch<any>(
-        `/users/search-by-code?q=${encodeURIComponent(debouncedTargetQuery.trim())}`
+        `/users/search-by-code?q=${encodeURIComponent(debouncedTargetQuery.trim())}&code_only=true`
       );
       if (res.success && Array.isArray(res.data)) {
         setTargetResults(res.data);
@@ -148,6 +149,7 @@ export default function PurchasePage() {
     const selfObj: UserSearchResult = {
       id: user.id,
       full_name: user.full_name,
+      email: user.email || null,
       phone: user.phone,
       referral_code: user.referral_code,
       status: user.status as any,
@@ -173,7 +175,7 @@ export default function PurchasePage() {
     const searchReferrer = async () => {
       setSearchingReferrer(true);
       const res = await apiFetch<any>(
-        `/users/search-by-code?q=${encodeURIComponent(debouncedReferrerQuery.trim())}`
+        `/users/search-by-code?q=${encodeURIComponent(debouncedReferrerQuery.trim())}&code_only=true`
       );
       if (res.success && Array.isArray(res.data)) {
         setReferrerResults(res.data);
@@ -429,7 +431,7 @@ export default function PurchasePage() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-              Target User Code / Phone <span className="text-rose-500">*</span>
+              Target User Id <span className="text-rose-500">*</span>
             </label>
             <button
               type="button"
@@ -437,57 +439,57 @@ export default function PurchasePage() {
               className="text-xs text-[#005A36] font-bold hover:underline cursor-pointer flex items-center space-x-1"
             >
               <User className="w-3.5 h-3.5" />
-              <span>Use My Own Code</span>
+              <span>Use My Own Id</span>
             </button>
           </div>
 
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search User Code (e.g. EX0001) or Phone..."
-                value={targetQuery}
-                onChange={(e) => {
-                  setTargetQuery(e.target.value);
-                  if (selectedTargetUser && e.target.value.trim().toLowerCase() !== selectedTargetUser.referral_code.toLowerCase()) {
-                    setSelectedTargetUser(null);
-                  }
-                }}
-                onFocus={() => targetResults.length > 0 && !selectedTargetUser && setShowTargetDropdown(true)}
-                className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
-              />
-              {searchingTarget && (
-                <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
-                  Searching...
-                </span>
-              )}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Enter or search Target User Id (e.g. EX0001)..."
+              value={targetQuery}
+              onChange={(e) => {
+                setTargetQuery(e.target.value);
+                if (selectedTargetUser && e.target.value.trim().toLowerCase() !== selectedTargetUser.referral_code.toLowerCase()) {
+                  setSelectedTargetUser(null);
+                }
+              }}
+              onFocus={() => targetResults.length > 0 && !selectedTargetUser && setShowTargetDropdown(true)}
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+            />
+            {searchingTarget && (
+              <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
+                Searching...
+              </span>
+            )}
 
-              {/* Target Dropdown Suggestions */}
-              {showTargetDropdown && targetResults.length > 0 && (
-                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
-                  {targetResults.map((u) => (
-                    <button
-                      key={u.id}
-                      type="button"
-                      onClick={() => handleSelectTargetUser(u)}
-                      className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
-                    >
-                      <div>
-                        <div className="text-xs font-black text-slate-900">
-                          {u.full_name || 'No Name'}
-                        </div>
-                        <div className="text-[10px] text-slate-500 font-mono">
-                          Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
-                        </div>
+            {/* Target Dropdown Suggestions */}
+            {showTargetDropdown && targetResults.length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                {targetResults.map((u) => (
+                  <button
+                    key={u.id}
+                    type="button"
+                    onClick={() => handleSelectTargetUser(u)}
+                    className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="text-xs font-black text-[#005A36]">
+                        Code: <span className="underline">{u.referral_code}</span>
                       </div>
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                        {u.status} {u.is_premium && '• PREMIUM'}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                      <div className="text-[10px] text-slate-600 font-medium">
+                        Name: {u.full_name || 'No Name'} • Phone: {u.phone}
+                      </div>
+                    </div>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                      {u.status} {u.is_premium && '• PREMIUM'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
+        </div>
 
           {/* Auto-filled Target Details */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -510,11 +512,11 @@ export default function PurchasePage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Code</label>
+              <label className="block text-[10px] font-bold text-slate-500 uppercase">Target User Email</label>
               <input
                 type="text"
                 readOnly
-                value={selectedTargetUser?.referral_code || '—'}
+                value={selectedTargetUser?.email || '—'}
                 className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-[#005A36]"
               />
             </div>
@@ -568,7 +570,7 @@ export default function PurchasePage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-                    Referral Code / Sponsor Code <span className="text-rose-500">*</span>
+                    Referral / Sponsor Code <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center space-x-3 text-xs font-bold">
                     {selectedTargetUser?.referred_by && (
@@ -594,7 +596,7 @@ export default function PurchasePage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search Referral / Sponsor Code (e.g. EX0001) or Phone..."
+                    placeholder="Enter or search Referral / Sponsor Code (e.g. EX0001)..."
                     value={referrerQuery}
                     onChange={(e) => {
                       setReferrerQuery(e.target.value);
@@ -619,17 +621,17 @@ export default function PurchasePage() {
                           key={u.id}
                           type="button"
                           onClick={() => handleSelectReferrerUser(u)}
-                          className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between"
+                          className="w-full text-left p-3 hover:bg-purple-50 transition-colors flex items-center justify-between"
                         >
                           <div>
-                            <div className="text-xs font-black text-slate-900">
-                              {u.full_name || 'No Name'}
+                            <div className="text-xs font-black text-purple-800">
+                              Code: <span className="underline">{u.referral_code}</span>
                             </div>
-                            <div className="text-[10px] text-slate-500 font-mono">
-                              Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
+                            <div className="text-[10px] text-slate-600 font-medium">
+                              Name: {u.full_name || 'No Name'} • Phone: {u.phone}
                             </div>
                           </div>
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700">
                             {u.status} {u.is_premium && '• PREMIUM'}
                           </span>
                         </button>

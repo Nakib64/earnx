@@ -358,7 +358,7 @@ function ReferralContent() {
           id="referral-search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search member by name, phone, or user code..."
+          placeholder="Search member by name, phone, or user id..."
           className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200/90 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all"
         />
         {searchTerm && (
@@ -376,7 +376,7 @@ function ReferralContent() {
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 truncate">
             <Users className="w-5 h-5 text-[#01281a] shrink-0" />
-            <span className="truncate">Referral Network Tree</span>
+            <span className="truncate">Department members</span>
           </h2>
           <span className="text-xs font-mono font-black text-amber-200 bg-[#01281a] px-3 py-1 rounded-xl border border-[#d4af37]/40 shadow-sm">
             {displayMembers.length} Members

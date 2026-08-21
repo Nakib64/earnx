@@ -29,14 +29,20 @@ export class UsersController {
 
   // User / Admin Search by User Code, Phone, or Name (Debounced Auto-complete)
   @Get('users/search-by-code')
-  async searchUsers(@Query('q') query?: string) {
-    return this.usersService.searchUsers(query || '');
+  async searchUsers(
+    @Query('q') query?: string,
+    @Query('code_only') codeOnly?: string,
+  ) {
+    return this.usersService.searchUsers(query || '', codeOnly === 'true');
   }
 
   @UseGuards(AdminJwtGuard)
   @Get('admin/users/search')
-  async searchUsersAdmin(@Query('q') query?: string) {
-    return this.usersService.searchUsers(query || '');
+  async searchUsersAdmin(
+    @Query('q') query?: string,
+    @Query('code_only') codeOnly?: string,
+  ) {
+    return this.usersService.searchUsers(query || '', codeOnly === 'true');
   }
 
   // Admin User List & Management

@@ -35,6 +35,7 @@ export default function WalletPage() {
     setTargetReferralCode,
     recipientName,
     recipientPhone,
+    recipientEmail,
     transferAmount,
     setTransferAmount,
     transferNote,
@@ -86,6 +87,7 @@ export default function WalletPage() {
           setTargetReferralCode={setTargetReferralCode}
           recipientName={recipientName}
           recipientPhone={recipientPhone}
+          recipientEmail={recipientEmail}
           transferAmount={transferAmount}
           setTransferAmount={setTransferAmount}
           transferNote={transferNote}

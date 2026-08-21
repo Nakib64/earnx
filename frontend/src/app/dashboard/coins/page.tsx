@@ -652,36 +652,7 @@ export default function UserCoinsPage() {
               </div>
             </div>
 
-            {/* Referral Link Box */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                Your Referral Link
-              </span>
-              <div className="flex items-center justify-between gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={typeof window !== 'undefined' ? `${window.location.origin}/register?ref=${user?.referral_code || ''}` : `https://earnx.capital/register?ref=${user?.referral_code || ''}`}
-                  className="w-full bg-white border border-slate-200 text-xs font-mono font-bold text-slate-700 rounded-xl px-3 py-2 focus:outline-none truncate"
-                />
-                <button
-                  onClick={handleCopyReferralLink}
-                  className="bg-emerald-700 hover:bg-emerald-800 text-white p-2 rounded-xl shrink-0 transition-colors cursor-pointer"
-                  title="Copy Link"
-                >
-                  {copiedLink ? <Check className="w-4 h-4 text-emerald-200" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
 
-            {/* Invite Button CTA */}
-            <button
-              onClick={handleCopyReferralLink}
-              className="w-full py-3.5 bg-[#023322] hover:bg-[#034932] text-white font-extrabold text-sm rounded-2xl flex items-center justify-center space-x-2 transition-all shadow-lg cursor-pointer"
-            >
-              <span>{copiedLink ? 'Referral Link Copied!' : 'Invite Friends Now'}</span>
-              <Share2 className="w-4 h-4 text-emerald-400" />
-            </button>
 
             {/* How it works link */}
             <div className="flex justify-end pt-2">

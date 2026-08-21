@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
 import { AlertBanner } from '../../../components/common/AlertBanner';
+import { ImageCropModal } from '../../../components/common/ImageCropModal';
 import {
   User,
   Lock,
@@ -42,6 +43,10 @@ export default function UserSettingsPage() {
   const [nationalId, setNationalId] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
 
+  // Image Cropper State
+  const [rawImageToCrop, setRawImageToCrop] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState<boolean>(false);
+
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -61,7 +66,7 @@ export default function UserSettingsPage() {
     }
   }, [user]);
 
-  // Handle uploading photo directly from user's device
+  // Handle uploading photo directly from user's device & opening Cropper
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -74,14 +79,20 @@ export default function UserSettingsPage() {
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
-        setAvatarUrl(reader.result);
-        setStatusMsg({
-          type: 'success',
-          text: 'Profile photo selected from device! Click "Save Changes" below to complete.',
-        });
+        setRawImageToCrop(reader.result);
+        setShowCropModal(true);
+        e.target.value = '';
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedBase64: string) => {
+    setAvatarUrl(croppedBase64);
+    setStatusMsg({
+      type: 'success',
+      text: 'Profile photo cropped & selected! Click "Save Profile & Security Settings" below to complete.',
+    });
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -245,14 +256,7 @@ export default function UserSettingsPage() {
               <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
                 <Upload className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-black text-slate-900">
-                  Upload Profile Picture from Device
-                </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Select any photo from your phone or computer to update your avatar.
-                </p>
-              </div>
+        
             </div>
 
             <label
@@ -438,6 +442,15 @@ export default function UserSettingsPage() {
           </div>
         </form>
       </div>
+
+      {/* Interactive Profile Photo Cropper Modal */}
+      <ImageCropModal
+        isOpen={showCropModal}
+        imageSrc={rawImageToCrop}
+        onClose={() => setShowCropModal(false)}
+        onCropComplete={handleCropComplete}
+        cropShape="round"
+      />
     </div>
   );
 }

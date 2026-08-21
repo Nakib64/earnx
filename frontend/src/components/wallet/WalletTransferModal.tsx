@@ -19,6 +19,7 @@ interface WalletTransferModalProps {
   setTargetReferralCode: (code: string) => void;
   recipientName: string;
   recipientPhone: string;
+  recipientEmail?: string;
   transferAmount: string;
   setTransferAmount: (amt: string) => void;
   transferNote: string;
@@ -42,6 +43,7 @@ export function WalletTransferModal({
   setTargetReferralCode,
   recipientName,
   recipientPhone,
+  recipientEmail,
   transferAmount,
   setTransferAmount,
   transferNote,
@@ -63,7 +65,7 @@ export function WalletTransferModal({
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <h3 className="font-black text-slate-900 text-base flex items-center space-x-2 truncate">
           <ArrowRightLeft className="w-5 h-5 text-[#005A36] shrink-0" />
-          <span className="truncate">Direct Network Balance Transfer</span>
+          <span className="truncate">Balance Transfer</span>
         </h3>
         <button
           onClick={onCancel}
@@ -74,16 +76,16 @@ export function WalletTransferModal({
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
-        {/* 1. Target User Code / Phone Search Field */}
+        {/* 1. Target User Code Search Field */}
         <div className="space-y-1.5" ref={dropdownRef}>
           <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
-            Recipient User Code / Phone <span className="text-rose-500">*</span>
+            Recipient User Code <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <input
               type="text"
               required
-              placeholder="Search User Code (e.g. EX0001) or Phone..."
+              placeholder="Enter or search Recipient User Code (e.g. EX0001)..."
               value={targetReferralCode}
               onChange={(e) => {
                 setTargetReferralCode(e.target.value);
@@ -102,7 +104,7 @@ export function WalletTransferModal({
               </span>
             )}
 
-            {/* Target Dropdown Suggestions (Same style as /dashboard/purchase) */}
+            {/* Target Dropdown Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
               <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
                 {suggestions.map((item) => (
@@ -113,15 +115,15 @@ export function WalletTransferModal({
                     className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between cursor-pointer"
                   >
                     <div>
-                      <div className="text-xs font-black text-slate-900">
-                        {item.full_name || 'No Name'}
+                      <div className="text-xs font-black text-[#005A36]">
+                        Code: <span className="underline">{item.referral_code}</span>
                       </div>
-                      <div className="text-[10px] text-slate-500 font-mono">
-                        Phone: {item.phone} • Code: <span className="font-bold text-[#005A36]">{item.referral_code}</span>
+                      <div className="text-[10px] text-slate-600 font-medium">
+                        Name: {item.full_name || 'No Name'} • Phone: {item.phone}
                       </div>
                     </div>
                     <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
-                      {item.referral_code}
+                      {item.status} {item.is_premium && '• PREMIUM'}
                     </span>
                   </button>
                 ))}
@@ -159,11 +161,11 @@ export function WalletTransferModal({
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Code</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Email</label>
             <input
               type="text"
               readOnly
-              value={verifiedRecipient?.referral_code || '—'}
+              value={verifiedRecipient?.email || recipientEmail || '—'}
               className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-[#005A36] focus:outline-none cursor-not-allowed"
             />
           </div>

@@ -4,6 +4,9 @@ import React from 'react';
 import HeroBanner from '../components/public/HeroBanner';
 import CryptoTickerCard from '../components/public/CryptoTickerCard';
 import FeatureCards from '../components/public/FeatureCards';
+import InstitutionalIntelligenceSection from '../components/public/InstitutionalIntelligenceSection';
+import GlobalMetricsSection from '../components/public/GlobalMetricsSection';
+import SecurityCustodySection from '../components/public/SecurityCustodySection';
 import HowItWorks from '../components/public/HowItWorks';
 import CtaBanner from '../components/public/CtaBanner';
 import Footer from '../components/Footer';
@@ -38,10 +41,19 @@ export default function Homepage() {
           {/* 3. Feature Cards Component */}
           <FeatureCards />
 
-          {/* 4. How It Works Component */}
+          {/* 4. Institutional Asset Strategy & Global Market Intelligence */}
+          <InstitutionalIntelligenceSection />
+
+          {/* 5. Enterprise Scale & Network Telemetry Metrics */}
+          <GlobalMetricsSection />
+
+          {/* 6. Defense-in-Depth Security & Vault Custody */}
+          <SecurityCustodySection />
+
+          {/* 7. How It Works Component */}
           <HowItWorks />
 
-          {/* 5. CTA Banner Component */}
+          {/* 8. CTA Banner Component */}
           <CtaBanner />
         </div>
       </div>
@@ -51,3 +63,4 @@ export default function Homepage() {
     </div>
   );
 }
+
