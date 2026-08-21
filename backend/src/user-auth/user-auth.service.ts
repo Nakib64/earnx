@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { OtpService } from '../otp/otp.service';
 import * as bcrypt from 'bcrypt';
 import { UserRegisterDto } from './dto/user-register.dto';
 import { UserLoginDto } from './dto/user-login.dto';
@@ -11,6 +12,7 @@ export class UserAuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly otpService: OtpService,
   ) {}
 
   public async generateUniqueReferralCode(tx?: any): Promise<string> {
@@ -36,13 +38,53 @@ export class UserAuthService {
     return `EX${padded}`;
   }
 
-  async register(dto: UserRegisterDto) {
+  /**
+   * Dispatches 6-digit signup OTP via SMS
+   */
+  async sendSignupOtp(phone: string) {
+    const cleanPhone = phone?.trim();
+    if (!cleanPhone) {
+      throw new BadRequestException('Phone number is required');
+    }
+
     const existingPhone = await this.prisma.user.findUnique({
-      where: { phone: dto.phone.trim() },
+      where: { phone: cleanPhone },
     });
 
     if (existingPhone) {
       throw new ConflictException('A user with this phone number already exists');
+    }
+
+    return this.otpService.generateAndSendOtp(cleanPhone, 'SIGNUP');
+  }
+
+  /**
+   * Verifies 6-digit signup OTP
+   */
+  async verifySignupOtp(phone: string, otp: string) {
+    return this.otpService.verifyOtp(phone, otp, 'SIGNUP');
+  }
+
+  async register(dto: UserRegisterDto & { otp?: string }) {
+    const cleanPhone = dto.phone.trim();
+    const existingPhone = await this.prisma.user.findUnique({
+      where: { phone: cleanPhone },
+    });
+
+    if (existingPhone) {
+      throw new ConflictException('A user with this phone number already exists');
+    }
+
+    // Verify OTP if provided with registration, or check recent verification status
+    if (dto.otp) {
+      await this.otpService.verifyOtp(cleanPhone, dto.otp, 'SIGNUP');
+    } else {
+      const isVerified = await this.otpService.isPhoneVerified(cleanPhone, 'SIGNUP');
+      if (!isVerified) {
+        throw new BadRequestException(
+          'Phone number verification required. Please enter the 6-digit OTP sent to your phone.',
+        );
+      }
     }
 
     let referredById: string | null = null;
@@ -52,7 +94,7 @@ export class UserAuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        phone: dto.phone.trim(),
+        phone: cleanPhone,
         password_hash: passwordHash,
         full_name: dto.full_name?.trim() || null,
         email: dto.email?.trim() || null,

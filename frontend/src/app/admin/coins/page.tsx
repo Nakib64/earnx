@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { apiFetch } from '../../../lib/api';
 import { AlertBanner } from '../../../components/common/AlertBanner';
-import { GoldenCoinsIcon } from '../../../components/common/GoldenCoinsIcon';
+import { SolanaLogo } from '../../../components/common/SolanaLogo';
 import {
   Coins,
   Save,
@@ -160,32 +160,21 @@ export default function AdminCoinsPage() {
     setSavingConfig(true);
     setMessage(null);
 
-    const requests = [
-      apiFetch('/admin/system-config', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({ key: 'COIN_PRICE', value: coinPrice }),
+    const res = await apiFetch('/coins/admin/configs', {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify({
+        COIN_PRICE: parseFloat(coinPrice),
+        PREMIUM_FREE_COINS: parseInt(premiumFreeCoins, 10),
+        PREMIUM_FREE_COINS_REQUIRED_REFERRALS: parseInt(requiredReferrals, 10),
       }),
-      apiFetch('/admin/system-config', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({ key: 'PREMIUM_FREE_COINS', value: premiumFreeCoins }),
-      }),
-      apiFetch('/admin/system-config', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({ key: 'PREMIUM_FREE_COINS_REQUIRED_REFERRALS', value: requiredReferrals }),
-      }),
-    ];
+    });
 
-    const results = await Promise.all(requests);
-    const allSuccessful = results.every((r) => r.success);
-
-    if (allSuccessful) {
-      setMessage({ type: 'success', text: 'Coin system configuration saved successfully!' });
+    if (res.success) {
+      setMessage({ type: 'success', text: 'Global coin configurations saved successfully!' });
       await fetchStats();
     } else {
-      setMessage({ type: 'error', text: 'Failed to update some coin configurations. Please try again.' });
+      setMessage({ type: 'error', text: res.error?.message || 'Failed to save coin configurations.' });
     }
     setSavingConfig(false);
   };
@@ -241,16 +230,16 @@ export default function AdminCoinsPage() {
         {/* Card 1: Spendable Coins */}
         <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white">
           <span className="text-[11px] font-black text-amber-200 uppercase tracking-widest flex items-center gap-1.5">
-            Spendable <GoldenCoinsIcon size={20} />
+            Spendable Coins <SolanaLogo size={20} />
           </span>
           <div className="flex items-center space-x-3.5">
             <div className="w-12 h-12 rounded-xl border border-[#d4af37]/60 bg-amber-500/10 flex items-center justify-center shrink-0">
-              <GoldenCoinsIcon size={32} />
+              <SolanaLogo size={32} />
             </div>
             <div>
               <div className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()}
-                <GoldenCoinsIcon size={24} />
+                <SolanaLogo size={24} />
               </div>
               <div className="text-xs font-bold text-slate-300">Total Available</div>
             </div>
@@ -264,7 +253,7 @@ export default function AdminCoinsPage() {
         {/* Card 2: Locked Coins */}
         <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-lg text-white">
           <span className="text-[11px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
-            Locked <GoldenCoinsIcon size={20} />
+            Locked Coins <SolanaLogo size={20} />
           </span>
           <div className="flex items-center space-x-3.5">
             <div className="w-12 h-12 rounded-xl border border-amber-500/60 bg-amber-500/10 flex items-center justify-center text-[#f3ba2f] shrink-0">
@@ -273,14 +262,14 @@ export default function AdminCoinsPage() {
             <div>
               <div className="text-3xl sm:text-4xl font-black text-amber-100 font-mono tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()}
-                <GoldenCoinsIcon size={24} />
+                <SolanaLogo size={24} />
               </div>
               <div className="text-xs font-bold text-amber-300">Premium Locked</div>
             </div>
           </div>
           <div className="pt-1">
             <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-[#3d2705] text-amber-200 border border-amber-500/40 font-mono inline-flex items-center gap-1">
-              ৳{coinPrice} / <GoldenCoinsIcon size={16} />
+              ৳{coinPrice} / <SolanaLogo size={16} />
             </span>
           </div>
         </div>
@@ -537,7 +526,7 @@ export default function AdminCoinsPage() {
                     className={`py-2.5 px-3 rounded-xl border text-xs font-extrabold transition-all ${!adjustIsLocked
                       ? 'bg-[#005A36] border-[#005A36] text-white'
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
+                      }`}
                   >
                     Available Coins
                   </button>
@@ -547,7 +536,7 @@ export default function AdminCoinsPage() {
                     className={`py-2.5 px-3 rounded-xl border text-xs font-extrabold transition-all ${adjustIsLocked
                       ? 'bg-amber-100 border-amber-300 text-[#854D0E]'
                       : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
+                      }`}
                   >
                     Locked Coins
                   </button>

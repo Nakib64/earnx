@@ -178,12 +178,17 @@ export interface WithdrawalRequest {
   id: string;
   user_id: string;
   amount: number | string;
+  otp?: string | null;
+  otp_expires_at?: string | null;
   status: RequestStatus;
   approved_by?: string | null;
+  paid_to_user_id?: string | null;
+  paid_at?: string | null;
   rejection_reason?: string | null;
   created_at: string;
   updated_at?: string;
   user?: UserSummary;
+  paid_to_user?: UserSummary | null;
 }
 
 export interface CommissionRule {

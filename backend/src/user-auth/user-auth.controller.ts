@@ -8,8 +8,18 @@ import { UserJwtGuard } from './guards/user-jwt.guard';
 export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}
 
+  @Post('send-signup-otp')
+  async sendSignupOtp(@Body() body: { phone: string }) {
+    return this.userAuthService.sendSignupOtp(body.phone);
+  }
+
+  @Post('verify-signup-otp')
+  async verifySignupOtp(@Body() body: { phone: string; otp: string }) {
+    return this.userAuthService.verifySignupOtp(body.phone, body.otp);
+  }
+
   @Post('register')
-  async register(@Body() dto: UserRegisterDto) {
+  async register(@Body() dto: UserRegisterDto & { otp?: string }) {
     return this.userAuthService.register(dto);
   }
 

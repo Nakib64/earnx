@@ -15,11 +15,17 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { CoinsModule } from './coins/coins.module';
 import { NoticesModule } from './notices/notices.module';
 import { PurchasesModule } from './purchases/purchases.module';
+import { SmsModule } from './sms/sms.module';
+import { OtpModule } from './otp/otp.module';
+import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    SmsModule,
+    OtpModule,
+    WithdrawalsModule,
     AdminAuthModule,
     UserAuthModule,
     UsersModule,

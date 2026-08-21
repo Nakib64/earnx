@@ -24,6 +24,7 @@ import {
   ExternalLink,
   ShoppingBag,
   Megaphone,
+  Banknote,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -43,9 +44,9 @@ export default function Sidebar() {
 
 
   // Hide sidebar on public pages, or if user/admin isn't logged in
-  if (isAdminRoute && !admin && !isLoading && !adminToken) return null;
-  if (isDashboardRoute && !user && !isLoading && !userToken) return null;
-  if (!isDashboardRoute && !isAdminRoute) return null;
+  if (!userToken && !adminToken) {
+    return null;
+  }
 
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Account Dashboard', icon: LayoutDashboard },
@@ -61,6 +62,7 @@ export default function Sidebar() {
 
   const adminTopItems: LinkItem[] = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
     { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
@@ -164,31 +166,27 @@ export default function Sidebar() {
             {initials}
           </div>
 
-          <div className="flex flex-col min-w-0">
+          <div className="flex flex-col min-w-0 justify-center">
             <span className="text-sm font-extrabold text-white group-hover:text-amber-300 transition-colors truncate">
-              {displayName}
+              {isAdminRoute ? (admin?.name || displayName) : displayName}
             </span>
 
-            {/* Status & Designation Line */}
-            {isAdminRoute ? (
-              <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
-                <Crown className="w-3 h-3 shrink-0" />
-                <span className="truncate">System Admin</span>
-              </div>
-            ) : user?.is_premium || user?.designation?.name ? (
-              <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
-                <Crown className="w-3 h-3 shrink-0" />
-                <span className="truncate">
-                  {user?.is_premium ? 'Premium Member' : user?.designation?.name}
-                </span>
-              </div>
-            ) : user?.status === 'ACTIVE' ? (
-              <div className="flex items-center space-x-1 text-emerald-400 text-[11px] font-bold mt-0.5">
-                <CheckCircle2 className="w-3 h-3 shrink-0" />
-                <span className="truncate">Active Member</span>
-              </div>
-            ) : null}
-
+            {/* Status & Designation Line (User only) */}
+            {!isAdminRoute && (
+              user?.is_premium || user?.designation?.name ? (
+                <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+                  <Crown className="w-3 h-3 shrink-0" />
+                  <span className="truncate">
+                    {user?.is_premium ? 'Premium Member' : user?.designation?.name}
+                  </span>
+                </div>
+              ) : user?.status === 'ACTIVE' ? (
+                <div className="flex items-center space-x-1 text-emerald-400 text-[11px] font-bold mt-0.5">
+                  <CheckCircle2 className="w-3 h-3 shrink-0" />
+                  <span className="truncate">Active Member</span>
+                </div>
+              ) : null
+            )}
           </div>
         </div>
 

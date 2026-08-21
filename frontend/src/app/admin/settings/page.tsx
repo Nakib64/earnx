@@ -21,13 +21,17 @@ export default function AdminSettingsPage() {
 
   // Admin Profile State
   const [adminName, setAdminName] = useState(admin?.name || '');
+  const [adminPhone, setAdminPhone] = useState(admin?.phone || '');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [savingAdminProfile, setSavingAdminProfile] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
-    if (admin) setAdminName(admin.name || '');
+    if (admin) {
+      setAdminName(admin.name || '');
+      setAdminPhone(admin.phone || '');
+    }
   }, [admin]);
 
   const handleUpdateAdminProfile = async (e: React.FormEvent) => {
@@ -35,7 +39,10 @@ export default function AdminSettingsPage() {
     setSavingAdminProfile(true);
     setMessage(null);
 
-    const bodyData: any = { name: adminName.trim() };
+    const bodyData: any = {
+      name: adminName.trim(),
+      phone: adminPhone.trim(),
+    };
     if (newPassword) {
       bodyData.current_password = currentPassword;
       bodyData.new_password = newPassword;
@@ -74,7 +81,7 @@ export default function AdminSettingsPage() {
               Admin Profile & Security
             </h1>
             <p className="text-xs text-slate-300 font-semibold">
-              Update administrator display name, phone number details, and security password.
+              Update administrator display name, login phone number, and security password.
             </p>
           </div>
         </div>
@@ -104,7 +111,7 @@ export default function AdminSettingsPage() {
         <form onSubmit={handleUpdateAdminProfile} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Admin Display Name
+              Admin Display Name <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <User className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
@@ -121,15 +128,17 @@ export default function AdminSettingsPage() {
 
           <div className="space-y-1.5">
             <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Phone Number <span className="normal-case text-slate-400 font-medium">(System ID - Readonly)</span>
+              Admin Phone Number <span className="text-rose-500">*</span>
             </label>
             <div className="relative">
               <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
               <input
                 type="text"
-                disabled
-                value={admin?.phone || ''}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl font-mono font-bold text-slate-500 text-sm cursor-not-allowed"
+                required
+                value={adminPhone}
+                onChange={(e) => setAdminPhone(e.target.value)}
+                placeholder="01700000000"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
           </div>

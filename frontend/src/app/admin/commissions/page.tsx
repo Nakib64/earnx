@@ -16,7 +16,7 @@ export default function AdminCommissionsPage() {
   const [loading, setLoading] = useState(true);
 
   // Form State
-  const [type, setType] = useState<CommissionType>(CommissionType.ACTIVATION);
+  const [type, setType] = useState<CommissionType>(CommissionType.PREMIUM);
   const [level, setLevel] = useState(1);
   const [amount, setAmount] = useState('');
   const [saving, setSaving] = useState(false);
@@ -29,7 +29,9 @@ export default function AdminCommissionsPage() {
     setLoading(true);
     const res = await apiFetch<CommissionRule[]>('/admin/commissions/rules', { isAdmin: true });
     if (res.success && res.data) {
-      setRules(res.data);
+      // Filter only PREMIUM commission rules
+      const premiumRules = res.data.filter((r) => r.type === CommissionType.PREMIUM);
+      setRules(premiumRules);
     }
     setLoading(false);
   };
@@ -42,12 +44,6 @@ export default function AdminCommissionsPage() {
     e.preventDefault();
 
     const levelNum = Number(level);
-    if (type === CommissionType.ACTIVATION && levelNum > 1) {
-      toast.warning('Account activation registration reward is single-level direct only (Level 1)');
-      setLevel(1);
-      return;
-    }
-
     if (levelNum < 1 || levelNum > 5) {
       toast.warning('Tree level depth must be between Level 1 and Level 5');
       return;
@@ -58,14 +54,14 @@ export default function AdminCommissionsPage() {
       method: 'POST',
       isAdmin: true,
       body: JSON.stringify({
-        type,
+        type: CommissionType.PREMIUM,
         level: levelNum,
         amount: parseFloat(amount),
       }),
     });
 
     if (res.success) {
-      toast.success(`${type} Level ${levelNum} commission rule saved!`);
+      toast.success(`Premium Level ${levelNum} commission rule saved!`);
       setAmount('');
       await fetchRules();
     } else {
@@ -95,14 +91,18 @@ export default function AdminCommissionsPage() {
     {
       key: 'type',
       header: 'Commission Type',
-      render: (r) => <StatusBadge status={r.type} />,
+      render: (r) => (
+        <span className="font-bold text-xs bg-amber-50 text-amber-900 border border-amber-300 px-2.5 py-1 rounded-full">
+          PREMIUM UPGRADE
+        </span>
+      ),
     },
     {
       key: 'level',
-      header: 'Level Depth',
+      header: 'Tree Level Depth',
       render: (r) => (
         <span className="font-black font-mono text-slate-900 text-xs">
-          Level {r.level} {r.type === CommissionType.ACTIVATION ? '(Direct Only)' : '(Tree Level)'}
+          Level {r.level} (Upline Tier {r.level})
         </span>
       ),
     },
@@ -137,10 +137,10 @@ export default function AdminCommissionsPage() {
           </div>
           <div className="space-y-1 flex-1">
             <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
-              Commission Rules Matrix
+              Premium Commission Rules Matrix
             </h1>
             <p className="text-xs text-slate-300 font-semibold">
-              Define commission rewards for Activation (Direct Referrer Level 1) & Premium Package upgrades (Up to 5 Upper Levels).
+              Define commission rewards for Premium Package upgrades distributed across up to 5 Upper Levels in the referral tree.
             </p>
           </div>
           <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
@@ -156,55 +156,38 @@ export default function AdminCommissionsPage() {
             <Plus className="w-4 h-4" />
           </div>
           <h3 className="font-black text-slate-900 text-base">
-            Add or Update Commission Rule
+            Configure Premium Commission Level
           </h3>
         </div>
 
-        <form onSubmit={handleSaveRule} className="grid grid-cols-1 sm:grid-cols-4 gap-3.5 items-end">
+        <form onSubmit={handleSaveRule} className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 items-end">
           <div>
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
-              Commission Type
+              Tree Level Depth (Level 1 - 5) <span className="text-rose-500">*</span>
             </label>
             <select
-              value={type}
-              onChange={(e) => {
-                const newType = e.target.value as CommissionType;
-                setType(newType);
-                if (newType === CommissionType.ACTIVATION) setLevel(1);
-              }}
+              value={level}
+              onChange={(e) => setLevel(parseInt(e.target.value, 10))}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a]"
             >
-              <option value={CommissionType.ACTIVATION}>ACTIVATION (Direct Only)</option>
-              <option value={CommissionType.PREMIUM}>PREMIUM (Up to 5 Levels)</option>
+              {[1, 2, 3, 4, 5].map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  Level {lvl} Upline
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
-              Tree Level Depth (1 - 5)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              disabled={type === CommissionType.ACTIVATION}
-              required
-              value={level}
-              onChange={(e) => setLevel(parseInt(e.target.value, 10))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a] disabled:opacity-50"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
-              Payout Amount (৳)
+              Payout Amount (৳) <span className="text-rose-500">*</span>
             </label>
             <input
               type="number"
               step="0.01"
               min="0"
               required
-              placeholder="e.g. 50"
+              placeholder="e.g. 100.00"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a]"
@@ -214,10 +197,10 @@ export default function AdminCommissionsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs py-3 px-4 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            <span>{saving ? 'Saving Rule...' : 'Save Rule'}</span>
+            <span>{saving ? 'Saving Rule...' : 'Save Commission Rule'}</span>
           </button>
         </form>
       </div>

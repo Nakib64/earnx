@@ -40,7 +40,7 @@ export class AdminAuthService {
 
   async updateProfile(
     adminId: string,
-    dto: { name?: string; current_password?: string; new_password?: string },
+    dto: { name?: string; phone?: string; current_password?: string; new_password?: string },
   ) {
     const admin = await this.prisma.admin.findUnique({
       where: { id: adminId },
@@ -54,6 +54,20 @@ export class AdminAuthService {
 
     if (dto.name !== undefined) {
       updateData.name = dto.name.trim() || 'Admin';
+    }
+
+    if (dto.phone !== undefined) {
+      const cleanPhone = dto.phone.trim();
+      if (!cleanPhone) {
+        throw new BadRequestException('Phone number cannot be empty');
+      }
+      const existingPhone = await this.prisma.admin.findUnique({
+        where: { phone: cleanPhone },
+      });
+      if (existingPhone && existingPhone.id !== adminId) {
+        throw new BadRequestException('This phone number is already registered to another admin account');
+      }
+      updateData.phone = cleanPhone;
     }
 
     if (dto.new_password) {

@@ -86,7 +86,8 @@ model User {
   coin_transactions   CoinTransaction[]
   activation_requests ActivationRequest[]  @relation("UserActivationRequests")
   premium_requests    PremiumRequest[]     @relation("UserPremiumRequests")
-  withdrawal_requests WithdrawalRequest[]
+  withdrawal_requests WithdrawalRequest[]  @relation("UserWithdrawalRequests")
+  paid_withdrawals    WithdrawalRequest[]  @relation("PaidWithdrawals")
   investments         UserInvestment[]
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
@@ -154,14 +155,37 @@ model WithdrawalRequest {
   id               String        @id @default(uuid())
   user_id          String
   amount           Decimal       @db.Decimal(12, 2)
+  otp              String?       // 6-digit OTP code sent via SMS
+  otp_expires_at   DateTime?
   status           RequestStatus @default(PENDING)
-  approved_by      String?
+  approved_by      String?       // Admin phone who executed payment
+  paid_to_user_id  String?       // Target recipient user who received the funds
+  paid_at          DateTime?     // Timestamp when payment was routed
   rejection_reason String?
-  user             User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user             User          @relation("UserWithdrawalRequests", fields: [user_id], references: [id], onDelete: Cascade)
+  paid_to_user     User?         @relation("PaidWithdrawals", fields: [paid_to_user_id], references: [id], onDelete: SetNull)
   created_at       DateTime      @default(now())
   updated_at       DateTime      @updatedAt
 
   @@index([user_id])
+  @@index([paid_to_user_id])
+  @@index([otp])
+  @@index([status])
+}
+
+model OtpVerification {
+  id          String   @id @default(uuid())
+  phone       String
+  otp         String   // 6-digit numerical code
+  purpose     String   // "SIGNUP", "WITHDRAWAL"
+  attempts    Int      @default(0) // Failed attempt counter for brute-force protection
+  is_verified Boolean  @default(false)
+  expires_at  DateTime // 10 minutes validity
+  last_sent_at DateTime @default(now()) // Cooldown tracking (2 minutes)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([phone, purpose])
 }
 
 model WalletTransaction {
