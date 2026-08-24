@@ -10,8 +10,6 @@ import {
   LogOut,
   Menu,
   X,
-  CheckCircle,
-  Clock,
   LayoutDashboard,
   Users,
   Award,
@@ -33,7 +31,6 @@ import {
   Crown,
   CheckCircle2,
   Headset,
-  ExternalLink,
   ChevronDown,
   ShoppingBag,
   Megaphone,
@@ -84,8 +81,9 @@ export default function Navbar() {
 
   const publicItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/about', label: 'About', icon: Info },
-    { href: '/contact', label: 'Support', icon: Headset },
+
+    { href: '/about', label: 'About Us', icon: Info },
+    { href: '/contact', label: 'Contact', icon: Headset },
   ];
 
   const getInitials = (name?: string) => {
@@ -102,23 +100,20 @@ export default function Navbar() {
     : user?.full_name || user?.phone || 'Rasel Hossain';
 
   const initials = getInitials(displayName);
-  const designation = isAdminRoute
-    ? 'System Admin'
-    : user?.designation?.name || 'Premium Member';
 
   const drawerContent = (
     <div
-      className={`lg:hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${
+      className={`lg:hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex h-screen h-[100dvh] transition-opacity duration-300 ease-in-out ${
         mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
     >
       <div
-        className={`bg-gradient-to-b from-[#01281a] via-[#011f15] to-[#00170f] text-white w-68 sm:w-72 max-w-[75vw] h-full flex flex-col p-4 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out border-r border-[#d4af37]/35 ${
+        className={`bg-white text-slate-900 w-72 max-w-[80vw] h-full flex flex-col p-5 shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out border-r border-slate-200 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#053d29] shrink-0">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
           <Link
             href={isAdminRoute ? '/admin/dashboard' : '/'}
             onClick={() => setMobileMenuOpen(false)}
@@ -127,12 +122,12 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="EarnX Capital"
-              className="h-8 sm:h-9 w-auto object-contain bg-white rounded-lg px-2.5 py-1 shadow-sm"
+              className="h-8 sm:h-9 w-auto object-contain"
             />
           </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-2 text-[#d4af37] hover:text-white rounded-xl bg-[#023322] border border-[#d4af37]/30"
+            className="p-2 text-slate-600 hover:text-slate-900 rounded-xl bg-slate-100 hover:bg-slate-200"
           >
             <X className="w-5 h-5" />
           </button>
@@ -143,30 +138,28 @@ export default function Navbar() {
           <Link
             href={isAdminRoute ? '/admin/settings' : '/dashboard/settings'}
             onClick={() => setMobileMenuOpen(false)}
-            className="mt-3 bg-[#023322]/80 border border-[#d4af37]/35 hover:border-[#d4af37] rounded-2xl p-2.5 flex items-center justify-between transition-all duration-200 group shrink-0"
+            className="mt-4 bg-slate-50 border border-slate-200 rounded-2xl p-3 flex items-center justify-between group shrink-0"
           >
-            <div className="flex items-center space-x-2.5 min-w-0">
-              {/* Avatar with Gold border */}
-              <div className="w-10 h-10 rounded-full border-2 border-[#d4af37] bg-gradient-to-br from-[#044830] to-[#011c13] flex items-center justify-center text-[#d4af37] font-black text-sm shrink-0 shadow-md">
+            <div className="flex items-center space-x-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-[#01281a] text-[#f3ba2f] flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
                 {initials}
               </div>
 
               <div className="flex flex-col min-w-0 justify-center">
-                <span className="text-sm font-extrabold text-white group-hover:text-amber-300 transition-colors truncate">
+                <span className="text-sm font-extrabold text-slate-900 group-hover:text-[#01281a] transition-colors truncate">
                   {isAdminRoute ? (admin?.name || displayName) : displayName}
                 </span>
 
-                {/* Status & Designation Line (User only) */}
                 {!isAdminRoute && (
                   user?.is_premium || user?.designation?.name ? (
-                    <div className="flex items-center space-x-1 text-[#f5c542] text-[11px] font-bold mt-0.5">
+                    <div className="flex items-center space-x-1 text-amber-600 text-[11px] font-bold mt-0.5">
                       <Crown className="w-3 h-3 shrink-0" />
                       <span className="truncate">
                         {user?.is_premium ? 'Premium Member' : user?.designation?.name}
                       </span>
                     </div>
                   ) : user?.status === 'ACTIVE' ? (
-                    <div className="flex items-center space-x-1 text-emerald-400 text-[11px] font-bold mt-0.5">
+                    <div className="flex items-center space-x-1 text-emerald-600 text-[11px] font-bold mt-0.5">
                       <CheckCircle2 className="w-3 h-3 shrink-0" />
                       <span className="truncate">Active Member</span>
                     </div>
@@ -175,12 +168,12 @@ export default function Navbar() {
               </div>
             </div>
 
-            <ChevronRight className="w-4 h-4 text-[#d4af37] group-hover:translate-x-1 transition-transform shrink-0 ml-1" />
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform shrink-0 ml-1" />
           </Link>
         )}
 
         {/* Navigation List */}
-        <nav className="flex-1 space-y-1 overflow-y-auto py-2 custom-scrollbar">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto py-4">
           {((isAdminRoute && admin) ? adminItems : (isDashboardRoute && user) ? userItems : publicItems).map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -191,15 +184,15 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-2.5 rounded-2xl bg-gradient-to-r from-white via-[#fffdfa] to-[#f7eed6] text-slate-900 border border-[#e5c158] shadow-md shadow-amber-500/10 transition-all"
+                  className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 text-[#01281a] font-extrabold text-sm border border-emerald-200"
                 >
                   <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl border border-[#dfa836] bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <Icon className="w-4.5 h-4.5 text-[#dfa836]" />
+                    <div className="w-8 h-8 rounded-lg bg-[#01281a] text-white flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-[#f3ba2f]" />
                     </div>
-                    <span className="font-extrabold text-sm text-[#0d0d0d] tracking-tight truncate">{item.label}</span>
+                    <span className="truncate">{item.label}</span>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#dfa836] shrink-0 ml-1.5" />
+                  <ChevronRight className="w-4 h-4 text-[#01281a] shrink-0" />
                 </Link>
               );
             }
@@ -209,32 +202,31 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between p-2.5 rounded-xl border-b border-[#053d29]/50 hover:bg-[#033c28]/60 transition-all group"
+                className="flex items-center justify-between p-3 rounded-xl text-slate-700 hover:bg-slate-50 font-bold text-sm transition-colors group"
               >
                 <div className="flex items-center space-x-3 min-w-0">
-                  <div className="w-8 h-8 rounded-xl border border-[#d4af37]/60 bg-[#022e1f]/60 flex items-center justify-center shrink-0 group-hover:border-[#d4af37] transition-colors">
-                    <Icon className="w-4.5 h-4.5 text-[#d4af37] group-hover:scale-110 transition-transform" />
+                  <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0 group-hover:bg-[#01281a] group-hover:text-[#f3ba2f] transition-colors">
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="font-bold text-sm text-slate-100 group-hover:text-amber-200 transition-colors truncate">
+                  <span className="group-hover:text-[#01281a] transition-colors truncate">
                     {item.label}
                   </span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-[#d4af37]/70 group-hover:text-[#d4af37] shrink-0 ml-1.5" />
+                <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-[#01281a] shrink-0" />
               </Link>
             );
           })}
         </nav>
 
-      
         {/* Drawer Footer Actions */}
-        <div className="pt-2 border-t border-[#053d29] shrink-0 space-y-2">
+        <div className="pt-4 border-t border-slate-200 shrink-0 space-y-2">
           {user ? (
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
                 logoutUser();
               }}
-              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#032e1f] hover:bg-rose-950/40 text-amber-200 hover:text-rose-300 rounded-xl font-bold text-xs border border-[#d4af37]/30 transition-colors"
+              className="w-full flex items-center justify-center space-x-2 py-3 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-bold text-xs transition-colors"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out</span>
@@ -245,7 +237,7 @@ export default function Navbar() {
                 setMobileMenuOpen(false);
                 logoutAdmin();
               }}
-              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-[#032e1f] hover:bg-rose-950/40 text-amber-200 hover:text-rose-300 rounded-xl font-bold text-xs border border-[#d4af37]/30 transition-colors"
+              className="w-full flex items-center justify-center space-x-2 py-3 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl font-bold text-xs transition-colors"
             >
               <LogOut className="w-4 h-4" />
               <span>Log Out Admin</span>
@@ -255,18 +247,18 @@ export default function Navbar() {
               <Link
                 href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 bg-[#023322] text-amber-200 hover:text-white rounded-xl font-bold text-xs border border-[#d4af37]/30"
+                className="flex items-center justify-center space-x-1.5 py-3 bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-xl font-bold text-xs transition-colors"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Sign In</span>
+                <span>Login</span>
               </Link>
               <Link
                 href="/register"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold text-xs rounded-xl shadow-md"
+                className="flex items-center justify-center space-x-1.5 py-3 bg-[#01281a] text-white hover:bg-[#023c28] font-bold text-xs rounded-xl shadow-md transition-colors"
               >
-                <UserPlus className="w-4 h-4" />
-                <span>Sign Up</span>
+                <UserPlus className="w-4 h-4 text-[#f3ba2f]" />
+                <span>Join Now</span>
               </Link>
             </div>
           )}
@@ -279,19 +271,19 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border-b border-[#d4af37]/30 shadow-md w-full text-white ${
+        className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-xs w-full text-slate-800 transition-all ${
           isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex items-center">
               <Link href={isAdminRoute ? '/admin/dashboard' : '/'} className="flex items-center space-x-1 group">
                 <img
                   src="/logo.png"
                   alt="EarnX Capital"
-                  className="h-9 sm:h-10 w-auto object-contain bg-white rounded-lg px-3 py-1 shadow-sm transition-transform group-hover:scale-105"
+                  className="h-10 sm:h-11 w-auto object-contain transition-transform group-hover:scale-105"
                 />
               </Link>
             </div>
@@ -301,34 +293,33 @@ export default function Navbar() {
               <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
                 <Link
                   href="/"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                  className={`text-sm font-bold transition-colors ${
                     pathname === '/'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                      ? 'text-[#01281a] border-b-2 border-[#01281a] pb-1'
+                      : 'text-slate-600 hover:text-[#01281a]'
                   }`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/about"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                  className={`text-sm font-bold transition-colors ${
                     pathname === '/about'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                      ? 'text-[#01281a] border-b-2 border-[#01281a] pb-1'
+                      : 'text-slate-600 hover:text-[#01281a]'
                   }`}
                 >
-                  About
+                  About Us
                 </Link>
-              
                 <Link
                   href="/contact"
-                  className={`text-xs sm:text-sm font-bold transition-colors ${
+                  className={`text-sm font-bold transition-colors ${
                     pathname === '/contact'
-                      ? 'text-[#f3ba2f] border-b-2 border-[#f3ba2f] pb-0.5'
-                      : 'text-slate-200 hover:text-[#f3ba2f]'
+                      ? 'text-[#01281a] border-b-2 border-[#01281a] pb-1'
+                      : 'text-slate-600 hover:text-[#01281a]'
                   }`}
                 >
-                  Support
+                  Contact
                 </Link>
               </nav>
             )}
@@ -336,48 +327,44 @@ export default function Navbar() {
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
               {isLoading ? (
-                <div className="h-9 w-24 bg-emerald-950/60 animate-pulse rounded-xl" />
+                <div className="h-10 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
-                  {/* Public link to dashboard */}
                   {isPublicRoute && (
                     <Link
                       href="/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 rounded-xl font-bold text-xs shadow-md hover:brightness-110 transition-all"
+                      className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-[#01281a] hover:bg-[#023c28] text-white rounded-xl font-bold text-xs shadow-md transition-all"
                     >
-                      <LayoutDashboard className="w-4 h-4 text-slate-950" />
+                      <LayoutDashboard className="w-4 h-4 text-[#f3ba2f]" />
                       <span>Dashboard</span>
                     </Link>
                   )}
                 </div>
               ) : admin ? (
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-bold text-amber-200 bg-[#023322] border border-[#d4af37]/40 px-3 py-1 rounded-xl hidden sm:inline">
-                    Admin: {admin.phone}
-                  </span>
                   {isPublicRoute && (
                     <Link
                       href="/admin/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 rounded-xl font-bold text-xs shadow-md transition-colors"
+                      className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-[#01281a] hover:bg-[#023c28] text-white rounded-xl font-bold text-xs shadow-md transition-colors"
                     >
-                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      <LayoutDashboard className="w-4 h-4 text-[#f3ba2f]" />
                       <span>Admin Panel</span>
                     </Link>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <Link
                     href="/login"
-                    className="px-3.5 py-2 text-xs font-bold text-slate-200 hover:text-[#f3ba2f] transition-colors"
+                    className="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-[#01281a] border border-slate-200 hover:border-slate-300 transition-colors"
                   >
-                    Sign In
+                    Login
                   </Link>
                   <Link
                     href="/register"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-bold text-xs shadow-md hover:brightness-110 transition-all"
+                    className="px-5 py-2.5 rounded-xl bg-[#01281a] hover:bg-[#023c28] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all"
                   >
-                    Sign Up
+                    Join Now
                   </Link>
                 </div>
               )}
@@ -385,7 +372,7 @@ export default function Navbar() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-xl text-[#f3ba2f] bg-[#023322] border border-[#d4af37]/35 hover:bg-[#03442e] transition-colors"
+                className="lg:hidden p-2 rounded-xl text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors"
                 title="Toggle Menu"
               >
                 {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

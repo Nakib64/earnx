@@ -1,221 +1,173 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import {
-  ShieldCheck,
-  Lock,
-  Headset,
-  CheckCircle2,
-  Send,
-  Mail,
-} from 'lucide-react';
+import { ul } from 'framer-motion/client';
 
 export default function Footer() {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 4000);
-    }
-  };
-
   return (
-    <motion.footer
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: false, amount: 0.1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      className="bg-[#00140e] text-slate-300 border-t border-[#053d29] pt-14 pb-10 overflow-hidden"
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Top Section: Brand Summary & Newsletter Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Brand Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:col-span-5 space-y-5"
-          >
-            <Link href="/" className="inline-flex items-center space-x-2.5">
-              <div className="w-10 h-10 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center text-[#f3ba2f] font-black text-xl font-mono shadow-md">
-                EX
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight">
-                Earn<span className="text-amber-400">X</span> Capital
-              </span>
+    <footer className="bg-white text-slate-600 border-t border-slate-200 pt-16 pb-12 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-12 pb-12 border-b border-slate-100">
+          {/* Brand & Socials */}
+          <div className="md:col-span-4 space-y-4">
+            <Link href="/" className="inline-block">
+              <img
+                src="/logo.png"
+                alt="EarnX Capital"
+                className="h-10 w-auto object-contain"
+              />
             </Link>
-
-            <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-md">
-              High-integrity digital asset management and multi-tier wealth growth platform. Built with enterprise cold-wallet security and real-time yield distribution.
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium max-w-sm">
+              EarnX Capital is a digital business platform with multiple earning opportunities for everyone.
             </p>
 
-            {/* Live System Operational Indicator */}
-            <div className="inline-flex items-center space-x-2 bg-[#01261a] border border-[#055c3c] px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-400">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>All Systems Operational • 99.99% Uptime</span>
-            </div>
-          </motion.div>
-
-          {/* Newsletter Subscription Box */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="lg:col-span-7 bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/30 rounded-3xl p-6 sm:p-7 shadow-xl space-y-4"
-          >
-            <div className="space-y-1">
-              <h4 className="text-base font-black text-white flex items-center gap-2">
-                <Mail className="w-4 h-4 text-amber-400" />
-                <span>Subscribe to Market Insights</span>
-              </h4>
-              <p className="text-xs text-slate-300 font-medium">
-                Get weekly market updates, EXC token staking yields, and exclusive investment plan releases.
-              </p>
-            </div>
-
-            {subscribed ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="p-3.5 bg-emerald-950/80 border border-emerald-500/50 rounded-2xl text-xs font-black text-emerald-300 flex items-center gap-2"
+            {/* Social Icons with SVG */}
+            <div className="flex items-center space-x-3 pt-2">
+              {/* Facebook */}
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Thank you! You have successfully subscribed to EarnX updates.</span>
-              </motion.div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email address..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-[#001710] border border-[#055c3c] focus:border-amber-400 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none transition-all font-medium"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-2xl shadow-lg flex items-center justify-center space-x-2 shrink-0 cursor-pointer"
-                >
-                  <span>Subscribe</span>
-                  <Send className="w-3.5 h-3.5 text-slate-950" />
-                </motion.button>
-              </form>
-            )}
-          </motion.div>
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+              </a>
+
+              {/* Instagram */}
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+
+              {/* YouTube */}
+              <a
+                href="#"
+                aria-label="YouTube"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                </svg>
+              </a>
+
+              {/* LinkedIn */}
+              <a
+                href="#"
+                aria-label="LinkedIn"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                </svg>
+              </a>
+            </div>
+          </div>
+
+
+        <div className='w-full grid grid-cols-2 md:grid-cols-4 gap-8'>
+  {/* Company Links */}
+          <div className="md:col-span-2 space-y-3">
+            <h4 className="font-extrabold text-slate-900 text-sm">Company</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li>
+                <Link href="/about" className="hover:text-[#01281a] transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="hover:text-[#01281a] transition-colors">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Marketplace Links */}
+          <div className="md:col-span-2 space-y-3">
+            <h4 className="font-extrabold text-slate-900 text-sm">Marketplace</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li>
+                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
+                  All Products
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
+                  Categories
+                </Link>
+              </li>
+              <li>
+                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
+                  Top Sellers
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Opportunities Links */}
+          <div className="md:col-span-2 space-y-3">
+            <h4 className="font-extrabold text-slate-900 text-sm">Opportunities</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li>
+                <Link href="/#opportunities" className="hover:text-[#01281a] transition-colors">
+                  Sales &amp; Marketing
+                </Link>
+              </li>
+              <li>
+                <Link href="/#team-business" className="hover:text-[#01281a] transition-colors">
+                  Team-Based Business
+                </Link>
+              </li>
+              <li>
+                <Link href="/#investment" className="hover:text-[#01281a] transition-colors">
+                  Investment Opportunities
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div className="md:col-span-2 space-y-3">
+            <h4 className="font-extrabold text-slate-900 text-sm">Support</h4>
+            <ul className="space-y-2 text-xs font-semibold">
+              <li>
+                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                  Terms &amp; Conditions
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
         </div>
 
-        {/* Middle Links Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-6 border-t border-[#053d29]/60 text-xs"
-        >
-          {/* Col 1: Platform Links */}
-          <div className="space-y-3">
-            <h5 className="font-black text-white uppercase tracking-wider text-[11px]">Platform</h5>
-            <ul className="space-y-2 font-medium">
-              <li>
-                <Link href="/" className="hover:text-amber-300 transition-colors">Homepage</Link>
-              </li>
-              <li>
-                <Link href="/dashboard" className="hover:text-amber-300 transition-colors">User Dashboard</Link>
-              </li>
-              <li>
-                <Link href="/dashboard/investments" className="hover:text-amber-300 transition-colors">Investment Packages</Link>
-              </li>
-              <li>
-                <Link href="/dashboard/leaderboard" className="hover:text-amber-300 transition-colors">Top Leaders</Link>
-              </li>
-              <li>
-                <Link href="/dashboard/coins" className="hover:text-amber-300 transition-colors">EarnX Coin (EXC)</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 2: Account & Earnings */}
-          <div className="space-y-3">
-            <h5 className="font-black text-white uppercase tracking-wider text-[11px]">Account & Staking</h5>
-            <ul className="space-y-2 font-medium">
-              <li>
-                <Link href="/register" className="hover:text-amber-300 transition-colors">Create Account</Link>
-              </li>
-              <li>
-                <Link href="/login" className="hover:text-amber-300 transition-colors">Member Sign In</Link>
-              </li>
-              <li>
-                <Link href="/dashboard/wallet" className="hover:text-amber-300 transition-colors">My Wallet & Withdrawals</Link>
-              </li>
-              <li>
-                <Link href="/dashboard/referral" className="hover:text-amber-300 transition-colors">Referral Commission</Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 3: Company & Information */}
-          <div className="space-y-3">
-            <h5 className="font-black text-white uppercase tracking-wider text-[11px]">Company</h5>
-            <ul className="space-y-2 font-medium">
-              <li>
-                <Link href="/about" className="hover:text-amber-300 transition-colors">About EarnX</Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-amber-300 transition-colors">24/7 Support</Link>
-              </li>
-              <li>
-                <span className="text-slate-400 cursor-pointer hover:text-white transition-colors">Security Audits</span>
-              </li>
-              <li>
-                <span className="text-slate-400 cursor-pointer hover:text-white transition-colors">Risk Disclosure</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 4: Live EXC Asset Card */}
-          <div className="bg-[#012015] border border-[#d4af37]/30 rounded-2xl p-4 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="font-black text-white text-xs">EarnX Coin</span>
-              <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-700/50">+7.35%</span>
-            </div>
-            <div className="text-xl font-black font-mono text-white">$184.56 USD</div>
-            <p className="text-[10px] text-slate-400 leading-snug">Native platform utility token powering daily ROI boosts and zero-fee transfers.</p>
-          </div>
-        </motion.div>
-
-        {/* Bottom Bar: Copyright & Security Pillars */}
-        <div className="pt-8 border-t border-[#053d29]/60 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
-          <div>
-            © {new Date().getFullYear()} EarnX Capital. All rights reserved.
-          </div>
-
-          <div className="flex flex-wrap items-center gap-6 font-medium">
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Cold Wallet Storage
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <Lock className="w-3.5 h-3.5 text-amber-400" /> 256-Bit SSL Encryption
-            </span>
-            <span className="flex items-center gap-1.5 text-slate-300">
-              <Headset className="w-3.5 h-3.5 text-emerald-400" /> 24/7 Desk
-            </span>
-          </div>
+        {/* Bottom Copyright */}
+        <div className="pt-8 text-center text-xs text-slate-400 font-medium">
+          © 2026 EarnX Capital. All rights reserved.
         </div>
       </div>
-    </motion.footer>
+    </footer>
   );
 }

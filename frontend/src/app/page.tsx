@@ -1,66 +1,53 @@
 'use client';
 
 import React from 'react';
-import HeroBanner from '../components/public/HeroBanner';
-import CryptoTickerCard from '../components/public/CryptoTickerCard';
-import FeatureCards from '../components/public/FeatureCards';
-import InstitutionalIntelligenceSection from '../components/public/InstitutionalIntelligenceSection';
-import GlobalMetricsSection from '../components/public/GlobalMetricsSection';
-import SecurityCustodySection from '../components/public/SecurityCustodySection';
-import HowItWorks from '../components/public/HowItWorks';
-import CtaBanner from '../components/public/CtaBanner';
+import HeroSection from '../components/landing/HeroSection';
+import AboutSection from '../components/landing/AboutSection';
+import WaysToEarnSection from '../components/landing/WaysToEarnSection';
+import MetricsStrip from '../components/landing/MetricsStrip';
+import HowItWorksSection from '../components/landing/HowItWorksSection';
+import AgencyAndInvestmentSection from '../components/landing/AgencyAndInvestmentSection';
+import MarketplaceSection from '../components/landing/MarketplaceSection';
+import TeamBusinessSection from '../components/landing/TeamBusinessSection';
+import WhyEarnXSection from '../components/landing/WhyEarnXSection';
+import FinalCtaSection from '../components/landing/FinalCtaSection';
 import Footer from '../components/Footer';
 
 export default function Homepage() {
   return (
-    <div className="bg-[#F4F7F6] text-slate-900 flex flex-col justify-between">
-      <div className="pb-16">
-        {/* 1. Hero Banner Component */}
-        <HeroBanner
-          bgImage="/hero-banner.jpg"
-          title={
-            <>
-              Grow Your <br />
-              Wealth With <br />
-              <span className="bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-500 bg-clip-text text-transparent">
-                EarnX
-              </span>
-            </>
-          }
-          description="Smart digital asset management with a premium experience."
-          secondaryBtnText="EarnX Coin"
-          secondaryBtnHref="/dashboard/coins"
-          showMemberStats={true}
-        />
+    <div className="bg-white text-slate-900 flex flex-col min-h-screen">
+      {/* 1. HERO SECTION */}
+      <HeroSection />
 
-        {/* Lower Sections */}
-        <div className="space-y-14 sm:space-y-20 pt-10 sm:pt-14">
-          {/* 2. Crypto Market Ticker Component */}
-          <CryptoTickerCard />
+      {/* 2. WHAT IS EARNX CAPITAL? */}
+      <AboutSection />
 
-          {/* 3. Feature Cards Component */}
-          <FeatureCards />
+      {/* 3. MULTIPLE WAYS TO EARN (3 Tinted Cards) */}
+      <WaysToEarnSection />
 
-          {/* 4. Institutional Asset Strategy & Global Market Intelligence */}
-          <InstitutionalIntelligenceSection />
+      {/* 4. METRICS / STATS STRIP */}
+      <MetricsStrip />
 
-          {/* 5. Enterprise Scale & Network Telemetry Metrics */}
-          <GlobalMetricsSection />
+      {/* 5. HOW EARNX CAPITAL WORKS? (4 Horizontal Connected Steps) */}
+      <HowItWorksSection />
 
-          {/* 6. Defense-in-Depth Security & Vault Custody */}
-          <SecurityCustodySection />
+      {/* 6. AGENCY SERVICES & INVESTMENT SPLIT SECTION */}
+      <AgencyAndInvestmentSection />
 
-          {/* 7. How It Works Component */}
-          <HowItWorks />
+      {/* 7. MARKETPLACE (Shop & Sell Ecosystem) */}
+      <MarketplaceSection />
 
-          {/* 8. CTA Banner Component */}
-          <CtaBanner />
-        </div>
-      </div>
+      {/* 8. TEAM BUSINESS (Collaborative Leadership) */}
+      <TeamBusinessSection />
 
-      {/* Smart Footer Component */}
+      {/* 9. WHY CHOOSE EARNX? (5 Value Proposition Cards) */}
+      <WhyEarnXSection />
+
+      {/* 10. FINAL CTA (Dark Green Banner with Gold Action) */}
+      <FinalCtaSection />
+
+      {/* 11. CLEAN WHITE FOOTER */}
       <Footer />
     </div>
   );
 }
-
