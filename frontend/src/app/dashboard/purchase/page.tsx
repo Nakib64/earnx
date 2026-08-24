@@ -446,7 +446,7 @@ export default function PurchasePage() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Enter or search Target User Id (e.g. EX0001)..."
+              placeholder="Enter or search Target User Id (e.g. EX1001)..."
               value={targetQuery}
               onChange={(e) => {
                 setTargetQuery(e.target.value);
@@ -596,7 +596,7 @@ export default function PurchasePage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Enter or search Referral / Sponsor Code (e.g. EX0001)..."
+                    placeholder="Enter or search Referral / Sponsor Code (e.g. EX1001)..."
                     value={referrerQuery}
                     onChange={(e) => {
                       setReferrerQuery(e.target.value);

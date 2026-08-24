@@ -27,7 +27,7 @@ export class ApprovalsService {
       select: { referral_code: true },
     });
 
-    let maxNum = 0;
+    let maxNum = 1000;
     for (const u of existingUsers) {
       const match = u.referral_code.match(/\d+/);
       if (match) {
@@ -98,7 +98,7 @@ export class ApprovalsService {
         },
       });
 
-      // 2. Activate user & assign serial user code (EX0001, EX0002...)
+      // 2. Activate user & assign serial user code (EX1001, EX1002...)
       const targetUser = await tx.user.findUnique({ where: { id: request.user_id } });
       let userCode = targetUser?.referral_code;
       if (!userCode || !userCode.startsWith('EX')) {

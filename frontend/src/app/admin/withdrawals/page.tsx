@@ -336,7 +336,7 @@ export default function AdminWithdrawalsPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
-            placeholder="Search by User Name, User Code (EX0001), Phone, or 6-digit OTP..."
+            placeholder="Search by User Name, User Code (EX1001), Phone, or 6-digit OTP..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -637,7 +637,7 @@ export default function AdminWithdrawalsPage() {
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="text"
-                  placeholder="Search User Code (e.g. EX0001), Name, or Phone..."
+                  placeholder="Search User Code (e.g. EX1001), Name, or Phone..."
                   value={targetQuery}
                   onChange={(e) => {
                     setTargetQuery(e.target.value);

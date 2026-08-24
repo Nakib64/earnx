@@ -195,7 +195,7 @@ export class UsersService {
         where: { referral_code: { startsWith: 'EX' } },
         select: { referral_code: true },
       });
-      let maxNum = 0;
+      let maxNum = 1000;
       for (const u of existingUsers) {
         const match = u.referral_code.match(/\d+/);
         if (match) {

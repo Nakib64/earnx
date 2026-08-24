@@ -85,7 +85,7 @@ export function WalletTransferModal({
             <input
               type="text"
               required
-              placeholder="Enter or search Recipient User Code (e.g. EX0001)..."
+              placeholder="Enter or search Recipient User Code (e.g. EX1001)..."
               value={targetReferralCode}
               onChange={(e) => {
                 setTargetReferralCode(e.target.value);
