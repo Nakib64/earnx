@@ -6,11 +6,11 @@ import { motion } from 'framer-motion';
 const paymentMethods = [
   {
     name: 'bKash',
-    logo: 'https://www.svgrepo.com/show/515062/bkash.svg',
+    logo: '/bkash.svg',
   },
   {
     name: 'Nagad',
-    logo: 'https://www.svgrepo.com/show/518100/nagad.svg',
+    logo: '/nagad.svg',
   },
   {
     name: 'Rocket',
