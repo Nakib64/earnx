@@ -34,6 +34,7 @@ import {
   ChevronDown,
   ShoppingBag,
   Megaphone,
+  Banknote,
 } from 'lucide-react';
 
 export default function Navbar() {
@@ -64,6 +65,7 @@ export default function Navbar() {
 
   const adminItems = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
     { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
