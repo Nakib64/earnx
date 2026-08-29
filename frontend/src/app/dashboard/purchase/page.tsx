@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { SystemConfigMap } from '../../../types';
 import {
   ShoppingBag,
   Search,
@@ -67,8 +68,6 @@ export default function PurchasePage() {
   const [selectedReferrerUser, setSelectedReferrerUser] = useState<UserSearchResult | null>(null);
   const [showReferrerDropdown, setShowReferrerDropdown] = useState(false);
 
-
-
   // Modal Dialog States
   const [submitting, setSubmitting] = useState(false);
   const [modalState, setModalState] = useState<{
@@ -84,8 +83,23 @@ export default function PurchasePage() {
     message: '',
   });
 
-  const activationFee = 500;
-  const premiumFee = 1000;
+  const [activationFee, setActivationFee] = useState<number>(500);
+  const [premiumFee, setPremiumFee] = useState<number>(1000);
+
+  // Fetch global system config fees (dynamic pricing)
+  const fetchSystemConfigs = useCallback(async () => {
+    const res = await apiFetch<SystemConfigMap>('/system-config/public');
+    if (res.success && res.data) {
+      if (res.data.ACTIVATION_FEE) {
+        const fee = parseFloat(res.data.ACTIVATION_FEE);
+        if (!isNaN(fee)) setActivationFee(fee);
+      }
+      if (res.data.PREMIUM_FEE) {
+        const fee = parseFloat(res.data.PREMIUM_FEE);
+        if (!isNaN(fee)) setPremiumFee(fee);
+      }
+    }
+  }, []);
 
   // Fetch all active investment plans
   const fetchActivePlans = useCallback(async () => {
@@ -106,8 +120,9 @@ export default function PurchasePage() {
   }, []);
 
   useEffect(() => {
+    fetchSystemConfigs();
     fetchActivePlans();
-  }, [fetchActivePlans]);
+  }, [fetchSystemConfigs, fetchActivePlans]);
 
   // Debounced search for Target User
   useEffect(() => {

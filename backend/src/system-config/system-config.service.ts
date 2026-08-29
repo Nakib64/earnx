@@ -27,6 +27,8 @@ export class SystemConfigService {
       COIN_PRICE: '10', // Default ৳10 per coin
       PREMIUM_FREE_COINS: '100', // Default 100 free coins on premium
       PREMIUM_FREE_COINS_REQUIRED_REFERRALS: '10', // Fixed 10 active referrals required
+      PREMIUM_FEE: '1000', // Default ৳1000 for Premium package
+      ACTIVATION_FEE: '500', // Default ৳500 for Activation package
     };
     for (const c of configs) {
       result[c.key] = c.value;

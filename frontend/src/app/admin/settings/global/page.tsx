@@ -18,6 +18,8 @@ import {
   Coins,
   Sliders,
   CheckCircle2,
+  Crown,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface PremiumUser {
@@ -34,6 +36,8 @@ interface PremiumUser {
 
 export default function GlobalSettingsPage() {
   // System Config State
+  const [premiumFee, setPremiumFee] = useState('1000');
+  const [activationFee, setActivationFee] = useState('500');
   const [weeklyPayout, setWeeklyPayout] = useState('100');
   const [coinPrice, setCoinPrice] = useState('10');
   const [premiumFreeCoins, setPremiumFreeCoins] = useState('100');
@@ -61,6 +65,8 @@ export default function GlobalSettingsPage() {
     setLoading(true);
     const res = await apiFetch<SystemConfigMap>('/admin/system-config', { isAdmin: true });
     if (res.success && res.data) {
+      if (res.data.PREMIUM_FEE) setPremiumFee(res.data.PREMIUM_FEE);
+      if (res.data.ACTIVATION_FEE) setActivationFee(res.data.ACTIVATION_FEE);
       if (res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT) setWeeklyPayout(res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT);
       if (res.data.COIN_PRICE) setCoinPrice(res.data.COIN_PRICE);
       if (res.data.PREMIUM_FREE_COINS) setPremiumFreeCoins(res.data.PREMIUM_FREE_COINS);
@@ -92,6 +98,16 @@ export default function GlobalSettingsPage() {
     setSaving(true);
     setMessage(null);
     const requests = [
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'PREMIUM_FEE', value: premiumFee }),
+      }),
+      apiFetch('/admin/system-config', {
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify({ key: 'ACTIVATION_FEE', value: activationFee }),
+      }),
       apiFetch('/admin/system-config', {
         method: 'POST',
         isAdmin: true,
@@ -222,11 +238,49 @@ export default function GlobalSettingsPage() {
           </div>
           <div>
             <h2 className="text-base sm:text-lg font-extrabold text-slate-900">System Parameters</h2>
-            <p className="text-[11px] font-medium text-slate-400">Set weekly payout amounts and coin pricing</p>
+            <p className="text-[11px] font-medium text-slate-400">Set package pricing, weekly payout amounts, and coin parameters</p>
           </div>
         </div>
 
         <form onSubmit={handleSave} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                <Crown className="w-3.5 h-3.5 text-amber-500" />
+                <span>Premium Package Fee (৳)</span>
+              </label>
+              <div className="relative">
+                <DollarSign className="w-5 h-5 text-primary absolute left-3.5 top-3" />
+                <input
+                  type="number"
+                  value={premiumFee}
+                  onChange={(e) => setPremiumFee(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  placeholder="1000"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium">Cost to purchase/upgrade to Premium membership subscription.</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Account Activation Fee (৳)</span>
+              </label>
+              <div className="relative">
+                <DollarSign className="w-5 h-5 text-primary absolute left-3.5 top-3" />
+                <input
+                  type="number"
+                  value={activationFee}
+                  onChange={(e) => setActivationFee(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  placeholder="500"
+                />
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium">Cost to activate a newly registered disabled account.</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
@@ -267,12 +321,15 @@ export default function GlobalSettingsPage() {
               <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
                 Premium Free Bonus Coins
               </label>
-              <input
-                type="number"
-                value={premiumFreeCoins}
-                onChange={(e) => setPremiumFreeCoins(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
-              />
+              <div className="relative">
+                <Coins className="w-5 h-5 text-primary absolute left-3.5 top-3" />
+                <input
+                  type="number"
+                  value={premiumFreeCoins}
+                  onChange={(e) => setPremiumFreeCoins(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                />
+              </div>
               <p className="text-[10px] text-slate-400 font-medium">Locked coins granted upon premium subscription.</p>
             </div>
 
@@ -280,12 +337,15 @@ export default function GlobalSettingsPage() {
               <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
                 Required Active Referrals
               </label>
-              <input
-                type="number"
-                value={requiredReferrals}
-                onChange={(e) => setRequiredReferrals(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
-              />
+              <div className="relative">
+                <Users className="w-5 h-5 text-primary absolute left-3.5 top-3" />
+                <input
+                  type="number"
+                  value={requiredReferrals}
+                  onChange={(e) => setRequiredReferrals(e.target.value)}
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                />
+              </div>
               <p className="text-[10px] text-slate-400 font-medium">Number of active referrals needed to unlock locked coins.</p>
             </div>
           </div>
