@@ -20,6 +20,7 @@ export enum TransactionType {
   COMMISSION = 'COMMISSION',
   ADMIN_ADJUSTMENT = 'ADMIN_ADJUSTMENT',
   PREMIUM_WEEKLY_PAYOUT = 'PREMIUM_WEEKLY_PAYOUT',
+  PREMIUM_DAILY_REWARD = 'PREMIUM_DAILY_REWARD',
   INVESTMENT_DEPOSIT = 'INVESTMENT_DEPOSIT',
   INVESTMENT_PAYOUT = 'INVESTMENT_PAYOUT',
   BALANCE_TRANSFER = 'BALANCE_TRANSFER',
@@ -36,6 +37,8 @@ export enum CoinTransactionType {
   PREMIUM_LOCKED_REWARD = 'PREMIUM_LOCKED_REWARD',
   PREMIUM_UNLOCKED = 'PREMIUM_UNLOCKED',
   ADMIN_ADJUSTMENT = 'ADMIN_ADJUSTMENT',
+  COIN_TRANSFER_SENT = 'COIN_TRANSFER_SENT',
+  COIN_TRANSFER_RECEIVED = 'COIN_TRANSFER_RECEIVED',
 }
 
 // ==========================================
@@ -59,9 +62,103 @@ export interface ApiResponse<T = any> {
 // DOMAIN MODELS & ENTITIES
 // ==========================================
 
+export interface PremiumPackage {
+  id: string;
+  title: string;
+  description?: string | null;
+  price: number | string;
+  daily_ads_count: number;
+  daily_reward_amount: number | string;
+  duration_days: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DailyAdTask {
+  is_premium: boolean;
+  message?: string;
+  package_title?: string;
+  daily_reward_amount?: number;
+  daily_ads_required?: number;
+  ads_watched?: number;
+  is_claimed?: boolean;
+  can_claim?: boolean;
+  claim_date?: string;
+}
+
+export interface DepositGatewayConfig {
+  bkash_number: string;
+  bkash_type: string;
+  nagad_number: string;
+  nagad_type: string;
+  rocket_number: string;
+  rocket_type: string;
+  deposit_instruction?: string;
+}
+
+export interface DepositRequest {
+  id: string;
+  user_id: string;
+  method: string;
+  sender_number: string;
+  amount: number | string;
+  trx_id: string;
+  status: RequestStatus;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  rejection_reason?: string | null;
+  created_at: string;
+  updated_at?: string;
+  user?: UserSummary;
+}
+
+export interface CoinTransfer {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  coin_amount: number | string;
+  coin_rate: number | string;
+  total_bdt_value: number | string;
+  note?: string | null;
+  status: RequestStatus;
+  responded_at?: string | null;
+  created_at: string;
+  updated_at?: string;
+  sender?: UserSummary;
+  receiver?: UserSummary;
+}
+
+export interface MarketplaceComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  parent_id?: string | null;
+  content: string;
+  created_at: string;
+  updated_at?: string;
+  user?: UserSummary;
+  replies?: MarketplaceComment[];
+}
+
+export interface MarketplacePost {
+  id: string;
+  user_id?: string;
+  content: string;
+  image_url?: string | null;
+  created_at: string;
+  updated_at?: string;
+  user: UserSummary & { designation?: Designation | null; is_premium?: boolean };
+  likes_count: number;
+  comments_count: number;
+  is_liked?: boolean;
+  is_liked_by_me?: boolean;
+  comments: MarketplaceComment[];
+}
+
 export interface User {
   id: string;
-  phone: string;
+  phone?: string | null;
   full_name: string | null;
   email?: string | null;
   country?: string | null;
@@ -77,6 +174,8 @@ export interface User {
   is_premium_coins_unlocked?: boolean;
   designation_id?: string | null;
   is_premium?: boolean;
+  premium_package_id?: string | null;
+  premium_package?: PremiumPackage | null;
   premium_started_at?: string | null;
   premium_expires_at?: string | null;
   premium_payout_count?: number;
@@ -102,6 +201,7 @@ export interface CoinTransaction {
 export interface CoinInfo {
   coin_balance: number;
   locked_coin_balance: number;
+  locked_bonus_coins?: number;
   wallet_balance: number;
   is_premium: boolean;
   premium_coins_granted: boolean;
@@ -115,10 +215,13 @@ export interface CoinInfo {
 
 export interface UserSummary {
   id: string;
-  phone: string;
+  phone?: string | null;
+  email?: string | null;
   full_name: string | null;
+  avatar_url?: string | null;
   referral_code: string;
   wallet_balance?: number | string;
+  is_premium?: boolean;
   referred_by?: UserSummary | null;
 }
 
@@ -132,6 +235,7 @@ export interface Admin {
 export interface Designation {
   id: string;
   name: string;
+  title?: string;
   stars: number;
   max_level: number;
   created_at?: string;
@@ -216,7 +320,7 @@ export interface InvestmentPlan {
   title: string;
   amount?: number | string;
   min_amount: number | string;
-  max_amount: number | string;
+  max_amount?: number | string;
   monthly_return_percent: number | string;
   duration_months?: number | null;
   is_lifetime?: boolean;
@@ -238,7 +342,11 @@ export interface UserInvestment {
   pending_amount?: number | string | null;
   total_payouts_made: number;
   max_payouts?: number | null;
+  duration_months?: number | null;
   is_lifetime?: boolean;
+  starts_at?: string;
+  ends_at?: string | null;
+  is_principal_returned?: boolean;
   last_payout_at?: string | null;
   next_payout_at?: string | null;
   created_at: string;

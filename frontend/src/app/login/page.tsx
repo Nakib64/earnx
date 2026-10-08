@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { apiFetch } from '../../lib/api';
 import {
   Phone,
+  Mail,
   Lock,
   ArrowRight,
   ShieldCheck,
@@ -24,7 +25,7 @@ import { AlertBanner } from '../../components/common/AlertBanner';
 export default function LoginPage() {
   const router = useRouter();
   const { loginUser } = useAuth();
-  const [phone, setPhone] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +34,8 @@ export default function LoginPage() {
 
   // Forgot Password State
   const [showForgotModal, setShowForgotModal] = useState(false);
-  const [forgotStep, setForgotStep] = useState<'PHONE' | 'OTP_RESET'>('PHONE');
-  const [forgotPhone, setForgotPhone] = useState('');
+  const [forgotStep, setForgotStep] = useState<'IDENTIFIER' | 'OTP_RESET'>('IDENTIFIER');
+  const [forgotTarget, setForgotTarget] = useState('');
   const [forgotOtp, setForgotOtp] = useState('');
   const [forgotNewPassword, setForgotNewPassword] = useState('');
   const [forgotConfirmPassword, setForgotConfirmPassword] = useState('');
@@ -55,15 +56,22 @@ export default function LoginPage() {
     return () => clearInterval(timer);
   }, [cooldown]);
 
+  const isEmailInput = (val: string) => val.includes('@');
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccessBanner(null);
     setLoading(true);
 
+    const clean = identifier.trim();
+    const payload = isEmailInput(clean)
+      ? { email: clean, identifier: clean, password }
+      : { phone: clean, identifier: clean, password };
+
     const res = await apiFetch<{ accessToken: string; user: any }>('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ phone, password }),
+      body: JSON.stringify(payload),
     });
 
     if (res.success && res.data) {
@@ -82,19 +90,21 @@ export default function LoginPage() {
     setForgotSuccessMsg(null);
     setForgotLoading(true);
 
+    const cleanTarget = forgotTarget.trim();
     const res = await apiFetch<any>('/auth/forgot-password/send-otp', {
       method: 'POST',
-      body: JSON.stringify({ phone: forgotPhone.trim() }),
+      body: JSON.stringify({ target: cleanTarget }),
     });
 
     if (res.success) {
       setForgotStep('OTP_RESET');
       setCooldown(res.data?.cooldownSeconds || 120);
+      const isMail = isEmailInput(cleanTarget);
       setForgotSuccessMsg(
-        `A 6-digit verification code has been sent via SMS to ${forgotPhone.trim()}.`,
+        `A 6-digit verification code has been sent via ${isMail ? 'Email' : 'SMS'} to ${cleanTarget}.`,
       );
     } else {
-      setForgotError(res.error?.message || 'Failed to send verification code. Please check your phone number.');
+      setForgotError(res.error?.message || 'Failed to send verification code. Please check your phone or email.');
     }
     setForgotLoading(false);
   };
@@ -105,14 +115,16 @@ export default function LoginPage() {
     setForgotError(null);
     setForgotLoading(true);
 
+    const cleanTarget = forgotTarget.trim();
     const res = await apiFetch<any>('/auth/forgot-password/send-otp', {
       method: 'POST',
-      body: JSON.stringify({ phone: forgotPhone.trim() }),
+      body: JSON.stringify({ target: cleanTarget }),
     });
 
     if (res.success) {
       setCooldown(res.data?.cooldownSeconds || 120);
-      setForgotSuccessMsg(`New 6-digit verification code sent to ${forgotPhone.trim()}.`);
+      const isMail = isEmailInput(cleanTarget);
+      setForgotSuccessMsg(`New 6-digit verification code sent via ${isMail ? 'Email' : 'SMS'} to ${cleanTarget}.`);
     } else {
       setForgotError(res.error?.message || 'Failed to resend code.');
     }
@@ -136,17 +148,18 @@ export default function LoginPage() {
 
     setForgotLoading(true);
 
+    const cleanTarget = forgotTarget.trim();
     const res = await apiFetch<any>('/auth/forgot-password/reset', {
       method: 'POST',
       body: JSON.stringify({
-        phone: forgotPhone.trim(),
+        target: cleanTarget,
         otp: forgotOtp.trim(),
         new_password: forgotNewPassword,
       }),
     });
 
     if (res.success) {
-      setPhone(forgotPhone.trim());
+      setIdentifier(cleanTarget);
       setShowForgotModal(false);
       setSuccessBanner('Your password has been reset successfully! Please sign in with your new password.');
       setPassword('');
@@ -203,17 +216,21 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Phone Number
+              Phone Number or Email Address
             </label>
             <div className="relative">
-              <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+              {isEmailInput(identifier) ? (
+                <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+              ) : (
+                <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+              )}
               <input
                 type="text"
                 required
-                placeholder="01700000000"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                placeholder="01700000000 or user@example.com"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
           </div>
@@ -227,8 +244,8 @@ export default function LoginPage() {
                 type="button"
                 onClick={() => {
                   setShowForgotModal(true);
-                  setForgotStep('PHONE');
-                  setForgotPhone(phone || '');
+                  setForgotStep('IDENTIFIER');
+                  setForgotTarget(identifier || '');
                   setForgotOtp('');
                   setForgotNewPassword('');
                   setForgotConfirmPassword('');
@@ -286,7 +303,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ── FORGOT PASSWORD MODAL (SMS OTP + RATE LIMITING) ── */}
+      {/* ── FORGOT PASSWORD MODAL (SMS / EMAIL OTP) ── */}
       {showForgotModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 relative">
@@ -305,12 +322,12 @@ export default function LoginPage() {
               </div>
               <div>
                 <h3 className="text-base sm:text-lg font-black text-slate-900">
-                  {forgotStep === 'PHONE' ? 'Reset Password' : 'Enter Verification Code'}
+                  {forgotStep === 'IDENTIFIER' ? 'Reset Password' : 'Enter Verification Code'}
                 </h3>
                 <p className="text-[11px] font-semibold text-slate-500">
-                  {forgotStep === 'PHONE'
-                    ? 'Verify your phone number via SMS to reset password'
-                    : `Enter the 6-digit OTP code sent to ${forgotPhone}`}
+                  {forgotStep === 'IDENTIFIER'
+                    ? 'Verify your phone number or email to reset password'
+                    : `Enter the 6-digit OTP code sent to ${forgotTarget}`}
                 </p>
               </div>
             </div>
@@ -331,26 +348,30 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Step 1: Phone Input */}
-            {forgotStep === 'PHONE' && (
+            {/* Step 1: Identifier Input */}
+            {forgotStep === 'IDENTIFIER' && (
               <form onSubmit={handleSendForgotOtp} className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                    Registered Phone Number <span className="text-rose-500">*</span>
+                    Registered Phone or Email <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+                    {isEmailInput(forgotTarget) ? (
+                      <Mail className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+                    ) : (
+                      <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
+                    )}
                     <input
                       type="text"
                       required
-                      placeholder="01700000000"
-                      value={forgotPhone}
-                      onChange={(e) => setForgotPhone(e.target.value)}
-                      className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] text-sm"
+                      placeholder="01700000000 or user@example.com"
+                      value={forgotTarget}
+                      onChange={(e) => setForgotTarget(e.target.value)}
+                      className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] text-sm"
                     />
                   </div>
                   <p className="text-[11px] text-slate-500 font-medium">
-                    We will send a 6-digit OTP to your registered phone number.
+                    We will send a 6-digit OTP to your registered phone or email address.
                   </p>
                 </div>
 
@@ -364,7 +385,7 @@ export default function LoginPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={forgotLoading || !forgotPhone.trim()}
+                    disabled={forgotLoading || !forgotTarget.trim()}
                     className="px-5 py-2.5 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
                   >
                     {forgotLoading ? (
@@ -468,12 +489,12 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setForgotStep('PHONE');
+                      setForgotStep('IDENTIFIER');
                       setForgotError(null);
                     }}
                     className="px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold text-xs text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
-                    Change Phone
+                    Change Identifier
                   </button>
                   <button
                     type="submit"

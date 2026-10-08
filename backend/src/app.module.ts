@@ -16,16 +16,22 @@ import { CoinsModule } from './coins/coins.module';
 import { NoticesModule } from './notices/notices.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { SmsModule } from './sms/sms.module';
+import { EmailModule } from './email/email.module';
 import { OtpModule } from './otp/otp.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
+import { DepositsModule } from './deposits/deposits.module';
+import { MarketplaceModule } from './marketplace/marketplace.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     SmsModule,
+    EmailModule,
     OtpModule,
     WithdrawalsModule,
+    DepositsModule,
+    MarketplaceModule,
     AdminAuthModule,
     UserAuthModule,
     UsersModule,

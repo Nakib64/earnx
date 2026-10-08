@@ -26,6 +26,7 @@ enum TransactionType {
   COMMISSION
   ADMIN_ADJUSTMENT
   PREMIUM_WEEKLY_PAYOUT
+  PREMIUM_DAILY_REWARD
   INVESTMENT_DEPOSIT
   INVESTMENT_PAYOUT
   BALANCE_TRANSFER
@@ -37,6 +38,8 @@ enum CoinTransactionType {
   PREMIUM_LOCKED_REWARD
   PREMIUM_UNLOCKED
   ADMIN_ADJUSTMENT
+  COIN_TRANSFER_SENT
+  COIN_TRANSFER_RECEIVED
 }
 
 enum CommissionType {
@@ -69,16 +72,16 @@ model AdminLoginHistory {
 
 model User {
   id                         String            @id @default(uuid())
-  phone                      String            @unique
+  phone                      String?           @unique
   password_hash              String
   full_name                  String?
-  email                      String?
+  email                      String?           @unique
   country                    String?           @default("Bangladesh")
   national_id                String?
   avatar_url                 String?
   referral_code              String            @unique
   referred_by_id             String?
-  status                     UserStatus        @default(DISABLED)
+  status                     UserStatus        @default(ACTIVE)
   wallet_balance             Decimal           @default(0.00) @db.Decimal(12, 2)
   coin_balance               Decimal           @default(0.00) @db.Decimal(12, 2)
   locked_coin_balance        Decimal           @default(0.00) @db.Decimal(12, 2)
@@ -86,28 +89,154 @@ model User {
   is_premium_coins_unlocked  Boolean           @default(false)
   designation_id             String?
 
-  // Premium status fields (Weekly payouts for 1 year / 52 weeks max)
+  // Premium status fields
   is_premium                 Boolean           @default(false)
+  premium_package_id         String?
+  premium_package            PremiumPackage?   @relation(fields: [premium_package_id], references: [id], onDelete: SetNull)
   premium_started_at         DateTime?
   premium_expires_at         DateTime?
   premium_payout_count       Int               @default(0)
   last_premium_payout_at     DateTime?
 
-  referred_by         User?               @relation("ReferralTree", fields: [referred_by_id], references: [id], onDelete: SetNull)
-  referrals           User[]              @relation("ReferralTree")
-  designation         Designation?        @relation(fields: [designation_id], references: [id], onDelete: SetNull)
-  transactions        WalletTransaction[]
-  coin_transactions   CoinTransaction[]
-  activation_requests ActivationRequest[]  @relation("UserActivationRequests")
-  premium_requests    PremiumRequest[]     @relation("UserPremiumRequests")
-  withdrawal_requests WithdrawalRequest[]  @relation("UserWithdrawalRequests")
-  paid_withdrawals    WithdrawalRequest[]  @relation("PaidWithdrawals")
-  investments         UserInvestment[]
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
+  referred_by                User?               @relation("ReferralTree", fields: [referred_by_id], references: [id], onDelete: SetNull)
+  referrals                  User[]              @relation("ReferralTree")
+  designation                Designation?        @relation(fields: [designation_id], references: [id], onDelete: SetNull)
+  transactions               WalletTransaction[]
+  coin_transactions          CoinTransaction[]
+  activation_requests        ActivationRequest[]  @relation("UserActivationRequests")
+  premium_requests           PremiumRequest[]     @relation("UserPremiumRequests")
+  withdrawal_requests        WithdrawalRequest[]  @relation("UserWithdrawalRequests")
+  paid_withdrawals           WithdrawalRequest[]  @relation("PaidWithdrawals")
+  investments                UserInvestment[]
+  deposit_requests           DepositRequest[]
+  sent_coin_transfers        CoinTransfer[]       @relation("SentCoinTransfers")
+  received_coin_transfers    CoinTransfer[]       @relation("ReceivedCoinTransfers")
+  marketplace_posts          MarketplacePost[]
+  marketplace_comments       MarketplaceComment[]
+  marketplace_likes          MarketplaceLike[]
+  daily_ad_claims            DailyAdClaim[]
+  created_at                 DateTime            @default(now())
+  updated_at                 DateTime            @updatedAt
 
   @@index([referral_code])
   @@index([referred_by_id])
+  @@index([phone])
+  @@index([email])
+}
+
+model PremiumPackage {
+  id                  String         @id @default(uuid())
+  title               String
+  description         String?
+  price               Decimal        @db.Decimal(12, 2)
+  daily_ads_count     Int            @default(6)
+  daily_reward_amount Decimal        @db.Decimal(12, 2)
+  duration_days       Int            @default(365)
+  is_active           Boolean        @default(true)
+  users               User[]
+  daily_claims        DailyAdClaim[]
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+}
+
+model DailyAdClaim {
+  id            String         @id @default(uuid())
+  user_id       String
+  package_id    String
+  claim_date    String         // YYYY-MM-DD
+  ads_watched   Int            @default(0)
+  is_claimed    Boolean        @default(false)
+  reward_amount Decimal        @db.Decimal(12, 2)
+  claimed_at    DateTime?
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  package       PremiumPackage @relation(fields: [package_id], references: [id], onDelete: Cascade)
+  created_at    DateTime       @default(now())
+
+  @@unique([user_id, claim_date])
+  @@index([user_id])
+}
+
+model DepositRequest {
+  id               String        @id @default(uuid())
+  user_id          String
+  method           String        // "BKASH", "NAGAD", "ROCKET"
+  sender_number    String
+  amount           Decimal       @db.Decimal(12, 2)
+  trx_id           String        @unique
+  status           RequestStatus @default(PENDING)
+  approved_by      String?
+  approved_at      DateTime?
+  rejection_reason String?
+  user             User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  @@index([user_id])
+  @@index([trx_id])
+  @@index([status])
+}
+
+model CoinTransfer {
+  id              String        @id @default(uuid())
+  sender_id       String
+  receiver_id     String
+  coin_amount     Decimal       @db.Decimal(12, 2)
+  coin_rate       Decimal       @db.Decimal(12, 2)
+  total_bdt_value Decimal       @db.Decimal(12, 2)
+  note            String?
+  status          RequestStatus @default(PENDING) // PENDING, APPROVED, REJECTED
+  responded_at    DateTime?
+  sender          User          @relation("SentCoinTransfers", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver        User          @relation("ReceivedCoinTransfers", fields: [receiver_id], references: [id], onDelete: Cascade)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  @@index([sender_id])
+  @@index([receiver_id])
+  @@index([status])
+}
+
+model MarketplacePost {
+  id         String               @id @default(uuid())
+  user_id    String
+  content    String
+  image_url  String?
+  user       User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  likes      MarketplaceLike[]
+  comments   MarketplaceComment[]
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+
+  @@index([user_id])
+  @@index([created_at])
+}
+
+model MarketplaceLike {
+  id         String          @id @default(uuid())
+  post_id    String
+  user_id    String
+  post       MarketplacePost @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  created_at DateTime        @default(now())
+
+  @@unique([post_id, user_id])
+}
+
+model MarketplaceComment {
+  id         String               @id @default(uuid())
+  post_id    String
+  user_id    String
+  parent_id  String?
+  content    String
+  post       MarketplacePost      @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user       User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  parent     MarketplaceComment?  @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies    MarketplaceComment[] @relation("CommentReplies")
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+
+  @@index([post_id])
+  @@index([parent_id])
 }
 
 model CoinTransaction {
@@ -128,8 +257,8 @@ model CoinTransaction {
 model Designation {
   id         String   @id @default(uuid())
   name       String   // e.g. "1 Star", "2 Star Leader", "VIP Diamond"
-  stars      Int      @default(1) // Star count (1, 2, 3, 4, 5)
-  max_level  Int      // Unlocked tree level depth (e.g. 1, 2, 3, 5)
+  stars      Int      @default(1)
+  max_level  Int
   users      User[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -169,12 +298,12 @@ model WithdrawalRequest {
   id               String        @id @default(uuid())
   user_id          String
   amount           Decimal       @db.Decimal(12, 2)
-  otp              String?       // 6-digit OTP code sent via SMS
+  otp              String?
   otp_expires_at   DateTime?
   status           RequestStatus @default(PENDING)
-  approved_by      String?       // Admin phone who executed payment
-  paid_to_user_id  String?       // Target recipient user who received the funds
-  paid_at          DateTime?     // Timestamp when payment was routed
+  approved_by      String?
+  paid_to_user_id  String?
+  paid_at          DateTime?
   rejection_reason String?
   user             User          @relation("UserWithdrawalRequests", fields: [user_id], references: [id], onDelete: Cascade)
   paid_to_user     User?         @relation("PaidWithdrawals", fields: [paid_to_user_id], references: [id], onDelete: SetNull)
@@ -188,17 +317,21 @@ model WithdrawalRequest {
 }
 
 model OtpVerification {
-  id          String   @id @default(uuid())
-  phone       String
-  otp         String   // 6-digit numerical code
-  purpose     String   // "SIGNUP", "WITHDRAWAL"
-  attempts    Int      @default(0) // Failed attempt counter for brute-force protection
-  is_verified Boolean  @default(false)
-  expires_at  DateTime // 10 minutes validity
-  last_sent_at DateTime @default(now()) // Cooldown tracking (2 minutes)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  id           String    @id @default(uuid())
+  target       String?   // Phone number OR Email address
+  phone        String?   // Backward compatible phone field
+  email        String?   // Email address field
+  channel      String    @default("SMS") // "SMS" | "EMAIL"
+  otp          String    // 6-digit numerical code
+  purpose      String    // "SIGNUP", "WITHDRAWAL", "FORGOT_PASSWORD"
+  attempts     Int       @default(0)
+  is_verified  Boolean   @default(false)
+  expires_at   DateTime
+  last_sent_at DateTime  @default(now())
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 
+  @@index([target, purpose])
   @@index([phone, purpose])
 }
 
@@ -219,7 +352,7 @@ model WalletTransaction {
 model CommissionRule {
   id         String         @id @default(uuid())
   type       CommissionType
-  level      Int            // 1, 2, 3...
+  level      Int
   amount     Decimal        @db.Decimal(12, 2)
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
@@ -251,7 +384,7 @@ model InvestmentPlan {
   title                  String
   amount                 Decimal          @default(0) @db.Decimal(12, 2)
   min_amount             Decimal          @db.Decimal(12, 2)
-  max_amount             Decimal          @db.Decimal(12, 2)
+  max_amount             Decimal?         @db.Decimal(12, 2)
   monthly_return_percent Decimal          @db.Decimal(5, 2)
   duration_months        Int?             @default(12)
   is_lifetime            Boolean          @default(false)
@@ -269,13 +402,17 @@ model UserInvestment {
   amount                 Decimal         @db.Decimal(12, 2)
   monthly_return_percent Decimal         @db.Decimal(5, 2)
   monthly_payout_amount  Decimal         @db.Decimal(12, 2)
-  status                 RequestStatus   @default(PENDING)
+  status                 RequestStatus   @default(APPROVED)
   request_type           String          @default("NEW")
   pending_plan_id        String?
   pending_amount         Decimal?        @db.Decimal(12, 2)
   total_payouts_made     Int             @default(0)
   max_payouts            Int?            @default(12)
+  duration_months        Int?            @default(12)
   is_lifetime            Boolean         @default(false)
+  starts_at              DateTime        @default(now())
+  ends_at                DateTime?
+  is_principal_returned  Boolean         @default(false)
   last_payout_at         DateTime?
   next_payout_at         DateTime?
   user                   User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -311,4 +448,3 @@ model Notice {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
-

@@ -1,30 +1,41 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from '../sms/sms.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OtpService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly smsService: SmsService,
+    private readonly emailService: EmailService,
   ) {}
 
   /**
    * Generates a 6-digit OTP, stores it in OtpVerification (valid for 10 min),
-   * enforces 2-minute cooldown on resends, and sends SMS to user.
+   * enforces 2-minute cooldown on resends, and dispatches via SMS or Email.
    */
   async generateAndSendOtp(
-    phone: string,
+    target: string,
     purpose: 'SIGNUP' | 'WITHDRAWAL' | 'FORGOT_PASSWORD',
+    channel?: 'SMS' | 'EMAIL',
     metadata?: { amount?: number },
   ) {
-    const cleanPhone = phone.trim();
-    if (!cleanPhone) {
-      throw new BadRequestException('Phone number is required');
+    const cleanTarget = target.trim();
+    if (!cleanTarget) {
+      throw new BadRequestException('Recipient phone or email is required');
     }
 
+    const detectedChannel: 'SMS' | 'EMAIL' =
+      channel || (cleanTarget.includes('@') ? 'EMAIL' : 'SMS');
+
     const existing = await this.prisma.otpVerification.findFirst({
-      where: { phone: cleanPhone, purpose },
+      where: {
+        OR: [
+          { target: cleanTarget, purpose },
+          { phone: cleanTarget, purpose },
+        ],
+      },
       orderBy: { created_at: 'desc' },
     });
 
@@ -33,23 +44,27 @@ export class OtpService {
     // 2-minute resend cooldown check (120 seconds)
     if (existing && existing.last_sent_at) {
       const elapsedMs = now.getTime() - new Date(existing.last_sent_at).getTime();
-      const cooldownMs = 120 * 1000; // 2 minutes
+      const cooldownMs = 120 * 1000;
       if (elapsedMs < cooldownMs) {
         const remainingSeconds = Math.ceil((cooldownMs - elapsedMs) / 1000);
         throw new BadRequestException(
-          `Please wait ${remainingSeconds} seconds before requesting a new OTP.`,
+          `Please wait ${remainingSeconds} seconds before requesting a new verification code.`,
         );
       }
     }
 
     // Generate cryptographically uniform 6-digit OTP (100000 - 999999)
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(now.getTime() + 10 * 60 * 1000); // 10 minutes validity
+    const expiresAt = new Date(now.getTime() + 10 * 60 * 1000);
 
     if (existing) {
       await this.prisma.otpVerification.update({
         where: { id: existing.id },
         data: {
+          target: cleanTarget,
+          phone: detectedChannel === 'SMS' ? cleanTarget : null,
+          email: detectedChannel === 'EMAIL' ? cleanTarget : null,
+          channel: detectedChannel,
           otp,
           attempts: 0,
           is_verified: false,
@@ -60,7 +75,10 @@ export class OtpService {
     } else {
       await this.prisma.otpVerification.create({
         data: {
-          phone: cleanPhone,
+          target: cleanTarget,
+          phone: detectedChannel === 'SMS' ? cleanTarget : null,
+          email: detectedChannel === 'EMAIL' ? cleanTarget : null,
+          channel: detectedChannel,
           purpose,
           otp,
           attempts: 0,
@@ -71,21 +89,32 @@ export class OtpService {
       });
     }
 
-    // Dispatch SMS based on purpose
-    if (purpose === 'SIGNUP') {
-      await this.smsService.sendSignupOtp(cleanPhone, otp);
-    } else if (purpose === 'FORGOT_PASSWORD') {
-      await this.smsService.sendForgotPasswordOtp(cleanPhone, otp);
-    } else if (purpose === 'WITHDRAWAL') {
-      await this.smsService.sendWithdrawalOtp(cleanPhone, otp, metadata?.amount || 0);
+    // Dispatch via SMS or Email based on channel
+    if (detectedChannel === 'EMAIL') {
+      if (purpose === 'SIGNUP') {
+        await this.emailService.sendSignupOtp(cleanTarget, otp);
+      } else if (purpose === 'FORGOT_PASSWORD') {
+        await this.emailService.sendForgotPasswordOtp(cleanTarget, otp);
+      } else if (purpose === 'WITHDRAWAL') {
+        await this.emailService.sendWithdrawalOtp(cleanTarget, otp, metadata?.amount || 0);
+      }
+    } else {
+      if (purpose === 'SIGNUP') {
+        await this.smsService.sendSignupOtp(cleanTarget, otp);
+      } else if (purpose === 'FORGOT_PASSWORD') {
+        await this.smsService.sendForgotPasswordOtp(cleanTarget, otp);
+      } else if (purpose === 'WITHDRAWAL') {
+        await this.smsService.sendWithdrawalOtp(cleanTarget, otp, metadata?.amount || 0);
+      }
     }
 
     return {
       success: true,
-      message: `A 6-digit verification code has been sent to ${cleanPhone}.`,
+      message: `A 6-digit verification code has been sent to ${cleanTarget} via ${detectedChannel}.`,
+      channel: detectedChannel,
       cooldownSeconds: 120,
       expiresAt,
-      // For development ease, include otp in response when SMS_API_KEY is not set
+      // Dev mode fallback
       ...(process.env.NODE_ENV !== 'production' && !process.env.SMS_API_KEY ? { devOtp: otp } : {}),
     };
   }
@@ -93,34 +122,44 @@ export class OtpService {
   /**
    * Verifies the 6-digit OTP code against brute force attempts (max 5) and expiration (10 min)
    */
-  async verifyOtp(phone: string, code: string, purpose: 'SIGNUP' | 'WITHDRAWAL' | 'FORGOT_PASSWORD') {
-    const cleanPhone = phone.trim();
+  async verifyOtp(
+    target: string,
+    code: string,
+    purpose: 'SIGNUP' | 'WITHDRAWAL' | 'FORGOT_PASSWORD',
+  ) {
+    const cleanTarget = target.trim();
     const cleanCode = code.trim();
 
-    if (!cleanPhone || !cleanCode) {
-      throw new BadRequestException('Phone number and 6-digit OTP are required');
+    if (!cleanTarget || !cleanCode) {
+      throw new BadRequestException('Recipient identifier and 6-digit OTP are required');
     }
 
     const record = await this.prisma.otpVerification.findFirst({
-      where: { phone: cleanPhone, purpose },
+      where: {
+        OR: [
+          { target: cleanTarget, purpose },
+          { phone: cleanTarget, purpose },
+          { email: cleanTarget, purpose },
+        ],
+      },
       orderBy: { created_at: 'desc' },
     });
 
     if (!record) {
-      throw new BadRequestException('No active OTP request found for this phone number. Please request a new OTP.');
+      throw new BadRequestException('No active OTP request found. Please request a new verification code.');
     }
 
     const now = new Date();
 
-    // 1. Expiration check (10 minutes)
+    // 1. Expiration check
     if (now > new Date(record.expires_at)) {
-      throw new BadRequestException('The OTP verification code has expired. Please request a new OTP.');
+      throw new BadRequestException('The OTP verification code has expired. Please request a new code.');
     }
 
     // 2. Rate limiting / Brute force protection (max 5 failed attempts)
     if (record.attempts >= 5) {
       throw new BadRequestException(
-        'Too many failed attempts. For security, this OTP is locked. Please request a new OTP.',
+        'Too many failed attempts. For security, this OTP is locked. Please request a new code.',
       );
     }
 
@@ -134,7 +173,7 @@ export class OtpService {
 
       const remaining = Math.max(0, 5 - newAttempts);
       if (remaining === 0) {
-        throw new BadRequestException('Incorrect OTP. Maximum attempts exceeded. Please request a new OTP.');
+        throw new BadRequestException('Incorrect OTP. Maximum attempts exceeded. Please request a new code.');
       }
       throw new BadRequestException(`Incorrect OTP code. You have ${remaining} attempt(s) remaining.`);
     }
@@ -147,18 +186,22 @@ export class OtpService {
 
     return {
       success: true,
-      message: 'Phone number verified successfully.',
+      message: 'Verification successful.',
     };
   }
 
   /**
-   * Checks if phone has a valid, verified OTP status within last 10 minutes
+   * Checks if identifier has a valid, verified OTP status within last 15 minutes
    */
-  async isPhoneVerified(phone: string, purpose: 'SIGNUP'): Promise<boolean> {
+  async isTargetVerified(target: string, purpose: 'SIGNUP'): Promise<boolean> {
+    const clean = target.trim();
     const record = await this.prisma.otpVerification.findFirst({
       where: {
-        phone: phone.trim(),
-        purpose,
+        OR: [
+          { target: clean, purpose },
+          { phone: clean, purpose },
+          { email: clean, purpose },
+        ],
         is_verified: true,
       },
       orderBy: { updated_at: 'desc' },
@@ -166,9 +209,12 @@ export class OtpService {
 
     if (!record) return false;
 
-    // Must have been verified within the last 15 minutes
     const now = new Date();
     const elapsedMinutes = (now.getTime() - new Date(record.updated_at).getTime()) / (1000 * 60);
     return elapsedMinutes <= 15;
+  }
+
+  async isPhoneVerified(phone: string, purpose: 'SIGNUP'): Promise<boolean> {
+    return this.isTargetVerified(phone, purpose);
   }
 }

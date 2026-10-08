@@ -4,6 +4,7 @@ import {
   Post,
   Patch,
   Body,
+  Param,
   UseGuards,
   Request,
   Query,
@@ -42,6 +43,59 @@ export class CoinsController {
   @Get('transactions')
   async getUserTransactions(@Request() req: any) {
     return this.coinsService.getUserTransactions(req.user.id);
+  }
+
+  // ==========================================
+  // COIN TRANSFER ENDPOINTS
+  // ==========================================
+
+  @UseGuards(UserJwtGuard)
+  @Post('transfer')
+  async createCoinTransfer(
+    @Request() req: any,
+    @Body()
+    body: {
+      receiver_code: string;
+      coin_amount: number;
+      coin_rate: number;
+      note?: string;
+    },
+  ) {
+    return this.coinsService.createCoinTransfer(req.user.id, body);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Get('transfers/pending')
+  async getPendingIncomingTransfers(@Request() req: any) {
+    return this.coinsService.getPendingIncomingTransfers(req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Get('transfers/history')
+  async getMyCoinTransfers(@Request() req: any) {
+    return this.coinsService.getMyCoinTransfers(req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('transfers/:id/approve')
+  async approveCoinTransfer(
+    @Request() req: any,
+    @Param('id') paramId: string,
+    @Body('id') bodyId?: string,
+  ) {
+    const id = paramId || bodyId || '';
+    return this.coinsService.approveCoinTransfer(id, req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('transfers/:id/reject')
+  async rejectCoinTransfer(
+    @Request() req: any,
+    @Param('id') paramId: string,
+    @Body('id') bodyId?: string,
+  ) {
+    const id = paramId || bodyId || '';
+    return this.coinsService.rejectCoinTransfer(id, req.user.id);
   }
 
   // ==========================================

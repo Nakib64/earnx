@@ -9,25 +9,40 @@ export class UserAuthController {
   constructor(private readonly userAuthService: UserAuthService) {}
 
   @Post('send-signup-otp')
-  async sendSignupOtp(@Body() body: { phone: string }) {
-    return this.userAuthService.sendSignupOtp(body.phone);
+  async sendSignupOtp(@Body() body: { target?: string; phone?: string; email?: string }) {
+    const target = body.target || body.phone || body.email || '';
+    return this.userAuthService.sendSignupOtp(target);
   }
 
   @Post('verify-signup-otp')
-  async verifySignupOtp(@Body() body: { phone: string; otp: string }) {
-    return this.userAuthService.verifySignupOtp(body.phone, body.otp);
+  async verifySignupOtp(
+    @Body() body: { target?: string; phone?: string; email?: string; otp: string },
+  ) {
+    const target = body.target || body.phone || body.email || '';
+    return this.userAuthService.verifySignupOtp(target, body.otp);
   }
 
   @Post('forgot-password/send-otp')
-  async sendForgotPasswordOtp(@Body() body: { phone: string }) {
-    return this.userAuthService.sendForgotPasswordOtp(body.phone);
+  async sendForgotPasswordOtp(
+    @Body() body: { target?: string; phone?: string; email?: string },
+  ) {
+    const target = body.target || body.phone || body.email || '';
+    return this.userAuthService.sendForgotPasswordOtp(target);
   }
 
   @Post('forgot-password/reset')
   async resetForgotPassword(
-    @Body() body: { phone: string; otp: string; new_password: string },
+    @Body()
+    body: {
+      target?: string;
+      phone?: string;
+      email?: string;
+      otp: string;
+      new_password: string;
+    },
   ) {
-    return this.userAuthService.resetForgotPassword(body.phone, body.otp, body.new_password);
+    const target = body.target || body.phone || body.email || '';
+    return this.userAuthService.resetForgotPassword(target, body.otp, body.new_password);
   }
 
   @Post('register')

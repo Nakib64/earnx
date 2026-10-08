@@ -1,22 +1,21 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class UserRegisterDto {
   @IsString()
-  @IsNotEmpty()
-  phone!: string;
+  @IsOptional()
+  phone?: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
   @MinLength(6)
   password!: string;
 
   @IsString()
   @IsOptional()
   full_name?: string;
-
-  @IsString()
-  @IsOptional()
-  email?: string;
 
   @IsString()
   @IsOptional()
@@ -29,4 +28,8 @@ export class UserRegisterDto {
   @IsString()
   @IsOptional()
   avatar_url?: string;
+
+  @IsString()
+  @IsOptional()
+  otp?: string;
 }

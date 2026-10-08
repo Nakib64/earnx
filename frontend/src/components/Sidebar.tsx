@@ -26,6 +26,8 @@ import {
   Megaphone,
   Banknote,
   Lock,
+  ArrowDownCircle,
+  MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -57,26 +59,29 @@ export default function Sidebar() {
   }
 
   const userItems: LinkItem[] = [
-    { href: '/dashboard', label: 'Account Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/purchase', label: 'Purchase Package', icon: ShoppingBag },
-    { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
-    { href: '/dashboard/referral', label: 'Team Lead Report', icon: Users },
-    { href: '/dashboard/coins', label: 'Coin', icon: Coins },
-    { href: '/dashboard/investments', label: 'Investment', icon: TrendingUp },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/dashboard/deposit', label: 'Deposit Funds', icon: ArrowDownCircle },
+    { href: '/dashboard/premium', label: 'Premium VIP & Ads', icon: Crown },
+    { href: '/dashboard/marketplace', label: 'Community Feed', icon: MessageSquare },
+    { href: '/dashboard/wallet', label: 'Cash Wallet', icon: Wallet },
+    { href: '/dashboard/coins', label: 'Solana Coin Hub', icon: Coins },
+    { href: '/dashboard/investments', label: 'Investments', icon: TrendingUp },
+    { href: '/dashboard/referral', label: 'Affiliate Team', icon: Users },
     { href: '/dashboard/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/dashboard/settings', label: 'Account Setting', icon: Settings },
-    { href: '/contact', label: 'Support', icon: Headset },
+    { href: '/dashboard/settings', label: 'Account Settings', icon: Settings },
+    { href: '/contact', label: 'Support Desk', icon: Headset },
   ];
 
   const adminTopItems: LinkItem[] = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/deposits', label: 'Deposit Requests', icon: ArrowDownCircle },
     { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
-    { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
-    { href: '/admin/coins', label: 'Coin Management', icon: Coins },
+    { href: '/admin/premium', label: 'Premium Packages', icon: Crown },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
-    { href: '/admin/investments/actions', label: 'Investment Actions', icon: UserCheck },
+    { href: '/admin/coins', label: 'Coin Management', icon: Coins },
+    { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
-    { href: '/admin/users', label: 'Users & Designations', icon: Users },
+    { href: '/admin/users', label: 'Users & Accounts', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
     { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
     { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },

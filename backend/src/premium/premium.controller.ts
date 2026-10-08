@@ -1,28 +1,87 @@
-import { Controller, Post, Get, Query, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Delete,
+  Query,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { PremiumService } from './premium.service';
+import { UserJwtGuard } from '../user-auth/guards/user-jwt.guard';
 import { AdminJwtGuard } from '../admin-auth/guards/admin-jwt.guard';
 
-@Controller('admin/premium')
-@UseGuards(AdminJwtGuard)
+@Controller('premium')
 export class PremiumController {
   constructor(private readonly premiumService: PremiumService) {}
 
-  @Post('trigger-payouts')
-  async triggerPayouts(
-    @Query('force') force?: string,
-    @Body('force') bodyForce?: boolean,
-  ) {
-    const isForce = force !== undefined ? force === 'true' : bodyForce !== undefined ? bodyForce : true;
-    return this.premiumService.processWeeklyPayouts(isForce);
+  // ==========================================
+  // PUBLIC / USER ENDPOINTS
+  // ==========================================
+
+  @Get('packages')
+  async getActivePackages() {
+    return this.premiumService.getActivePackages();
   }
 
-  @Get('users')
+  @UseGuards(UserJwtGuard)
+  @Post('subscribe')
+  async subscribePackage(@Request() req: any, @Body('package_id') packageId: string) {
+    return this.premiumService.subscribePackage(req.user.id, packageId);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Get('daily-task')
+  async getDailyTask(@Request() req: any) {
+    return this.premiumService.getDailyTask(req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('watch-ad')
+  async recordAdWatched(@Request() req: any) {
+    return this.premiumService.recordAdWatched(req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Post('claim-daily-reward')
+  async claimDailyReward(@Request() req: any) {
+    return this.premiumService.claimDailyReward(req.user.id);
+  }
+
+  // ==========================================
+  // ADMIN ENDPOINTS
+  // ==========================================
+
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/packages')
+  async getAllPackages() {
+    return this.premiumService.getAllPackages();
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Post('admin/packages')
+  async createPackage(@Body() body: any) {
+    return this.premiumService.createPackage(body);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Patch('admin/packages/:id')
+  async updatePackage(@Param('id') id: string, @Body() body: any) {
+    return this.premiumService.updatePackage(id, body);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Delete('admin/packages/:id')
+  async deletePackage(@Param('id') id: string) {
+    return this.premiumService.deletePackage(id);
+  }
+
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/users')
   async getPremiumUsers(@Query('search') search?: string) {
     return this.premiumService.getPremiumUsers(search);
-  }
-
-  @Post('payout-selected')
-  async payoutSelectedUsers(@Body('user_ids') userIds: string[]) {
-    return this.premiumService.payoutSpecificUsers(userIds || []);
   }
 }

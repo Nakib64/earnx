@@ -25,11 +25,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // Non-premium restriction: ONLY /dashboard and /dashboard/settings are unlocked
-  const isAllowedPath = pathname === '/dashboard' || pathname === '/dashboard/settings';
+  // All pages are accessible to members, except Coins and Investments which require Premium / active package
+  const isRestrictedPath =
+    pathname.startsWith('/dashboard/coins') || pathname.startsWith('/dashboard/investments');
   const isPremium = Boolean((user as any).is_premium);
 
-  if (!isPremium && !isAllowedPath) {
+  if (!isPremium && isRestrictedPath) {
     return (
       <div className="pb-20 lg:pb-0">
         <PremiumLockScreen />

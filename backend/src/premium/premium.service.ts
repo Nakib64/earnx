@@ -1,193 +1,78 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { PrismaService } from '../prisma/prisma.service';
-import { SystemConfigService } from '../system-config/system-config.service';
-import { TransactionType, Prisma } from '@prisma/client';
+import { Injectable } from '@nestjs/common';
+import { PremiumPackageSubService } from './sub-services/premium-package.sub-service';
+import { DailyAdsSubService } from './sub-services/daily-ads.sub-service';
 
+/**
+ * PremiumService acts as a Facade orchestrating premium sub-services:
+ * - PremiumPackageSubService: Package tier administration and subscription activation
+ * - DailyAdsSubService: Watch-to-earn daily limits, ad tracking, and reward disbursements
+ */
 @Injectable()
 export class PremiumService {
-  private readonly logger = new Logger(PremiumService.name);
-
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly configService: SystemConfigService,
+    private readonly packageSubService: PremiumPackageSubService,
+    private readonly dailyAdsSubService: DailyAdsSubService,
   ) {}
 
-  // Run automatically every day at midnight to process weekly payouts
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  async handleCron() {
-    this.logger.log('Executing automated weekly premium payout check...');
-    await this.processWeeklyPayouts();
+  // ==========================================
+  // PACKAGE TIERS & SUBSCRIPTIONS
+  // ==========================================
+  async getActivePackages() {
+    return this.packageSubService.getActivePackages();
   }
 
-  async processWeeklyPayouts(force = false) {
-    const weeklyAmountStr = await this.configService.getValue(
-      'PREMIUM_WEEKLY_PAYOUT_AMOUNT',
-      '100',
-    );
-    const weeklyAmount = parseFloat(weeklyAmountStr) || 100;
-
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-    const whereClause: Prisma.UserWhereInput = {
-      is_premium: true,
-      premium_payout_count: { lt: 52 },
-    };
-
-    if (!force) {
-      whereClause.OR = [
-        { last_premium_payout_at: null },
-        { last_premium_payout_at: { lte: sevenDaysAgo } },
-      ];
-    }
-
-    // Find active premium users who need payout
-    const users = await this.prisma.user.findMany({
-      where: whereClause,
-    });
-
-    let processedCount = 0;
-
-    for (const user of users) {
-      // Check if expired
-      if (user.premium_expires_at && now > user.premium_expires_at) {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: { is_premium: false },
-        });
-        continue;
-      }
-
-      await this.prisma.$transaction(async (tx) => {
-        const balanceBefore = Number(user.wallet_balance);
-        const balanceAfter = balanceBefore + weeklyAmount;
-        const newPayoutCount = user.premium_payout_count + 1;
-        const isFinished = newPayoutCount >= 52;
-
-        // 1. Update wallet balance & premium stats
-        await tx.user.update({
-          where: { id: user.id },
-          data: {
-            wallet_balance: new Prisma.Decimal(balanceAfter),
-            premium_payout_count: newPayoutCount,
-            last_premium_payout_at: now,
-            is_premium: !isFinished,
-          },
-        });
-
-        // 2. Create transaction log
-        await tx.walletTransaction.create({
-          data: {
-            user_id: user.id,
-            type: TransactionType.PREMIUM_WEEKLY_PAYOUT,
-            amount: new Prisma.Decimal(weeklyAmount),
-            balance_before: new Prisma.Decimal(balanceBefore),
-            balance_after: new Prisma.Decimal(balanceAfter),
-            description: `Weekly Premium Payout (${newPayoutCount}/52 weeks)`,
-          },
-      });
-      }, { maxWait: 10000, timeout: 30000 });
-
-      processedCount++;
-    }
-
-    this.logger.log(
-      `Weekly premium payout complete. Processed payouts for ${processedCount} users.`,
-    );
-    return { success: true, processedCount, weeklyAmount };
+  async getAllPackages() {
+    return this.packageSubService.getAllPackages();
   }
 
-  // ==========================================
-  // SPECIFIC USER PAYOUTS & MANAGEMENT
-  // ==========================================
+  async createPackage(data: {
+    title: string;
+    price: number;
+    daily_ads_count: number;
+    daily_reward_amount: number;
+    duration_days?: number;
+  }) {
+    return this.packageSubService.createPackage(data);
+  }
+
+  async updatePackage(
+    id: string,
+    data: Partial<{
+      title: string;
+      price: number;
+      daily_ads_count: number;
+      daily_reward_amount: number;
+      duration_days: number;
+      is_active: boolean;
+    }>,
+  ) {
+    return this.packageSubService.updatePackage(id, data);
+  }
+
+  async deletePackage(id: string) {
+    return this.packageSubService.deletePackage(id);
+  }
+
+  async subscribePackage(userId: string, packageId: string) {
+    return this.packageSubService.subscribePackage(userId, packageId);
+  }
 
   async getPremiumUsers(search?: string) {
-    const where: Prisma.UserWhereInput = {
-      is_premium: true,
-    };
-
-    if (search && search.trim()) {
-      const q = search.trim();
-      where.OR = [
-        { full_name: { contains: q, mode: 'insensitive' } },
-        { phone: { contains: q, mode: 'insensitive' } },
-        { referral_code: { contains: q, mode: 'insensitive' } },
-      ];
-    }
-
-    return this.prisma.user.findMany({
-      where,
-      select: {
-        id: true,
-        full_name: true,
-        phone: true,
-        referral_code: true,
-        wallet_balance: true,
-        is_premium: true,
-        premium_payout_count: true,
-        last_premium_payout_at: true,
-        premium_expires_at: true,
-      },
-      orderBy: { created_at: 'desc' },
-    });
+    return this.packageSubService.getPremiumUsers(search);
   }
 
-  async payoutSpecificUsers(userIds: string[]) {
-    if (!userIds || userIds.length === 0) {
-      return { success: true, processedCount: 0, weeklyAmount: 0 };
-    }
+  // ==========================================
+  // DAILY WATCH-TO-EARN ADS
+  // ==========================================
+  async getDailyTask(userId: string) {
+    return this.dailyAdsSubService.getDailyTask(userId);
+  }
 
-    const weeklyAmountStr = await this.configService.getValue(
-      'PREMIUM_WEEKLY_PAYOUT_AMOUNT',
-      '100',
-    );
-    const weeklyAmount = parseFloat(weeklyAmountStr) || 100;
-    const now = new Date();
+  async recordAdWatched(userId: string) {
+    return this.dailyAdsSubService.recordAdWatched(userId);
+  }
 
-    const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: userIds },
-        is_premium: true,
-      },
-    });
-
-    let processedCount = 0;
-
-    for (const user of users) {
-      if (user.premium_payout_count >= 52) continue;
-
-      await this.prisma.$transaction(async (tx) => {
-        const balanceBefore = Number(user.wallet_balance);
-        const balanceAfter = balanceBefore + weeklyAmount;
-        const newPayoutCount = user.premium_payout_count + 1;
-        const isFinished = newPayoutCount >= 52;
-
-        await tx.user.update({
-          where: { id: user.id },
-          data: {
-            wallet_balance: new Prisma.Decimal(balanceAfter),
-            premium_payout_count: newPayoutCount,
-            last_premium_payout_at: now, // Resets 7-day timer from current execution
-            is_premium: !isFinished,
-          },
-        });
-
-        await tx.walletTransaction.create({
-          data: {
-            user_id: user.id,
-            type: TransactionType.PREMIUM_WEEKLY_PAYOUT,
-            amount: new Prisma.Decimal(weeklyAmount),
-            balance_before: new Prisma.Decimal(balanceBefore),
-            balance_after: new Prisma.Decimal(balanceAfter),
-            description: `Weekly Premium Payout (${newPayoutCount}/52 weeks)`,
-          },
-        });
-      }, { maxWait: 10000, timeout: 30000 });
-
-      processedCount++;
-    }
-
-    return { success: true, processedCount, weeklyAmount };
+  async claimDailyReward(userId: string) {
+    return this.dailyAdsSubService.claimDailyReward(userId);
   }
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import localFont from 'next/font/local';
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Providers from '../context/Providers';
@@ -7,6 +8,48 @@ import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
 import PageRenderAnimation from '../components/common/PageRenderAnimation';
 import { Toaster } from 'sonner';
+
+const clarityCity = localFont({
+  src: [
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-Light.woff2',
+      weight: '300',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-Regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-Medium.woff2',
+      weight: '500',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-SemiBold.woff2',
+      weight: '600',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-Bold.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-ExtraBold.woff2',
+      weight: '800',
+      style: 'normal',
+    },
+    {
+      path: '../../public/fonts/clarity-city/ClarityCity-Black.woff2',
+      weight: '900',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-clarity-city',
+  display: 'swap',
+});
 
 const outfit = Outfit({
   variable: '--font-outfit',
@@ -33,7 +76,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} h-full antialiased font-sans`}>
+    <html
+      lang="en"
+      className={`${clarityCity.variable} ${outfit.variable} ${plusJakarta.variable} h-full antialiased font-sans`}
+    >
       <body className="min-h-screen flex flex-col bg-[#F4F7F6] text-slate-900 overflow-x-hidden font-sans font-semibold">
         <PageRenderAnimation />
         <Providers>

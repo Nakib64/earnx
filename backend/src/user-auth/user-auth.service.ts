@@ -39,71 +39,82 @@ export class UserAuthService {
   }
 
   /**
-   * Dispatches 6-digit signup OTP via SMS
+   * Dispatches 6-digit signup OTP via SMS (phone) or Email (email address)
    */
-  async sendSignupOtp(phone: string) {
-    const cleanPhone = phone?.trim();
-    if (!cleanPhone) {
-      throw new BadRequestException('Phone number is required');
+  async sendSignupOtp(target: string) {
+    const cleanTarget = target?.trim();
+    if (!cleanTarget) {
+      throw new BadRequestException('Phone number or email address is required');
     }
 
-    const existingPhone = await this.prisma.user.findUnique({
-      where: { phone: cleanPhone },
-    });
-
-    if (existingPhone) {
-      throw new ConflictException('A user with this phone number already exists');
+    const isEmail = cleanTarget.includes('@');
+    if (isEmail) {
+      const existingEmail = await this.prisma.user.findUnique({
+        where: { email: cleanTarget },
+      });
+      if (existingEmail) {
+        throw new ConflictException('A user with this email address already exists');
+      }
+      return this.otpService.generateAndSendOtp(cleanTarget, 'SIGNUP', 'EMAIL');
+    } else {
+      const existingPhone = await this.prisma.user.findUnique({
+        where: { phone: cleanTarget },
+      });
+      if (existingPhone) {
+        throw new ConflictException('A user with this phone number already exists');
+      }
+      return this.otpService.generateAndSendOtp(cleanTarget, 'SIGNUP', 'SMS');
     }
-
-    return this.otpService.generateAndSendOtp(cleanPhone, 'SIGNUP');
   }
 
   /**
    * Verifies 6-digit signup OTP
    */
-  async verifySignupOtp(phone: string, otp: string) {
-    return this.otpService.verifyOtp(phone, otp, 'SIGNUP');
+  async verifySignupOtp(target: string, otp: string) {
+    return this.otpService.verifyOtp(target, otp, 'SIGNUP');
   }
 
   /**
-   * Dispatches 6-digit forgot password OTP via SMS
+   * Dispatches 6-digit forgot password OTP via SMS or Email
    */
-  async sendForgotPasswordOtp(phone: string) {
-    const cleanPhone = phone?.trim();
-    if (!cleanPhone) {
-      throw new BadRequestException('Phone number is required');
+  async sendForgotPasswordOtp(target: string) {
+    const cleanTarget = target?.trim();
+    if (!cleanTarget) {
+      throw new BadRequestException('Phone number or email is required');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { phone: cleanPhone },
-    });
+    const isEmail = cleanTarget.includes('@');
+    const user = isEmail
+      ? await this.prisma.user.findUnique({ where: { email: cleanTarget } })
+      : await this.prisma.user.findUnique({ where: { phone: cleanTarget } });
 
     if (!user) {
-      throw new BadRequestException('No registered account found with this phone number');
+      throw new BadRequestException(`No registered account found with this ${isEmail ? 'email' : 'phone number'}`);
     }
 
-    return this.otpService.generateAndSendOtp(cleanPhone, 'FORGOT_PASSWORD');
+    return this.otpService.generateAndSendOtp(cleanTarget, 'FORGOT_PASSWORD', isEmail ? 'EMAIL' : 'SMS');
   }
 
   /**
    * Verifies OTP and resets user password
    */
-  async resetForgotPassword(phone: string, otp: string, newPassword: string) {
-    const cleanPhone = phone?.trim();
-    if (!cleanPhone) {
-      throw new BadRequestException('Phone number is required');
+  async resetForgotPassword(target: string, otp: string, newPassword: string) {
+    const cleanTarget = target?.trim();
+    if (!cleanTarget) {
+      throw new BadRequestException('Phone number or email is required');
     }
     if (!newPassword || newPassword.length < 6) {
       throw new BadRequestException('New password must be at least 6 characters');
     }
 
-    // 1. Verify OTP with brute force prevention
-    await this.otpService.verifyOtp(cleanPhone, otp, 'FORGOT_PASSWORD');
+    // 1. Verify OTP
+    await this.otpService.verifyOtp(cleanTarget, otp, 'FORGOT_PASSWORD');
 
     // 2. Find and update user password
-    const user = await this.prisma.user.findUnique({
-      where: { phone: cleanPhone },
-    });
+    const isEmail = cleanTarget.includes('@');
+    const user = isEmail
+      ? await this.prisma.user.findUnique({ where: { email: cleanTarget } })
+      : await this.prisma.user.findUnique({ where: { phone: cleanTarget } });
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -118,7 +129,13 @@ export class UserAuthService {
 
     // Invalidate OTP record so it cannot be reused
     await this.prisma.otpVerification.updateMany({
-      where: { phone: cleanPhone, purpose: 'FORGOT_PASSWORD' },
+      where: {
+        OR: [
+          { target: cleanTarget, purpose: 'FORGOT_PASSWORD' },
+          { phone: cleanTarget, purpose: 'FORGOT_PASSWORD' },
+          { email: cleanTarget, purpose: 'FORGOT_PASSWORD' },
+        ],
+      },
       data: { is_verified: false, otp: 'EXPIRED' },
     });
 
@@ -129,48 +146,66 @@ export class UserAuthService {
   }
 
   async register(dto: UserRegisterDto & { otp?: string }) {
-    const cleanPhone = dto.phone.trim();
-    const existingPhone = await this.prisma.user.findUnique({
-      where: { phone: cleanPhone },
-    });
+    const cleanPhone = dto.phone ? dto.phone.trim() : null;
+    const cleanEmail = dto.email ? dto.email.trim() : null;
 
-    if (existingPhone) {
-      throw new ConflictException('A user with this phone number already exists');
+    if (!cleanPhone && !cleanEmail) {
+      throw new BadRequestException('Either a phone number or an email address must be provided');
     }
 
-    // Verify OTP if provided with registration, or check recent verification status
+    // Verify uniqueness
+    if (cleanPhone) {
+      const existingPhone = await this.prisma.user.findUnique({
+        where: { phone: cleanPhone },
+      });
+      if (existingPhone) {
+        throw new ConflictException('A user with this phone number already exists');
+      }
+    }
+
+    if (cleanEmail) {
+      const existingEmail = await this.prisma.user.findUnique({
+        where: { email: cleanEmail },
+      });
+      if (existingEmail) {
+        throw new ConflictException('A user with this email address already exists');
+      }
+    }
+
+    // Determine target for OTP check
+    const primaryTarget = cleanPhone || cleanEmail!;
+
     if (dto.otp) {
-      await this.otpService.verifyOtp(cleanPhone, dto.otp, 'SIGNUP');
+      await this.otpService.verifyOtp(primaryTarget, dto.otp, 'SIGNUP');
     } else {
-      const isVerified = await this.otpService.isPhoneVerified(cleanPhone, 'SIGNUP');
+      const isVerified = await this.otpService.isTargetVerified(primaryTarget, 'SIGNUP');
       if (!isVerified) {
         throw new BadRequestException(
-          'Phone number verification required. Please enter the 6-digit OTP sent to your phone.',
+          `Verification required. Please enter the 6-digit OTP sent to your ${cleanPhone ? 'phone' : 'email'}.`,
         );
       }
     }
 
-    let referredById: string | null = null;
-
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const newReferralCode = await this.generateUniqueReferralCode();
 
+    // Directly creates user with ACTIVE status (Account activation removed)
     const user = await this.prisma.user.create({
       data: {
         phone: cleanPhone,
+        email: cleanEmail,
         password_hash: passwordHash,
         full_name: dto.full_name?.trim() || null,
-        email: dto.email?.trim() || null,
         country: dto.country?.trim() || 'Bangladesh',
         national_id: dto.national_id?.trim() || null,
         avatar_url: dto.avatar_url?.trim() || null,
         referral_code: newReferralCode,
-        referred_by_id: referredById,
-        status: UserStatus.DISABLED, // Default DISABLED
+        referred_by_id: null,
+        status: UserStatus.ACTIVE, // Immediate ACTIVE access
       },
     });
 
-    const payload = { sub: user.id, phone: user.phone, role: 'user' };
+    const payload = { sub: user.id, phone: user.phone || user.email, role: 'user' };
     const accessToken = this.jwtService.sign(payload);
     const { password_hash, ...sanitizedUser } = user;
 
@@ -181,14 +216,26 @@ export class UserAuthService {
   }
 
   async login(dto: UserLoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { phone: dto.phone.trim() },
+    const rawTarget = (dto.identifier || dto.phone || dto.email || '').trim();
+    if (!rawTarget) {
+      throw new BadRequestException('Phone number or email is required');
+    }
+
+    // Find by phone OR by email
+    const user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { phone: rawTarget },
+          { email: rawTarget },
+        ],
+      },
       include: {
         designation: true,
         referred_by: {
           select: {
             id: true,
             phone: true,
+            email: true,
             full_name: true,
             referral_code: true,
           },
@@ -197,7 +244,7 @@ export class UserAuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid phone number or password');
+      throw new UnauthorizedException('Invalid login credentials');
     }
 
     if (user.status === UserStatus.BLOCKED) {
@@ -206,10 +253,10 @@ export class UserAuthService {
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password_hash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid phone number or password');
+      throw new UnauthorizedException('Invalid login credentials');
     }
 
-    const payload = { sub: user.id, phone: user.phone, role: 'user' };
+    const payload = { sub: user.id, phone: user.phone || user.email, role: 'user' };
     const accessToken = this.jwtService.sign(payload);
 
     const { password_hash, ...sanitizedUser } = user;
@@ -225,10 +272,12 @@ export class UserAuthService {
       where: { id: userId },
       include: {
         designation: true,
+        premium_package: true,
         referred_by: {
           select: {
             id: true,
             phone: true,
+            email: true,
             full_name: true,
             referral_code: true,
           },
@@ -270,7 +319,12 @@ export class UserAuthService {
       updateData.full_name = dto.full_name.trim() || null;
     }
     if (dto.email !== undefined) {
-      updateData.email = dto.email.trim() || null;
+      const cleanEmail = dto.email.trim() || null;
+      if (cleanEmail && cleanEmail !== user.email) {
+        const existing = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
+        if (existing) throw new ConflictException('Email address is already in use by another account');
+      }
+      updateData.email = cleanEmail;
     }
     if (dto.country !== undefined) {
       updateData.country = dto.country.trim() || 'Bangladesh';
@@ -301,10 +355,12 @@ export class UserAuthService {
       data: updateData,
       include: {
         designation: true,
+        premium_package: true,
         referred_by: {
           select: {
             id: true,
             phone: true,
+            email: true,
             full_name: true,
             referral_code: true,
           },

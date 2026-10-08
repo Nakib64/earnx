@@ -228,6 +228,7 @@ export class WalletService {
         id: true,
         full_name: true,
         phone: true,
+        email: true,
         referral_code: true,
         status: true,
       },
@@ -249,7 +250,8 @@ export class WalletService {
     return {
       id: recipient.id,
       full_name: recipient.full_name || 'Anonymous User',
-      phone: recipient.phone,
+      phone: recipient.phone || recipient.email || '',
+      email: recipient.email || null,
       referral_code: recipient.referral_code,
     };
   }
@@ -265,12 +267,14 @@ export class WalletService {
           { referral_code: { contains: q, mode: 'insensitive' } },
           { full_name: { contains: q, mode: 'insensitive' } },
           { phone: { contains: q, mode: 'insensitive' } },
+          { email: { contains: q, mode: 'insensitive' } },
         ],
       },
       select: {
         id: true,
         full_name: true,
         phone: true,
+        email: true,
         referral_code: true,
       },
       take: 20,
@@ -280,6 +284,7 @@ export class WalletService {
       id: string;
       full_name: string;
       phone: string;
+      email?: string | null;
       referral_code: string;
     }> = [];
     for (const candidate of candidates) {
@@ -288,7 +293,8 @@ export class WalletService {
         results.push({
           id: candidate.id,
           full_name: candidate.full_name || 'Anonymous User',
-          phone: candidate.phone,
+          phone: candidate.phone || candidate.email || '',
+          email: candidate.email || null,
           referral_code: candidate.referral_code,
         });
       }

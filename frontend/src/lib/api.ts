@@ -22,6 +22,10 @@ export async function apiFetch<T = any>(
     ...(customHeaders as Record<string, string>),
   };
 
+  if (typeof FormData !== 'undefined' && rest.body instanceof FormData) {
+    delete headers['Content-Type'];
+  }
+
   const keyName = isAdmin ? 'earnx_admin_token' : 'earnx_user_token';
   const storedToken =
     token ||

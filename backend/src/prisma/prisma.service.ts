@@ -11,6 +11,27 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await this.$executeRawUnsafe(
         `ALTER TYPE "TransactionType" ADD VALUE IF NOT EXISTS 'BALANCE_TRANSFER';`,
       );
+      await this.$executeRawUnsafe(
+        `ALTER TYPE "TransactionType" ADD VALUE IF NOT EXISTS 'PREMIUM_DAILY_REWARD';`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TYPE "CoinTransactionType" ADD VALUE IF NOT EXISTS 'COIN_TRANSFER_SENT';`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TYPE "CoinTransactionType" ADD VALUE IF NOT EXISTS 'COIN_TRANSFER_RECEIVED';`,
+      );
+    } catch (err) {}
+
+    try {
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "User" ALTER COLUMN "phone" DROP NOT NULL;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "User" ALTER COLUMN "status" SET DEFAULT 'ACTIVE';`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "premium_package_id" TEXT;`,
+      );
     } catch (err) {}
 
     try {
@@ -40,6 +61,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       );
       await this.$executeRawUnsafe(
         `ALTER TABLE "UserInvestment" ALTER COLUMN "max_payouts" DROP NOT NULL;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "duration_months" INTEGER DEFAULT 12;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "starts_at" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP;`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "ends_at" TIMESTAMP(3);`,
+      );
+      await this.$executeRawUnsafe(
+        `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "is_principal_returned" BOOLEAN DEFAULT false;`,
       );
     } catch (err) {}
   }
