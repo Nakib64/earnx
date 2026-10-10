@@ -33,7 +33,9 @@ export function useCoinOrchestrator() {
   const [rejectingId, setRejectingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    if (!coinInfo) {
+      setLoading(true);
+    }
     const [infoRes, txRes] = await Promise.all([
       apiFetch<CoinInfo>('/coins/info'),
       apiFetch<CoinTransaction[]>('/coins/transactions'),
@@ -51,10 +53,12 @@ export function useCoinOrchestrator() {
       setTransactions(Array.isArray(data) ? data : []);
     }
     setLoading(false);
-  }, [transferCoinRate]);
+  }, [transferCoinRate, coinInfo]);
 
   const fetchTransfers = useCallback(async () => {
-    setLoadingTransfers(true);
+    if (pendingTransfers.length === 0 && transferHistory.length === 0) {
+      setLoadingTransfers(true);
+    }
     const [pendingRes, historyRes] = await Promise.all([
       apiFetch<CoinTransfer[]>('/coins/transfers/pending'),
       apiFetch<CoinTransfer[]>('/coins/transfers/history'),
@@ -67,7 +71,7 @@ export function useCoinOrchestrator() {
       setTransferHistory(historyRes.data);
     }
     setLoadingTransfers(false);
-  }, []);
+  }, [pendingTransfers.length, transferHistory.length]);
 
   useEffect(() => {
     fetchData();

@@ -77,7 +77,7 @@ export default function GlobalMetricsSection() {
                 <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#d4af37] mb-4 group-hover:scale-110 transition-transform">
                   <Icon className="w-5 h-5" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-white font-mono tracking-tight">
+                <div className="text-2xl sm:text-3xl font-black text-white  tracking-tight">
                   {item.value}
                 </div>
                 <div className="text-xs font-bold text-emerald-300 mt-1 uppercase tracking-wider">

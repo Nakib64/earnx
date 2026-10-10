@@ -53,7 +53,9 @@ export function useWalletPage() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchTransactions = async () => {
-    setLoading(true);
+    if (transactions.length === 0) {
+      setLoading(true);
+    }
     const res = await apiFetch<any>('/wallet/transactions?page=1&limit=100');
     if (res.success && res.data) {
       const raw = res.data;

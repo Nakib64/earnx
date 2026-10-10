@@ -120,15 +120,15 @@ export default function AdminInvestmentActionsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-3.5">
         <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-3.5 sm:p-4 text-center shadow-lg text-white">
-          <div className="text-2xl font-black text-amber-100 font-mono">{pendingCount}</div>
+          <div className="text-2xl font-black text-amber-100 ">{pendingCount}</div>
           <div className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Pending</div>
         </div>
         <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-3.5 sm:p-4 text-center shadow-lg text-white">
-          <div className="text-2xl font-black text-white font-mono">{approvedCount}</div>
+          <div className="text-2xl font-black text-white ">{approvedCount}</div>
           <div className="text-[10px] font-black text-amber-200 uppercase tracking-widest">Approved</div>
         </div>
         <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 text-center shadow-sm">
-          <div className="text-2xl font-black text-slate-400 font-mono">{rejectedCount}</div>
+          <div className="text-2xl font-black text-slate-400 ">{rejectedCount}</div>
           <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rejected</div>
         </div>
       </div>
@@ -148,17 +148,16 @@ export default function AdminInvestmentActionsPage() {
               <button
                 key={f}
                 onClick={() => setStatusFilter(f)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                  statusFilter === f
+                className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${statusFilter === f
                     ? f === 'PENDING'
                       ? 'bg-amber-100 text-[#854D0E] border border-amber-300'
                       : f === 'APPROVED'
-                      ? 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
-                      : f === 'REJECTED'
-                      ? 'bg-slate-200 text-slate-700'
-                      : 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
+                        ? 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
+                        : f === 'REJECTED'
+                          ? 'bg-slate-200 text-slate-700'
+                          : 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                }`}
+                  }`}
               >
                 {f === 'ALL' ? `All (${investments.length})` : f === 'PENDING' ? `Pending (${pendingCount})` : f === 'APPROVED' ? `Approved (${approvedCount})` : `Rejected (${rejectedCount})`}
               </button>
@@ -198,7 +197,7 @@ export default function AdminInvestmentActionsPage() {
                   <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-2.5 py-2">
                       <p className="font-extrabold text-slate-900 text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-[150px]">{inv.user?.full_name || inv.user?.phone || 'User'}</p>
-                      <p className="text-slate-500 font-mono text-[9px]">{inv.user?.phone}</p>
+                      <p className="text-slate-500  text-[9px]">{inv.user?.phone}</p>
                     </td>
                     <td className="px-2.5 py-2">
                       <div className="flex flex-wrap items-center gap-1">
@@ -248,7 +247,7 @@ export default function AdminInvestmentActionsPage() {
             <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3.5 space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Investor</span>
               <p className="font-extrabold text-slate-900 text-sm">{viewInvestment.user?.full_name || 'Anonymous'}</p>
-              <p className="text-[11px] text-slate-500 font-mono">
+              <p className="text-[11px] text-slate-500 ">
                 {viewInvestment.user?.phone}
                 {viewInvestment.user?.referral_code && <span className="text-primary font-bold"> • {viewInvestment.user.referral_code}</span>}
               </p>
@@ -262,8 +261,8 @@ export default function AdminInvestmentActionsPage() {
                   {viewInvestment.request_type === 'UPGRADE'
                     ? `Upgrade to ${viewInvestment.pending_plan?.title || 'New Plan'} (৳${Number(viewInvestment.pending_amount || 0).toLocaleString()})`
                     : viewInvestment.request_type === 'WITHDRAWAL'
-                    ? `Withdraw 100% Capital: ৳${Number(viewInvestment.pending_amount || viewInvestment.amount || 0).toLocaleString()}`
-                    : 'New Package Request'}
+                      ? `Withdraw 100% Capital: ৳${Number(viewInvestment.pending_amount || viewInvestment.amount || 0).toLocaleString()}`
+                      : 'New Package Request'}
                 </span>
               )}
             </div>
@@ -276,7 +275,7 @@ export default function AdminInvestmentActionsPage() {
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Invested</p>
-                <p className="text-sm font-black text-primary font-mono mt-0.5">৳{Number(viewInvestment.amount).toLocaleString()}</p>
+                <p className="text-sm font-black text-primary  mt-0.5">৳{Number(viewInvestment.amount).toLocaleString()}</p>
               </div>
             </div>
 
@@ -284,7 +283,7 @@ export default function AdminInvestmentActionsPage() {
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Monthly Return</p>
                 <p className="text-sm font-black text-slate-900 mt-0.5">{Number(viewInvestment.monthly_return_percent)}%</p>
-                <p className="text-[10px] font-extrabold text-primary font-mono">৳{Number(viewInvestment.monthly_payout_amount).toLocaleString()}/mo</p>
+                <p className="text-[10px] font-extrabold text-primary ">৳{Number(viewInvestment.monthly_payout_amount).toLocaleString()}/mo</p>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payouts</p>
@@ -296,7 +295,7 @@ export default function AdminInvestmentActionsPage() {
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-2 gap-3 text-[10px] text-slate-500 font-mono">
+            <div className="grid grid-cols-2 gap-3 text-[10px] text-slate-500 ">
               <div>
                 <span className="font-extrabold text-slate-400 uppercase tracking-wider block">Created</span>
                 {viewInvestment.created_at ? new Date(viewInvestment.created_at).toLocaleDateString() : '-'}

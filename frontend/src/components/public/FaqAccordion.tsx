@@ -89,15 +89,14 @@ export default function FaqAccordion({
                 className="w-full p-5 text-left flex items-center justify-between space-x-4 cursor-pointer hover:bg-slate-50 transition-colors"
               >
                 <span className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-lg bg-[#023824] border border-[#056343] text-amber-300 text-xs font-mono flex items-center justify-center shrink-0">
+                  <span className="w-6 h-6 rounded-lg bg-[#023824] border border-[#056343] text-amber-300 text-xs  flex items-center justify-center shrink-0">
                     {idx + 1}
                   </span>
                   {faq.question}
                 </span>
                 <ChevronDown
-                  className={`w-5 h-5 text-[#03442e] shrink-0 transition-transform duration-300 ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
+                  className={`w-5 h-5 text-[#03442e] shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''
+                    }`}
                 />
               </button>
 

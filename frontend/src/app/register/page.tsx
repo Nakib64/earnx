@@ -124,9 +124,8 @@ function RegisterForm() {
     } else {
       setError(
         res.error?.message ||
-          `Failed to send verification code. Please check your ${
-            authMode === 'PHONE' ? 'phone number' : 'email address'
-          }.`,
+        `Failed to send verification code. Please check your ${authMode === 'PHONE' ? 'phone number' : 'email address'
+        }.`,
       );
     }
     setLoading(false);
@@ -224,11 +223,10 @@ function RegisterForm() {
               setAuthMode('PHONE');
               setError(null);
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
-              authMode === 'PHONE'
-                ? 'bg-[#005A36] text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${authMode === 'PHONE'
+              ? 'bg-[#005A36] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <Phone className="w-3.5 h-3.5" />
             <span>Use Phone Number</span>
@@ -239,11 +237,10 @@ function RegisterForm() {
               setAuthMode('EMAIL');
               setError(null);
             }}
-            className={`flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
-              authMode === 'EMAIL'
-                ? 'bg-[#005A36] text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
+            className={`flex-1 py-2 rounded-lg text-xs font-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${authMode === 'EMAIL'
+              ? 'bg-[#005A36] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+              }`}
           >
             <Mail className="w-3.5 h-3.5" />
             <span>Use Email Address</span>
@@ -469,7 +466,7 @@ function RegisterForm() {
                   placeholder="• • • • • •"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="w-full text-center text-2xl font-mono font-black tracking-widest py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-[#005A36] focus:outline-none"
+                  className="w-full text-center text-2xl  font-black tracking-widest py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:border-[#005A36] focus:outline-none"
                 />
               </div>
 
@@ -483,7 +480,7 @@ function RegisterForm() {
                 ) : (
                   <ShieldCheck className="w-4 h-4" />
                 )}
-                <span>{verifyingOtp ? 'Verifying Code...' : 'Confirm & Complete Registration'}</span>
+                <span>{verifyingOtp ? 'Verifying Code...' : 'Complete Registration'}</span>
               </button>
             </form>
 

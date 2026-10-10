@@ -28,7 +28,6 @@ export enum TransactionType {
 }
 
 export enum CommissionType {
-  ACTIVATION = 'ACTIVATION',
   PREMIUM = 'PREMIUM',
 }
 
@@ -66,6 +65,8 @@ export interface PremiumPackage {
   id: string;
   title: string;
   description?: string | null;
+  original_price?: number | string | null;
+  discount_percent?: number | null;
   price: number | string;
   daily_ads_count: number;
   daily_reward_amount: number | string;
@@ -82,10 +83,56 @@ export interface DailyAdTask {
   daily_reward_amount?: number;
   daily_ads_required?: number;
   ads_watched?: number;
+  reward_per_ad?: number;
+  earned_today?: number;
+  remaining_ads?: number;
+  remaining_reward?: number;
+  quota_reached?: boolean;
   is_claimed?: boolean;
   can_claim?: boolean;
   claim_date?: string;
 }
+
+export interface AdsAnalyticsChartPoint {
+  label: string;
+  ads_count: number;
+  total_earned: number;
+  active_users: number;
+}
+
+export interface AdsAnalyticsPackageBreakdown {
+  title: string;
+  ads_count: number;
+  total_earned: number;
+  user_count: number;
+}
+
+export interface AdsAnalyticsRecentItem {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_phone?: string | null;
+  package_title: string;
+  amount: number;
+  created_at: string;
+  description?: string | null;
+}
+
+export interface AdsAnalyticsData {
+  timeframe: string;
+  summary: {
+    total_ads_watched: number;
+    total_earned_bdt: number;
+    active_users: number;
+    avg_ads_per_user: number;
+    all_time_ads_watched: number;
+    all_time_earned_bdt: number;
+  };
+  chart_data: AdsAnalyticsChartPoint[];
+  package_breakdown: AdsAnalyticsPackageBreakdown[];
+  recent_activity: AdsAnalyticsRecentItem[];
+}
+
 
 export interface DepositGatewayConfig {
   bkash_number: string;

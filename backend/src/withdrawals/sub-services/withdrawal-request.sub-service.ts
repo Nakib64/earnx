@@ -10,7 +10,7 @@ export class WithdrawalRequestSubService {
     private readonly prisma: PrismaService,
     private readonly smsService: SmsService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   /**
    * User requests withdrawal:
@@ -39,20 +39,25 @@ export class WithdrawalRequestSubService {
           throw new NotFoundException('User not found');
         }
 
-        const currentBalance = Number(user.wallet_balance);
-        if (currentBalance < numAmount) {
+        // 1. Deduct balance from user atomically
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            wallet_balance: { gte: new Prisma.Decimal(numAmount) },
+          },
+          data: {
+            wallet_balance: { decrement: new Prisma.Decimal(numAmount) },
+          },
+        });
+
+        if (deductResult.count === 0) {
           throw new BadRequestException('Insufficient wallet balance for withdrawal');
         }
 
+        const currentBalance = Number(user.wallet_balance);
         const balanceAfter = currentBalance - numAmount;
 
-        // 1. Deduct balance from user
-        await tx.user.update({
-          where: { id: userId },
-          data: { wallet_balance: new Prisma.Decimal(balanceAfter) },
-        });
-
-        // 2. Record ledger transaction
+        // 2. Record  transaction
         await tx.walletTransaction.create({
           data: {
             user_id: userId,

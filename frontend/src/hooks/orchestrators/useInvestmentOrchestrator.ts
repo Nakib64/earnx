@@ -24,7 +24,9 @@ export function useInvestmentOrchestrator() {
   const [selectedDuration, setSelectedDuration] = useState<3 | 6 | 12>(6);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    if (plans.length === 0) {
+      setLoading(true);
+    }
     const [plansRes, myRes] = await Promise.all([
       apiFetch<InvestmentPlan[]>('/investments/plans'),
       apiFetch<UserInvestment[]>('/investments/my'),
@@ -32,7 +34,7 @@ export function useInvestmentOrchestrator() {
     if (plansRes.success && plansRes.data) setPlans(plansRes.data);
     if (myRes.success && myRes.data) setMyInvestments(myRes.data);
     setLoading(false);
-  }, []);
+  }, [plans.length]);
 
   useEffect(() => {
     fetchData();

@@ -33,7 +33,19 @@ export class CoinPurchaseSubService {
 
         if (!user) throw new NotFoundException('User not found');
 
-        if (Number(user.wallet_balance) < totalCost) {
+        // 1. Deduct from User Wallet and add coins atomically
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            wallet_balance: { gte: new Prisma.Decimal(totalCost) },
+          },
+          data: {
+            wallet_balance: { decrement: new Prisma.Decimal(totalCost) },
+            coin_balance: { increment: new Prisma.Decimal(amount) },
+          },
+        });
+
+        if (deductResult.count === 0) {
           throw new BadRequestException(
             `Insufficient wallet balance. Total cost is ৳${totalCost.toFixed(
               2,
@@ -41,20 +53,16 @@ export class CoinPurchaseSubService {
           );
         }
 
-        const walletBefore = Number(user.wallet_balance);
-        const walletAfter = walletBefore - totalCost;
-
-        const coinsBefore = Number(user.coin_balance);
-        const coinsAfter = coinsBefore + amount;
-
-        // 1. Deduct from User Wallet
-        await tx.user.update({
+        const freshUser = await tx.user.findUnique({
           where: { id: userId },
-          data: {
-            wallet_balance: new Prisma.Decimal(walletAfter),
-            coin_balance: new Prisma.Decimal(coinsAfter),
-          },
+          select: { wallet_balance: true, coin_balance: true },
         });
+
+        const walletAfter = Number(freshUser?.wallet_balance || 0);
+        const walletBefore = walletAfter + totalCost;
+
+        const coinsAfter = Number(freshUser?.coin_balance || 0);
+        const coinsBefore = coinsAfter - amount;
 
         // 2. Record Wallet Transaction
         await tx.walletTransaction.create({

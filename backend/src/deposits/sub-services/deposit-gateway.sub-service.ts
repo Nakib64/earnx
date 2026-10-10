@@ -120,16 +120,26 @@ export class DepositGatewaySubService {
       );
     }
 
-    const deposit = await this.prisma.depositRequest.create({
-      data: {
-        user_id: userId,
-        method: data.method.trim().toUpperCase(),
-        sender_number: cleanSender,
-        amount: new Prisma.Decimal(numAmount),
-        trx_id: cleanTrx,
-        status: RequestStatus.PENDING,
-      },
-    });
+    let deposit;
+    try {
+      deposit = await this.prisma.depositRequest.create({
+        data: {
+          user_id: userId,
+          method: data.method.trim().toUpperCase(),
+          sender_number: cleanSender,
+          amount: new Prisma.Decimal(numAmount),
+          trx_id: cleanTrx,
+          status: RequestStatus.PENDING,
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException(
+          'This Transaction ID has already been submitted. Please check your TrxID or contact support.',
+        );
+      }
+      throw err;
+    }
 
     return {
       success: true,

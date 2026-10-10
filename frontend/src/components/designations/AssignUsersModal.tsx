@@ -100,7 +100,7 @@ export default function AssignUsersModal({
                     <div className="font-extrabold text-slate-900 group-hover:text-primary transition-colors">
                       {user.full_name || user.phone}
                     </div>
-                    <div className="text-[10px] text-slate-500 font-mono flex items-center space-x-2 mt-0.5">
+                    <div className="text-[10px] text-slate-500  flex items-center space-x-2 mt-0.5">
                       <span>Phone: <strong className="text-slate-700">{user.phone}</strong></span>
                       {user.referral_code && (
                         <>

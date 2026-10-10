@@ -8,7 +8,7 @@ import { RequestStatus, TransactionType, Prisma } from '@prisma/client';
 
 @Injectable()
 export class DepositAdminSubService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Admin: List all deposit requests with filtering & search
@@ -91,16 +91,32 @@ export class DepositAdminSubService {
         }
 
         const numAmount = Number(deposit.amount);
-        const balanceBefore = Number(deposit.user.wallet_balance);
-        const balanceAfter = balanceBefore + numAmount;
 
-        // 1. Credit user wallet balance
-        await tx.user.update({
-          where: { id: deposit.user_id },
-          data: { wallet_balance: new Prisma.Decimal(balanceAfter) },
+        // 1. Mark deposit approved atomically
+        const updateResult = await tx.depositRequest.updateMany({
+          where: { id: depositId, status: RequestStatus.PENDING },
+          data: {
+            status: RequestStatus.APPROVED,
+            approved_by: adminPhone,
+            approved_at: new Date(),
+          },
         });
 
-        // 2. Record ledger transaction
+        if (updateResult.count === 0) {
+          throw new BadRequestException('This deposit request has already been processed');
+        }
+
+        // 2. Credit user wallet balance atomically
+        const updatedUser = await tx.user.update({
+          where: { id: deposit.user_id },
+          data: { wallet_balance: { increment: new Prisma.Decimal(numAmount) } },
+          select: { wallet_balance: true },
+        });
+
+        const balanceAfter = Number(updatedUser.wallet_balance);
+        const balanceBefore = balanceAfter - numAmount;
+
+        // 3. Record  transaction
         await tx.walletTransaction.create({
           data: {
             user_id: deposit.user_id,
@@ -112,22 +128,15 @@ export class DepositAdminSubService {
           },
         });
 
-        // 3. Mark deposit approved
-        const updatedDeposit = await tx.depositRequest.update({
+        const updatedDeposit = await tx.depositRequest.findUnique({
           where: { id: depositId },
-          data: {
-            status: RequestStatus.APPROVED,
-            approved_by: adminPhone,
-            approved_at: new Date(),
-          },
           include: { user: true },
         });
 
         return {
           success: true,
-          message: `Successfully approved deposit of ৳${numAmount.toFixed(2)} for ${
-            deposit.user.full_name || deposit.user.phone || deposit.user.email
-          } (${deposit.user.referral_code}).`,
+          message: `Successfully approved deposit of ৳${numAmount.toFixed(2)} for ${deposit.user.full_name || deposit.user.phone || deposit.user.email
+            } (${deposit.user.referral_code}).`,
           deposit: updatedDeposit,
         };
       },
@@ -151,13 +160,21 @@ export class DepositAdminSubService {
       throw new BadRequestException('This deposit request has already been processed');
     }
 
-    const updated = await this.prisma.depositRequest.update({
-      where: { id: depositId },
+    const updateResult = await this.prisma.depositRequest.updateMany({
+      where: { id: depositId, status: RequestStatus.PENDING },
       data: {
         status: RequestStatus.REJECTED,
         approved_by: adminPhone,
         rejection_reason: reason || 'Invalid Transaction ID or unverified payment',
       },
+    });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestException('This deposit request has already been processed');
+    }
+
+    const updated = await this.prisma.depositRequest.findUnique({
+      where: { id: depositId },
       include: { user: true },
     });
 

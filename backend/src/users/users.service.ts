@@ -100,6 +100,38 @@ export class UsersService {
     });
   }
 
+  async checkReferrer(code: string) {
+    const clean = code?.trim();
+    if (!clean) {
+      return { exists: false, user: null };
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        referral_code: { equals: clean, mode: 'insensitive' },
+      },
+      select: {
+        id: true,
+        full_name: true,
+        phone: true,
+        referral_code: true,
+      },
+    });
+
+    if (!user) {
+      return { exists: false, user: null };
+    }
+
+    return {
+      exists: true,
+      user: {
+        id: user.id,
+        full_name: user.full_name || 'Member',
+        referral_code: user.referral_code,
+      },
+    };
+  }
+
   // Admin User Management
   async getAllUsers(
     page = 1,

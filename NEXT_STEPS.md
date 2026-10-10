@@ -10,7 +10,7 @@ This document outlines the current project status, immediate setup commands, end
   - NestJS modular API + Prisma ORM + PostgreSQL schema.
   - Isolated Dual Authentication (`UserJwtGuard` vs `AdminJwtGuard`).
   - Recursive Multi-Level Commission Engine with Designation Depth Key validation (`parent.designation.max_level >= current_level`).
-  - Immutable `WalletTransaction` ledger powered by ACID database transactions (`prisma.$transaction()`).
+  - Immutable `WalletTransaction`  powered by ACID database transactions (`prisma.$transaction()`).
 - **Frontend Architecture (`/frontend`)**:
   - Next.js 15 (App Router) + React 19 + Tailwind CSS + TanStack Query + React Hook Form + Zod.
   - Public Landing Homepage at `/`.
@@ -120,7 +120,7 @@ earnx/
 │       ├── admin-auth/             # Admin login & strategy
 │       ├── user-auth/              # User registration & strategy
 │       ├── users/                  # Referral tree & designation management
-│       ├── wallets/                # ACID transaction ledger & balance calculation
+│       ├── wallets/                # ACID transaction  & balance calculation
 │       ├── commissions/            # Recursive Multi-Level Commission Engine
 │       ├── approvals/              # Activation, Premium, Withdrawal requests
 │       ├── offers/                 # Promotions & tasks

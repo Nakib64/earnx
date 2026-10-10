@@ -31,18 +31,31 @@ export class MarketplaceInteractionSubService {
 
     let isLiked = false;
     if (existingLike) {
-      await this.prisma.marketplaceLike.delete({
-        where: { id: existingLike.id },
-      });
+      try {
+        await this.prisma.marketplaceLike.delete({
+          where: { id: existingLike.id },
+        });
+      } catch {
+        // Ignored if already deleted concurrently
+      }
       isLiked = false;
     } else {
-      await this.prisma.marketplaceLike.create({
-        data: {
-          post_id: postId,
-          user_id: userId,
-        },
-      });
-      isLiked = true;
+      try {
+        await this.prisma.marketplaceLike.create({
+          data: {
+            post_id: postId,
+            user_id: userId,
+          },
+        });
+        isLiked = true;
+      } catch (err: any) {
+        if (err.code === 'P2002') {
+          // Already created concurrently by rapid click
+          isLiked = true;
+        } else {
+          throw err;
+        }
+      }
     }
 
     const likesCount = await this.prisma.marketplaceLike.count({
@@ -127,7 +140,11 @@ export class MarketplaceInteractionSubService {
       throw new UnauthorizedException('You do not have permission to delete this comment');
     }
 
-    await this.prisma.marketplaceComment.delete({ where: { id: commentId } });
+    try {
+      await this.prisma.marketplaceComment.delete({ where: { id: commentId } });
+    } catch (err: any) {
+      if (err.code !== 'P2025') throw err;
+    }
 
     return { success: true, message: 'Comment deleted successfully' };
   }

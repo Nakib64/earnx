@@ -27,7 +27,7 @@ Example Scenario (Premium Commission):
 C. Designations as "Depth Keys"
 Designations (like 1 Star, 2 Star) are security keys that unlock deeper levels of the commission tree. A user without a designation might only get direct (Level 1) commissions. Admins assign these designations to reward top referrers.
 
-D. The Immutable Wallet Ledger
+D. The Immutable Wallet 
 Never update a user's wallet balance directly. The `wallet_balance` field on the User table is only a "cached" reflection. The absolute source of truth is the `WalletTransaction` table. 
 - When a commission is earned, an ACID database transaction opens.
 - Inserts a row into `WalletTransaction` (Type: COMMISSION, Amount: +500).
@@ -98,7 +98,7 @@ model PremiumRequest {
   approved_by     String?  // Can be a User ID or Admin ID
 }
 
-// Immutable ledger for all money movement
+// Immutable  for all money movement
 model WalletTransaction {
   id              String   @id @default(uuid())
   user_id         String
@@ -140,10 +140,10 @@ CORE BUSINESS LOGIC & WORKFLOWS:
    - The service must traverse upward from the newly approved user through their parents (Level 1, Level 2, Level 3, etc.).
    - At each level, fetch the parent's `Designation`. The Designation defines their `max_level` of earning depth. 
    - Pay them the amount defined in the `CommissionRule` table only if their Designation allows that specific level depth.
-5. Immutable Wallet Ledger: 
+5. Immutable Wallet : 
    - `WalletTransaction` is the absolute source of truth. 
    - `User.wallet_balance` is strictly a cached reflection. 
-   - Every balance change (commission payout, admin addition/subtraction) MUST be executed within a single ACID database transaction that inserts the ledger record and updates the user cache simultaneously.
+   - Every balance change (commission payout, admin addition/subtraction) MUST be executed within a single ACID database transaction that inserts the  record and updates the user cache simultaneously.
 
 FRONTEND UI/UX DESIGN (Mobile-First):
 - The vast majority of users are on mobile. Build a bottom navigation bar for primary routes (Home, Wallet, Referral, Profile) and a hamburger menu that triggers a sidebar drawer for secondary routes.

@@ -94,15 +94,7 @@ export class PurchasesService {
     let packageCost = 0;
     let investmentPlan: any = null;
 
-    if (dto.package_type === PackageType.ACTIVATION) {
-      if (targetUser.status === UserStatus.ACTIVE) {
-        throw new BadRequestException(
-          `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is already an ACTIVE account. Account activation cannot be purchased again for an active member.`
-        );
-      }
-      const feeVal = await this.systemConfigService.getValue('ACTIVATION_FEE', '500');
-      packageCost = parseFloat(feeVal) || 500;
-    } else if (dto.package_type === PackageType.PREMIUM) {
+    if (dto.package_type === PackageType.PREMIUM) {
       if (payer.id !== targetUser.id && !payer.is_premium) {
         throw new BadRequestException(
           'You must be a Premium Member yourself in order to purchase Premium status for other users.'
@@ -110,7 +102,7 @@ export class PurchasesService {
       }
       if (targetUser.status !== UserStatus.ACTIVE) {
         throw new BadRequestException(
-          `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is not an ACTIVE account. An account must be activated before taking Premiumship.`
+          `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is not an active account.`
         );
       }
       if (targetUser.is_premium) {
@@ -157,32 +149,7 @@ export class PurchasesService {
       );
 
       // B. Process Package Specific Logic for Target User
-      if (dto.package_type === PackageType.ACTIVATION) {
-        let userCode = targetUser.referral_code;
-        if (!userCode || !userCode.startsWith('EX')) {
-          userCode = await this.generateSerialUserCode(tx);
-        }
-
-        const updateData: any = {
-          status: UserStatus.ACTIVE,
-          referral_code: userCode,
-        };
-
-        await tx.user.update({
-          where: { id: targetUser.id },
-          data: updateData,
-        });
-
-        // Trigger activation commissions & bonus unlock
-        await this.commissionService.distributeCommissions(
-          targetUser.id,
-          CommissionType.ACTIVATION,
-          tx
-        );
-        if (targetUser.referred_by_id) {
-          await this.coinsService.checkAndUnlockForReferrer(targetUser.referred_by_id, tx);
-        }
-      } else if (dto.package_type === PackageType.PREMIUM) {
+      if (dto.package_type === PackageType.PREMIUM) {
         const updateData: any = {
           is_premium: true,
           premium_started_at: new Date(),

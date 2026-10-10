@@ -346,11 +346,10 @@ export default function AdminDepositsPage() {
                 setStatusFilter(tab);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${
-                statusFilter === tab
+              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${statusFilter === tab
                   ? 'bg-[#005A36] text-white shadow-sm'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -394,7 +393,7 @@ export default function AdminDepositsPage() {
                         <p className="font-black text-slate-900">
                           {item.user?.full_name || 'Member'}
                         </p>
-                        <p className="text-[11px] font-mono text-slate-500">
+                        <p className="text-[11px]  text-slate-500">
                           {item.user?.phone || item.user?.email || 'N/A'}
                         </p>
                       </div>
@@ -408,12 +407,12 @@ export default function AdminDepositsPage() {
                     </td>
 
                     {/* Sender */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900">
+                    <td className="py-3.5 px-4  font-bold text-slate-900">
                       {item.sender_number}
                     </td>
 
                     {/* TrxID */}
-                    <td className="py-3.5 px-4 font-mono font-black text-[#005A36] select-all">
+                    <td className="py-3.5 px-4  font-black text-[#005A36] select-all">
                       {item.trx_id}
                     </td>
 
@@ -433,7 +432,7 @@ export default function AdminDepositsPage() {
                     </td>
 
                     {/* Date */}
-                    <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
+                    <td className="py-3.5 px-4 text-slate-400  text-[11px]">
                       {new Date(item.created_at).toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -530,7 +529,7 @@ export default function AdminDepositsPage() {
 
             <p className="text-xs text-slate-600">
               Are you sure you want to reject TrxID{' '}
-              <strong className="font-mono text-slate-900">{rejectModal.deposit?.trx_id}</strong> for amount{' '}
+              <strong className=" text-slate-900">{rejectModal.deposit?.trx_id}</strong> for amount{' '}
               <strong className="text-slate-900">৳{rejectModal.deposit?.amount}</strong>?
             </p>
 

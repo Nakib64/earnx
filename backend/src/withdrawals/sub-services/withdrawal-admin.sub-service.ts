@@ -10,7 +10,7 @@ export class WithdrawalAdminSubService {
     private readonly prisma: PrismaService,
     private readonly smsService: SmsService,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   /**
    * Admin: Get all withdrawals with search by name, user code, phone, email, or OTP
@@ -176,16 +176,35 @@ export class WithdrawalAdminSubService {
         }
 
         const numAmount = Number(withdrawal.amount);
-        const recipientBalanceBefore = Number(targetUser.wallet_balance);
-        const recipientBalanceAfter = recipientBalanceBefore + numAmount;
 
-        // 1. Credit target user balance
-        await tx.user.update({
-          where: { id: targetUserId },
-          data: { wallet_balance: new Prisma.Decimal(recipientBalanceAfter) },
+        // 1. Mark withdrawal request as APPROVED / Paid atomically
+        const updateResult = await tx.withdrawalRequest.updateMany({
+          where: { id: withdrawalId, status: RequestStatus.PENDING },
+          data: {
+            status: RequestStatus.APPROVED,
+            paid_to_user_id: targetUserId,
+            paid_at: new Date(),
+            approved_by: adminPhone,
+          },
         });
 
-        // 2. Record ledger transaction for target user
+        if (updateResult.count === 0) {
+          throw new BadRequestException(
+            'This withdrawal has already been processed or is not pending',
+          );
+        }
+
+        // 2. Credit target user balance atomically
+        const updatedTargetUser = await tx.user.update({
+          where: { id: targetUserId },
+          data: { wallet_balance: { increment: new Prisma.Decimal(numAmount) } },
+          select: { wallet_balance: true },
+        });
+
+        const recipientBalanceAfter = Number(updatedTargetUser.wallet_balance);
+        const recipientBalanceBefore = recipientBalanceAfter - numAmount;
+
+        // 3. Record  transaction for target user
         await tx.walletTransaction.create({
           data: {
             user_id: targetUserId,
@@ -193,21 +212,13 @@ export class WithdrawalAdminSubService {
             amount: new Prisma.Decimal(numAmount),
             balance_before: new Prisma.Decimal(recipientBalanceBefore),
             balance_after: new Prisma.Decimal(recipientBalanceAfter),
-            description: `Withdrawal payment received from ${
-              withdrawal.user.full_name || withdrawal.user.phone || withdrawal.user.email
-            } (${withdrawal.user.referral_code})`,
+            description: `Withdrawal payment received from ${withdrawal.user.full_name || withdrawal.user.phone || withdrawal.user.email
+              } (${withdrawal.user.referral_code})`,
           },
         });
 
-        // 3. Mark withdrawal request as APPROVED / Paid
-        const updatedWithdrawal = await tx.withdrawalRequest.update({
+        const updatedWithdrawal = await tx.withdrawalRequest.findUnique({
           where: { id: withdrawalId },
-          data: {
-            status: RequestStatus.APPROVED,
-            paid_to_user_id: targetUserId,
-            paid_at: new Date(),
-            approved_by: adminPhone,
-          },
           include: {
             user: true,
             paid_to_user: true,
@@ -216,9 +227,8 @@ export class WithdrawalAdminSubService {
 
         return {
           success: true,
-          message: `Successfully paid ৳${numAmount.toFixed(2)} to ${
-            targetUser.full_name || targetUser.phone || targetUser.email
-          } (${targetUser.referral_code}).`,
+          message: `Successfully paid ৳${numAmount.toFixed(2)} to ${targetUser.full_name || targetUser.phone || targetUser.email
+            } (${targetUser.referral_code}).`,
           withdrawal: updatedWithdrawal,
         };
       },

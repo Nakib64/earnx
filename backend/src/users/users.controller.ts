@@ -36,6 +36,12 @@ export class UsersController {
     return this.usersService.searchUsers(query || '', codeOnly === 'true');
   }
 
+  // Quick lookup to check if a single referral ID exists and return user's name
+  @Get('users/check-referrer')
+  async checkReferrer(@Query('code') code: string) {
+    return this.usersService.checkReferrer(code);
+  }
+
   @UseGuards(AdminJwtGuard)
   @Get('admin/users/search')
   async searchUsersAdmin(

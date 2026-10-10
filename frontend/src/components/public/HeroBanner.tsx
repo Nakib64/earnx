@@ -144,7 +144,7 @@ export default function HeroBanner({
                 </div>
                 <div className="flex items-center space-x-1.5 text-emerald-400">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>100% Verified Ledger</span>
+                  <span>100% Verified </span>
                 </div>
               </motion.div>
             )}

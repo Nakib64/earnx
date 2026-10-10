@@ -12,7 +12,7 @@ const contactFaqs = [
   {
     question: 'How fast are withdrawal requests processed?',
     answer:
-      'Withdrawals are monitored by our automated financial ledger. Automated payouts for verified accounts process instantly or within 15–30 minutes depending on network congestion.',
+      'Withdrawals are monitored by our automated financial . Automated payouts for verified accounts process instantly or within 15–30 minutes depending on network congestion.',
   },
   {
     question: 'How do 5-level referral commissions work?',
@@ -38,7 +38,7 @@ const contactFaqs = [
 
 export default function ContactPage() {
   return (
-    <div className="bg-[#F4F7F6] text-slate-900 flex flex-col justify-between">
+    <div className="bg-transparent text-slate-900 flex flex-col justify-between">
       <div className="pb-16 space-y-16 sm:space-y-24">
         {/* 1. Hero Banner Component */}
         <HeroBanner
@@ -64,7 +64,7 @@ export default function ContactPage() {
         <SupportTicketForm />
 
 
-     
+
       </div>
 
       {/* Smart Footer Component */}

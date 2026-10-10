@@ -29,8 +29,12 @@ export class PremiumController {
 
   @UseGuards(UserJwtGuard)
   @Post('subscribe')
-  async subscribePackage(@Request() req: any, @Body('package_id') packageId: string) {
-    return this.premiumService.subscribePackage(req.user.id, packageId);
+  async subscribePackage(
+    @Request() req: any,
+    @Body('package_id') packageId: string,
+    @Body('referrer_code') referrerCode?: string,
+  ) {
+    return this.premiumService.subscribePackage(req.user.id, packageId, referrerCode);
   }
 
   @UseGuards(UserJwtGuard)
@@ -49,6 +53,15 @@ export class PremiumController {
   @Post('claim-daily-reward')
   async claimDailyReward(@Request() req: any) {
     return this.premiumService.claimDailyReward(req.user.id);
+  }
+
+  @UseGuards(UserJwtGuard)
+  @Get('user/ads-analytics')
+  async getUserAdsAnalytics(
+    @Request() req: any,
+    @Query('timeframe') timeframe?: string,
+  ) {
+    return this.premiumService.getUserAdsAnalytics(req.user.id, timeframe);
   }
 
   // ==========================================
@@ -84,4 +97,11 @@ export class PremiumController {
   async getPremiumUsers(@Query('search') search?: string) {
     return this.premiumService.getPremiumUsers(search);
   }
+
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/ads-analytics')
+  async getAdsAnalytics(@Query('timeframe') timeframe?: string) {
+    return this.premiumService.getAdsAnalytics(timeframe);
+  }
 }
+

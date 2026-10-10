@@ -1,16 +1,22 @@
 'use client';
 
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ShoppingCart, Wallet } from 'lucide-react';
 import { usePurchaseOrchestrator } from '../../../hooks/orchestrators';
+import { useDesignSystem } from '../../../context/DesignSystemContext';
+import { GlassCard } from '../../../components/design-system/GlassCard';
+import { GlassButton } from '../../../components/design-system/GlassButton';
+import { NumericAmount } from '../../../components/design-system/NumericAmount';
 import {
   PurchaseTargetSection,
   PurchasePackageSection,
   PurchaseReferrerSection,
   PurchaseModal,
+  PurchaseSkeleton,
 } from '../../../components/purchase';
 
 export default function PurchasePage() {
+  const { isLoading: forceSkeletonLoading } = useDesignSystem();
   const {
     state: {
       packageType,
@@ -29,7 +35,6 @@ export default function PurchasePage() {
       showReferrerDropdown,
       submitting,
       modalState,
-      activationFee,
       premiumFee,
     },
     computed: {
@@ -56,85 +61,102 @@ export default function PurchasePage() {
     },
   } = usePurchaseOrchestrator();
 
+  if (forceSkeletonLoading) {
+    return <PurchaseSkeleton />;
+  }
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8">
+    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8 animate-fade-in">
       {/* Top Banner Header */}
-      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white">Purchase Form</h1>
-          <p className="text-xs text-slate-300 font-medium">
-            Buy Account Activation, Premium Subscription, or Investment Plans using account balance.
+      <GlassCard
+        className="p-5 sm:p-6 relative overflow-hidden specular-rim flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        glow
+      >
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+            <ShoppingCart className="w-3.5 h-3.5" />
+            Checkout Portal
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Package &amp; Plan Purchase</h1>
+          <p className="text-xs text-slate-500 font-medium max-w-lg">
+            Acquire VIP Premium Subscriptions or High-Yield Investment Plans directly using your account balance.
           </p>
         </div>
-        <div className="bg-[#023322] border border-[#d4af37]/40 px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold text-emerald-300">
-          Balance: <strong className="text-white">৳{payerBalance.toFixed(2)}</strong>
+
+        <div className="bg-white/80 backdrop-blur-md border border-white/95 px-4 py-2.5 rounded-2xl shadow-xs flex items-center gap-2.5 self-start sm:self-center">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-700 flex items-center justify-center shrink-0">
+            <Wallet className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Available Balance</span>
+            <NumericAmount amount={payerBalance} variant="gain" size="sm" />
+          </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Main Generic Form */}
-      <form
-        onSubmit={handleInitiatePurchase}
-        className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5"
-      >
-        {/* 1. Target User Section */}
-        <PurchaseTargetSection
-          targetQuery={targetQuery}
-          setTargetQuery={setTargetQuery}
-          targetResults={targetResults}
-          searchingTarget={searchingTarget}
-          selectedTargetUser={selectedTargetUser}
-          setSelectedTargetUser={setSelectedTargetUser}
-          showTargetDropdown={showTargetDropdown}
-          setShowTargetDropdown={setShowTargetDropdown}
-          onSelectTargetUser={handleSelectTargetUser}
-          onSelectSelfAsTarget={handleSelectSelfAsTarget}
-        />
+      <GlassCard className="p-6 sm:p-8 specular-rim">
+        <form onSubmit={handleInitiatePurchase} className="space-y-6">
+          {/* 1. Target User Section */}
+          <PurchaseTargetSection
+            targetQuery={targetQuery}
+            setTargetQuery={setTargetQuery}
+            targetResults={targetResults}
+            searchingTarget={searchingTarget}
+            selectedTargetUser={selectedTargetUser}
+            setSelectedTargetUser={setSelectedTargetUser}
+            showTargetDropdown={showTargetDropdown}
+            setShowTargetDropdown={setShowTargetDropdown}
+            onSelectTargetUser={handleSelectTargetUser}
+            onSelectSelfAsTarget={handleSelectSelfAsTarget}
+          />
 
-        {/* 2. Package & Investment Plans Section */}
-        <PurchasePackageSection
-          packageType={packageType}
-          setPackageType={setPackageType}
-          activationFee={activationFee}
-          premiumFee={premiumFee}
-          selectedPlanId={selectedPlanId}
-          setSelectedPlanId={setSelectedPlanId}
-          activePlans={activePlans}
-          loadingPlans={loadingPlans}
-        />
+          {/* 2. Package & Investment Plans Section */}
+          <PurchasePackageSection
+            packageType={packageType}
+            setPackageType={setPackageType}
+            premiumFee={premiumFee}
+            selectedPlanId={selectedPlanId}
+            setSelectedPlanId={setSelectedPlanId}
+            activePlans={activePlans}
+            loadingPlans={loadingPlans}
+          />
 
-        {/* 3. Referrer Section (only for PREMIUM) */}
-        <PurchaseReferrerSection
-          packageType={packageType}
-          selectedTargetUser={selectedTargetUser}
-          referrerQuery={referrerQuery}
-          setReferrerQuery={setReferrerQuery}
-          referrerResults={referrerResults}
-          searchingReferrer={searchingReferrer}
-          selectedReferrerUser={selectedReferrerUser}
-          setSelectedReferrerUser={setSelectedReferrerUser}
-          showReferrerDropdown={showReferrerDropdown}
-          setShowReferrerDropdown={setShowReferrerDropdown}
-          onSelectReferrerUser={handleSelectReferrerUser}
-          onSelectSelfAsReferrer={handleSelectSelfAsReferrer}
-          onSelectTargetSponsorAsReferrer={handleSelectTargetSponsorAsReferrer}
-        />
+          {/* 3. Referrer Section (only for PREMIUM) */}
+          <PurchaseReferrerSection
+            packageType={packageType}
+            selectedTargetUser={selectedTargetUser}
+            referrerQuery={referrerQuery}
+            setReferrerQuery={setReferrerQuery}
+            referrerResults={referrerResults}
+            searchingReferrer={searchingReferrer}
+            selectedReferrerUser={selectedReferrerUser}
+            setSelectedReferrerUser={setSelectedReferrerUser}
+            showReferrerDropdown={showReferrerDropdown}
+            setShowReferrerDropdown={setShowReferrerDropdown}
+            onSelectReferrerUser={handleSelectReferrerUser}
+            onSelectSelfAsReferrer={handleSelectSelfAsReferrer}
+            onSelectTargetSponsorAsReferrer={handleSelectTargetSponsorAsReferrer}
+          />
 
-        {/* Total Cost & Submit */}
-        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs">
-            <span className="text-slate-500 block font-medium">Total Package Fee:</span>
-            <span className="text-xl font-black font-mono text-[#005A36]">৳{currentPrice.toFixed(2)}</span>
+          {/* Total Cost & Submit */}
+          <div className="pt-5 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-0.5 self-start sm:self-center">
+              <span className="text-slate-500 block text-xs font-semibold">Total Package Fee:</span>
+              <NumericAmount amount={currentPrice} variant="neutral" size="xl" />
+            </div>
+
+            <GlassButton
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full sm:w-auto gap-2 px-8 shadow-lg shadow-emerald-950/15"
+            >
+              <span>Buy Package Now</span>
+            </GlassButton>
           </div>
-
-          <button
-            type="submit"
-            className="w-full sm:w-auto bg-[#005A36] hover:bg-[#044D2F] text-white px-8 py-3 rounded-xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm transition-colors cursor-pointer"
-          >
-            <span>Buy Package Now</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </form>
+        </form>
+      </GlassCard>
 
       {/* Confirmation & Status Modal */}
       <PurchaseModal

@@ -16,27 +16,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || !user) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-700"></div>
-        <p className="text-sm font-medium text-slate-500">Checking authorization...</p>
-      </div>
-    );
+  if (!user) {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
+        </div>
+      );
+    }
+    return null;
   }
 
-  // All pages are accessible to members, except Coins and Investments which require Premium / active package
+  // All pages are accessible to members, except Coins, Investments, and Marketplace which require Premium / active package
   const isRestrictedPath =
-    pathname.startsWith('/dashboard/coins') || pathname.startsWith('/dashboard/investments');
+    pathname.startsWith('/dashboard/coins') ||
+    pathname.startsWith('/dashboard/investments') ||
+    pathname.startsWith('/dashboard/marketplace');
   const isPremium = Boolean((user as any).is_premium);
 
   if (!isPremium && isRestrictedPath) {
     return (
-      <div className="pb-20 lg:pb-0">
+      <div className="pb-24 lg:pb-8 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4">
         <PremiumLockScreen />
       </div>
     );
   }
 
-  return <div className="pb-20 lg:pb-0">{children}</div>;
+  return (
+    <div className="pb-24 lg:pb-8 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4">
+      {children}
+    </div>
+  );
 }

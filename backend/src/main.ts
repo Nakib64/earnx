@@ -12,6 +12,11 @@ async function bootstrap() {
     mkdirSync(uploadsDir, { recursive: true });
   }
 
+  const noticesUploadsDir = join(__dirname, '..', 'uploads', 'notices');
+  if (!existsSync(noticesUploadsDir)) {
+    mkdirSync(noticesUploadsDir, { recursive: true });
+  }
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(json({ limit: '25mb' }));

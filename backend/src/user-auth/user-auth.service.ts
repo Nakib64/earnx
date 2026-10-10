@@ -189,21 +189,39 @@ export class UserAuthService {
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const newReferralCode = await this.generateUniqueReferralCode();
 
-    // Directly creates user with ACTIVE status (Account activation removed)
-    const user = await this.prisma.user.create({
-      data: {
-        phone: cleanPhone,
-        email: cleanEmail,
-        password_hash: passwordHash,
-        full_name: dto.full_name?.trim() || null,
-        country: dto.country?.trim() || 'Bangladesh',
-        national_id: dto.national_id?.trim() || null,
-        avatar_url: dto.avatar_url?.trim() || null,
-        referral_code: newReferralCode,
-        referred_by_id: null,
-        status: UserStatus.ACTIVE, // Immediate ACTIVE access
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          phone: cleanPhone,
+          email: cleanEmail,
+          password_hash: passwordHash,
+          full_name: dto.full_name?.trim() || null,
+          country: dto.country?.trim() || 'Bangladesh',
+          national_id: dto.national_id?.trim() || null,
+          avatar_url: dto.avatar_url?.trim() || null,
+          referral_code: newReferralCode,
+          referred_by_id: null,
+          status: UserStatus.ACTIVE, // Immediate ACTIVE access
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        const target = (err.meta?.target as string[]) || [];
+        const targetStr = Array.isArray(target) ? target.join(', ') : String(target);
+        if (targetStr.includes('phone')) {
+          throw new ConflictException('A user with this phone number already exists');
+        }
+        if (targetStr.includes('email')) {
+          throw new ConflictException('A user with this email address already exists');
+        }
+        if (targetStr.includes('referral_code')) {
+          throw new ConflictException('Referral code collision. Please retry registration.');
+        }
+        throw new ConflictException('An account with these details already exists.');
+      }
+      throw err;
+    }
 
     const payload = { sub: user.id, phone: user.phone || user.email, role: 'user' };
     const accessToken = this.jwtService.sign(payload);
@@ -350,23 +368,31 @@ export class UserAuthService {
       updateData.password_hash = await bcrypt.hash(dto.new_password, 10);
     }
 
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      include: {
-        designation: true,
-        premium_package: true,
-        referred_by: {
-          select: {
-            id: true,
-            phone: true,
-            email: true,
-            full_name: true,
-            referral_code: true,
+    let updatedUser;
+    try {
+      updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+        include: {
+          designation: true,
+          premium_package: true,
+          referred_by: {
+            select: {
+              id: true,
+              phone: true,
+              email: true,
+              full_name: true,
+              referral_code: true,
+            },
           },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new ConflictException('Email address is already in use by another account');
+      }
+      throw err;
+    }
 
     const { password_hash, ...sanitized } = updatedUser;
     return sanitized;

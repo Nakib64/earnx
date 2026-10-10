@@ -42,112 +42,19 @@ export class ApprovalsService {
   }
 
   // ==========================================
-  // ACTIVATION REQUESTS
+  // ACTIVATION REQUESTS (DECOMMISSIONED)
   // ==========================================
 
   async submitActivationRequest(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
-
-    if (user.status === UserStatus.ACTIVE) {
-      throw new BadRequestException('User is already ACTIVE');
-    }
-
-    // Check for existing pending request
-    const existingPending = await this.prisma.activationRequest.findFirst({
-      where: { user_id: userId, status: RequestStatus.PENDING },
-    });
-    if (existingPending) {
-      throw new BadRequestException('Activation request is already pending approval');
-    }
-
-    return this.prisma.activationRequest.create({
-      data: {
-        user_id: userId,
-        referrer_id: user.referred_by_id,
-        status: RequestStatus.PENDING,
-      },
-    });
+    throw new BadRequestException('The activation system is decommissioned. All accounts are automatically active upon registration.');
   }
 
   async approveActivationRequest(requestId: string, approverId: string, isAdmin = false) {
-    return this.prisma.$transaction(async (tx) => {
-      const request = await tx.activationRequest.findUnique({
-        where: { id: requestId },
-        include: { user: true },
-      });
-
-      if (!request) throw new NotFoundException('Activation request not found');
-      if (request.status !== RequestStatus.PENDING) {
-        throw new BadRequestException(`Request is already ${request.status}`);
-      }
-
-      // Check permission: Must be Admin OR direct referrer
-      if (!isAdmin) {
-        if (!request.referrer_id || request.referrer_id !== approverId) {
-          throw new ForbiddenException('Only the direct referrer or an Admin can approve this request');
-        }
-      }
-
-      // 1. Update request status
-      const updatedRequest = await tx.activationRequest.update({
-        where: { id: requestId },
-        data: {
-          status: RequestStatus.APPROVED,
-          approved_by: approverId,
-        },
-      });
-
-      // 2. Activate user & assign serial user code (EX1001, EX1002...)
-      const targetUser = await tx.user.findUnique({ where: { id: request.user_id } });
-      let userCode = targetUser?.referral_code;
-      if (!userCode || !userCode.startsWith('EX')) {
-        userCode = await this.generateSerialUserCode(tx);
-      }
-
-      await tx.user.update({
-        where: { id: request.user_id },
-        data: {
-          status: UserStatus.ACTIVE,
-          referral_code: userCode,
-        },
-      });
-
-      // 3. Trigger activation commissions payout
-      const payouts = await this.commissionService.distributeCommissions(
-        request.user_id,
-        CommissionType.ACTIVATION,
-        tx,
-      );
-
-      // 4. Check & unlock premium bonus coins for referrer if active referral count target met
-      if (request.referrer_id) {
-        await this.coinsService.checkAndUnlockForReferrer(request.referrer_id, tx);
-      }
-
-      return { request: updatedRequest, payouts };
-    }, { maxWait: 10000, timeout: 30000 });
+    throw new BadRequestException('The activation system is decommissioned.');
   }
 
   async rejectActivationRequest(requestId: string, approverId: string, reason?: string, isAdmin = false) {
-    const request = await this.prisma.activationRequest.findUnique({ where: { id: requestId } });
-    if (!request) throw new NotFoundException('Activation request not found');
-    if (request.status !== RequestStatus.PENDING) {
-      throw new BadRequestException(`Request is already ${request.status}`);
-    }
-
-    if (!isAdmin && request.referrer_id !== approverId) {
-      throw new ForbiddenException('Only the direct referrer or an Admin can reject this request');
-    }
-
-    return this.prisma.activationRequest.update({
-      where: { id: requestId },
-      data: {
-        status: RequestStatus.REJECTED,
-        approved_by: approverId,
-        rejection_reason: reason || 'Request rejected',
-      },
-    });
+    throw new BadRequestException('The activation system is decommissioned.');
   }
 
   // ==========================================
@@ -194,12 +101,21 @@ export class ApprovalsService {
         throw new ForbiddenException('Only the direct referrer or an Admin can approve this request');
       }
 
-      const updatedRequest = await tx.premiumRequest.update({
-        where: { id: requestId },
+      // 1. Update request status atomically
+      const updateResult = await tx.premiumRequest.updateMany({
+        where: { id: requestId, status: RequestStatus.PENDING },
         data: {
           status: RequestStatus.APPROVED,
           approved_by: approverId,
         },
+      });
+
+      if (updateResult.count === 0) {
+        throw new BadRequestException('Request is already processed');
+      }
+
+      const updatedRequest = await tx.premiumRequest.findUnique({
+        where: { id: requestId },
       });
 
       // Update user premium status fields (1 year / 365 days expiration)
@@ -243,13 +159,21 @@ export class ApprovalsService {
       throw new ForbiddenException('Only the direct referrer or an Admin can reject this request');
     }
 
-    return this.prisma.premiumRequest.update({
-      where: { id: requestId },
+    const updateResult = await this.prisma.premiumRequest.updateMany({
+      where: { id: requestId, status: RequestStatus.PENDING },
       data: {
         status: RequestStatus.REJECTED,
         approved_by: approverId,
         rejection_reason: reason || 'Request rejected',
       },
+    });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestException('Request is already processed');
+    }
+
+    return this.prisma.premiumRequest.findUnique({
+      where: { id: requestId },
     });
   }
 
@@ -378,18 +302,12 @@ export class ApprovalsService {
 
   // Lists for referrers & admins
   async getPendingDownlineApprovals(referrerId: string) {
-    const [activations, premiums] = await Promise.all([
-      this.prisma.activationRequest.findMany({
-        where: { referrer_id: referrerId, status: RequestStatus.PENDING },
-        include: { user: { select: { id: true, phone: true, full_name: true } } },
-      }),
-      this.prisma.premiumRequest.findMany({
-        where: { referrer_id: referrerId, status: RequestStatus.PENDING },
-        include: { user: { select: { id: true, phone: true, full_name: true } } },
-      }),
-    ]);
+    const premiums = await this.prisma.premiumRequest.findMany({
+      where: { referrer_id: referrerId, status: RequestStatus.PENDING },
+      include: { user: { select: { id: true, phone: true, full_name: true } } },
+    });
 
-    return { activations, premiums };
+    return { activations: [], premiums };
   }
 
   async getAllPendingAdminApprovals() {
@@ -402,11 +320,7 @@ export class ApprovalsService {
       referred_by: { select: { id: true, phone: true, full_name: true } },
     };
 
-    const [activations, premiums, withdrawals] = await Promise.all([
-      this.prisma.activationRequest.findMany({
-        orderBy: { created_at: 'desc' },
-        include: { user: { select: userSelect } },
-      }),
+    const [premiums, withdrawals] = await Promise.all([
       this.prisma.premiumRequest.findMany({
         orderBy: { created_at: 'desc' },
         include: { user: { select: userSelect } },
@@ -417,6 +331,6 @@ export class ApprovalsService {
       }),
     ]);
 
-    return { activations, premiums, withdrawals };
+    return { activations: [], premiums, withdrawals };
   }
 }

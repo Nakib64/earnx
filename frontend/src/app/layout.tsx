@@ -1,67 +1,16 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
-import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 import './globals.css';
 import Providers from '../context/Providers';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import BottomNav from '../components/BottomNav';
-import PageRenderAnimation from '../components/common/PageRenderAnimation';
 import { Toaster } from 'sonner';
+import { AmbientCanvas } from '../components/design-system/AmbientCanvas';
 
-const clarityCity = localFont({
-  src: [
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-Light.woff2',
-      weight: '300',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-Regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-Medium.woff2',
-      weight: '500',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-SemiBold.woff2',
-      weight: '600',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-Bold.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-ExtraBold.woff2',
-      weight: '800',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/clarity-city/ClarityCity-Black.woff2',
-      weight: '900',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-clarity-city',
-  display: 'swap',
-});
-
-const outfit = Outfit({
-  variable: '--font-outfit',
+const montserrat = Montserrat({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  display: 'swap',
-});
-
-const plusJakarta = Plus_Jakarta_Sans({
-  variable: '--font-jakarta',
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-montserrat',
   display: 'swap',
 });
 
@@ -78,16 +27,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${clarityCity.variable} ${outfit.variable} ${plusJakarta.variable} h-full antialiased font-sans`}
+      className={`${montserrat.variable} h-full antialiased font-sans`}
     >
-      <body className="min-h-screen flex flex-col bg-[#F4F7F6] text-slate-900 overflow-x-hidden font-sans font-semibold">
-        <PageRenderAnimation />
+      <body className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#111827] overflow-x-hidden font-sans font-semibold relative">
+        <AmbientCanvas />
         <Providers>
           <Toaster position="top-right" richColors closeButton />
           <Navbar />
-          <div className="flex-1 flex w-full">
+          <div className="flex-1 flex w-full relative z-10">
             <Sidebar />
-            <main className="flex-1 w-full">{children}</main>
+            <main className="flex-1 w-full relative z-10">{children}</main>
           </div>
           <BottomNav />
         </Providers>

@@ -5,12 +5,12 @@
   --color-primary-hover: #023c28;
   --color-secondary: #f3ba2f;
   --color-secondary-hover: #d4af37;
-  --font-sans: var(--font-clarity-city), 'Clarity City', var(--font-outfit), var(--font-jakarta), system-ui, sans-serif;
+  --font-sans: var(--font-montserrat), 'Montserrat', sans-serif;
 }
 
 :root {
   --background: #F4F7F6;
-  --foreground: #0f172a;
+  --foreground: #111827;
   --primary: #01281a;
   --primary-hover: #023c28;
   --secondary: #f3ba2f;
@@ -24,12 +24,66 @@
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-clarity-city), 'Clarity City', var(--font-outfit), var(--font-jakarta), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #111827;
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
   min-height: 100vh;
   font-weight: 600;
   letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Liquid Glassmorphic Design System Tokens ───────────────────────── */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+  border-radius: 1.5rem;
+}
+
+.liquid-glass-elevated {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.98);
+  border-radius: 1.5rem;
+}
+
+.specular-rim {
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+.specular-glow {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.specular-glow:hover {
+  border-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 14px 34px rgba(5, 150, 105, 0.07), inset 0 1px 2px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+/* Continuous Shimmer Wave */
+@keyframes shimmerWave {
+  0% {
+    transform: translateX(-150%);
+  }
+
+  100% {
+    transform: translateX(150%);
+  }
+}
+
+.animate-shimmer-wave {
+  animation: shimmerWave 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Numeric & Monospace alignment */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 /* Glass & Theme Buttons */
@@ -97,16 +151,28 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F3F4F6;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #9CA3AF;
-  border-radius: 0px !important;
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px !important;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6B7280;
+  background: rgba(100, 116, 139, 0.7);
+}
+
+/* No Scrollbar Utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 /* ─── Landing Page Styles ────────────────────────────────────────────────── */
@@ -260,13 +326,16 @@ body {
 
 /* Glassy Logo Wave Rendering Animation */
 @keyframes glassyWave {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.15;
     transform: scale(0.92);
     background-color: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.18);
     box-shadow: none;
   }
+
   50% {
     opacity: 1;
     transform: scale(1.08);
@@ -282,10 +351,13 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.4;
     transform: scale(0.98);
   }
+
   50% {
     opacity: 0.85;
     transform: scale(1.02);
@@ -294,4 +366,103 @@ body {
 
 .animate-pulse-glow {
   animation: pulseGlow 2.4s ease-in-out infinite;
+}
+
+/* ─── Premium Membership Card & Subscribe Button System ─────────────────── */
+.premium-card {
+  position: relative;
+  z-index: 1;
+  background-color: #FFFFFF;
+  border: 1px solid #E5EBE7;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .premium-card:hover {
+    border-color: #D1DCD4;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  }
+}
+
+.premium-subscribe-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  position: relative;
+  white-space: nowrap;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 52px;
+  min-height: 52px;
+  gap: 10px;
+  border-radius: 10px;
+  background-color: #009F6B;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-subscribe-btn:hover:not(:disabled) {
+  background-color: #008C5F;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 159, 107, 0.25);
+}
+
+.premium-subscribe-btn:active:not(:disabled) {
+  background-color: #007A53;
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.premium-subscribe-btn:focus-visible {
+  outline: 2px solid #009F6B;
+  outline-offset: 2px;
+}
+
+.premium-subscribe-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.premium-subscribe-btn__label {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.premium-subscribe-btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.premium-subscribe-btn:hover:not(:disabled) .premium-subscribe-btn__icon {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .premium-card,
+  .premium-subscribe-btn,
+  .premium-subscribe-btn__icon {
+    transition: none !important;
+    transform: none !important;
+  }
 }

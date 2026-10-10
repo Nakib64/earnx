@@ -81,7 +81,7 @@ export function InvestmentSubscribeModal({
                 min={minRequired}
                 value={customInvestAmount}
                 onChange={(e) => setCustomInvestAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono font-black text-slate-900 text-sm focus:ring-2 focus:ring-[#005A36]"
+                className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl  font-black text-slate-900 text-sm focus:ring-2 focus:ring-[#005A36]"
               />
             </div>
           </div>
@@ -97,17 +97,15 @@ export function InvestmentSubscribeModal({
                     type="button"
                     key={dur}
                     onClick={() => setSelectedDuration(dur)}
-                    className={`py-2 px-2 rounded-xl border text-center transition-all ${
-                      isSelected
-                        ? 'border-[#005A36] bg-[#005A36] text-white shadow-sm font-black'
-                        : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold'
-                    }`}
+                    className={`py-2 px-2 rounded-xl border text-center transition-all ${isSelected
+                      ? 'border-[#005A36] bg-[#005A36] text-white shadow-sm font-black'
+                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold'
+                      }`}
                   >
                     <div className="text-xs">{dur} Months</div>
                     <div
-                      className={`text-[10px] ${
-                        isSelected ? 'text-emerald-200' : 'text-slate-500'
-                      }`}
+                      className={`text-[10px] ${isSelected ? 'text-emerald-200' : 'text-slate-500'
+                        }`}
                     >
                       {dur === 3 ? '5%/mo' : dur === 6 ? '7.5%/mo' : '10%/mo'}
                     </div>
@@ -121,23 +119,23 @@ export function InvestmentSubscribeModal({
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span className="font-bold">Your Account Balance:</span>
-              <span className="font-black text-primary font-mono">
+              <span className="font-black text-primary ">
                 ৳{walletBal.toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between text-slate-600">
               <span className="font-bold">Monthly Return Rate:</span>
-              <span className="font-black text-[#01281a] font-mono">{returnRate}% / month</span>
+              <span className="font-black text-[#01281a] ">{returnRate}% / month</span>
             </div>
             <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
               <span className="font-bold">Estimated Monthly Dividend:</span>
-              <span className="font-black text-[#005A36] font-mono text-sm">
+              <span className="font-black text-[#005A36]  text-sm">
                 ৳{estimatedDividend.toLocaleString()} / mo
               </span>
             </div>
             <div className="flex justify-between text-slate-600">
               <span className="font-bold">Principal Unlock Date:</span>
-              <span className="font-black text-slate-900 font-mono">{unlockDate}</span>
+              <span className="font-black text-slate-900 ">{unlockDate}</span>
             </div>
           </div>
 
@@ -169,8 +167,8 @@ export function InvestmentSubscribeModal({
             {submitting
               ? 'Processing...'
               : isInsufficient
-              ? 'Insufficient Balance'
-              : 'Confirm & Lock Investment'}
+                ? 'Insufficient Balance'
+                : 'Lock Investment'}
           </button>
         </div>
       </div>

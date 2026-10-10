@@ -4,9 +4,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserAuthService } from './user-auth.service';
 import { UserAuthController } from './user-auth.controller';
 import { UserJwtStrategy } from './strategies/user-jwt.strategy';
+import { OtpModule } from '../otp/otp.module';
 
 @Module({
   imports: [
+    OtpModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -65,7 +65,10 @@ export function useReferralOrchestrator() {
 
   const fetchTree = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
+    // Only set loading true if we do not already have members loaded
+    if (allMembers.length === 0) {
+      setLoading(true);
+    }
     const res = await apiFetch<any>('/users/tree?depth=10');
     if (res.success && res.data?.tree) {
       const tree: Record<string, TreeMember[]> = res.data.tree;
@@ -91,7 +94,7 @@ export function useReferralOrchestrator() {
       setAllMembers(flat);
     }
     setLoading(false);
-  }, [user]);
+  }, [user, allMembers.length]);
 
   useEffect(() => {
     fetchTree();

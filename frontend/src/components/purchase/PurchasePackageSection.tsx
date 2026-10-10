@@ -4,9 +4,8 @@ import React from 'react';
 import { InvestmentPlan } from '../../hooks/orchestrators/usePurchaseOrchestrator';
 
 interface PurchasePackageSectionProps {
-  packageType: 'ACTIVATION' | 'PREMIUM' | 'INVESTMENT';
-  setPackageType: (val: 'ACTIVATION' | 'PREMIUM' | 'INVESTMENT') => void;
-  activationFee: number;
+  packageType: 'PREMIUM' | 'INVESTMENT';
+  setPackageType: (val: 'PREMIUM' | 'INVESTMENT') => void;
   premiumFee: number;
   selectedPlanId: string;
   setSelectedPlanId: (id: string) => void;
@@ -17,7 +16,6 @@ interface PurchasePackageSectionProps {
 export function PurchasePackageSection({
   packageType,
   setPackageType,
-  activationFee,
   premiumFee,
   selectedPlanId,
   setSelectedPlanId,
@@ -34,10 +32,9 @@ export function PurchasePackageSection({
         <select
           value={packageType}
           onChange={(e) => setPackageType(e.target.value as any)}
-          className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
+          className="w-full bg-white/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs cursor-pointer"
         >
-          <option value="ACTIVATION">Account Activation Package (৳{activationFee})</option>
-          <option value="PREMIUM">Premium Subscription Package (৳{premiumFee})</option>
+          <option value="PREMIUM">Premium VIP Membership (৳{premiumFee})</option>
           <option value="INVESTMENT">Investment Package Plan</option>
         </select>
       </div>
@@ -49,16 +46,16 @@ export function PurchasePackageSection({
             Select Investment Plan <span className="text-rose-500">*</span>
           </label>
           {loadingPlans ? (
-            <div className="text-xs text-slate-400 italic">Loading active plans...</div>
+            <div className="text-xs text-slate-400 italic">Loading active investment plans...</div>
           ) : activePlans.length > 0 ? (
             <select
               value={selectedPlanId}
               onChange={(e) => setSelectedPlanId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] cursor-pointer"
+              className="w-full bg-white/80 border border-slate-200/90 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs cursor-pointer"
             >
               {activePlans.map((plan) => (
                 <option key={plan.id} value={plan.id}>
-                  {plan.title} — ৳{Number(plan.amount)} ({plan.monthly_return_percent}% Monthly Return{' '}
+                  {plan.title} — ৳{Number(plan.amount).toLocaleString()} ({plan.monthly_return_percent}% Monthly Return{' '}
                   {plan.is_lifetime ? '• Lifetime' : `• ${plan.duration_months} Months`})
                 </option>
               ))}

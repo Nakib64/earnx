@@ -61,7 +61,7 @@ export function AdjustWalletModal({
           Target Member: <strong>{user.full_name || user.phone}</strong> ({user.phone})
           <br />
           Current Wallet Balance:{' '}
-          <span className="font-mono font-bold text-slate-800">
+          <span className=" font-bold text-slate-800">
             ৳{Number(user.wallet_balance).toFixed(2)}
           </span>
         </p>
@@ -74,11 +74,10 @@ export function AdjustWalletModal({
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label
-                className={`flex items-center justify-center space-x-2 p-2.5 rounded-xl border font-bold text-xs cursor-pointer transition-all ${
-                  adjustType === 'ADD'
+                className={`flex items-center justify-center space-x-2 p-2.5 rounded-xl border font-bold text-xs cursor-pointer transition-all ${adjustType === 'ADD'
                     ? 'bg-emerald-50 border-emerald-300 text-emerald-800 shadow-sm'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -92,11 +91,10 @@ export function AdjustWalletModal({
               </label>
 
               <label
-                className={`flex items-center justify-center space-x-2 p-2.5 rounded-xl border font-bold text-xs cursor-pointer transition-all ${
-                  adjustType === 'SUBTRACT'
+                className={`flex items-center justify-center space-x-2 p-2.5 rounded-xl border font-bold text-xs cursor-pointer transition-all ${adjustType === 'SUBTRACT'
                     ? 'bg-rose-50 border-rose-300 text-rose-800 shadow-sm'
                     : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                }`}
+                  }`}
               >
                 <input
                   type="radio"
@@ -123,7 +121,7 @@ export function AdjustWalletModal({
               placeholder="e.g. 500"
               value={adjustAmount}
               onChange={(e) => setAdjustAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-mono font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm  font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 

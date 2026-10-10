@@ -101,7 +101,7 @@ export default function AdminCommissionsPage() {
       key: 'level',
       header: 'Tree Level Depth',
       render: (r) => (
-        <span className="font-black font-mono text-slate-900 text-xs">
+        <span className="font-black  text-slate-900 text-xs">
           Level {r.level} (Upline Tier {r.level})
         </span>
       ),
@@ -112,7 +112,7 @@ export default function AdminCommissionsPage() {
       align: 'right',
       render: (r) => (
         <div className="flex items-center justify-end space-x-2">
-          <span className="font-black text-[#01281a] font-mono text-xs">
+          <span className="font-black text-[#01281a]  text-xs">
             ৳{Number(r.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </span>
           <button
@@ -143,7 +143,7 @@ export default function AdminCommissionsPage() {
               Define commission rewards for Premium Package upgrades distributed across up to 5 Upper Levels in the referral tree.
             </p>
           </div>
-          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
+          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40  shrink-0 hidden sm:inline-flex">
             {rules.length} Rules Defined
           </span>
         </div>

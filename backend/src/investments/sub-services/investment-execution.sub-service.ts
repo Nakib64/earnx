@@ -59,12 +59,27 @@ export class InvestmentExecutionSubService {
 
     return this.prisma.$transaction(
       async (tx) => {
-        // 1. Deduct investment amount from user's account balance
-        const newBal = userBal - investAmount;
-        await tx.user.update({
-          where: { id: userId },
-          data: { wallet_balance: new Prisma.Decimal(newBal) },
+        // 1. Deduct investment amount from user's account balance atomically
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            wallet_balance: { gte: new Prisma.Decimal(investAmount) },
+          },
+          data: {
+            wallet_balance: { decrement: new Prisma.Decimal(investAmount) },
+          },
         });
+
+        if (deductResult.count === 0) {
+          throw new BadRequestException('Insufficient account balance.');
+        }
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: userId },
+          select: { wallet_balance: true },
+        });
+        const newBal = Number(freshUser?.wallet_balance || 0);
+        const userBalBefore = newBal + investAmount;
 
         // 2. Log wallet transaction
         await tx.walletTransaction.create({
@@ -72,7 +87,7 @@ export class InvestmentExecutionSubService {
             user_id: userId,
             type: TransactionType.WITHDRAW,
             amount: new Prisma.Decimal(-investAmount),
-            balance_before: new Prisma.Decimal(userBal),
+            balance_before: new Prisma.Decimal(userBalBefore),
             balance_after: new Prisma.Decimal(newBal),
             description: `Investment package subscribed: ${plan.title} (৳${investAmount.toLocaleString()})`,
           },
@@ -153,12 +168,27 @@ export class InvestmentExecutionSubService {
 
     return this.prisma.$transaction(
       async (tx) => {
-        // 1. Deduct remaining upgrade cost from account balance
-        const newBal = userBal - remainingToPay;
-        await tx.user.update({
-          where: { id: userId },
-          data: { wallet_balance: new Prisma.Decimal(newBal) },
+        // 1. Deduct remaining upgrade cost from account balance atomically
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            wallet_balance: { gte: new Prisma.Decimal(remainingToPay) },
+          },
+          data: {
+            wallet_balance: { decrement: new Prisma.Decimal(remainingToPay) },
+          },
         });
+
+        if (deductResult.count === 0) {
+          throw new BadRequestException('Insufficient account balance.');
+        }
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: userId },
+          select: { wallet_balance: true },
+        });
+        const newBal = Number(freshUser?.wallet_balance || 0);
+        const userBalBefore = newBal + remainingToPay;
 
         // 2. Log transaction
         await tx.walletTransaction.create({
@@ -166,7 +196,7 @@ export class InvestmentExecutionSubService {
             user_id: userId,
             type: TransactionType.WITHDRAW,
             amount: new Prisma.Decimal(remainingToPay),
-            balance_before: new Prisma.Decimal(userBal),
+            balance_before: new Prisma.Decimal(userBalBefore),
             balance_after: new Prisma.Decimal(newBal),
             description: `Investment package upgrade to ${targetPlan.title} (৳${remainingToPay.toLocaleString()})`,
           },
@@ -223,33 +253,40 @@ export class InvestmentExecutionSubService {
 
     return this.prisma.$transaction(
       async (tx) => {
-        // 1. Directly credit 100% of capital back to user's account balance
-        const user = await tx.user.findUnique({ where: { id: userId } });
-        if (user) {
-          const userBalBefore = Number(user.wallet_balance);
-          const userBalAfter = userBalBefore + currentAmt;
+        // 1. Atomically delete the investment package record first
+        const deleteResult = await tx.userInvestment.deleteMany({
+          where: { id: investmentId, user_id: userId },
+        });
 
-          await tx.user.update({
-            where: { id: userId },
-            data: { wallet_balance: new Prisma.Decimal(userBalAfter) },
-          });
-
-          await tx.walletTransaction.create({
-            data: {
-              user_id: userId,
-              type: TransactionType.INVESTMENT_PAYOUT,
-              amount: new Prisma.Decimal(currentAmt),
-              balance_before: new Prisma.Decimal(userBalBefore),
-              balance_after: new Prisma.Decimal(userBalAfter),
-              description: `Direct investment capital withdrawal refund: ${planTitle} (৳${currentAmt.toLocaleString()})`,
-            },
-          });
+        if (deleteResult.count === 0) {
+          throw new BadRequestException('Investment record not found or already withdrawn');
         }
 
-        // 2. Immediately delete the investment package record
-        return tx.userInvestment.delete({
-          where: { id: investmentId },
+        // 2. Directly credit 100% of capital back to user's account balance
+        const updatedUser = await tx.user.update({
+          where: { id: userId },
+          data: { wallet_balance: { increment: new Prisma.Decimal(currentAmt) } },
+          select: { wallet_balance: true },
         });
+
+        const userBalAfter = Number(updatedUser.wallet_balance);
+        const userBalBefore = userBalAfter - currentAmt;
+
+        await tx.walletTransaction.create({
+          data: {
+            user_id: userId,
+            type: TransactionType.INVESTMENT_PAYOUT,
+            amount: new Prisma.Decimal(currentAmt),
+            balance_before: new Prisma.Decimal(userBalBefore),
+            balance_after: new Prisma.Decimal(userBalAfter),
+            description: `Direct investment capital withdrawal refund: ${planTitle} (৳${currentAmt.toLocaleString()})`,
+          },
+        });
+
+        return {
+          success: true,
+          message: `Successfully withdrawn ৳${currentAmt.toLocaleString()} capital.`,
+        };
       },
       { maxWait: 10000, timeout: 30000 },
     );
@@ -320,16 +357,32 @@ export class InvestmentExecutionSubService {
 
       return this.prisma.$transaction(
         async (tx) => {
-          // Refund 100% of capital back to user's wallet
-          const user = await tx.user.findUnique({ where: { id: inv.user_id } });
-          if (user && refundAmt > 0) {
-            const userBalBefore = Number(user.wallet_balance);
-            const userBalAfter = userBalBefore + refundAmt;
+          // 1. Mark status terminated atomically
+          const updateResult = await tx.userInvestment.updateMany({
+            where: { id, status: RequestStatus.PENDING },
+            data: {
+              amount: new Prisma.Decimal(0),
+              monthly_payout_amount: new Prisma.Decimal(0),
+              status: RequestStatus.REJECTED, // Terminated/closed
+              request_type: 'NEW',
+              pending_amount: null,
+              next_payout_at: null,
+            },
+          });
 
-            await tx.user.update({
+          if (updateResult.count === 0) {
+            throw new BadRequestException('Investment is already processed');
+          }
+
+          if (refundAmt > 0) {
+            const updatedUser = await tx.user.update({
               where: { id: inv.user_id },
-              data: { wallet_balance: new Prisma.Decimal(userBalAfter) },
+              data: { wallet_balance: { increment: new Prisma.Decimal(refundAmt) } },
+              select: { wallet_balance: true },
             });
+
+            const userBalAfter = Number(updatedUser.wallet_balance);
+            const userBalBefore = userBalAfter - refundAmt;
 
             await tx.walletTransaction.create({
               data: {
@@ -343,16 +396,8 @@ export class InvestmentExecutionSubService {
             });
           }
 
-          return tx.userInvestment.update({
+          return tx.userInvestment.findUnique({
             where: { id },
-            data: {
-              amount: new Prisma.Decimal(0),
-              monthly_payout_amount: new Prisma.Decimal(0),
-              status: RequestStatus.REJECTED, // Terminated/closed
-              request_type: 'NEW',
-              pending_amount: null,
-              next_payout_at: null,
-            },
             include: { user: true, plan: true, pending_plan: true },
           });
         },

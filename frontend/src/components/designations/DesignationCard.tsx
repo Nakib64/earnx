@@ -64,7 +64,7 @@ export default function DesignationCard({
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">
               Earning Depth
             </span>
-            <div className="font-mono font-extrabold text-slate-900 mt-0.5">
+            <div className=" font-extrabold text-slate-900 mt-0.5">
               Level {designation.max_level}
             </div>
           </div>
@@ -73,7 +73,7 @@ export default function DesignationCard({
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider block">
               Members
             </span>
-            <div className="font-mono font-extrabold text-primary mt-0.5">
+            <div className=" font-extrabold text-primary mt-0.5">
               {memberCount} Active
             </div>
           </div>

@@ -16,6 +16,8 @@ import {
   Award,
   GripVertical,
   ArrowUpDown,
+  ArrowLeft,
+  RefreshCw,
 } from 'lucide-react';
 import { useDebounce } from '../../../hooks/useDebounce';
 
@@ -126,15 +128,15 @@ export default function AdminLeaderboardPage() {
 
     const res = editingId
       ? await apiFetch(`/leaderboard/admin/${editingId}`, {
-          method: 'PUT',
-          isAdmin: true,
-          body: JSON.stringify(formData),
-        })
+        method: 'PUT',
+        isAdmin: true,
+        body: JSON.stringify(formData),
+      })
       : await apiFetch('/leaderboard/admin/create', {
-          method: 'POST',
-          isAdmin: true,
-          body: JSON.stringify(formData),
-        });
+        method: 'POST',
+        isAdmin: true,
+        body: JSON.stringify(formData),
+      });
 
     if (res.success) {
       setMessage({
@@ -225,39 +227,47 @@ export default function AdminLeaderboardPage() {
 
       {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
 
-      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
-      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-3">
-        <div className="flex items-start space-x-3.5">
-          <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
-            <Trophy className="w-6 h-6 text-[#f3ba2f]" />
-          </div>
-          <div className="space-y-1 flex-1">
-            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
-              Top 100 Leaderboard Manager
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3">
+          <Link
+            href="/admin/dashboard"
+            className="w-10 h-10 rounded-2xl bg-white/80 hover:bg-white border border-white/90 flex items-center justify-center text-slate-700 transition-all shadow-xs cursor-pointer active:scale-[0.98]"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center space-x-2">
+              <Trophy className="w-6 h-6 text-amber-500" />
+              <span>Top 100 Leaderboard Manager</span>
             </h1>
-            <p className="text-xs text-slate-300 font-semibold">
-              Drag rows to adjust ranking, upload photos, and manage top earners.
+            <p className="text-xs text-slate-500 font-medium">
+              Drag rows to adjust ranking, upload photos, and manage top earners ({entries.length} entries)
             </p>
           </div>
-          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
-            {entries.length} Entries
-          </span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="border-t border-[#053d29] pt-3 flex flex-wrap gap-2">
+        <div className="flex items-center space-x-2">
           <button
             onClick={handleOpenAdd}
-            className="py-2.5 px-4 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs rounded-xl flex items-center space-x-2 transition-all shadow-md cursor-pointer"
+            className="bg-[#009F6B] hover:bg-[#00875a] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center space-x-2 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
           >
             <Plus className="w-4 h-4" />
-            <span>Add New Entry</span>
+            <span>Add Entry</span>
+          </button>
+
+          <button
+            onClick={fetchLeaderboard}
+            className="bg-white/80 hover:bg-white text-slate-700 font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center space-x-2 transition-all cursor-pointer border border-white/90 shadow-xs active:scale-[0.98]"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
 
       {/* Main Leaderboard Table Section */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
+      <div className="bg-white/80 backdrop-blur-xl border border-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
@@ -267,7 +277,7 @@ export default function AdminLeaderboardPage() {
               <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center space-x-2">
                 <span>Leaderboard Rankings</span>
                 {savingReorder && (
-                  <span className="text-xs text-primary font-mono animate-pulse">Saving rank order...</span>
+                  <span className="text-xs text-primary  animate-pulse">Saving rank order...</span>
                 )}
               </h2>
               <p className="text-[11px] font-medium text-slate-400">
@@ -328,13 +338,12 @@ export default function AdminLeaderboardPage() {
                       onDragStart={() => handleDragStart(index)}
                       onDragOver={(e) => handleDragOver(e, index)}
                       onDrop={() => handleDrop(index)}
-                      className={`transition-all ${
-                        isDragging
+                      className={`transition-all ${isDragging
                           ? 'opacity-40 bg-emerald-100/50'
                           : isOver
-                          ? 'bg-emerald-50 border-y-2 border-primary'
-                          : 'hover:bg-slate-50'
-                      }`}
+                            ? 'bg-emerald-50 border-y-2 border-primary'
+                            : 'hover:bg-slate-50'
+                        }`}
                     >
                       {/* Drag Handle */}
                       <td className="px-2 py-2 text-center text-slate-300 hover:text-slate-600 cursor-grab active:cursor-grabbing hidden lg:table-cell">
@@ -343,7 +352,7 @@ export default function AdminLeaderboardPage() {
 
                       {/* Rank */}
                       <td className="px-2.5 py-2">
-                        <span className="font-extrabold text-slate-900 font-mono text-xs">
+                        <span className="font-extrabold text-slate-900  text-xs">
                           #{item.rank}
                         </span>
                       </td>
@@ -368,21 +377,21 @@ export default function AdminLeaderboardPage() {
                           )}
                           <div className="truncate max-w-[120px] sm:max-w-[180px]">
                             <p className="font-extrabold text-slate-900 text-xs truncate">{item.name}</p>
-                            <p className="text-[9px] text-slate-500 font-mono">{item.phone || 'N/A'}</p>
+                            <p className="text-[9px] text-slate-500 ">{item.phone || 'N/A'}</p>
                           </div>
                         </div>
                       </td>
 
                       {/* Invested */}
                       <td className="px-2.5 py-2 hidden lg:table-cell">
-                        <span className="font-extrabold text-primary font-mono text-xs">
+                        <span className="font-extrabold text-primary  text-xs">
                           ৳{Number(item.invested_amount).toLocaleString()}
                         </span>
                       </td>
 
                       {/* Profit */}
                       <td className="px-2.5 py-2 hidden lg:table-cell">
-                        <span className="font-extrabold text-slate-900 font-mono text-xs">
+                        <span className="font-extrabold text-slate-900  text-xs">
                           ৳{Number(item.profit_earned).toLocaleString()}
                         </span>
                       </td>
@@ -460,7 +469,7 @@ export default function AdminLeaderboardPage() {
                     max={100}
                     value={formData.rank}
                     onChange={(e) => setFormData({ ...formData, rank: Number(e.target.value) })}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -496,7 +505,7 @@ export default function AdminLeaderboardPage() {
                   placeholder="01700000000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                 />
               </div>
 
@@ -510,7 +519,7 @@ export default function AdminLeaderboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, invested_amount: Number(e.target.value) })
                     }
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -522,7 +531,7 @@ export default function AdminLeaderboardPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, profit_earned: Number(e.target.value) })
                     }
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                   />
                 </div>
               </div>

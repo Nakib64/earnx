@@ -3,6 +3,7 @@
 import React from 'react';
 import { Wallet, Check, Copy } from 'lucide-react';
 import { DepositGatewayConfig } from '../../types';
+import { GlassCard } from '../design-system';
 
 interface DepositGatewaySelectorProps {
   selectedMethod: 'BKASH' | 'NAGAD' | 'ROCKET';
@@ -25,13 +26,13 @@ export function DepositGatewaySelector({
   handleCopy,
 }: DepositGatewaySelectorProps) {
   return (
-    <div className="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+    <GlassCard variant="standard" className="p-5 sm:p-6 space-y-4">
       <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
-        <Wallet className="w-5 h-5 text-[#005A36]" />
-        Official Deposit Numbers
+        <Wallet className="w-5 h-5 text-emerald-700" />
+        Official Deposit Gateways
       </h2>
-      <p className="text-xs text-slate-500 font-medium">
-        Send money to the numbers below according to your preferred payment gateway:
+      <p className="text-xs text-slate-500 font-semibold">
+        Send funds to the verified gateway account numbers below:
       </p>
 
       <div className="space-y-3 pt-1">
@@ -42,42 +43,45 @@ export function DepositGatewaySelector({
             <div
               key={method}
               onClick={() => setSelectedMethod(method)}
-              className={`cursor-pointer border rounded-2xl p-4 transition-all duration-200 ${
-                isSelected
-                  ? 'border-[#005A36] bg-emerald-50/40 shadow-sm ring-1 ring-[#005A36]'
-                  : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-              }`}
+              className={`cursor-pointer border rounded-2xl p-4 transition-all duration-200 specular-rim ${isSelected
+                  ? 'border-emerald-500 bg-emerald-50/60 shadow-sm ring-2 ring-emerald-500/20'
+                  : 'border-slate-200/90 hover:border-slate-300 bg-white/70 hover:bg-white'
+                }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase ${info.badge}`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase ${info.badge}`}>
                     {info.name}
                   </span>
-                  <span className="text-[11px] font-semibold text-slate-500">
+                  <span className="text-[11px] font-bold text-slate-500">
                     {info.type}
                   </span>
                 </div>
-                <span className="text-[11px] font-bold text-slate-400">
-                  {isSelected ? '✓ Selected' : 'Tap to select'}
+                <span className="text-[11px] font-black text-slate-400">
+                  {isSelected ? '✓ SELECTED' : 'TAP TO SELECT'}
                 </span>
               </div>
 
-              <div className="flex items-center justify-between bg-white border border-slate-200/80 rounded-xl px-3.5 py-2">
-                <span className="font-mono text-base font-black text-slate-900 tracking-wider">
+              <div className="flex items-center justify-between bg-white/90 rounded-xl px-3.5 py-2.5 border border-slate-200/80 mt-1 shadow-2xs">
+                <span className=" font-black text-sm text-slate-900 tracking-wider tabular-nums">
                   {info.number}
                 </span>
+
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleCopy(info.number, method);
                   }}
-                  className="flex items-center gap-1 text-xs font-bold text-[#005A36] hover:text-[#044D2F] px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-100 transition-colors"
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${copiedKey === method
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    }`}
                 >
                   {copiedKey === method ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-emerald-700">Copied</span>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied</span>
                     </>
                   ) : (
                     <>
@@ -92,17 +96,9 @@ export function DepositGatewaySelector({
         })}
       </div>
 
-      <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 space-y-2 text-xs text-amber-900">
-        <p className="font-black text-amber-950 flex items-center gap-1.5">
-          📌 Important Deposit Instructions:
-        </p>
-        <ul className="list-disc list-inside space-y-1 font-medium text-[11px] leading-relaxed">
-          <li>Always &quot;Send Money&quot; (Personal) to the specified account.</li>
-          <li>Save the Transaction ID (TrxID) received via SMS.</li>
-          <li>Submit the form with your Sender Number and TrxID for verification.</li>
-          <li>Approvals usually take 5–15 minutes after submission.</li>
-        </ul>
+      <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-[11px] text-amber-900 leading-relaxed font-semibold">
+        ⚠️ <strong>Important:</strong> Only transfer from your personal bKash/Nagad/Rocket account. Keep your Transaction ID (TrxID) handy to submit below for automatic balance crediting.
       </div>
-    </div>
+    </GlassCard>
   );
 }

@@ -93,7 +93,7 @@ export function UserDetailCards({
         return (
           <div className="flex items-center space-x-2">
             <StatusBadge status={tx.type} />
-            <span className={`font-mono font-black text-xs ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
+            <span className={` font-black text-xs ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
               {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
             </span>
           </div>
@@ -104,7 +104,7 @@ export function UserDetailCards({
       key: 'balance',
       header: 'Before → After',
       render: (tx) => (
-        <span className="font-mono text-[10px] text-slate-500 font-extrabold truncate block max-w-[140px]">
+        <span className=" text-[10px] text-slate-500 font-extrabold truncate block max-w-[140px]">
           ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
         </span>
       ),
@@ -118,7 +118,7 @@ export function UserDetailCards({
           <div className="text-slate-800 text-[10px] font-bold truncate max-w-[160px] sm:max-w-[220px] ml-auto">
             {tx.description || '-'}
           </div>
-          <div className="text-slate-400 text-[9px] font-mono">{new Date(tx.created_at).toLocaleString()}</div>
+          <div className="text-slate-400 text-[9px] ">{new Date(tx.created_at).toLocaleString()}</div>
         </div>
       ),
     },
@@ -139,7 +139,7 @@ export function UserDetailCards({
               </h2>
               <StatusBadge status={user.status} />
             </div>
-            <p className="text-xs text-slate-500 font-mono">
+            <p className="text-xs text-slate-500 ">
               Phone: <strong className="text-slate-900">{user.phone}</strong> · Ref: <strong className="text-primary">{user.referral_code}</strong>
             </p>
           </div>
@@ -178,7 +178,7 @@ export function UserDetailCards({
             )}
           </div>
           {user.designation && (
-            <div className="text-[11px] text-slate-600 font-mono font-bold pt-0.5">
+            <div className="text-[11px] text-slate-600  font-bold pt-0.5">
               Stars: {user.designation.stars}★ · Max Level Depth: {user.designation.max_level}
             </div>
           )}
@@ -200,7 +200,7 @@ export function UserDetailCards({
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
           <div>
             <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Wallet Balance</div>
-            <div className="text-xl font-black text-[#005A36] font-mono mt-0.5">
+            <div className="text-xl font-black text-[#005A36]  mt-0.5">
               ৳{Number(user.wallet_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </div>
           </div>
@@ -307,7 +307,7 @@ export function UserDetailCards({
             </div>
           </div>
           {txTotalPages > 1 && (
-            <span className="text-[10px] font-extrabold text-primary bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 font-mono">
+            <span className="text-[10px] font-extrabold text-primary bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 ">
               Page {txPage} of {txTotalPages}
             </span>
           )}
@@ -339,7 +339,7 @@ export function UserDetailCards({
               <span>Previous</span>
             </button>
 
-            <span className="font-mono text-slate-600 text-[11px] font-extrabold hidden sm:inline">
+            <span className=" text-slate-600 text-[11px] font-extrabold hidden sm:inline">
               Page <strong>{txPage}</strong> of <strong>{txTotalPages}</strong> ({txTotalRecords} total transactions)
             </span>
 

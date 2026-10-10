@@ -21,14 +21,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [admin, isLoading, isLoginPage, router]);
 
-  // While checking authorization or redirecting unauthenticated admin, show a loading spinner
-  if (isLoading || (!admin && !isLoginPage)) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-3">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-sky-600"></div>
-        <span className="text-xs font-semibold text-slate-500">Checking Admin Authorization...</span>
-      </div>
-    );
+  if (!admin && !isLoginPage) {
+    if (isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-3">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+        </div>
+      );
+    }
+    return null;
   }
 
   return <>{children}</>;

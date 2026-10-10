@@ -154,7 +154,7 @@ export default function AdminOffersPage() {
               <div key={offer.id} className="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4 bg-white border border-slate-200">
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-600 font-mono text-base">
+                    <span className="font-bold text-emerald-600  text-base">
                       ৳{Number(offer.reward_amount).toFixed(2)}
                     </span>
                     <button

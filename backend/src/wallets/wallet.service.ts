@@ -31,11 +31,41 @@ export class WalletService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      const balanceBefore = Number(user.wallet_balance);
-      const balanceAfter = balanceBefore + numericAmount;
+      let balanceBefore = Number(user.wallet_balance);
+      let balanceAfter: number;
 
-      if (balanceAfter < 0) {
-        throw new BadRequestException('Insufficient wallet balance for this transaction');
+      if (numericAmount < 0) {
+        const absDeduct = Math.abs(numericAmount);
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            wallet_balance: { gte: new Prisma.Decimal(absDeduct) },
+          },
+          data: {
+            wallet_balance: { decrement: new Prisma.Decimal(absDeduct) },
+          },
+        });
+
+        if (deductResult.count === 0) {
+          throw new BadRequestException('Insufficient wallet balance for this transaction');
+        }
+
+        const freshUser = await tx.user.findUnique({
+          where: { id: userId },
+          select: { wallet_balance: true },
+        });
+        balanceAfter = Number(freshUser?.wallet_balance || 0);
+        balanceBefore = balanceAfter + absDeduct;
+      } else {
+        const updatedUser = await tx.user.update({
+          where: { id: userId },
+          data: {
+            wallet_balance: { increment: new Prisma.Decimal(numericAmount) },
+          },
+          select: { wallet_balance: true },
+        });
+        balanceAfter = Number(updatedUser.wallet_balance);
+        balanceBefore = balanceAfter - numericAmount;
       }
 
       const walletTx = await tx.walletTransaction.create({
@@ -46,13 +76,6 @@ export class WalletService {
           balance_before: new Prisma.Decimal(balanceBefore),
           balance_after: new Prisma.Decimal(balanceAfter),
           description,
-        },
-      });
-
-      await tx.user.update({
-        where: { id: userId },
-        data: {
-          wallet_balance: new Prisma.Decimal(balanceAfter),
         },
       });
 

@@ -414,7 +414,7 @@ export default function LoginPage() {
                       6-Digit OTP Code <span className="text-rose-500">*</span>
                     </label>
                     {cooldown > 0 ? (
-                      <span className="text-[11px] font-mono font-bold text-amber-700 flex items-center gap-1">
+                      <span className="text-[11px]  font-bold text-amber-700 flex items-center gap-1">
                         <Clock className="w-3 h-3" /> Resend in {cooldown}s
                       </span>
                     ) : (
@@ -435,7 +435,7 @@ export default function LoginPage() {
                     placeholder="123456"
                     value={forgotOtp}
                     onChange={(e) => setForgotOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-extrabold text-slate-900 tracking-widest text-center text-lg focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl  font-extrabold text-slate-900 tracking-widest text-center text-lg focus:outline-none focus:ring-2 focus:ring-[#005A36]"
                   />
                   <p className="text-[10px] text-slate-400 text-center font-medium">
                     Valid for 10 minutes. Maximum 5 verification attempts.

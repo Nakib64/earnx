@@ -3,6 +3,7 @@
 import React from 'react';
 import { InvestmentPlan, UserInvestment, RequestStatus } from '../../types';
 import { TrendingUp, Sparkles, ArrowUpRight, Zap } from 'lucide-react';
+import { GlassCard, GlassButton, NumericAmount, ShimmerSkeleton, SkeletonLine, SkeletonBadge } from '../design-system';
 
 interface InvestmentPlansGridProps {
   plans: InvestmentPlan[];
@@ -21,7 +22,7 @@ export function InvestmentPlansGrid({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center space-x-2 truncate">
-          <TrendingUp className="w-5 h-5 text-[#01281a] shrink-0" />
+          <TrendingUp className="w-5 h-5 text-emerald-700 shrink-0" />
           <span className="truncate">Available Investment Packages</span>
         </h2>
       </div>
@@ -29,33 +30,24 @@ export function InvestmentPlansGrid({
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[1, 2, 3].map((n) => (
-            <div
-              key={n}
-              className="rounded-3xl border border-[#d4af37]/35 bg-gradient-to-br from-[#023322] via-[#012418] to-[#011a12] p-5 sm:p-6 space-y-5 animate-pulse shadow-xl"
-            >
+            <GlassCard key={n} variant="standard" className="p-5 sm:p-6 space-y-4">
               <div className="space-y-2">
-                <div className="h-6 w-1/2 bg-[#03442e] rounded-lg"></div>
-                <div className="h-3.5 w-3/4 bg-[#03442e]/60 rounded-md"></div>
+                <SkeletonLine className="w-1/2 h-6" />
+                <SkeletonLine className="w-3/4 h-3.5" />
               </div>
-              <div className="h-20 bg-[#011f15] border border-[#d4af37]/25 rounded-2xl p-4 flex justify-between items-center">
-                <div className="space-y-2 w-1/2">
-                  <div className="h-3 w-1/3 bg-[#03442e] rounded"></div>
-                  <div className="h-7 w-2/3 bg-[#03442e] rounded-lg"></div>
-                </div>
-                <div className="w-10 h-10 bg-[#03442e] border border-[#d4af37]/30 rounded-xl"></div>
-              </div>
+              <ShimmerSkeleton className="w-full h-20" rounded="rounded-2xl" />
               <div className="grid grid-cols-2 gap-3">
-                <div className="h-14 bg-[#011a12] border border-[#d4af37]/20 rounded-2xl"></div>
-                <div className="h-14 bg-[#011a12] border border-[#d4af37]/20 rounded-2xl"></div>
+                <ShimmerSkeleton className="w-full h-14" rounded="rounded-2xl" />
+                <ShimmerSkeleton className="w-full h-14" rounded="rounded-2xl" />
               </div>
-              <div className="h-12 bg-gradient-to-r from-amber-400/20 to-amber-500/20 rounded-2xl border border-amber-400/30"></div>
-            </div>
+              <ShimmerSkeleton className="w-full h-12" rounded="rounded-2xl" />
+            </GlassCard>
           ))}
         </div>
       ) : plans.length === 0 ? (
-        <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-3xl p-8 text-center text-slate-300 font-bold shadow-lg">
+        <GlassCard variant="standard" className="p-8 text-center text-slate-500 font-bold">
           No investment plans available at the moment. Please check back soon!
-        </div>
+        </GlassCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {plans.map((plan) => {
@@ -69,78 +61,77 @@ export function InvestmentPlansGrid({
             const isHigherPackage = activeInv && packageAmt > activeAmt;
 
             return (
-              <div
+              <GlassCard
                 key={plan.id}
-                className="group relative rounded-3xl border border-[#d4af37]/45 bg-gradient-to-br from-[#023322] via-[#012418] to-[#011a12] text-white transition-all duration-300 hover:-translate-y-1.5 hover:border-[#d4af37] flex flex-col justify-between overflow-hidden p-5 sm:p-6 space-y-5 min-w-0 shadow-xl"
+                variant="standard"
+                className="group relative flex flex-col justify-between p-5 sm:p-6 space-y-5 hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
               >
                 {/* Badge */}
                 {isPopular ? (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-bl-2xl shadow-md flex items-center space-x-1 shrink-0">
-                    <Sparkles className="w-3 h-3 text-slate-950" />
-                    <span>Best Value</span>
+                  <div className="absolute top-0 right-0 bg-amber-100 text-amber-900 border-l border-b border-amber-200 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-2xl shadow-2xs flex items-center space-x-1 shrink-0">
+                    <Sparkles className="w-3 h-3 text-amber-600" />
+                    <span>Best Yield</span>
                   </div>
                 ) : (
-                  <div className="absolute top-0 right-0 bg-[#013825] border-l border-b border-[#d4af37]/40 text-amber-200 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-2xl shrink-0">
-                    <span>Guaranteed Yield</span>
+                  <div className="absolute top-0 right-0 bg-emerald-50 border-l border-b border-emerald-200 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-2xl shrink-0">
+                    <span>Guaranteed</span>
                   </div>
                 )}
 
                 <div className="space-y-4 min-w-0">
                   {/* Title & Subtitle */}
                   <div className="min-w-0 space-y-0.5">
-                    <h3 className="text-lg sm:text-xl font-black tracking-tight text-white truncate">
+                    <h3 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 truncate">
                       {plan.title}
                     </h3>
-                    <p className="text-xs font-semibold text-slate-300 truncate">
-                      Guaranteed Monthly Dividend Package
+                    <p className="text-xs font-semibold text-slate-500 truncate">
+                      Monthly Dividend Plan
                     </p>
                   </div>
 
                   {/* Price Tag Box */}
-                  <div className="rounded-2xl p-4 flex items-center justify-between min-w-0 border bg-[#011f15] border-[#d4af37]/35 text-white shadow-inner">
+                  <div className="rounded-2xl p-4 flex items-center justify-between min-w-0 bg-white/80 border border-slate-200/90 text-slate-900 shadow-2xs specular-rim">
                     <div className="min-w-0">
-                      <span className="text-[10px] font-black uppercase tracking-widest block truncate text-amber-200">
-                        Package Price
+                      <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
+                        Package Principal
                       </span>
-                      <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight truncate block text-white">
-                        ৳{packageAmt.toLocaleString()}
-                      </span>
+                      <NumericAmount value={packageAmt} size="2xl" className=" text-slate-900" />
                     </div>
-                    <div className="w-11 h-11 rounded-xl border border-[#d4af37]/50 bg-[#023322] flex items-center justify-center text-[#f3ba2f] shrink-0 shadow-md">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
                       <TrendingUp className="w-5.5 h-5.5" />
                     </div>
                   </div>
 
                   {/* Return Rate & Dividend Metrics */}
                   <div className="grid grid-cols-2 gap-2.5 pt-1">
-                    <div className="border border-[#d4af37]/30 p-3 rounded-2xl bg-[#011a12] min-w-0 space-y-0.5">
-                      <span className="text-[10px] font-black uppercase tracking-wider block truncate text-amber-300">
+                    <div className="border border-slate-200/80 p-3 rounded-2xl bg-white/70 min-w-0 space-y-0.5 specular-rim">
+                      <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
                         Monthly Return
                       </span>
-                      <div className="text-base sm:text-lg font-black font-mono truncate text-amber-200">
-                        {returnPct}% / mo
+                      <div className="text-base sm:text-lg font-black  truncate text-emerald-700 tabular-nums">
+                        +{returnPct}% / mo
                       </div>
                     </div>
 
-                    <div className="border border-[#d4af37]/30 p-3 rounded-2xl bg-[#011a12] min-w-0 space-y-0.5">
-                      <span className="text-[10px] font-black uppercase tracking-wider block truncate text-amber-300">
+                    <div className="border border-slate-200/80 p-3 rounded-2xl bg-white/70 min-w-0 space-y-0.5 specular-rim">
+                      <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
                         Est. Dividend
                       </span>
-                      <div className="text-base sm:text-lg font-black font-mono truncate text-white">
+                      <div className="text-base sm:text-lg font-black  truncate text-slate-900 tabular-nums">
                         ৳{monthlyDividend.toLocaleString()}
                       </div>
                     </div>
                   </div>
 
                   {/* Plan Duration Badge */}
-                  <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-[#d4af37]/30 bg-[#011f15] text-xs font-bold min-w-0">
-                    <span className="text-slate-300 font-medium shrink-0">Plan Duration:</span>
+                  <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 text-xs font-bold min-w-0">
+                    <span className="text-slate-500 font-semibold shrink-0">Plan Duration:</span>
                     {plan.is_lifetime ? (
-                      <span className="font-black text-amber-200 bg-[#023322] border border-[#d4af37]/40 px-2.5 py-0.5 rounded-lg text-[11px] shrink-0">
-                        Lifetime Payouts
+                      <span className="font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] shrink-0">
+                        Lifetime Dividend
                       </span>
                     ) : (
-                      <span className="font-black font-mono truncate text-white">
+                      <span className="font-black  truncate text-slate-900">
                         {plan.duration_months} Months
                       </span>
                     )}
@@ -150,30 +141,32 @@ export function InvestmentPlansGrid({
                 {/* Action Button */}
                 <div className="pt-2">
                   {isCurrentPackage ? (
-                    <div className="w-full py-3.5 px-4 rounded-2xl font-black text-xs bg-[#023322] text-amber-200 border border-[#d4af37]/50 text-center tracking-wide shadow-md">
+                    <div className="w-full py-3 px-4 rounded-2xl font-black text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 text-center tracking-wide shadow-2xs">
                       ✓ Active Package
                     </div>
                   ) : isHigherPackage ? (
-                    <button
+                    <GlassButton
                       onClick={() => onSelectPlan(plan)}
                       disabled={activeInv?.status === RequestStatus.PENDING}
-                      className="w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 shadow-md disabled:opacity-50 cursor-pointer"
+                      variant="primary"
+                      fullWidth
+                      icon={<ArrowUpRight className="w-4 h-4" />}
                     >
-                      <ArrowUpRight className="w-4 h-4 text-slate-950 shrink-0" />
-                      <span className="truncate">Upgrade Package</span>
-                    </button>
+                      Upgrade Package
+                    </GlassButton>
                   ) : (
-                    <button
+                    <GlassButton
                       onClick={() => onSelectPlan(plan)}
                       disabled={!!activeInv}
-                      className="w-full py-3.5 px-4 rounded-2xl font-black text-xs transition-all duration-300 flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 disabled:opacity-40 cursor-pointer shadow-md"
+                      variant="primary"
+                      fullWidth
+                      icon={<Zap className="w-4 h-4 fill-current" />}
                     >
-                      <Zap className="w-4 h-4 fill-current shrink-0" />
-                      <span className="truncate">Invest Now</span>
-                    </button>
+                      Invest Now
+                    </GlassButton>
                   )}
                 </div>
-              </div>
+              </GlassCard>
             );
           })}
         </div>

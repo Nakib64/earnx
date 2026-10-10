@@ -197,7 +197,7 @@ export default function AdminSettingsPage() {
                 value={adminPhone}
                 onChange={(e) => setAdminPhone(e.target.value)}
                 placeholder="01700000000"
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl  font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
               />
             </div>
           </div>
@@ -264,7 +264,7 @@ export default function AdminSettingsPage() {
               <p className="text-[11px] font-medium text-slate-400">Security audit of all recent login events and client details</p>
             </div>
           </div>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono">
+          <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 ">
             {historyTotal} Events
           </span>
         </div>
@@ -297,7 +297,7 @@ export default function AdminSettingsPage() {
               ) : (
                 history.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-mono font-bold text-slate-900 whitespace-nowrap">
+                    <td className="px-4 py-3  font-bold text-slate-900 whitespace-nowrap">
                       {new Date(item.created_at).toLocaleString('en-US', {
                         year: 'numeric',
                         month: 'short',
@@ -308,7 +308,7 @@ export default function AdminSettingsPage() {
                         hour12: true,
                       })}
                     </td>
-                    <td className="px-4 py-3 font-mono">
+                    <td className="px-4 py-3 ">
                       <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold text-slate-800 text-[11px]">
                         {item.ip_address || '—'}
                       </span>

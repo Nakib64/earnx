@@ -37,7 +37,6 @@ interface PremiumUser {
 export default function GlobalSettingsPage() {
   // System Config State
   const [premiumFee, setPremiumFee] = useState('1000');
-  const [activationFee, setActivationFee] = useState('500');
   const [weeklyPayout, setWeeklyPayout] = useState('100');
   const [coinPrice, setCoinPrice] = useState('10');
   const [premiumFreeCoins, setPremiumFreeCoins] = useState('100');
@@ -66,7 +65,6 @@ export default function GlobalSettingsPage() {
     const res = await apiFetch<SystemConfigMap>('/admin/system-config', { isAdmin: true });
     if (res.success && res.data) {
       if (res.data.PREMIUM_FEE) setPremiumFee(res.data.PREMIUM_FEE);
-      if (res.data.ACTIVATION_FEE) setActivationFee(res.data.ACTIVATION_FEE);
       if (res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT) setWeeklyPayout(res.data.PREMIUM_WEEKLY_PAYOUT_AMOUNT);
       if (res.data.COIN_PRICE) setCoinPrice(res.data.COIN_PRICE);
       if (res.data.PREMIUM_FREE_COINS) setPremiumFreeCoins(res.data.PREMIUM_FREE_COINS);
@@ -102,11 +100,6 @@ export default function GlobalSettingsPage() {
         method: 'POST',
         isAdmin: true,
         body: JSON.stringify({ key: 'PREMIUM_FEE', value: premiumFee }),
-      }),
-      apiFetch('/admin/system-config', {
-        method: 'POST',
-        isAdmin: true,
-        body: JSON.stringify({ key: 'ACTIVATION_FEE', value: activationFee }),
       }),
       apiFetch('/admin/system-config', {
         method: 'POST',
@@ -255,29 +248,11 @@ export default function GlobalSettingsPage() {
                   type="number"
                   value={premiumFee}
                   onChange={(e) => setPremiumFee(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                   placeholder="1000"
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium">Cost to purchase/upgrade to Premium membership subscription.</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center space-x-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Account Activation Fee (৳)</span>
-              </label>
-              <div className="relative">
-                <DollarSign className="w-5 h-5 text-primary absolute left-3.5 top-3" />
-                <input
-                  type="number"
-                  value={activationFee}
-                  onChange={(e) => setActivationFee(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
-                  placeholder="500"
-                />
-              </div>
-              <p className="text-[10px] text-slate-400 font-medium">Cost to activate a newly registered disabled account.</p>
             </div>
           </div>
 
@@ -292,7 +267,7 @@ export default function GlobalSettingsPage() {
                   type="number"
                   value={weeklyPayout}
                   onChange={(e) => setWeeklyPayout(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium">Weekly return per active premium member (52 weeks max).</p>
@@ -309,7 +284,7 @@ export default function GlobalSettingsPage() {
                   step="0.01"
                   value={coinPrice}
                   onChange={(e) => setCoinPrice(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium">Price per coin when user purchases via wallet balance.</p>
@@ -327,7 +302,7 @@ export default function GlobalSettingsPage() {
                   type="number"
                   value={premiumFreeCoins}
                   onChange={(e) => setPremiumFreeCoins(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium">Locked coins granted upon premium subscription.</p>
@@ -343,7 +318,7 @@ export default function GlobalSettingsPage() {
                   type="number"
                   value={requiredReferrals}
                   onChange={(e) => setRequiredReferrals(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium">Number of active referrals needed to unlock locked coins.</p>
@@ -418,13 +393,13 @@ export default function GlobalSettingsPage() {
                       <p className="font-extrabold text-slate-900 text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-[150px]">
                         {user.full_name || user.phone}
                       </p>
-                      <p className="text-slate-500 font-mono text-[9px]">{user.phone}</p>
+                      <p className="text-slate-500  text-[9px]">{user.phone}</p>
                     </td>
 
                     {/* Column 2: Progress & Balance */}
                     <td className="px-2.5 py-2">
                       <div className="flex flex-wrap items-center gap-1">
-                        <span className="font-extrabold text-primary font-mono text-[10px] sm:text-xs">
+                        <span className="font-extrabold text-primary  text-[10px] sm:text-xs">
                           ৳{Number(user.wallet_balance).toLocaleString()}
                         </span>
                         <span className="px-1.5 py-0.5 rounded-lg bg-emerald-50 text-primary border border-emerald-200 font-extrabold text-[9px]">
@@ -484,7 +459,7 @@ export default function GlobalSettingsPage() {
             <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3.5 space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Premium Member</span>
               <p className="font-extrabold text-slate-900 text-sm">{viewUser.full_name || 'Anonymous'}</p>
-              <p className="text-[11px] text-slate-500 font-mono">
+              <p className="text-[11px] text-slate-500 ">
                 {viewUser.phone} <span className="text-primary font-bold">• {viewUser.referral_code}</span>
               </p>
             </div>
@@ -493,20 +468,20 @@ export default function GlobalSettingsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Wallet Balance</p>
-                <p className="text-sm font-black text-primary font-mono mt-0.5">
+                <p className="text-sm font-black text-primary  mt-0.5">
                   ৳{Number(viewUser.wallet_balance).toLocaleString()}
                 </p>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Payout Progress</p>
-                <p className="text-sm font-black text-slate-900 font-mono mt-0.5">
+                <p className="text-sm font-black text-slate-900  mt-0.5">
                   {viewUser.premium_payout_count} / 52 wks
                 </p>
               </div>
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-2 gap-3 text-[10px] text-slate-500 font-mono">
+            <div className="grid grid-cols-2 gap-3 text-[10px] text-slate-500 ">
               <div>
                 <span className="font-extrabold text-slate-400 uppercase tracking-wider block font-sans">Last Payout</span>
                 {viewUser.last_premium_payout_at ? new Date(viewUser.last_premium_payout_at).toLocaleDateString() : 'Never'}

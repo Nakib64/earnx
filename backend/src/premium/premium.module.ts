@@ -6,9 +6,10 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { SystemConfigModule } from '../system-config/system-config.module';
 import { PremiumPackageSubService } from './sub-services/premium-package.sub-service';
 import { DailyAdsSubService } from './sub-services/daily-ads.sub-service';
+import { CoinsModule } from '../coins/coins.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), PrismaModule, SystemConfigModule],
+  imports: [ScheduleModule.forRoot(), PrismaModule, SystemConfigModule, CoinsModule],
   controllers: [PremiumController],
   providers: [
     PremiumPackageSubService,

@@ -249,7 +249,7 @@ export default function AdminInvestmentsPage() {
             <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">Investment Plans & Returns</h1>
             <p className="text-xs text-slate-300 font-semibold">Configure dividend packages, assign to users, and process returns.</p>
           </div>
-          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
+          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40  shrink-0 hidden sm:inline-flex">
             {plans.length} Plans
           </span>
         </div>
@@ -313,7 +313,7 @@ export default function AdminInvestmentsPage() {
                   <span className="text-sm font-black text-slate-800">{plan.title}</span>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] font-black text-[#01281a] bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">{Number(plan.monthly_return_percent)}% /mo</span>
-                    <span className="text-[10px] font-black text-slate-600 font-mono">৳{Number(plan.amount || plan.min_amount).toLocaleString()}</span>
+                    <span className="text-[10px] font-black text-slate-600 ">৳{Number(plan.amount || plan.min_amount).toLocaleString()}</span>
                     {plan.is_lifetime ? (
                       <span className="text-[10px] font-extrabold text-[#854D0E] bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">Lifetime</span>
                     ) : (
@@ -394,7 +394,7 @@ export default function AdminInvestmentsPage() {
                     <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                       <td className="px-2.5 py-2">
                         <p className="font-extrabold text-slate-900 text-[10px] sm:text-xs truncate max-w-[100px] sm:max-w-[150px]">{inv.user?.full_name || inv.user?.phone || 'User'}</p>
-                        <p className="text-slate-500 font-mono text-[9px]">{inv.user?.phone}</p>
+                        <p className="text-slate-500  text-[9px]">{inv.user?.phone}</p>
                       </td>
                       <td className="px-2.5 py-2">
                         <div className="flex flex-wrap items-center gap-1">
@@ -461,22 +461,22 @@ export default function AdminInvestmentsPage() {
             <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3.5 space-y-1">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Investor</span>
               <p className="font-extrabold text-slate-900 text-sm">{viewInvestment.user?.full_name || 'Anonymous'}</p>
-              <p className="text-[11px] text-slate-500 font-mono">{viewInvestment.user?.phone}</p>
+              <p className="text-[11px] text-slate-500 ">{viewInvestment.user?.phone}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 font-mono text-xs">
+            <div className="grid grid-cols-2 gap-3  text-xs">
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-sans">Plan</p>
                 <p className="text-sm font-black text-slate-900 mt-0.5 font-sans">{viewInvestment.plan?.title || 'Investment'}</p>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-sans">Invested</p>
-                <p className="text-sm font-black text-primary font-mono mt-0.5">৳{Number(viewInvestment.amount).toLocaleString()}</p>
+                <p className="text-sm font-black text-primary  mt-0.5">৳{Number(viewInvestment.amount).toLocaleString()}</p>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-sans">Monthly Return</p>
                 <p className="text-sm font-black text-slate-900 mt-0.5 font-sans">{Number(viewInvestment.monthly_return_percent)}%</p>
-                <p className="text-[10px] font-extrabold text-primary font-mono">৳{Number(viewInvestment.monthly_payout_amount).toLocaleString()}/mo</p>
+                <p className="text-[10px] font-extrabold text-primary ">৳{Number(viewInvestment.monthly_payout_amount).toLocaleString()}/mo</p>
               </div>
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider font-sans">Payouts Made</p>
@@ -520,7 +520,7 @@ export default function AdminInvestmentsPage() {
               <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3.5 space-y-1">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Selected User</span>
                 <p className="font-extrabold text-slate-900 text-xs">{selectedUserObj.full_name || 'Anonymous'}</p>
-                <p className="text-[11px] text-slate-500 font-mono">{selectedUserObj.phone}</p>
+                <p className="text-[11px] text-slate-500 ">{selectedUserObj.phone}</p>
               </div>
             )}
 
@@ -537,9 +537,9 @@ export default function AdminInvestmentsPage() {
                     className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between ${selectedUserObj?.id === u.id ? 'bg-emerald-50 border-primary/30 text-slate-900 font-bold shadow-sm' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}`}>
                     <div>
                       <p className="font-extrabold text-slate-900">{u.full_name || 'Anonymous'}</p>
-                      <p className="text-[11px] text-slate-500 font-mono">{u.phone}</p>
+                      <p className="text-[11px] text-slate-500 ">{u.phone}</p>
                     </div>
-                    <span className="font-mono text-[11px] font-extrabold text-primary bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">{u.referral_code}</span>
+                    <span className=" text-[11px] font-extrabold text-primary bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">{u.referral_code}</span>
                   </div>
                 ))}
               </div>

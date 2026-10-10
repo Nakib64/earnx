@@ -3,6 +3,7 @@
 import React from 'react';
 import { ShoppingBag, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { PurchaseModalState } from '../../hooks/orchestrators/usePurchaseOrchestrator';
+import { GlassButton } from '../design-system/GlassButton';
 
 interface PurchaseModalProps {
   modalState: PurchaseModalState;
@@ -20,61 +21,64 @@ export function PurchaseModal({
   if (!modalState.isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-        <div className="flex items-center space-x-3">
+    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+      <div className="bg-white/95 backdrop-blur-2xl border border-white/90 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 specular-rim">
+        <div className="flex items-center space-x-3.5">
           {modalState.type === 'CONFIRM' && (
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#005A36] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-700 flex items-center justify-center shrink-0">
               <ShoppingBag className="w-5 h-5" />
             </div>
           )}
           {(modalState.type === 'DUPLICATE_ERROR' || modalState.type === 'BALANCE_ERROR') && (
-            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-rose-500/15 border border-rose-500/25 text-rose-600 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-5 h-5" />
             </div>
           )}
           {modalState.type === 'SUCCESS' && (
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 flex items-center justify-center shrink-0">
               <CheckCircle2 className="w-5 h-5" />
             </div>
           )}
 
           <div>
-            <h3 className="text-base font-black text-slate-900">{modalState.title}</h3>
+            <h3 className="text-base font-black text-slate-900 tracking-tight">{modalState.title}</h3>
           </div>
         </div>
 
-        <div className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <div className="text-xs sm:text-sm font-medium text-slate-600 leading-relaxed bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80">
           {modalState.message}
         </div>
 
-        <div className="flex items-center justify-end space-x-2 pt-2">
+        <div className="flex items-center justify-end space-x-3 pt-2 border-t border-slate-200/60">
           {modalState.type === 'CONFIRM' ? (
             <>
-              <button
+              <GlassButton
                 type="button"
+                variant="secondary"
+                size="md"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer"
               >
                 Cancel
-              </button>
-              <button
+              </GlassButton>
+              <GlassButton
                 type="button"
+                variant="primary"
+                size="md"
                 disabled={submitting}
                 onClick={onConfirm}
-                className="px-5 py-2 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white text-xs font-black shadow-sm cursor-pointer disabled:opacity-50"
               >
-                {submitting ? 'Processing...' : 'Confirm & Buy'}
-              </button>
+                {submitting ? 'Processing...' : 'Buy'}
+              </GlassButton>
             </>
           ) : (
-            <button
+            <GlassButton
               type="button"
+              variant="primary"
+              size="md"
               onClick={onClose}
-              className="px-6 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 cursor-pointer"
             >
               OK, Got it
-            </button>
+            </GlassButton>
           )}
         </div>
       </div>

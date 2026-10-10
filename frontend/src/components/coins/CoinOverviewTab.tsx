@@ -11,9 +11,11 @@ import {
   Plus,
   Gift,
   Unlock,
+  Sparkles,
 } from 'lucide-react';
 import { SolanaCoinBadge, SolanaWelcomePedestal } from '../common/SolanaIcon';
 import { CoinInfo } from '../../types';
+import { GlassCard, GlassButton, NumericAmount } from '../design-system';
 
 interface CoinOverviewTabProps {
   coinInfo: CoinInfo | null;
@@ -49,42 +51,46 @@ export function CoinOverviewTab({
 
   return (
     <div className="space-y-6">
-      {/* Dark Luxury Hero Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-[#00170f] border border-slate-800 text-white p-6 sm:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-500/10 via-teal-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* Liquid Glass Hero Card */}
+      <GlassCard
+        variant="elevated"
+        className="p-6 sm:p-8 text-slate-900 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/[0.06] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-sky-500/[0.05] rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5">
-              <SolanaCoinBadge size={44} className="shadow-lg shadow-emerald-500/20" />
+              <SolanaCoinBadge size={46} className="shadow-md shadow-emerald-500/20" />
               <div>
                 <div className="flex items-center space-x-2">
-                  <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                     Solana
                   </h2>
-                  <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-xs  font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
                     SOL
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 font-medium">Main Portfolio Coin</p>
+                <p className="text-xs text-slate-500 font-semibold">Primary Network Asset</p>
               </div>
             </div>
 
             <div className="flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-white">
+              <span className="text-3xl sm:text-4xl font-black  tracking-tight text-slate-900 tabular-nums">
                 {coinBalance.toLocaleString()}
               </span>
-              <span className="text-sm font-black text-emerald-400 font-mono">SOL</span>
+              <span className="text-sm font-black text-emerald-700 ">SOL</span>
             </div>
           </div>
 
-          {/* Mini Chart Curve */}
+          {/* Mini Valuation Banner & Curve */}
           <div className="h-16 w-full flex items-end justify-between pt-2">
-            <div className="space-y-1">
-              <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">
-                Estimated USD
+            <div className="space-y-0.5">
+              <span className="text-[10px]  text-slate-400 uppercase tracking-wider block font-bold">
+                Estimated Valuation
               </span>
-              <span className="text-sm font-mono font-black text-slate-200">
+              <span className="text-sm  font-black text-slate-800 tabular-nums">
                 ${totalValueUSD.toFixed(2)} USD
               </span>
             </div>
@@ -93,8 +99,8 @@ export function CoinOverviewTab({
               <svg viewBox="0 0 320 60" className="w-full h-full overflow-visible">
                 <defs>
                   <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#00ffa3" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#00ffa3" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#059669" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#059669" stopOpacity="0" />
                   </linearGradient>
                 </defs>
                 <path
@@ -104,78 +110,72 @@ export function CoinOverviewTab({
                 <path
                   d="M 0 50 Q 30 45, 60 48 T 120 38 T 180 42 T 240 20 T 320 12"
                   fill="none"
-                  stroke="#00ffa3"
+                  stroke="#059669"
                   strokeWidth="2.8"
                   strokeLinecap="round"
                 />
-                <circle cx="320" cy="12" r="4" fill="#00ffa3" />
+                <circle cx="320" cy="12" r="4" fill="#059669" />
               </svg>
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-slate-800/80 pt-5">
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3.5 space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <Tag className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[11px] font-medium text-slate-400">Current Price</span>
+          {/* Stats Grid with Specular Highlight Panels */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 border-t border-slate-200/80 pt-5">
+            <div className="bg-white/80 border border-white/95 rounded-2xl p-3.5 space-y-1 specular-rim shadow-xs">
+              <div className="flex items-center space-x-1.5">
+                <Tag className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-[11px] font-bold text-slate-500">Market Rate</span>
               </div>
-              <div className="text-lg font-black text-white font-mono">
-                ৳{coinPriceBDT.toLocaleString()}
-              </div>
+              <NumericAmount value={coinPriceBDT} size="lg" className="text-slate-900" />
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3.5 space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <Wallet className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[11px] font-medium text-slate-400">Total Value</span>
+            <div className="bg-white/80 border border-white/95 rounded-2xl p-3.5 space-y-1 specular-rim shadow-xs">
+              <div className="flex items-center space-x-1.5">
+                <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-[11px] font-bold text-slate-500">Portfolio Value</span>
               </div>
-              <div className="text-lg font-black text-white font-mono">
-                ৳{totalValueBDT.toLocaleString()}
-              </div>
+              <NumericAmount value={totalValueBDT} size="lg" semantic="gain" />
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3.5 space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-[11px] font-medium text-slate-400">Main Wallet</span>
+            <div className="bg-white/80 border border-white/95 rounded-2xl p-3.5 space-y-1 specular-rim shadow-xs">
+              <div className="flex items-center space-x-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-[11px] font-bold text-slate-500">Wallet Balance</span>
               </div>
-              <div className="text-lg font-black text-white font-mono">
-                ৳{walletBalanceBDT.toLocaleString()}
-              </div>
+              <NumericAmount value={walletBalanceBDT} size="lg" className="text-slate-900" />
             </div>
 
-            <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-3.5 space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px] font-medium text-slate-400">Locked Bonus</span>
+            <div className="bg-white/80 border border-white/95 rounded-2xl p-3.5 space-y-1 specular-rim shadow-xs">
+              <div className="flex items-center space-x-1.5">
+                <Lock className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-[11px] font-bold text-slate-500">Locked Bonus</span>
               </div>
-              <div className="text-lg font-black text-amber-200 font-mono">
+              <div className="text-base font-black text-amber-700  tabular-nums">
                 {lockedCoins.toLocaleString()} SOL
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </GlassCard>
 
       {/* Two-Column Section: Buy Form & Welcome Gift */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Col: Buy Form */}
-        <div className="lg:col-span-7 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-5">
+        <GlassCard variant="standard" className="lg:col-span-7 p-6 space-y-5">
           <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
-                <ShoppingCart className="w-5 h-5 text-emerald-400" />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs">
+                <ShoppingCart className="w-5 h-5 text-emerald-700" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-900">Purchase SOL Coins</h2>
-                <p className="text-xs text-slate-500 font-medium">
-                  Buy Solana coins directly using your main wallet balance.
+                <h2 className="text-base sm:text-lg font-black text-slate-900">Purchase SOL Coins</h2>
+                <p className="text-xs text-slate-500 font-semibold">
+                  Buy Solana coins directly from the treasury with cash wallet balance.
                 </p>
               </div>
             </div>
 
-            <span className="text-xs font-mono font-black px-3 py-1.5 rounded-xl bg-slate-900 text-emerald-300 border border-emerald-500/30">
+            <span className="text-xs  font-black px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
               ৳{coinPriceBDT.toLocaleString()} / SOL
             </span>
           </div>
@@ -197,20 +197,20 @@ export function CoinOverviewTab({
                     value={buyAmount || ''}
                     onChange={(e) => setBuyAmount(parseInt(e.target.value, 10) || 0)}
                     placeholder="Enter coin amount..."
-                    className="w-full pl-11 pr-12 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36] text-sm"
+                    className="w-full pl-11 pr-12 py-3 bg-white/70 border border-slate-200/90 rounded-2xl  font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 text-sm shadow-xs"
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">
                     <button
                       type="button"
                       onClick={() => setBuyAmount(Math.max(1, buyAmount - 1))}
-                      className="w-6 h-6 rounded-md bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-700 cursor-pointer"
+                      className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 cursor-pointer"
                     >
                       <Minus className="w-3 h-3" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setBuyAmount(buyAmount + 1)}
-                      className="w-6 h-6 rounded-md bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-700 cursor-pointer"
+                      className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 cursor-pointer"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -218,23 +218,20 @@ export function CoinOverviewTab({
                 </div>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+              <div className="bg-white/80 border border-slate-200/90 rounded-2xl p-3 flex items-center justify-between shadow-xs specular-rim">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     Total BDT Cost
                   </p>
-                  <p className="text-lg font-black text-slate-900 font-mono">
-                    ৳{totalBuyCost.toLocaleString()}
-                  </p>
+                  <NumericAmount value={totalBuyCost} size="base" className=" text-slate-900" />
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     Wallet After
                   </p>
                   <p
-                    className={`text-xs font-mono font-bold ${
-                      remainingWalletAfterBuy >= 0 ? 'text-emerald-700' : 'text-rose-600'
-                    }`}
+                    className={`text-xs  font-bold tabular-nums ${remainingWalletAfterBuy >= 0 ? 'text-emerald-700' : 'text-rose-600'
+                      }`}
                   >
                     ৳{remainingWalletAfterBuy.toLocaleString()}
                   </p>
@@ -242,38 +239,37 @@ export function CoinOverviewTab({
               </div>
             </div>
 
-            <button
+            <GlassButton
               type="submit"
+              variant="primary"
+              fullWidth
+              size="lg"
+              isLoading={purchasing}
               disabled={purchasing || buyAmount <= 0 || walletBalanceBDT < totalBuyCost}
-              className="w-full py-3.5 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md"
+              icon={<ShoppingCart className="w-4.5 h-4.5" />}
             >
-              <ShoppingCart className="w-4 h-4 text-emerald-100" />
-              <span>
-                {purchasing
-                  ? 'Processing Purchase...'
-                  : `Confirm & Buy ${buyAmount} SOL (৳${totalBuyCost.toLocaleString()})`}
-              </span>
-            </button>
+              Buy {buyAmount} SOL (৳{totalBuyCost.toLocaleString()})
+            </GlassButton>
           </form>
-        </div>
+        </GlassCard>
 
         {/* Right Col: Welcome Bonus */}
-        <div className="lg:col-span-5 bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
+        <GlassCard variant="standard" className="lg:col-span-5 p-6 space-y-4 flex flex-col justify-between">
           <div className="flex items-center space-x-2 border-b border-slate-100 pb-3">
             <Gift className="w-5 h-5 text-amber-500" />
-            <h2 className="text-lg font-black text-slate-900">Welcome Bonus Gift</h2>
+            <h2 className="text-base sm:text-lg font-black text-slate-900">Welcome Bonus Gift</h2>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <SolanaWelcomePedestal className="w-28 h-28 shrink-0" />
+            <SolanaWelcomePedestal className="w-24 h-24 shrink-0 drop-shadow-sm" />
             <div className="space-y-1">
-              <div className="text-2xl font-black text-slate-900 font-mono">
+              <div className="text-2xl font-black text-slate-900  tabular-nums">
                 {lockedCoins.toFixed(2)} SOL
               </div>
-              <span className="inline-block bg-amber-50 text-amber-700 text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-amber-200">
+              <span className="inline-block bg-amber-50 text-amber-800 text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border border-amber-200">
                 LOCKED BONUS
               </span>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-500 font-medium">
                 Complete {requiredReferralsCount} referrals to unlock. ({activeReferralsCount}/
                 {requiredReferralsCount} done)
               </p>
@@ -281,16 +277,18 @@ export function CoinOverviewTab({
           </div>
 
           {coinInfo?.can_unlock && !coinInfo.is_premium_coins_unlocked && (
-            <button
+            <GlassButton
               onClick={handleUnlockCoins}
               disabled={unlocking}
-              className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 text-slate-950 font-black text-xs rounded-xl flex items-center justify-center space-x-2 shadow-md cursor-pointer"
+              isLoading={unlocking}
+              variant="primary"
+              fullWidth
+              icon={<Unlock className="w-4 h-4" />}
             >
-              <Unlock className="w-4 h-4" />
-              <span>{unlocking ? 'Unlocking...' : 'Unlock Bonus Now!'}</span>
-            </button>
+              Unlock Bonus Now!
+            </GlassButton>
           )}
-        </div>
+        </GlassCard>
       </div>
     </div>
   );

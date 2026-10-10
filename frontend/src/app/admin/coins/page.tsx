@@ -237,7 +237,7 @@ export default function AdminCoinsPage() {
               <SolanaLogo size={32} />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-white font-mono tracking-tight flex items-center gap-1.5">
+              <div className="text-3xl sm:text-4xl font-black text-white  tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()}
                 <SolanaLogo size={24} />
               </div>
@@ -260,7 +260,7 @@ export default function AdminCoinsPage() {
               <Lock className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-amber-100 font-mono tracking-tight flex items-center gap-1.5">
+              <div className="text-3xl sm:text-4xl font-black text-amber-100  tracking-tight flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()}
                 <SolanaLogo size={24} />
               </div>
@@ -268,7 +268,7 @@ export default function AdminCoinsPage() {
             </div>
           </div>
           <div className="pt-1">
-            <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-[#3d2705] text-amber-200 border border-amber-500/40 font-mono inline-flex items-center gap-1">
+            <span className="text-xs font-extrabold px-3 py-1.5 rounded-xl bg-[#3d2705] text-amber-200 border border-amber-500/40  inline-flex items-center gap-1">
               ৳{coinPrice} / <SolanaLogo size={16} />
             </span>
           </div>
@@ -345,7 +345,7 @@ export default function AdminCoinsPage() {
                 min="1"
                 value={requiredReferrals}
                 onChange={(e) => setRequiredReferrals(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm font-mono"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm "
               />
             </div>
           </div>
@@ -423,12 +423,12 @@ export default function AdminCoinsPage() {
                         <p className="font-extrabold text-slate-900 text-[11px] truncate max-w-[130px] sm:max-w-[180px]">
                           {u.full_name || u.phone}
                         </p>
-                        <p className="text-slate-500 font-mono text-[9px]">
+                        <p className="text-slate-500  text-[9px]">
                           {u.phone} <span className="text-primary font-bold">• {u.referral_code}</span>
                         </p>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
+                        <div className="flex flex-wrap items-center gap-1.5  text-[10px]">
                           <span className="font-extrabold text-primary">
                             {Number(u.coin_balance).toLocaleString()} Avail
                           </span>
@@ -509,8 +509,8 @@ export default function AdminCoinsPage() {
             {/* User Info */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1.5 text-xs">
               <p className="font-extrabold text-slate-800">{selectedUser.full_name || 'Anonymous User'}</p>
-              <p className="text-slate-500 font-mono">Phone: {selectedUser.phone} | Code: {selectedUser.referral_code}</p>
-              <div className="pt-2 flex justify-between font-extrabold border-t border-slate-200 mt-2 font-mono">
+              <p className="text-slate-500 ">Phone: {selectedUser.phone} | Code: {selectedUser.referral_code}</p>
+              <div className="pt-2 flex justify-between font-extrabold border-t border-slate-200 mt-2 ">
                 <span className="text-primary">Available: {Number(selectedUser.coin_balance)} Coins</span>
                 <span className="text-[#854D0E]">Locked: {Number(selectedUser.locked_coin_balance)} Coins</span>
               </div>

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { User, Mail, CreditCard, Upload, Camera } from 'lucide-react';
+import { GlassButton } from '../design-system/GlassButton';
 
 interface SettingsPersonalFormProps {
   fullName: string;
@@ -37,20 +38,20 @@ export function SettingsPersonalForm({
   return (
     <div className="space-y-4">
       {/* Device Upload Banner Prompt */}
-      <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
+      <div className="bg-white/60 backdrop-blur-md border border-white/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 shrink-0">
             <Upload className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-black text-slate-800">Upload Profile Photo</p>
+            <p className="text-xs font-black text-slate-900">Upload Profile Photo</p>
             <p className="text-[11px] text-slate-500 font-medium">JPEG, PNG, or WEBP up to 10MB</p>
           </div>
         </div>
 
         <label
           htmlFor="device-photo-upload"
-          className="bg-[#005A36] hover:bg-[#044D2F] text-white px-4 py-2 rounded-xl text-xs font-black flex items-center space-x-1.5 shrink-0 transition-colors shadow-sm cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white text-xs font-black shrink-0 transition-all shadow-xs cursor-pointer active:scale-95"
         >
           <Camera className="w-3.5 h-3.5" />
           <span>Choose Device File</span>
@@ -72,14 +73,14 @@ export function SettingsPersonalForm({
 
       {/* Section 2: Personal Information Details */}
       <div className="space-y-4 pt-2">
-        <h2 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center space-x-2">
-          <User className="w-5 h-5 text-[#03442e] shrink-0" />
+        <h2 className="text-base font-black text-slate-900 border-b border-slate-200/60 pb-3 flex items-center space-x-2">
+          <User className="w-5 h-5 text-emerald-700 shrink-0" />
           <span>Personal Profile Information</span>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Full Name */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
               Full Name
             </label>
@@ -90,13 +91,13 @@ export function SettingsPersonalForm({
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a]"
+                className="w-full bg-white/80 border border-slate-200/90 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs"
               />
             </div>
           </div>
 
           {/* Phone Number (Read Only) */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
               Phone Number
             </label>
@@ -104,12 +105,12 @@ export function SettingsPersonalForm({
               type="text"
               disabled
               value={userPhone || ''}
-              className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs sm:text-sm font-mono font-bold text-slate-500 cursor-not-allowed"
+              className="w-full bg-slate-100/80 border border-slate-200/70 rounded-2xl px-4 py-3 text-xs sm:text-sm  font-bold text-slate-400 cursor-not-allowed shadow-2xs"
             />
           </div>
 
           {/* Email Address */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
               Email Address
             </label>
@@ -120,24 +121,24 @@ export function SettingsPersonalForm({
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a]"
+                className="w-full bg-white/80 border border-slate-200/90 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs"
               />
             </div>
           </div>
 
           {/* Country Selection */}
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
               Country
             </label>
             <div className="relative">
-              <span className="text-base absolute left-3.5 top-2.5 shrink-0 pointer-events-none">
+              <span className="text-base absolute left-3.5 top-3 shrink-0 pointer-events-none">
                 {selectedCountryObj.flag}
               </span>
               <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a] cursor-pointer"
+                className="w-full bg-white/80 border border-slate-200/90 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs cursor-pointer"
               >
                 {countries.map((c) => (
                   <option key={c.name} value={c.name}>
@@ -149,7 +150,7 @@ export function SettingsPersonalForm({
           </div>
 
           {/* Passport / National ID Number */}
-          <div className="space-y-1 sm:col-span-2">
+          <div className="space-y-1.5 sm:col-span-2">
             <label className="block text-xs font-black text-slate-700 uppercase tracking-wider">
               Passport / National ID Number (NID)
             </label>
@@ -160,7 +161,7 @@ export function SettingsPersonalForm({
                 placeholder="Enter NID or Passport number..."
                 value={nationalId}
                 onChange={(e) => setNationalId(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs sm:text-sm font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#01281a] uppercase"
+                className="w-full bg-white/80 border border-slate-200/90 rounded-2xl pl-10 pr-4 py-3 text-xs sm:text-sm  font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all shadow-xs uppercase"
               />
             </div>
           </div>

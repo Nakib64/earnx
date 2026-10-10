@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Send } from 'lucide-react';
+import { Send, X, AlertCircle } from 'lucide-react';
+import { GlassCard, GlassButton, NumericAmount } from '../design-system';
 
 interface WalletWithdrawModalProps {
   currentBal: number;
@@ -21,21 +22,23 @@ export function WalletWithdrawModal({
   onCancel,
 }: WalletWithdrawModalProps) {
   return (
-    <div className="bg-white rounded-2xl p-5 sm:p-6 border-2 border-emerald-200 space-y-4 shadow-md animate-in fade-in zoom-in-95 duration-200">
+    <GlassCard variant="standard" className="p-5 sm:p-7 space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 className="font-extrabold text-slate-900 text-base truncate">Submit Direct Withdrawal</h3>
+        <h3 className="font-black text-slate-900 text-base tracking-tight truncate">
+          Submit Direct Withdrawal
+        </h3>
         <button
           onClick={onCancel}
-          className="text-xs font-bold text-slate-400 hover:text-slate-600 shrink-0 cursor-pointer"
+          className="text-xs font-bold text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
         >
-          Cancel
+          <X className="w-4 h-4" />
         </button>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
-            Withdrawal Amount (৳)
+          <label className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5">
+            Withdrawal Amount (৳) <span className="text-rose-500">*</span>
           </label>
           <input
             type="number"
@@ -46,33 +49,38 @@ export function WalletWithdrawModal({
             placeholder="Enter withdrawal amount..."
             value={withdrawAmount}
             onChange={(e) => setWithdrawAmount(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-primary font-bold text-slate-900"
+            className="w-full bg-white/70 border border-slate-200/90 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500  font-black text-slate-900 shadow-xs"
           />
-          <div className="flex items-center justify-between mt-1.5 text-[11px] text-slate-500 font-mono">
-            <span>Available Balance: <strong>৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong></span>
+          <div className="flex items-center justify-between mt-2 text-xs text-slate-500 ">
+            <span>
+              Available: <strong>৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+            </span>
             <button
               type="button"
               onClick={() => setWithdrawAmount(String(currentBal))}
-              className="text-[#005A36] hover:underline font-bold cursor-pointer"
+              className="text-emerald-700 hover:underline font-bold cursor-pointer"
             >
-              Withdraw All
+              Withdraw Max
             </button>
           </div>
         </div>
 
-        <button
+        <GlassButton
           type="submit"
+          variant="primary"
+          fullWidth
+          size="lg"
+          isLoading={submittingWithdraw}
           disabled={
             submittingWithdraw ||
             parseFloat(withdrawAmount) <= 0 ||
             parseFloat(withdrawAmount) > currentBal
           }
-          className="w-full bg-[#005A36] hover:bg-[#044D2F] text-white py-3 rounded-xl font-extrabold text-xs flex items-center justify-center space-x-2 disabled:opacity-50 shadow-sm transition-all cursor-pointer"
+          icon={<Send className="w-4.5 h-4.5" />}
         >
-          <Send className="w-4 h-4 text-secondary shrink-0" />
-          <span>{submittingWithdraw ? 'Processing Withdrawal...' : 'Confirm & Withdraw'}</span>
-        </button>
+          Submit Withdrawal
+        </GlassButton>
       </form>
-    </div>
+    </GlassCard>
   );
 }

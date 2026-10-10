@@ -14,9 +14,9 @@ import { TransactionType } from '@prisma/client';
 
 @Controller()
 export class WalletsController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(private readonly walletService: WalletService) { }
 
-  // User transaction ledger
+  // User transaction 
   @UseGuards(UserJwtGuard)
   @Get('wallet/transactions')
   async getUserTransactions(
@@ -68,7 +68,7 @@ export class WalletsController {
     );
   }
 
-  // Admin transaction ledger & manual adjustments
+  // Admin transaction  & manual adjustments
   @UseGuards(AdminJwtGuard)
   @Get('admin/wallet/transactions')
   async getAllTransactions(

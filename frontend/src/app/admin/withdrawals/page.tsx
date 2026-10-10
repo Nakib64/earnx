@@ -247,7 +247,7 @@ export default function AdminWithdrawalsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className="bg-[#023322] border border-[#d4af37]/40 px-3.5 py-2 rounded-xl text-xs font-mono font-bold text-emerald-300">
+          <div className="bg-[#023322] border border-[#d4af37]/40 px-3.5 py-2 rounded-xl text-xs  font-bold text-emerald-300">
             Total Requests: <strong className="text-white">{totalCount}</strong>
           </div>
           <button
@@ -271,7 +271,7 @@ export default function AdminWithdrawalsPage() {
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 font-mono tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-slate-900  tracking-tight">
             ৳{totalWithdrawnAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Across current page view</div>
@@ -285,7 +285,7 @@ export default function AdminWithdrawalsPage() {
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-600 font-mono tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-amber-600  tracking-tight">
             {pendingCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Awaiting payment routing</div>
@@ -299,7 +299,7 @@ export default function AdminWithdrawalsPage() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-700 font-mono tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-emerald-700  tracking-tight">
             {approvedCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Successfully settled</div>
@@ -313,7 +313,7 @@ export default function AdminWithdrawalsPage() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 font-mono tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-slate-900  tracking-tight">
             {totalCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">All time withdrawal requests</div>
@@ -372,11 +372,10 @@ export default function AdminWithdrawalsPage() {
                 setStatusFilter(tab);
                 setPage(1);
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                statusFilter === tab
-                  ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${statusFilter === tab
+                ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
             >
               {tab === 'ALL' ? 'All' : tab === 'PENDING' ? 'Pending' : 'Paid / Settled'}
             </button>
@@ -432,7 +431,7 @@ export default function AdminWithdrawalsPage() {
                             <div className="font-extrabold text-slate-900 text-xs sm:text-sm">
                               {w.user?.full_name || 'No Name'}
                             </div>
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-mono mt-0.5">
+                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500  mt-0.5">
                               <span className="font-bold text-[#005A36] bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
                                 {w.user?.referral_code || '—'}
                               </span>
@@ -444,14 +443,14 @@ export default function AdminWithdrawalsPage() {
                       </td>
 
                       {/* 2. Amount */}
-                      <td className="py-3.5 px-4 font-mono font-black text-slate-900 text-sm">
+                      <td className="py-3.5 px-4  font-black text-slate-900 text-sm">
                         ৳{Number(w.amount).toFixed(2)}
                       </td>
 
                       {/* 3. OTP Chip */}
                       <td className="py-3.5 px-4">
                         {w.otp ? (
-                          <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg font-mono font-black text-xs text-slate-800">
+                          <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg  font-black text-xs text-slate-800">
                             <span>{w.otp}</span>
                             <button
                               type="button"
@@ -474,7 +473,7 @@ export default function AdminWithdrawalsPage() {
                       {/* 4. Date */}
                       <td className="py-3.5 px-4 text-slate-600 text-xs">
                         <div>{new Date(w.created_at).toLocaleDateString()}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">
+                        <div className="text-[10px] text-slate-400 ">
                           {new Date(w.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </td>
@@ -503,7 +502,7 @@ export default function AdminWithdrawalsPage() {
                             <div className="font-bold text-slate-900 text-xs">
                               {w.paid_to_user.full_name || 'Member'}
                             </div>
-                            <div className="text-[10px] text-slate-500 font-mono">
+                            <div className="text-[10px] text-slate-500 ">
                               <span className="font-bold text-purple-700">{w.paid_to_user.referral_code}</span> • {w.paid_to_user.phone}
                             </div>
                           </div>
@@ -622,7 +621,7 @@ export default function AdminWithdrawalsPage() {
               </div>
               <div className="flex justify-between items-center text-slate-600">
                 <span>Withdrawal OTP:</span>
-                <span className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-800">
+                <span className=" font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-800">
                   {paymentModal.withdrawal.otp || '—'}
                 </span>
               </div>
@@ -670,16 +669,16 @@ export default function AdminWithdrawalsPage() {
                           <div className="text-xs font-black text-slate-900">
                             {u.full_name || 'No Name'}
                           </div>
-                          <div className="text-[10px] text-slate-500 font-mono">
+                          <div className="text-[10px] text-slate-500 ">
                             Phone: {u.phone} • Code: <span className="font-bold text-[#005A36]">{u.referral_code}</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 ">
                             {u.referral_code}
                           </span>
                           {u.wallet_balance !== undefined && (
-                            <div className="text-[10px] font-bold text-slate-400 font-mono mt-0.5">
+                            <div className="text-[10px] font-bold text-slate-400  mt-0.5">
                               Bal: ৳{Number(u.wallet_balance).toFixed(2)}
                             </div>
                           )}
@@ -708,7 +707,7 @@ export default function AdminWithdrawalsPage() {
                   type="text"
                   readOnly
                   value={selectedTargetUser?.phone || '—'}
-                  className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none cursor-not-allowed"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs  font-bold text-slate-800 focus:outline-none cursor-not-allowed"
                 />
               </div>
               <div>
@@ -717,7 +716,7 @@ export default function AdminWithdrawalsPage() {
                   type="text"
                   readOnly
                   value={selectedTargetUser?.referral_code || '—'}
-                  className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-[#005A36] focus:outline-none cursor-not-allowed"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-1.5 text-xs  font-bold text-[#005A36] focus:outline-none cursor-not-allowed"
                 />
               </div>
             </div>
@@ -746,7 +745,7 @@ export default function AdminWithdrawalsPage() {
                 ) : (
                   <>
                     <Check className="w-3.5 h-3.5 text-slate-950" />
-                    <span>Confirm & Credit ৳{Number(paymentModal.withdrawal.amount).toFixed(2)}</span>
+                    <span>Credit ৳{Number(paymentModal.withdrawal.amount).toFixed(2)}</span>
                   </>
                 )}
               </button>

@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
 
 export class CreateNoticeDto {
   @IsString()
@@ -6,8 +6,20 @@ export class CreateNoticeDto {
   title?: string;
 
   @IsString()
-  @IsNotEmpty()
-  content!: string;
+  @IsOptional()
+  content?: string;
+
+  @IsString()
+  @IsOptional()
+  image_url?: string;
+
+  @IsString()
+  @IsOptional()
+  link_url?: string;
+
+  @IsInt()
+  @IsOptional()
+  serial_number?: number;
 
   @IsBoolean()
   @IsOptional()

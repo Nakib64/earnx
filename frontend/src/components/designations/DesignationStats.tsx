@@ -21,7 +21,7 @@ export default function DesignationStats({
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
             Designation Badges
           </span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 font-mono mt-0.5">
+          <div className="text-xl sm:text-2xl font-black text-slate-900  mt-0.5">
             {designationsCount}
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function DesignationStats({
           <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">
             Max Depth Level Configured
           </span>
-          <div className="text-xl sm:text-2xl font-black text-amber-100 font-mono mt-0.5">
+          <div className="text-xl sm:text-2xl font-black text-amber-100  mt-0.5">
             Level {maxDepthLevel}
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function DesignationStats({
           <span className="text-[10px] font-black uppercase tracking-widest text-amber-200">
             Assigned Members
           </span>
-          <div className="text-xl sm:text-2xl font-black text-white font-mono mt-0.5">
+          <div className="text-xl sm:text-2xl font-black text-white  mt-0.5">
             {totalAssignedMembers}
           </div>
         </div>

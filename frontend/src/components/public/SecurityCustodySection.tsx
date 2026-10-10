@@ -109,7 +109,7 @@ export default function SecurityCustodySection() {
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#005A36] flex items-center justify-center border border-emerald-100 shadow-sm">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
+                  <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 ">
                     {item.tag}
                   </span>
                 </div>

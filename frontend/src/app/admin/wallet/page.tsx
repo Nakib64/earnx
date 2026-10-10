@@ -74,7 +74,7 @@ export default function AdminWalletPage() {
           <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[120px] sm:max-w-[180px]">
             {tx.user?.full_name || tx.user?.phone || tx.user_id}
           </div>
-          <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
+          <div className="text-[9px] text-slate-500  flex items-center space-x-1 mt-0.5">
             <span>{tx.user?.phone || tx.user_id}</span>
             {tx.user?.referral_code && <span className="text-primary font-bold hidden sm:inline">• {tx.user.referral_code}</span>}
           </div>
@@ -89,11 +89,11 @@ export default function AdminWalletPage() {
         return (
           <div className="space-y-0.5">
             <div className="flex items-center space-x-1.5">
-              <span className={`font-mono font-black text-[11px] ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
+              <span className={` font-black text-[11px] ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
                 {isCredit ? '+' : ''}৳{Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
-            <div className="font-mono text-[9px] text-slate-400 font-medium truncate max-w-[140px] hidden sm:block">
+            <div className=" text-[9px] text-slate-400 font-medium truncate max-w-[140px] hidden sm:block">
               ৳{Number(tx.balance_before).toFixed(1)} → ৳{Number(tx.balance_after).toFixed(1)}
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function AdminWalletPage() {
             </div>
             <div className="space-y-1">
               <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
-                Ledger & Transaction History
+                & Transaction History
               </h1>
               <p className="text-xs text-slate-300 font-semibold">
                 Complete audit log of all member deposits, withdrawals, payouts, and wallet adjustments.
@@ -195,7 +195,7 @@ export default function AdminWalletPage() {
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs  font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
               title="Start Date"
             />
           </div>
@@ -205,7 +205,7 @@ export default function AdminWalletPage() {
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-mono font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs  font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary"
               title="End Date"
             />
           </div>
@@ -237,11 +237,11 @@ export default function AdminWalletPage() {
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <h3 className="font-extrabold text-slate-900 text-base flex items-center space-x-2">
             <span>Transaction Logs</span>
-            <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-primary border border-emerald-200 text-[10px] font-mono font-extrabold">
+            <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-primary border border-emerald-200 text-[10px]  font-extrabold">
               {totalRecords} Total
             </span>
           </h3>
-          <span className="text-xs text-slate-400 font-mono font-extrabold">
+          <span className="text-xs text-slate-400  font-extrabold">
             Page {page} of {totalPages}
           </span>
         </div>
@@ -269,7 +269,7 @@ export default function AdminWalletPage() {
               <span>Previous</span>
             </button>
 
-            <span className="font-mono text-slate-600 text-[11px] font-extrabold hidden sm:inline">
+            <span className=" text-slate-600 text-[11px] font-extrabold hidden sm:inline">
               Page <strong>{page}</strong> of <strong>{totalPages}</strong> ({totalRecords} total records)
             </span>
 
@@ -296,7 +296,7 @@ export default function AdminWalletPage() {
                 </div>
                 <div>
                   <h3 className="font-black text-slate-900 text-base">Transaction Details</h3>
-                  <p className="text-[10px] text-slate-400 font-mono">ID: {selectedTx.id}</p>
+                  <p className="text-[10px] text-slate-400 ">ID: {selectedTx.id}</p>
                 </div>
               </div>
               <button
@@ -312,7 +312,7 @@ export default function AdminWalletPage() {
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-1">
                 <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Account Member</div>
                 <div className="font-black text-slate-900 text-sm">{selectedTx.user?.full_name || 'Member'}</div>
-                <div className="font-mono text-slate-600 font-bold flex items-center space-x-2">
+                <div className=" text-slate-600 font-bold flex items-center space-x-2">
                   <span>Phone: {selectedTx.user?.phone || selectedTx.user_id}</span>
                   {selectedTx.user?.referral_code && (
                     <>
@@ -334,21 +334,21 @@ export default function AdminWalletPage() {
 
                 <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-3 space-y-1">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Amount Payout</div>
-                  <div className={`font-mono font-black text-sm ${Number(selectedTx.amount) >= 0 ? 'text-[#005A36]' : 'text-rose-600'}`}>
+                  <div className={` font-black text-sm ${Number(selectedTx.amount) >= 0 ? 'text-[#005A36]' : 'text-rose-600'}`}>
                     {Number(selectedTx.amount) >= 0 ? '+' : ''}৳{Number(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Balance Before</div>
-                  <div className="font-mono font-extrabold text-slate-700">
+                  <div className=" font-extrabold text-slate-700">
                     ৳{Number(selectedTx.balance_before || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Balance After</div>
-                  <div className="font-mono font-black text-slate-900">
+                  <div className=" font-black text-slate-900">
                     ৳{Number(selectedTx.balance_after || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
@@ -358,7 +358,7 @@ export default function AdminWalletPage() {
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1">
                 <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Note / Reason</div>
                 <div className="font-bold text-slate-800">{selectedTx.description || 'No additional note provided.'}</div>
-                <div className="text-[10px] text-slate-400 font-mono pt-1">
+                <div className="text-[10px] text-slate-400  pt-1">
                   Timestamp: {new Date(selectedTx.created_at).toLocaleString()}
                 </div>
               </div>

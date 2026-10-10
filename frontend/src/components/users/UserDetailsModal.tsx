@@ -16,7 +16,7 @@ interface UserDetailsModalProps {
 
 export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserDetailsModalProps) {
   const [activeTab, setActiveTab] = useState<'downlines' | 'transactions'>('downlines');
-  
+
   // Downlines Data
   const [downlines, setDownlines] = useState<User[]>([]);
   const [loadingDownlines, setLoadingDownlines] = useState(false);
@@ -72,7 +72,7 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
     {
       key: 'referral_code',
       header: 'Referral Code',
-      render: (u) => <span className="font-mono text-xs text-slate-600">{u.referral_code}</span>,
+      render: (u) => <span className=" text-xs text-slate-600">{u.referral_code}</span>,
     },
     {
       key: 'status',
@@ -103,7 +103,7 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
       render: (tx) => {
         const isCredit = Number(tx.amount) > 0;
         return (
-          <span className={`font-mono font-bold text-xs ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
+          <span className={` font-bold text-xs ${isCredit ? 'text-emerald-600' : 'text-rose-600'}`}>
             {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
           </span>
         );
@@ -113,7 +113,7 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
       key: 'balance',
       header: 'Balance After',
       render: (tx) => (
-        <span className="font-mono text-[11px] text-slate-500">
+        <span className=" text-[11px] text-slate-500">
           ৳{Number(tx.balance_after).toFixed(2)}
         </span>
       ),
@@ -144,7 +144,7 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
               <h2 className="text-lg font-black text-slate-900 leading-tight">
                 {user.full_name || 'Member Details'}
               </h2>
-              <p className="text-xs text-slate-500 font-mono">Phone: {user.phone} · Ref: {user.referral_code}</p>
+              <p className="text-xs text-slate-500 ">Phone: {user.phone} · Ref: {user.referral_code}</p>
             </div>
           </div>
 
@@ -165,7 +165,7 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
 
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
             <div className="text-[10px] font-bold uppercase text-slate-400">Wallet Balance</div>
-            <div className="text-sm font-extrabold text-emerald-600 font-mono mt-1">
+            <div className="text-sm font-extrabold text-emerald-600  mt-1">
               ৳{Number(user.wallet_balance || 0).toFixed(2)}
             </div>
           </div>
@@ -189,11 +189,10 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
         <div className="flex items-center space-x-2 border-b border-slate-200 pb-2 shrink-0">
           <button
             onClick={() => setActiveTab('downlines')}
-            className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all ${
-              activeTab === 'downlines'
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all ${activeTab === 'downlines'
                 ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Users className="w-4 h-4" />
             <span>Direct Downlines ({downlines.length})</span>
@@ -201,11 +200,10 @@ export function UserDetailsModal({ user, isOpen, onClose, onExploreTree }: UserD
 
           <button
             onClick={() => setActiveTab('transactions')}
-            className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all ${
-              activeTab === 'transactions'
+            className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center space-x-2 transition-all ${activeTab === 'transactions'
                 ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+              }`}
           >
             <Wallet className="w-4 h-4" />
             <span>Transaction History ({transactions.length})</span>

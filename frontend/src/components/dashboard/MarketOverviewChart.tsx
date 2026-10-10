@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, TrendingUp } from 'lucide-react';
+import { GlassCard } from '../design-system';
 
 interface CandleData {
   open: number;
@@ -74,7 +75,7 @@ export default function MarketOverviewChart() {
   const yLabels = [190, 180, 170, 160, 150, 140];
 
   return (
-    <div className="bg-white rounded-[28px] p-5 sm:p-6 shadow-sm border border-slate-100/80">
+    <GlassCard variant="standard" className="p-5 sm:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
@@ -200,11 +201,11 @@ export default function MarketOverviewChart() {
 
         {/* Hover Tooltip */}
         {hoveredIndex !== null && (
-          <div className="absolute top-0 right-1 bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[10px] font-mono shadow-md z-10">
+          <div className="absolute top-0 right-1 bg-slate-900 text-white px-2.5 py-1 rounded-lg text-[10px]  shadow-md z-10">
             <span>Price: ${candleData[hoveredIndex].close.toFixed(2)}</span>
           </div>
         )}
       </div>
-    </div>
+    </GlassCard>
   );
 }

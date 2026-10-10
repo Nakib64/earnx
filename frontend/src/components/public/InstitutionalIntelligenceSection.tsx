@@ -122,7 +122,7 @@ export default function InstitutionalIntelligenceSection() {
                   <div className="w-11 h-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-800 group-hover:bg-[#01281a] group-hover:text-[#d4af37] transition-colors shadow-inner">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono">
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 ">
                     {item.badge}
                   </span>
                 </div>
@@ -136,7 +136,7 @@ export default function InstitutionalIntelligenceSection() {
 
               <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between relative z-10">
                 <div>
-                  <div className="text-base font-black text-[#005A36] font-mono">{item.stat}</div>
+                  <div className="text-base font-black text-[#005A36] ">{item.stat}</div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase">{item.statLabel}</div>
                 </div>
                 <div className="w-7 h-7 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#005A36] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all">

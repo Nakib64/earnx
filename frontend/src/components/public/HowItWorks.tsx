@@ -76,7 +76,7 @@ export default function HowItWorks() {
               className="bg-[#f0f9f4] border border-[#cbe8d8] rounded-3xl p-6 text-left space-y-3 shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer"
             >
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-black font-mono text-[#10b981]">
+                <span className="text-2xl font-black  text-[#10b981]">
                   {item.step}
                 </span>
                 <div className="w-10 h-10 rounded-xl bg-white border border-[#cbe8d8] flex items-center justify-center text-[#033e28] shadow-xs">

@@ -74,17 +74,24 @@ export class LeaderboardService {
       throw new BadRequestException(`Rank #${data.rank} is already taken by ${existing.name}`);
     }
 
-    return this.prisma.leaderboardEntry.create({
-      data: {
-        rank: data.rank,
-        name: data.name,
-        phone: data.phone || null,
-        invested_amount: new Prisma.Decimal(data.invested_amount),
-        profit_earned: new Prisma.Decimal(data.profit_earned),
-        photo_url: data.photo_url || null,
-        badge: data.badge || null,
-      },
-    });
+    try {
+      return await this.prisma.leaderboardEntry.create({
+        data: {
+          rank: data.rank,
+          name: data.name,
+          phone: data.phone || null,
+          invested_amount: new Prisma.Decimal(data.invested_amount),
+          profit_earned: new Prisma.Decimal(data.profit_earned),
+          photo_url: data.photo_url || null,
+          badge: data.badge || null,
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new BadRequestException(`Rank #${data.rank} is already taken`);
+      }
+      throw err;
+    }
   }
 
   async updateEntry(
@@ -115,25 +122,47 @@ export class LeaderboardService {
     if (data.badge !== undefined) updateData.badge = data.badge;
     if (data.is_active !== undefined) updateData.is_active = data.is_active;
 
-    return this.prisma.leaderboardEntry.update({
-      where: { id },
-      data: updateData,
-    });
+    try {
+      return await this.prisma.leaderboardEntry.update({
+        where: { id },
+        data: updateData,
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        throw new BadRequestException(`Rank #${data.rank} is already taken`);
+      }
+      throw err;
+    }
   }
 
   async deleteEntry(id: string) {
-    return this.prisma.leaderboardEntry.delete({ where: { id } });
+    try {
+      return await this.prisma.leaderboardEntry.delete({ where: { id } });
+    } catch (err: any) {
+      if (err.code === 'P2025') {
+        return { message: 'Entry already deleted' };
+      }
+      throw err;
+    }
   }
 
   async reorderEntries(orders: { id: string; rank: number }[]) {
-    return this.prisma.$transaction(
-      orders.map((item) =>
-        this.prisma.leaderboardEntry.update({
+    return this.prisma.$transaction(async (tx) => {
+      // Step 1: Temporarily set ranks to negative values to avoid unique constraint collisions
+      for (let i = 0; i < orders.length; i++) {
+        await tx.leaderboardEntry.update({
+          where: { id: orders[i].id },
+          data: { rank: -(100000 + i) },
+        });
+      }
+      // Step 2: Set final positive ranks
+      for (const item of orders) {
+        await tx.leaderboardEntry.update({
           where: { id: item.id },
           data: { rank: item.rank },
-        }),
-      ),
-    );
+        });
+      }
+    });
   }
 
   // Seed default 100 leaderboard entries if empty

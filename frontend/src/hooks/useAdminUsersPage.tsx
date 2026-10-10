@@ -245,7 +245,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
             <div className="font-extrabold text-slate-900 text-[10px] sm:text-[11px] leading-tight truncate max-w-[100px] sm:max-w-[180px]">
               {u.full_name || u.phone}
             </div>
-            <div className="text-[9px] text-slate-500 font-mono flex items-center space-x-1 mt-0.5">
+            <div className="text-[9px] text-slate-500  flex items-center space-x-1 mt-0.5">
               <span>{u.phone}</span>
               <span className="text-primary font-bold hidden sm:inline">• {u.referral_code}</span>
             </div>
@@ -270,7 +270,7 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
                     <span key={i} className="text-[10px] leading-none">★</span>
                   ))}
                   {starsCount > 5 && (
-                    <span className="text-[9px] font-extrabold text-amber-600 font-mono ml-0.5">
+                    <span className="text-[9px] font-extrabold text-amber-600  ml-0.5">
                       +{starsCount - 5}
                     </span>
                   )}
@@ -282,14 +282,14 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
           );
         },
       },
-    
+
       {
         key: 'wallet_actions',
         header: 'Wallet & Actions',
         align: 'right',
         render: (u) => (
           <div className="flex items-center justify-end space-x-1.5">
-            <span className="font-mono font-extrabold text-slate-900 text-[10px] sm:text-[11px]">
+            <span className=" font-extrabold text-slate-900 text-[10px] sm:text-[11px]">
               ৳{Number(u.wallet_balance || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
             </span>
             <RowActionsMenu

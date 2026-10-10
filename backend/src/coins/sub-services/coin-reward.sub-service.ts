@@ -184,17 +184,31 @@ export class CoinRewardSubService {
         );
       }
 
-      const coinsBefore = Number(user.coin_balance);
-      const coinsAfter = coinsBefore + lockedAmount;
-
-      await tx.user.update({
-        where: { id: userId },
+      // Atomically unlock coins
+      const unlockResult = await tx.user.updateMany({
+        where: {
+          id: userId,
+          is_premium_coins_unlocked: false,
+          locked_coin_balance: { gt: 0 },
+        },
         data: {
-          coin_balance: new Prisma.Decimal(coinsAfter),
+          coin_balance: { increment: new Prisma.Decimal(lockedAmount) },
           locked_coin_balance: new Prisma.Decimal(0),
           is_premium_coins_unlocked: true,
         },
       });
+
+      if (unlockResult.count === 0) {
+        throw new BadRequestException('You do not have any locked premium coins to unlock.');
+      }
+
+      const freshUser = await tx.user.findUnique({
+        where: { id: userId },
+        select: { coin_balance: true },
+      });
+
+      const coinsAfter = Number(freshUser?.coin_balance || 0);
+      const coinsBefore = coinsAfter - lockedAmount;
 
       const txRecord = await tx.coinTransaction.create({
         data: {

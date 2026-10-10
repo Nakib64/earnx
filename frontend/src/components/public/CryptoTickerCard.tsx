@@ -19,7 +19,7 @@ export default function CryptoTickerCard() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-center space-x-4 shrink-0">
             <div className="w-12 h-12 rounded-2xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center p-2 shadow-md">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xs border border-amber-200 shadow-inner font-mono">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 flex items-center justify-center text-slate-950 font-black text-xs border border-amber-200 shadow-inner ">
                 EX
               </div>
             </div>
@@ -27,13 +27,13 @@ export default function CryptoTickerCard() {
             <div>
               <div className="flex items-center space-x-2">
                 <h3 className="text-base font-black text-white">EarnX Coin</h3>
-                <span className="text-xs font-bold text-slate-400 font-mono">(EXC)</span>
+                <span className="text-xs font-bold text-slate-400 ">(EXC)</span>
               </div>
               <div className="flex items-baseline space-x-2 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
+                <span className="text-2xl sm:text-3xl font-black  tracking-tight text-white">
                   $184.56
                 </span>
-                <span className="text-xs font-black text-[#10b981] font-mono">
+                <span className="text-xs font-black text-[#10b981] ">
                   +7.35% (24h)
                 </span>
               </div>
@@ -66,19 +66,19 @@ export default function CryptoTickerCard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs shrink-0 border-t lg:border-t-0 lg:border-l border-[#053d29] pt-4 lg:pt-0 lg:pl-6">
             <div>
               <span className="text-[10px] font-bold text-slate-400 block uppercase">Market Cap</span>
-              <span className="font-mono font-black text-white">$83.45B</span>
+              <span className=" font-black text-white">$83.45B</span>
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 block uppercase">24h Volume</span>
-              <span className="font-mono font-black text-white">$3.21B</span>
+              <span className=" font-black text-white">$3.21B</span>
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 block uppercase">Rank</span>
-              <span className="font-mono font-black text-amber-300">#5</span>
+              <span className=" font-black text-amber-300">#5</span>
             </div>
             <div>
               <span className="text-[10px] font-bold text-slate-400 block uppercase">Circulating Supply</span>
-              <span className="font-mono font-black text-white">453.96M EXC</span>
+              <span className=" font-black text-white">453.96M EXC</span>
             </div>
           </div>
         </div>

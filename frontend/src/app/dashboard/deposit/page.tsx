@@ -1,16 +1,20 @@
 'use client';
 
 import React from 'react';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, ArrowDownCircle } from 'lucide-react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 import { useDepositOrchestrator } from '../../../hooks/orchestrators';
+import { useDesignSystem } from '../../../context/DesignSystemContext';
 import {
   DepositGatewaySelector,
   DepositSubmitForm,
   DepositHistoryTable,
+  DepositSkeleton,
 } from '../../../components/deposit';
+import { GlassCard, GlassButton } from '../../../components/design-system';
 
 export default function UserDepositPage() {
+  const { isLoading: isSkeletonReviewMode } = useDesignSystem();
   const {
     state: {
       deposits,
@@ -37,34 +41,49 @@ export default function UserDepositPage() {
     },
   } = useDepositOrchestrator();
 
+  if (isSkeletonReviewMode || (loadingHistory && deposits.length === 0)) {
+    return (
+      <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-5 lg:p-8 font-sans pb-16">
+        <DepositSkeleton />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-[#005A36] to-[#044D2F] p-6 rounded-3xl text-white shadow-xl shadow-emerald-950/20">
-        <div className="space-y-1">
+    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-5 lg:p-8 font-sans text-slate-900 pb-16">
+      {/* Liquid Glass Hero Header */}
+      <GlassCard
+        variant="elevated"
+        className="p-6 sm:p-8 text-slate-900 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-5"
+      >
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-white/20 text-emerald-100">
+            <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
               Instant Manual Deposit
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">Deposit Funds</h1>
-          <p className="text-emerald-100 text-xs sm:text-sm font-medium">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            Deposit Funds
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm font-semibold">
             Top up your EarnX main balance easily using bKash, Nagad, or Rocket.
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
+
+        <div className="flex items-center gap-3 shrink-0">
+          <GlassButton
             onClick={() => {
               fetchGateways();
               fetchHistory();
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition-all cursor-pointer"
+            variant="secondary"
+            size="md"
+            icon={<RefreshCw className={`w-3.5 h-3.5 ${loadingHistory ? 'animate-spin' : ''}`} />}
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loadingHistory ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
+            Refresh Data
+          </GlassButton>
         </div>
-      </div>
+      </GlassCard>
 
       {alertMsg && (
         <AlertBanner
@@ -104,7 +123,7 @@ export default function UserDepositPage() {
         </div>
       </div>
 
-      {/* Deposit History */}
+      {/* Full-Width Deposit History Table */}
       <DepositHistoryTable
         deposits={deposits}
         loadingHistory={loadingHistory}

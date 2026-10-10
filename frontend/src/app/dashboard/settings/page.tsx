@@ -4,13 +4,17 @@ import React from 'react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 import { ImageCropModal } from '../../../components/common/ImageCropModal';
 import { useSettingsOrchestrator, COUNTRIES } from '../../../hooks/orchestrators';
+import { useDesignSystem } from '../../../context/DesignSystemContext';
+import { GlassCard } from '../../../components/design-system/GlassCard';
 import {
   SettingsProfileHeaderCard,
   SettingsPersonalForm,
   SettingsSecurityForm,
+  SettingsSkeleton,
 } from '../../../components/settings';
 
 export default function UserSettingsPage() {
+  const { isLoading: forceSkeletonLoading } = useDesignSystem();
   const {
     state: {
       fullName,
@@ -48,8 +52,12 @@ export default function UserSettingsPage() {
     },
   } = useSettingsOrchestrator();
 
+  if (forceSkeletonLoading) {
+    return <SettingsSkeleton />;
+  }
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8">
+    <div className="space-y-6 max-w-7xl mx-auto p-3 sm:p-6 lg:p-8 animate-fade-in">
       {statusMsg && (
         <AlertBanner
           type={statusMsg.type}
@@ -58,7 +66,7 @@ export default function UserSettingsPage() {
         />
       )}
 
-      {/* Profile Card matching Screenshot Design */}
+      {/* Profile Card */}
       <SettingsProfileHeaderCard
         user={user}
         fullName={fullName}
@@ -68,7 +76,7 @@ export default function UserSettingsPage() {
       />
 
       {/* Main Settings Form */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      <GlassCard className="p-6 sm:p-8 specular-rim">
         <form onSubmit={handleUpdateProfile} className="space-y-6">
           <SettingsPersonalForm
             fullName={fullName}
@@ -96,7 +104,7 @@ export default function UserSettingsPage() {
             savingProfile={savingProfile}
           />
         </form>
-      </div>
+      </GlassCard>
 
       {/* Interactive Profile Photo Cropper Modal */}
       <ImageCropModal

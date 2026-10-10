@@ -174,7 +174,11 @@ export class MarketplacePostSubService {
       throw new UnauthorizedException('You do not have permission to delete this post');
     }
 
-    await this.prisma.marketplacePost.delete({ where: { id: postId } });
+    try {
+      await this.prisma.marketplacePost.delete({ where: { id: postId } });
+    } catch (err: any) {
+      if (err.code !== 'P2025') throw err;
+    }
 
     return { success: true, message: 'Post deleted successfully' };
   }

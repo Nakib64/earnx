@@ -10,8 +10,10 @@ import {
   Phone as PhoneIcon,
   UserCheck,
   CheckCircle2,
+  X,
 } from 'lucide-react';
 import { RecipientSuggestion } from '../../hooks/useWalletPage';
+import { GlassCard, GlassButton, NumericAmount } from '../design-system';
 
 interface WalletTransferModalProps {
   currentBal: number;
@@ -61,17 +63,17 @@ export function WalletTransferModal({
   onCancel,
 }: WalletTransferModalProps) {
   return (
-    <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 space-y-5 shadow-sm animate-in fade-in zoom-in-95 duration-200">
+    <GlassCard variant="standard" className="p-5 sm:p-7 space-y-5">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
         <h3 className="font-black text-slate-900 text-base flex items-center space-x-2 truncate">
-          <ArrowRightLeft className="w-5 h-5 text-[#005A36] shrink-0" />
-          <span className="truncate">Balance Transfer</span>
+          <ArrowRightLeft className="w-5 h-5 text-emerald-700 shrink-0" />
+          <span className="truncate">Network Balance Transfer</span>
         </h3>
         <button
           onClick={onCancel}
-          className="text-xs font-bold text-slate-400 hover:text-slate-600 shrink-0 cursor-pointer"
+          className="text-xs font-bold text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
         >
-          Cancel
+          <X className="w-4 h-4" />
         </button>
       </div>
 
@@ -87,43 +89,38 @@ export function WalletTransferModal({
               required
               placeholder="Enter or search Recipient User Code (e.g. EX1001)..."
               value={targetReferralCode}
-              onChange={(e) => {
-                setTargetReferralCode(e.target.value);
-                if (verifiedRecipient && e.target.value.trim().toLowerCase() !== verifiedRecipient.referral_code.toLowerCase()) {
-                  // User is changing query
-                }
-              }}
+              onChange={(e) => setTargetReferralCode(e.target.value)}
               onFocus={() => {
                 if (suggestions.length > 0 && !verifiedRecipient) setShowSuggestions(true);
               }}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+              className="w-full bg-white/70 border border-slate-200/90 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 shadow-xs"
             />
             {searchingRecipient && (
-              <span className="absolute right-3.5 top-3 text-xs text-slate-400 animate-pulse">
+              <span className="absolute right-3.5 top-3.5 text-xs text-slate-400 animate-pulse font-medium">
                 Searching...
               </span>
             )}
 
             {/* Target Dropdown Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100">
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white/95 backdrop-blur-xl border border-white/95 rounded-2xl shadow-2xl z-30 max-h-56 overflow-y-auto divide-y divide-slate-100 specular-rim">
                 {suggestions.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => onSelectRecipient(item)}
-                    className="w-full text-left p-3 hover:bg-emerald-50 transition-colors flex items-center justify-between cursor-pointer"
+                    className="w-full text-left p-3 hover:bg-emerald-50/80 transition-colors flex items-center justify-between cursor-pointer"
                   >
                     <div>
-                      <div className="text-xs font-black text-[#005A36]">
+                      <div className="text-xs font-black text-emerald-800">
                         Code: <span className="underline">{item.referral_code}</span>
                       </div>
-                      <div className="text-[10px] text-slate-600 font-medium">
-                        Name: {item.full_name || 'No Name'} • Phone: {item.phone}
+                      <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
+                        Name: {item.full_name || 'Member'} • Phone: {item.phone}
                       </div>
                     </div>
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono">
-                      {item.status} {item.is_premium && '• PREMIUM'}
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 ">
+                      {item.status}
                     </span>
                   </button>
                 ))}
@@ -140,33 +137,33 @@ export function WalletTransferModal({
           )}
         </div>
 
-        {/* 2. Auto-filled Target Details (Same 3-grid as /dashboard/purchase) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        {/* 2. Auto-filled Target Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/60 p-4 rounded-2xl border border-slate-200/80 specular-rim">
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Name</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Name</label>
             <input
               type="text"
               readOnly
               value={recipientName || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none cursor-not-allowed"
+              className="w-full bg-slate-100/70 border border-slate-200/80 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 cursor-not-allowed"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Phone Number</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Phone</label>
             <input
               type="text"
               readOnly
               value={recipientPhone || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-slate-800 focus:outline-none cursor-not-allowed"
+              className="w-full bg-slate-100/70 border border-slate-200/80 rounded-xl px-3 py-2 text-xs  font-bold text-slate-800 cursor-not-allowed tabular-nums"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target User Email</label>
+            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Target Email</label>
             <input
               type="text"
               readOnly
               value={verifiedRecipient?.email || recipientEmail || '—'}
-              className="w-full bg-slate-100 border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono font-bold text-[#005A36] focus:outline-none cursor-not-allowed"
+              className="w-full bg-slate-100/70 border border-slate-200/80 rounded-xl px-3 py-2 text-xs  font-bold text-emerald-800 cursor-not-allowed"
             />
           </div>
         </div>
@@ -186,9 +183,11 @@ export function WalletTransferModal({
               placeholder="Enter amount..."
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+              className="w-full bg-white/70 border border-slate-200/90 rounded-2xl px-4 py-3 text-sm font-black text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500  shadow-xs"
             />
-            <p className="text-[11px] text-slate-500 mt-1 font-mono">Available Balance: ৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+            <p className="text-[11px] text-slate-500 mt-1 ">
+              Available: ৳{currentBal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
           </div>
 
           <div>
@@ -201,13 +200,17 @@ export function WalletTransferModal({
               placeholder="Reference note (optional)..."
               value={transferNote}
               onChange={(e) => setTransferNote(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#005A36]"
+              className="w-full bg-white/70 border border-slate-200/90 rounded-2xl px-4 py-3 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 shadow-xs"
             />
           </div>
         </div>
 
-        <button
+        <GlassButton
           type="submit"
+          variant="primary"
+          fullWidth
+          size="lg"
+          isLoading={submittingTransfer}
           disabled={
             submittingTransfer ||
             !verifiedRecipient ||
@@ -215,12 +218,11 @@ export function WalletTransferModal({
             parseFloat(transferAmount) <= 0 ||
             parseFloat(transferAmount) > currentBal
           }
-          className="w-full py-3.5 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all cursor-pointer"
+          icon={<CheckCircle2 className="w-4.5 h-4.5" />}
         >
-          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
-          <span>{submittingTransfer ? 'Sending Transfer...' : 'Confirm & Direct Send'}</span>
-        </button>
+          Send Balance
+        </GlassButton>
       </form>
-    </div>
+    </GlassCard>
   );
 }

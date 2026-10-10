@@ -110,7 +110,7 @@ export default function InvestmentSection() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <span className="text-2xl font-black text-[#f3ba2f] font-mono">
+                    <span className="text-2xl font-black text-[#f3ba2f] ">
                       {item.step}
                     </span>
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#03442e] to-[#012015] border border-[#d4af37]/40 flex items-center justify-center group-hover:scale-105 transition-transform">

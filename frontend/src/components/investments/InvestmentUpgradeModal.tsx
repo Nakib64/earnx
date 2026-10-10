@@ -50,7 +50,7 @@ export function InvestmentUpgradeModal({
               <span className="text-slate-600 font-bold truncate">
                 Current ({activeInv.plan?.title}):
               </span>
-              <span className="font-black text-slate-900 font-mono truncate">
+              <span className="font-black text-slate-900  truncate">
                 ৳{currentAmt.toLocaleString()}
               </span>
             </div>
@@ -58,7 +58,7 @@ export function InvestmentUpgradeModal({
               <span className="text-[#854D0E] font-bold truncate">
                 Target ({selectedPlan.title}):
               </span>
-              <span className="font-black text-[#854D0E] font-mono truncate">
+              <span className="font-black text-[#854D0E]  truncate">
                 ৳{targetAmt.toLocaleString()}
               </span>
             </div>
@@ -69,7 +69,7 @@ export function InvestmentUpgradeModal({
             <span className="text-[11px] font-black uppercase tracking-wider text-amber-200">
               Upgrade Cost (Deducted from Wallet)
             </span>
-            <p className="text-3xl font-black font-mono truncate text-white">
+            <p className="text-3xl font-black  truncate text-white">
               ৳{remainingCost.toLocaleString()}
             </p>
             <p className="text-[11px] text-slate-300 font-medium">

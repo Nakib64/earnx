@@ -4,12 +4,17 @@ import React from 'react';
 import { Users, RefreshCw } from 'lucide-react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 import { useMarketplaceOrchestrator } from '../../../hooks/orchestrators';
+import { useDesignSystem } from '../../../context/DesignSystemContext';
+import { GlassCard } from '../../../components/design-system/GlassCard';
+import { GlassButton } from '../../../components/design-system/GlassButton';
 import {
   MarketplaceComposer,
   MarketplacePostCard,
+  MarketplaceSkeleton,
 } from '../../../components/marketplace';
 
 export default function MarketplacePage() {
+  const { isLoading: forceSkeletonLoading } = useDesignSystem();
   const {
     state: {
       posts,
@@ -59,32 +64,38 @@ export default function MarketplacePage() {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  if (forceSkeletonLoading || (loading && posts.length === 0)) {
+    return <MarketplaceSkeleton />;
+  }
+
   return (
-    <div className="space-y-6 max-w-3xl mx-auto pb-16">
+    <div className="space-y-6 max-w-3xl mx-auto pb-16 animate-fade-in">
       {/* Feed Header */}
-      <div className="flex items-center justify-between bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 shadow-sm">
+      <GlassCard className="p-5 sm:p-6 flex items-center justify-between specular-rim" glow>
         <div className="flex items-center space-x-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-[#005A36] shrink-0">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-700 shrink-0">
             <Users className="w-6 h-6" />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Community Marketplace Feed
             </h1>
-            <p className="text-xs font-semibold text-slate-500">
-              Share updates, coin offers, proof of earnings & interact with members
+            <p className="text-xs font-medium text-slate-500">
+              Share updates, coin offers, proof of earnings &amp; interact with members
             </p>
           </div>
         </div>
 
-        <button
+        <GlassButton
+          variant="secondary"
+          size="sm"
           onClick={fetchPosts}
-          className="p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer"
+          className="p-2.5 h-auto min-h-0 rounded-xl"
           title="Refresh Feed"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
+        </GlassButton>
+      </GlassCard>
 
       {alertMsg && (
         <AlertBanner
@@ -110,18 +121,14 @@ export default function MarketplacePage() {
       />
 
       {/* Feed Posts */}
-      {loading ? (
-        <div className="py-20 flex justify-center items-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-[#005A36]" />
-        </div>
-      ) : posts.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-2">
+      {posts.length === 0 ? (
+        <GlassCard className="p-12 text-center space-y-2 specular-rim">
           <Users className="w-10 h-10 text-slate-300 mx-auto" />
           <h3 className="text-base font-black text-slate-800">No Posts Yet</h3>
           <p className="text-xs text-slate-500">
             Be the first to post something exciting in the EarnX community!
           </p>
-        </div>
+        </GlassCard>
       ) : (
         <div className="space-y-5">
           {posts.map((post) => (

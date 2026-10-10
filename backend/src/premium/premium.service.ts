@@ -53,8 +53,8 @@ export class PremiumService {
     return this.packageSubService.deletePackage(id);
   }
 
-  async subscribePackage(userId: string, packageId: string) {
-    return this.packageSubService.subscribePackage(userId, packageId);
+  async subscribePackage(userId: string, packageId: string, referrerCode?: string) {
+    return this.packageSubService.subscribePackage(userId, packageId, referrerCode);
   }
 
   async getPremiumUsers(search?: string) {
@@ -75,4 +75,16 @@ export class PremiumService {
   async claimDailyReward(userId: string) {
     return this.dailyAdsSubService.claimDailyReward(userId);
   }
+
+  // ==========================================
+  // USER & ADMIN ADS ANALYTICS
+  // ==========================================
+  async getAdsAnalytics(timeframe?: string) {
+    return this.dailyAdsSubService.getAdsAnalytics(timeframe);
+  }
+
+  async getUserAdsAnalytics(userId: string, timeframe?: string) {
+    return this.dailyAdsSubService.getAdsAnalytics(timeframe, userId);
+  }
 }
+

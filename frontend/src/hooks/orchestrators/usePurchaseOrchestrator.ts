@@ -43,7 +43,7 @@ export function usePurchaseOrchestrator() {
   const { user, refreshUserProfile } = useAuth();
 
   // Package Type & Investment Plans
-  const [packageType, setPackageType] = useState<'ACTIVATION' | 'PREMIUM' | 'INVESTMENT'>('ACTIVATION');
+  const [packageType, setPackageType] = useState<'PREMIUM' | 'INVESTMENT'>('PREMIUM');
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [activePlans, setActivePlans] = useState<InvestmentPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
@@ -73,17 +73,12 @@ export function usePurchaseOrchestrator() {
     message: '',
   });
 
-  const [activationFee, setActivationFee] = useState<number>(500);
   const [premiumFee, setPremiumFee] = useState<number>(1000);
 
   // Fetch global system config fees
   const fetchSystemConfigs = useCallback(async () => {
     const res = await apiFetch<SystemConfigMap>('/system-config/public');
     if (res.success && res.data) {
-      if (res.data.ACTIVATION_FEE) {
-        const fee = parseFloat(res.data.ACTIVATION_FEE);
-        if (!isNaN(fee)) setActivationFee(fee);
-      }
       if (res.data.PREMIUM_FEE) {
         const fee = parseFloat(res.data.PREMIUM_FEE);
         if (!isNaN(fee)) setPremiumFee(fee);
@@ -230,7 +225,6 @@ export function usePurchaseOrchestrator() {
 
   // Price Calculation
   const getPackagePrice = (): number => {
-    if (packageType === 'ACTIVATION') return activationFee;
     if (packageType === 'PREMIUM') return premiumFee;
     if (packageType === 'INVESTMENT') {
       const plan = activePlans.find((p) => p.id === selectedPlanId);
@@ -252,18 +246,6 @@ export function usePurchaseOrchestrator() {
         type: 'DUPLICATE_ERROR',
         title: 'Target User Required',
         message: 'Please search and select the target user code before proceeding.',
-      });
-      return;
-    }
-
-    if (packageType === 'ACTIVATION' && selectedTargetUser.status === 'ACTIVE') {
-      setModalState({
-        isOpen: true,
-        type: 'DUPLICATE_ERROR',
-        title: 'Account Already Active',
-        message: `User "${selectedTargetUser.full_name || selectedTargetUser.phone}" (User Code: ${
-          selectedTargetUser.referral_code
-        }) is already an ACTIVE account. Account Activation cannot be purchased again for an active member.`,
       });
       return;
     }
@@ -344,23 +326,23 @@ export function usePurchaseOrchestrator() {
     setSubmitting(true);
 
     let res: any;
-    if (packageType === 'ACTIVATION') {
-      res = await apiFetch('/purchase/activation', {
-        method: 'POST',
-        body: JSON.stringify({ target_user_id: selectedTargetUser.id }),
-      });
-    } else if (packageType === 'PREMIUM') {
-      res = await apiFetch('/purchase/premium', {
+    if (packageType === 'PREMIUM') {
+      res = await apiFetch('/purchases/buy', {
         method: 'POST',
         body: JSON.stringify({
-          target_user_id: selectedTargetUser.id,
+          target_user_code: selectedTargetUser.referral_code,
+          package_type: 'PREMIUM',
           referrer_code: selectedReferrerUser?.referral_code || undefined,
         }),
       });
     } else if (packageType === 'INVESTMENT') {
-      res = await apiFetch('/investments/subscribe', {
+      res = await apiFetch('/purchases/buy', {
         method: 'POST',
-        body: JSON.stringify({ plan_id: selectedPlanId }),
+        body: JSON.stringify({
+          target_user_code: selectedTargetUser.referral_code,
+          package_type: 'INVESTMENT',
+          investment_plan_id: selectedPlanId,
+        }),
       });
     }
 
@@ -426,7 +408,6 @@ export function usePurchaseOrchestrator() {
       showReferrerDropdown,
       submitting,
       modalState,
-      activationFee,
       premiumFee,
     },
     computed: {

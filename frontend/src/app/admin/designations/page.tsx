@@ -122,7 +122,7 @@ export default function AdminDesignationsPage() {
               Configure Star badges and unlocked tree level depth keys. Assign members to control earning depth.
             </p>
           </div>
-          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40 font-mono shrink-0 hidden sm:inline-flex">
+          <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40  shrink-0 hidden sm:inline-flex">
             {designations.length} Badges
           </span>
         </div>

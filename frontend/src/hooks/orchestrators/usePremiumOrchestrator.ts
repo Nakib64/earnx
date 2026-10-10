@@ -11,6 +11,11 @@ export interface DailyTaskData {
   daily_reward_amount?: number;
   daily_ads_required?: number;
   ads_watched?: number;
+  reward_per_ad?: number;
+  earned_today?: number;
+  remaining_ads?: number;
+  remaining_reward?: number;
+  quota_reached?: boolean;
   is_claimed?: boolean;
   can_claim?: boolean;
   claim_date?: string;
@@ -35,8 +40,13 @@ export function usePremiumOrchestrator() {
   // Claiming reward state
   const [claiming, setClaiming] = useState(false);
 
+  // Subscribe modal state
+  const [selectedPkgForModal, setSelectedPkgForModal] = useState<PremiumPackage | null>(null);
+
   const fetchPackagesAndTask = useCallback(async () => {
-    setLoading(true);
+    if (packages.length === 0) {
+      setLoading(true);
+    }
     const [pkgRes, taskRes] = await Promise.all([
       apiFetch<PremiumPackage[]>('/premium/packages'),
       apiFetch<DailyTaskData>('/premium/daily-task'),
@@ -49,7 +59,7 @@ export function usePremiumOrchestrator() {
       setDailyTask(taskRes.data);
     }
     setLoading(false);
-  }, []);
+  }, [packages.length]);
 
   useEffect(() => {
     fetchPackagesAndTask();
@@ -78,16 +88,20 @@ export function usePremiumOrchestrator() {
 
   const handleFinishAd = async () => {
     setRecordingAd(true);
-    const res = await apiFetch('/premium/watch-ad', { method: 'POST' });
+    const res = await apiFetch<any>('/premium/watch-ad', { method: 'POST' });
     if (res.success) {
-      setAlertMsg({ type: 'success', text: 'Ad viewed successfully! Task progress updated.' });
+      setAlertMsg({
+        type: 'success',
+        text: res.data?.message || 'Ad viewed! Reward added to your wallet.',
+      });
       setAdModalOpen(false);
-      fetchPackagesAndTask();
+      await Promise.all([fetchPackagesAndTask(), refreshUserProfile()]);
     } else {
       setAlertMsg({ type: 'error', text: res.error?.message || 'Failed to record ad view.' });
     }
     setRecordingAd(false);
   };
+
 
   const handleClaimReward = async () => {
     setClaiming(true);
@@ -105,24 +119,27 @@ export function usePremiumOrchestrator() {
     setClaiming(false);
   };
 
-  const handleSubscribe = async (pkg: PremiumPackage) => {
-    if (
-      !confirm(
-        `Are you sure you want to subscribe to ${pkg.title} for ৳${Number(
-          pkg.price,
-        ).toLocaleString()}? This will be deducted from your wallet balance.`,
-      )
-    ) {
-      return;
-    }
+  const handleOpenSubscribeModal = (pkg: PremiumPackage) => {
+    setSelectedPkgForModal(pkg);
+  };
 
+  const handleCloseSubscribeModal = () => {
+    if (subscribingId) return;
+    setSelectedPkgForModal(null);
+  };
+
+  const handleConfirmSubscribe = async (pkg: PremiumPackage, referrerCode?: string) => {
     setSubscribingId(pkg.id);
     const res = await apiFetch('/premium/subscribe', {
       method: 'POST',
-      body: JSON.stringify({ package_id: pkg.id }),
+      body: JSON.stringify({
+        package_id: pkg.id,
+        referrer_code: referrerCode?.trim() || 'earnx-123',
+      }),
     });
 
     if (res.success) {
+      setSelectedPkgForModal(null);
       setAlertMsg({
         type: 'success',
         text: `🎉 Upgraded to ${pkg.title}! You can now watch daily ads to claim your daily rewards.`,
@@ -151,6 +168,7 @@ export function usePremiumOrchestrator() {
       adCompleted,
       recordingAd,
       claiming,
+      selectedPkgForModal,
     },
     computed: {
       user,
@@ -162,7 +180,9 @@ export function usePremiumOrchestrator() {
       handleStartWatchAd,
       handleFinishAd,
       handleClaimReward,
-      handleSubscribe,
+      handleOpenSubscribeModal,
+      handleCloseSubscribeModal,
+      handleConfirmSubscribe,
       fetchPackagesAndTask,
     },
   };

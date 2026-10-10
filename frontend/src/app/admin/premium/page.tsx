@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { apiFetch } from '../../../lib/api';
 import { PremiumPackage } from '../../../types';
 import {
@@ -9,14 +10,11 @@ import {
   Edit2,
   Trash2,
   RefreshCw,
-  CheckCircle2,
-  AlertCircle,
   X,
-  Check,
-  Search,
-  DollarSign,
   Tv,
   Save,
+  BarChart3,
+  Percent,
 } from 'lucide-react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 
@@ -31,9 +29,11 @@ export default function AdminPremiumPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    original_price: '',
+    discount_percent: '',
     price: '',
     daily_reward_amount: '',
-    daily_ads_count: '6',
+    daily_ads_count: '30',
     is_active: true,
   });
   const [saving, setSaving] = useState(false);
@@ -58,9 +58,11 @@ export default function AdminPremiumPage() {
     setFormData({
       title: '',
       description: '',
+      original_price: '',
+      discount_percent: '',
       price: '',
       daily_reward_amount: '',
-      daily_ads_count: '6',
+      daily_ads_count: '30',
       is_active: true,
     });
     setModalOpen(true);
@@ -71,12 +73,34 @@ export default function AdminPremiumPage() {
     setFormData({
       title: pkg.title,
       description: pkg.description || '',
+      original_price: pkg.original_price ? String(pkg.original_price) : '',
+      discount_percent: pkg.discount_percent ? String(pkg.discount_percent) : '',
       price: String(pkg.price),
       daily_reward_amount: String(pkg.daily_reward_amount),
       daily_ads_count: String(pkg.daily_ads_count),
       is_active: pkg.is_active,
     });
     setModalOpen(true);
+  };
+
+  const handlePriceChange = (val: string) => {
+    const orig = parseFloat(formData.original_price);
+    const p = parseFloat(val);
+    let disc = formData.discount_percent;
+    if (!isNaN(orig) && !isNaN(p) && orig > p && orig > 0) {
+      disc = String(Math.round(((orig - p) / orig) * 100));
+    }
+    setFormData({ ...formData, price: val, discount_percent: disc });
+  };
+
+  const handleOriginalPriceChange = (val: string) => {
+    const orig = parseFloat(val);
+    const p = parseFloat(formData.price);
+    let disc = formData.discount_percent;
+    if (!isNaN(orig) && !isNaN(p) && orig > p && orig > 0) {
+      disc = String(Math.round(((orig - p) / orig) * 100));
+    }
+    setFormData({ ...formData, original_price: val, discount_percent: disc });
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -87,6 +111,8 @@ export default function AdminPremiumPage() {
     const payload = {
       title: formData.title.trim(),
       description: formData.description.trim() || undefined,
+      original_price: formData.original_price ? parseFloat(formData.original_price) : undefined,
+      discount_percent: formData.discount_percent ? parseInt(formData.discount_percent, 10) : 0,
       price: parseFloat(formData.price),
       daily_reward_amount: parseFloat(formData.daily_reward_amount),
       daily_ads_count: parseInt(formData.daily_ads_count, 10),
@@ -150,12 +176,19 @@ export default function AdminPremiumPage() {
               Premium Package Management
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-500">
-              Configure membership tiers, daily watch ad counts, and reward payouts
+              Configure membership tiers, discounts, daily ad watch limits, and payout rates
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/admin/ads-analytics"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-[#005A36] text-xs font-black transition-all shadow-xs"
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Ads Analytics</span>
+          </Link>
           <button
             onClick={handleOpenCreate}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#005A36] hover:bg-[#044D2F] text-white text-xs font-black transition-all shadow-md cursor-pointer"
@@ -202,72 +235,102 @@ export default function AdminPremiumPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {packages.map((pkg) => (
-            <div
-              key={pkg.id}
-              className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-5"
-            >
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-black text-slate-900">{pkg.title}</h3>
-                    <span
-                      className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase mt-1 ${
-                        pkg.is_active
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      {pkg.is_active ? 'Active' : 'Inactive'}
-                    </span>
+          {packages.map((pkg) => {
+            const rewardPerAd = (
+              Number(pkg.daily_reward_amount) / (pkg.daily_ads_count || 1)
+            ).toFixed(2);
+            const hasDiscount =
+              pkg.original_price && Number(pkg.original_price) > Number(pkg.price);
+
+            return (
+              <div
+                key={pkg.id}
+                className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-5 hover:border-slate-300 transition-all"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900">{pkg.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                            pkg.is_active
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {pkg.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                        {pkg.discount_percent && pkg.discount_percent > 0 ? (
+                          <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-100 text-rose-700">
+                            {pkg.discount_percent}% OFF
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 font-black">
+                      ৳
+                    </div>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 font-black">
-                    ৳
+
+                  {pkg.description && (
+                    <p className="text-xs font-medium text-slate-500">{pkg.description}</p>
+                  )}
+
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-slate-500">Price / Membership:</span>
+                      <div className="text-right">
+                        {hasDiscount && (
+                          <span className="text-[11px] font-bold text-slate-400 line-through mr-1.5">
+                            ৳{Number(pkg.original_price).toLocaleString()}
+                          </span>
+                        )}
+                        <strong className="text-slate-900 font-black">
+                          ৳{Number(pkg.price).toLocaleString()}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-slate-500">Daily Reward Pool:</span>
+                      <strong className="text-emerald-700 font-black">
+                        ৳{Number(pkg.daily_reward_amount).toLocaleString()}
+                      </strong>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-slate-500">Daily Ads Quota:</span>
+                      <strong className="text-slate-900 font-black">{pkg.daily_ads_count} Ads</strong>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                      <span className="font-semibold text-slate-500">Reward Rate:</span>
+                      <span className="text-[#005A36] font-black">৳{rewardPerAd} / ad</span>
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-slate-400">
+                      <span>Validity:</span>
+                      <span className="font-bold">{pkg.duration_days || 365} Days (1 Year)</span>
+                    </div>
                   </div>
                 </div>
 
-                {pkg.description && (
-                  <p className="text-xs font-medium text-slate-500">{pkg.description}</p>
-                )}
-
-                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-500">Membership Fee:</span>
-                    <strong className="text-slate-900 font-black">
-                      ৳{Number(pkg.price).toLocaleString()}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-500">Daily Reward:</span>
-                    <strong className="text-emerald-700 font-black">
-                      ৳{Number(pkg.daily_reward_amount).toLocaleString()}
-                    </strong>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-slate-500">Daily Ads Count:</span>
-                    <strong className="text-slate-900 font-black">{pkg.daily_ads_count} Ads</strong>
-                  </div>
+                <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    onClick={() => handleOpenEdit(pkg)}
+                    className="flex-1 py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit Limits</span>
+                  </button>
+                  <button
+                    onClick={() => handleDelete(pkg.id, pkg.title)}
+                    className="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                    title="Delete Package"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                <button
-                  onClick={() => handleOpenEdit(pkg)}
-                  className="flex-1 py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 font-bold text-xs text-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span>Edit</span>
-                </button>
-                <button
-                  onClick={() => handleDelete(pkg.id, pkg.title)}
-                  className="p-2 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 cursor-pointer"
-                  title="Delete Package"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -311,15 +374,42 @@ export default function AdminPremiumPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-black text-slate-700">Price (৳ BDT)</label>
+                  <label className="text-xs font-black text-slate-700">Original Price (৳ BDT)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    placeholder="e.g. 10000"
+                    value={formData.original_price}
+                    onChange={(e) => handleOriginalPriceChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-slate-700">Discount (%)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="e.g. 65"
+                    value={formData.discount_percent}
+                    onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-slate-700">Discounted Price (৳ BDT)</label>
                   <input
                     type="number"
                     min="1"
                     step="any"
                     required
-                    placeholder="e.g. 1000"
+                    placeholder="e.g. 3500"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    onChange={(e) => handlePriceChange(e.target.value)}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
                   />
                 </div>
@@ -330,7 +420,7 @@ export default function AdminPremiumPage() {
                     min="1"
                     step="any"
                     required
-                    placeholder="e.g. 50"
+                    placeholder="e.g. 30"
                     value={formData.daily_reward_amount}
                     onChange={(e) => setFormData({ ...formData, daily_reward_amount: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
@@ -340,12 +430,12 @@ export default function AdminPremiumPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-xs font-black text-slate-700">Daily Ads to Watch</label>
+                  <label className="text-xs font-black text-slate-700">Daily Ads Quota</label>
                   <input
                     type="number"
                     min="1"
                     required
-                    placeholder="e.g. 6"
+                    placeholder="e.g. 30"
                     value={formData.daily_ads_count}
                     onChange={(e) => setFormData({ ...formData, daily_ads_count: e.target.value })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
@@ -363,6 +453,20 @@ export default function AdminPremiumPage() {
                   </label>
                 </div>
               </div>
+
+              {formData.daily_reward_amount && formData.daily_ads_count && (
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-800 flex items-center justify-between font-bold">
+                  <span>Per-Ad Reward Rate:</span>
+                  <span className="font-black text-[#005A36]">
+                    ৳
+                    {(
+                      parseFloat(formData.daily_reward_amount) /
+                      (parseInt(formData.daily_ads_count, 10) || 1)
+                    ).toFixed(2)}{' '}
+                    / ad
+                  </span>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
@@ -392,3 +496,4 @@ export default function AdminPremiumPage() {
     </div>
   );
 }
+

@@ -1,10 +1,10 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 
 export enum PackageType {
-  ACTIVATION = 'ACTIVATION',
   PREMIUM = 'PREMIUM',
   INVESTMENT = 'INVESTMENT',
 }
+
 
 export class CreatePurchaseDto {
   @IsString()

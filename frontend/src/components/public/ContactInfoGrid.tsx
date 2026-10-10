@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Phone, Mail, Clock } from 'lucide-react';
+import { GlassCard } from '../design-system/GlassCard';
 
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
@@ -16,11 +17,10 @@ const staggerContainer: Variants = {
 };
 
 const cardItem: Variants = {
-  hidden: { opacity: 0, y: 25, scale: 0.96 },
+  hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: { duration: 0.5, ease: 'easeOut' },
   },
 };
@@ -28,22 +28,21 @@ const cardItem: Variants = {
 const contactCards = [
   {
     icon: Phone,
-    title: 'Direct WhatsApp',
+    title: 'Direct WhatsApp Desk',
     value: '+880 1700-000000',
-    subtitle: 'Live WhatsApp 24/7',
+    subtitle: 'Live WhatsApp 24/7 Agent',
   },
   {
     icon: Mail,
-    title: 'Email Support',
+    title: 'Email Support Desk',
     value: 'support@earnx.com',
-    subtitle: 'Avg. Response < 2h',
+    subtitle: 'Avg. Response < 2 Hours',
   },
-
   {
     icon: Clock,
-    title: 'Desk Hours',
+    title: 'Monitoring Hours',
     value: 'Monday – Sunday',
-    subtitle: 'Non-Stop Monitoring',
+    subtitle: 'Non-Stop 24/7  Audits',
   },
 ];
 
@@ -52,32 +51,32 @@ export default function ContactInfoGrid() {
     <motion.section
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: false, amount: 0.2 }}
+      viewport={{ once: true, amount: 0.2 }}
       variants={staggerContainer}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
     >
-      <div className="grid grid-cols-1  md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {contactCards.map((item, idx) => {
           const Icon = item.icon;
           return (
-            <motion.div
-              key={idx}
-              variants={cardItem}
-              whileHover={{ scale: 1.03, y: -6 }}
-              className="bg-white border border-slate-200 hover:border-[#023322]/50 rounded-3xl p-6 text-center space-y-3 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-[#023824] border border-[#056343] text-emerald-400 group-hover:text-amber-300 flex items-center justify-center mx-auto transition-all shadow-md">
-                <Icon className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-black text-slate-900 group-hover:text-[#023322] transition-colors">
-                {item.title}
-              </h3>
-              <p className="text-xs font-bold font-mono text-slate-800">
-                {item.value}
-              </p>
-              <p className="text-[11px] font-bold text-[#03442e]">
-                {item.subtitle}
-              </p>
+            <motion.div key={idx} variants={cardItem}>
+              <GlassCard
+                className="p-6 text-center space-y-3.5 specular-rim hover:-translate-y-1.5 transition-all duration-300"
+                interactive
+              >
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 flex items-center justify-center mx-auto shadow-xs">
+                  <Icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="text-xs font-bold  text-slate-800">
+                  {item.value}
+                </p>
+                <p className="text-[11px] font-bold text-emerald-700">
+                  {item.subtitle}
+                </p>
+              </GlassCard>
             </motion.div>
           );
         })}

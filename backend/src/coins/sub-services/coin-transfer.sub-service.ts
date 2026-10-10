@@ -45,12 +45,6 @@ export class CoinTransferSubService {
 
         if (!sender) throw new NotFoundException('Sender not found');
 
-        if (Number(sender.coin_balance) < numCoins) {
-          throw new BadRequestException(
-            `Insufficient available coin balance. You have ${Number(sender.coin_balance)} coins available.`,
-          );
-        }
-
         const receiver = await tx.user.findFirst({
           where: {
             OR: [
@@ -69,16 +63,30 @@ export class CoinTransferSubService {
           throw new BadRequestException('You cannot transfer coins to your own account');
         }
 
-        const coinsBefore = Number(sender.coin_balance);
-        const coinsAfter = coinsBefore - numCoins;
-
-        // 1. Deduct coins from sender immediately (Escrow Hold)
-        await tx.user.update({
-          where: { id: userId },
+        // 1. Deduct coins from sender immediately (Escrow Hold) atomically
+        const deductResult = await tx.user.updateMany({
+          where: {
+            id: userId,
+            coin_balance: { gte: new Prisma.Decimal(numCoins) },
+          },
           data: {
-            coin_balance: new Prisma.Decimal(coinsAfter),
+            coin_balance: { decrement: new Prisma.Decimal(numCoins) },
           },
         });
+
+        if (deductResult.count === 0) {
+          throw new BadRequestException(
+            `Insufficient available coin balance. You have ${Number(sender.coin_balance)} coins available.`,
+          );
+        }
+
+        const freshSender = await tx.user.findUnique({
+          where: { id: userId },
+          select: { coin_balance: true },
+        });
+
+        const coinsAfter = Number(freshSender?.coin_balance || 0);
+        const coinsBefore = coinsAfter + numCoins;
 
         // 2. Record CoinTransaction for sender
         await tx.coinTransaction.create({
@@ -201,21 +209,32 @@ export class CoinTransferSubService {
           throw new BadRequestException('You are not authorized to approve this transfer');
         }
 
-        if (transfer.status !== 'PENDING') {
+        // 1. Mark transfer APPROVED atomically
+        const updateResult = await tx.coinTransfer.updateMany({
+          where: { id: transferId, status: 'PENDING' },
+          data: {
+            status: 'APPROVED',
+            responded_at: new Date(),
+          },
+        });
+
+        if (updateResult.count === 0) {
           throw new BadRequestException('This transfer has already been processed');
         }
 
         const numCoins = Number(transfer.coin_amount);
-        const recipientCoinsBefore = Number(transfer.receiver.coin_balance);
-        const recipientCoinsAfter = recipientCoinsBefore + numCoins;
 
-        // 1. Credit recipient coins
-        await tx.user.update({
+        // 2. Credit recipient coins atomically
+        const updatedReceiver = await tx.user.update({
           where: { id: receiverId },
-          data: { coin_balance: new Prisma.Decimal(recipientCoinsAfter) },
+          data: { coin_balance: { increment: new Prisma.Decimal(numCoins) } },
+          select: { coin_balance: true },
         });
 
-        // 2. Record CoinTransaction for recipient
+        const recipientCoinsAfter = Number(updatedReceiver.coin_balance);
+        const recipientCoinsBefore = recipientCoinsAfter - numCoins;
+
+        // 3. Record CoinTransaction for recipient
         await tx.coinTransaction.create({
           data: {
             user_id: receiverId,
@@ -228,13 +247,8 @@ export class CoinTransferSubService {
           },
         });
 
-        // 3. Mark transfer APPROVED
-        const updated = await tx.coinTransfer.update({
+        const updated = await tx.coinTransfer.findUnique({
           where: { id: transferId },
-          data: {
-            status: 'APPROVED',
-            responded_at: new Date(),
-          },
           include: { sender: true, receiver: true },
         });
 
@@ -267,17 +281,32 @@ export class CoinTransferSubService {
           throw new BadRequestException('This transfer has already been processed');
         }
 
-        const numCoins = Number(transfer.coin_amount);
-        const senderCoinsBefore = Number(transfer.sender.coin_balance);
-        const senderCoinsAfter = senderCoinsBefore + numCoins;
-
-        // 1. Refund coins to sender
-        await tx.user.update({
-          where: { id: transfer.sender_id },
-          data: { coin_balance: new Prisma.Decimal(senderCoinsAfter) },
+        // 1. Mark transfer REJECTED atomically
+        const updateResult = await tx.coinTransfer.updateMany({
+          where: { id: transferId, status: 'PENDING' },
+          data: {
+            status: 'REJECTED',
+            responded_at: new Date(),
+          },
         });
 
-        // 2. Record CoinTransaction refund for sender
+        if (updateResult.count === 0) {
+          throw new BadRequestException('This transfer has already been processed');
+        }
+
+        const numCoins = Number(transfer.coin_amount);
+
+        // 2. Refund coins to sender atomically
+        const updatedSender = await tx.user.update({
+          where: { id: transfer.sender_id },
+          data: { coin_balance: { increment: new Prisma.Decimal(numCoins) } },
+          select: { coin_balance: true },
+        });
+
+        const senderCoinsAfter = Number(updatedSender.coin_balance);
+        const senderCoinsBefore = senderCoinsAfter - numCoins;
+
+        // 3. Record CoinTransaction refund for sender
         await tx.coinTransaction.create({
           data: {
             user_id: transfer.sender_id,
@@ -289,13 +318,8 @@ export class CoinTransferSubService {
           },
         });
 
-        // 3. Mark transfer REJECTED
-        const updated = await tx.coinTransfer.update({
+        const updated = await tx.coinTransfer.findUnique({
           where: { id: transferId },
-          data: {
-            status: 'REJECTED',
-            responded_at: new Date(),
-          },
           include: { sender: true, receiver: true },
         });
 

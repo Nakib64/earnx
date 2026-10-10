@@ -13,7 +13,7 @@ export class ActiveUserGuard implements CanActivate {
 
     if (user.status !== UserStatus.ACTIVE) {
       throw new ForbiddenException(
-        `Account status is ${user.status}. Activation approval is required to access this feature.`,
+        `Account status is ${user.status}. An active account is required to access this feature.`,
       );
     }
 

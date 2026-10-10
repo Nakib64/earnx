@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Crown, Wallet, TrendingUp } from 'lucide-react';
+import { Crown, Wallet, TrendingUp, Sparkles } from 'lucide-react';
+import { GlassCard, NumericAmount } from '../design-system';
 
 interface DashboardHeroHeaderProps {
   firstName?: string | null;
@@ -15,149 +16,94 @@ export function DashboardHeroHeader({
   walletBalance,
 }: DashboardHeroHeaderProps) {
   return (
-    <div className="relative overflow-hidden rounded-[24px] lg:rounded-[28px] bg-gradient-to-br from-[#012215] via-[#022e1d] to-[#01160d] border border-emerald-900/60 p-4 sm:p-5 lg:p-6 text-white shadow-xl">
-      {/* Ambient Glows */}
-      <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-[#d4af37]/10 blur-3xl pointer-events-none" />
+    <GlassCard
+      variant="elevated"
+      className="p-5 sm:p-6 lg:p-7 text-slate-900 relative overflow-hidden"
+    >
+      {/* Subtle Ambient Mesh Sheen */}
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-emerald-500/[0.08] blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-sky-500/[0.06] blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 flex flex-row items-center justify-between gap-4 lg:gap-6">
-        {/* Left Info */}
-        <div className="space-y-2 sm:space-y-2.5 max-w-md lg:max-w-xl">
-          {/* Greeting & Name */}
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 lg:gap-8">
+        {/* Left Column: Greeting, Status & Tabular Financial Balances */}
+        <div className="space-y-3.5 max-w-xl">
+          {/* Greeting */}
           <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ring-2 ring-emerald-500/20" />
-              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-300/80">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ring-4 ring-emerald-500/20" />
+              <p className="text-[11px] font-black uppercase tracking-wider text-emerald-700">
                 Welcome Back
               </p>
             </div>
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight flex items-center gap-1.5 drop-shadow-sm">
-              <span>{firstName}</span>
-              <span className="text-base sm:text-lg">👋</span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <span>{firstName || 'Valued Member'}</span>
+              <span className="text-xl sm:text-2xl">👋</span>
             </h1>
           </div>
 
-          {/* Status & Wallet Badges */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          {/* Badges & Wallet Balance Pill */}
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
             {isPremium ? (
-              <div className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500/15 via-yellow-500/25 to-amber-600/15 border border-[#d4af37]/60 text-[#fbbf24] text-[11px] font-extrabold px-2.5 py-1 rounded-full shadow-[0_0_12px_rgba(212,175,55,0.15)] backdrop-blur-md">
-                <Crown className="w-3 h-3 fill-[#fbbf24] text-[#fbbf24]" />
-                <span>Premium</span>
+              <div className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-800 text-xs font-black px-3 py-1 rounded-full shadow-xs">
+                <Crown className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
+                <span>Premium VIP</span>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-1 bg-emerald-950/70 border border-emerald-700/60 text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-md">
-                <span>Standard</span>
+              <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200/80 text-slate-700 text-xs font-bold px-3 py-1 rounded-full">
+                <span>Standard Member</span>
               </div>
             )}
 
             {walletBalance !== undefined && (
-              <div className="inline-flex items-center gap-1 bg-white/[0.06] border border-white/10 text-slate-200 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md">
-                <Wallet className="w-3 h-3 text-emerald-400" />
-                <span>৳{Number(walletBalance).toLocaleString()}</span>
+              <div className="inline-flex items-center gap-2 bg-white/90 border border-slate-200/90 text-slate-800 text-xs font-bold px-3 py-1 rounded-full shadow-xs specular-rim">
+                <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Balance:</span>
+                <NumericAmount
+                  value={walletBalance}
+                  size="sm"
+                  className="font-bold text-slate-900"
+                />
               </div>
             )}
           </div>
 
-          {/* Total Earnings Stat Box */}
-          <div className="pt-0.5">
-            <div className="inline-flex items-center gap-2.5 bg-white/[0.04] border border-emerald-500/20 backdrop-blur-md rounded-xl px-3 py-1.5 shadow-sm">
-              <div className="flex items-center gap-1 text-slate-400 text-[10px] sm:text-[11px] font-semibold tracking-wide">
-                <TrendingUp className="w-3 h-3 text-emerald-400" />
-                <span>Earnings:</span>
+          {/* 24H Yield / Performance Tag */}
+          <div className="pt-1">
+            <div className="inline-flex items-center gap-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl px-3.5 py-1.5 shadow-xs">
+              <div className="flex items-center gap-1 text-slate-600 text-xs font-bold">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
+                <span>24H Yield:</span>
               </div>
-              <span className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-300 tracking-tight">
+              <span className="text-sm font-black text-emerald-700  tabular-nums tracking-tight">
                 +12.48%
               </span>
-              <span className="inline-flex items-center text-[9px] font-black bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-1 py-0.2 rounded">
-                ▲ 24H
+              <span className="inline-flex items-center text-[10px] font-black bg-emerald-600 text-white px-1.5 py-0.2 rounded-full">
+                ▲ Active
               </span>
             </div>
           </div>
         </div>
 
-        {/* Right: 3D Rising Pedestal Artwork */}
-        <div className="w-32 h-24 sm:w-36 sm:h-28 lg:w-44 lg:h-36 relative shrink-0 flex items-center justify-center">
-          <svg
-            viewBox="0 0 200 160"
-            className="w-full h-full drop-shadow-2xl overflow-visible"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="barG1" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#10b981" />
-                <stop offset="50%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#059669" />
-              </linearGradient>
-              <linearGradient id="barG2" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#059669" />
-                <stop offset="50%" stopColor="#10b981" />
-                <stop offset="100%" stopColor="#047857" />
-              </linearGradient>
-              <linearGradient id="arrowG" x1="0" y1="1" x2="1" y2="0">
-                <stop offset="0%" stopColor="#047857" />
-                <stop offset="60%" stopColor="#34d399" />
-                <stop offset="100%" stopColor="#a7f3d0" />
-              </linearGradient>
-              <linearGradient id="crownGoldG" x1="0" y1="1" x2="1" y2="0">
-                <stop offset="0%" stopColor="#d97706" />
-                <stop offset="50%" stopColor="#fbbf24" />
-                <stop offset="100%" stopColor="#fef08a" />
-              </linearGradient>
-              <linearGradient id="pedestalG" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#064e3b" />
-                <stop offset="100%" stopColor="#022c22" />
-              </linearGradient>
-              <linearGradient id="avatarG" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#059669" />
-                <stop offset="100%" stopColor="#022c22" />
-              </linearGradient>
-            </defs>
-
-            {/* Pedestal Base */}
-            <ellipse cx="100" cy="135" rx="85" ry="20" fill="url(#pedestalG)" stroke="#047857" strokeWidth="2" />
-            <ellipse cx="100" cy="130" rx="75" ry="16" fill="#012217" opacity="0.8" />
-
-            {/* Curved Arrow Rising */}
-            <path
-              d="M 25 110 Q 55 50 115 25"
-              fill="none"
-              stroke="url(#arrowG)"
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              filter="drop-shadow(0 0 6px rgba(52,211,153,0.6))"
-            />
-            <polygon points="112,18 128,22 118,34" fill="#6ee7b7" />
-
-            {/* Ascending 3D Columns */}
-            <g transform="translate(38, 90)">
-              <path d="M 0 10 L 0 35 A 10 5 0 0 0 20 35 L 20 10 Z" fill="url(#barG2)" />
-              <ellipse cx="10" cy="10" rx="10" ry="5" fill="#6ee7b7" />
-            </g>
-            <g transform="translate(62, 70)">
-              <path d="M 0 10 L 0 55 A 11 5.5 0 0 0 22 55 L 22 10 Z" fill="url(#barG1)" />
-              <ellipse cx="11" cy="10" rx="11" ry="5.5" fill="#a7f3d0" />
-            </g>
-            <g transform="translate(88, 48)">
-              <path d="M 0 10 L 0 78 A 12 6 0 0 0 24 78 L 24 10 Z" fill="url(#barG1)" />
-              <ellipse cx="12" cy="10" rx="12" ry="6" fill="#d1fae5" />
-            </g>
-
-            {/* User Token with Golden Crown */}
-            <g transform="translate(120, 52)">
-              <path
-                d="M 12 3 L 18 12 L 28 0 L 38 12 L 44 3 L 40 16 L 16 16 Z"
-                fill="url(#crownGoldG)"
-                filter="drop-shadow(0 2px 5px rgba(251,191,36,0.8))"
+        {/* Right Artwork: Light Liquid Financial Metrics Badge */}
+        <div className="hidden sm:flex items-center justify-center shrink-0">
+          <div className="relative p-5 rounded-3xl bg-white/80 border border-white/95 shadow-lg shadow-slate-900/5 specular-rim text-center min-w-[200px]">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+              Total Liquidity
+            </span>
+            <div className="mt-1">
+              <NumericAmount
+                value={walletBalance || 0}
+                size="2xl"
+                semantic="gain"
               />
-              <circle cx="28" cy="38" r="24" fill="url(#avatarG)" stroke="#34d399" strokeWidth="2.5" />
-              <circle cx="28" cy="38" r="20" fill="#064e3b" />
-              <circle cx="28" cy="32" r="6" fill="#a7f3d0" />
-              <path d="M 18 46 A 10 10 0 0 1 38 46 Z" fill="#a7f3d0" />
-            </g>
-          </svg>
+            </div>
+            <div className="mt-2.5 flex items-center justify-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 py-1 px-2.5 rounded-full border border-emerald-200/60">
+              <Sparkles className="w-3 h-3 text-emerald-600" />
+              <span>Real-Time Secured</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }

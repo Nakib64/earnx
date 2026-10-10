@@ -15,12 +15,15 @@ interface PaginatedResponse {
   hasMore: boolean;
 }
 
+let cachedTop3: LeaderboardEntry[] = [];
+let cachedLeaderboard: LeaderboardEntry[] = [];
+
 export function useLeaderboardOrchestrator() {
-  const [top3Entries, setTop3Entries] = useState<LeaderboardEntry[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [top3Entries, setTop3Entries] = useState<LeaderboardEntry[]>(() => cachedTop3);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => cachedLeaderboard);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingInitial, setLoadingInitial] = useState(() => cachedLeaderboard.length === 0);
   const [loadingMore, setLoadingMore] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,14 +34,21 @@ export function useLeaderboardOrchestrator() {
   const fetchTop3 = useCallback(async () => {
     const res = await apiFetch<LeaderboardEntry[]>('/leaderboard');
     if (res.success && res.data) {
-      setTop3Entries(res.data.slice(0, 3));
+      const topSlice = res.data.slice(0, 3);
+      cachedTop3 = topSlice;
+      setTop3Entries(topSlice);
     }
   }, []);
 
   const fetchPage = useCallback(
     async (pageNum: number, search: string, append = false) => {
-      if (pageNum === 1) setLoadingInitial(true);
-      else setLoadingMore(true);
+      if (pageNum === 1) {
+        if (cachedLeaderboard.length === 0 || search) {
+          setLoadingInitial(true);
+        }
+      } else {
+        setLoadingMore(true);
+      }
 
       const res = await apiFetch<PaginatedResponse>(
         `/leaderboard?page=${pageNum}&limit=20&search=${encodeURIComponent(search)}`
@@ -46,11 +56,17 @@ export function useLeaderboardOrchestrator() {
 
       if (res.success && res.data) {
         const newEntries = res.data.data;
+        if (pageNum === 1 && !search) {
+          cachedLeaderboard = newEntries;
+        }
         setLeaderboard((prev) => (append ? [...prev, ...newEntries] : newEntries));
         setHasMore(res.data.hasMore);
         setPage(res.data.page);
       } else if (res.success && Array.isArray(res.data)) {
         const raw = res.data as unknown as LeaderboardEntry[];
+        if (pageNum === 1 && !search) {
+          cachedLeaderboard = raw;
+        }
         setLeaderboard(raw);
         setHasMore(false);
       }
@@ -99,6 +115,11 @@ export function useLeaderboardOrchestrator() {
   const top2 = top3Entries.find((item) => item.rank === 2);
   const top3 = top3Entries.find((item) => item.rank === 3);
 
+  const refresh = useCallback(() => {
+    fetchTop3();
+    fetchPage(1, debouncedSearch, false);
+  }, [fetchTop3, fetchPage, debouncedSearch]);
+
   return {
     state: {
       top3Entries,
@@ -121,6 +142,7 @@ export function useLeaderboardOrchestrator() {
       getPhotoUrl,
       fetchTop3,
       fetchPage,
+      refresh,
     },
   };
 }

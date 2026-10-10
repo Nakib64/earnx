@@ -44,7 +44,7 @@ export function InvestmentWithdrawModal({
             <span className="text-[11px] font-black uppercase tracking-wider text-amber-200">
               Total Active Invested Capital
             </span>
-            <p className="text-3xl font-black font-mono truncate text-white">
+            <p className="text-3xl font-black  truncate text-white">
               ৳{currentAmt.toLocaleString()}
             </p>
             <p className="text-xs text-slate-300 font-medium leading-relaxed">
@@ -75,7 +75,7 @@ export function InvestmentWithdrawModal({
             disabled={submitting}
             className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
           >
-            {submitting ? 'Processing Refund...' : 'Confirm & Refund 100% Capital'}
+            {submitting ? 'Processing Refund...' : 'Refund 100% Capital'}
           </button>
         </div>
       </div>
