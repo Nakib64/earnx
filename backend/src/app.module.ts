@@ -21,6 +21,7 @@ import { OtpModule } from './otp/otp.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { DepositsModule } from './deposits/deposits.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { EcommerceModule } from './ecommerce/ecommerce.module';
 import { AdsModule } from './ads/ads.module';
 
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
@@ -43,6 +44,7 @@ import { APP_GUARD } from '@nestjs/core';
     WithdrawalsModule,
     DepositsModule,
     MarketplaceModule,
+    EcommerceModule,
     AdminAuthModule,
     UserAuthModule,
     UsersModule,

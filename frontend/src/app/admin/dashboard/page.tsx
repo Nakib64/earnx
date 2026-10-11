@@ -27,6 +27,8 @@ import {
   RefreshCw,
   ArrowUpRight,
   CheckCircle2,
+  ShoppingBag,
+  Package,
 } from 'lucide-react';
 import { ShimmerSkeleton, SkeletonLine } from '../../../components/design-system';
 import { AdminAdsAnalyticsChart } from '../../../components/dashboard';
@@ -177,7 +179,7 @@ export default function AdminDashboardPage() {
               </span>
               <span className="text-slate-300">•</span>
               <span className="text-xs text-slate-500 font-medium">
-                Console Phone: <span className="font-mono text-slate-700 font-semibold">{admin?.phone}</span>
+                Console Phone: <span className=" text-slate-700 font-semibold">{admin?.phone}</span>
               </span>
             </div>
           </div>
@@ -444,6 +446,20 @@ export default function AdminDashboardPage() {
             {/* Grid of Interactive Module Tiles */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3">
               {[
+                {
+                  href: '/admin/products',
+                  icon: ShoppingBag,
+                  label: 'Products Catalog',
+                  desc: 'Shop items & stock',
+                  accent: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+                },
+                {
+                  href: '/admin/orders',
+                  icon: Package,
+                  label: 'Ecommerce Orders',
+                  desc: 'Delivery & fulfillment',
+                  accent: 'bg-teal-50 text-teal-700 border-teal-200/80',
+                },
                 {
                   href: '/admin/deposits',
                   icon: ArrowDownCircle,

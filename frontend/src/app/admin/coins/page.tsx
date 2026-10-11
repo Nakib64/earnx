@@ -557,7 +557,7 @@ export default function AdminCoinsPage() {
                               <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[200px]">
                                 {u.full_name || u.phone}
                               </p>
-                              <p className="text-slate-400 font-mono text-[11px] mt-0.5">
+                              <p className="text-slate-400  text-[11px] mt-0.5">
                                 {u.phone} &bull;{' '}
                                 <span className="text-[#009F6B] font-bold">{u.referral_code}</span>
                               </p>
@@ -653,7 +653,7 @@ export default function AdminCoinsPage() {
               {/* User Info Box */}
               <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-4 space-y-1.5 text-xs">
                 <p className="font-bold text-slate-900">{selectedUser.full_name || 'Anonymous User'}</p>
-                <p className="text-slate-500 font-mono text-[11px]">
+                <p className="text-slate-500  text-[11px]">
                   Phone: {selectedUser.phone} &bull; Code: <strong className="text-[#009F6B]">{selectedUser.referral_code}</strong>
                 </p>
                 <div className="pt-2 flex justify-between font-bold border-t border-slate-200/70 mt-2">
@@ -670,8 +670,8 @@ export default function AdminCoinsPage() {
                       type="button"
                       onClick={() => setAdjustIsLocked(false)}
                       className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${!adjustIsLocked
-                          ? 'bg-[#009F6B] border-[#009F6B] text-white shadow-xs'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                        ? 'bg-[#009F6B] border-[#009F6B] text-white shadow-xs'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
                         }`}
                     >
                       Available Coins
@@ -680,8 +680,8 @@ export default function AdminCoinsPage() {
                       type="button"
                       onClick={() => setAdjustIsLocked(true)}
                       className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all cursor-pointer ${adjustIsLocked
-                          ? 'bg-amber-600 border-amber-600 text-white shadow-xs'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
+                        ? 'bg-amber-600 border-amber-600 text-white shadow-xs'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-white'
                         }`}
                     >
                       Locked Coins

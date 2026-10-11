@@ -413,11 +413,10 @@ export default function AdminWithdrawalsPage() {
                   setStatusFilter(tab);
                   setPage(1);
                 }}
-                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 active:scale-[0.98] ${
-                  statusFilter === tab
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 active:scale-[0.98] ${statusFilter === tab
                     ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-                }`}
+                  }`}
               >
                 {tab === 'ALL' ? 'All Requests' : tab === 'PENDING' ? 'Pending Queue' : 'Paid / Settled'}
               </button>
@@ -478,7 +477,7 @@ export default function AdminWithdrawalsPage() {
                                   {w.user?.referral_code || '—'}
                                 </span>
                                 <span>&bull;</span>
-                                <span className="font-mono text-slate-400">{w.user?.phone}</span>
+                                <span className=" text-slate-400">{w.user?.phone}</span>
                               </div>
                             </div>
                           </div>
@@ -492,7 +491,7 @@ export default function AdminWithdrawalsPage() {
                         {/* 3. OTP Chip */}
                         <td className="py-3.5 px-4">
                           {w.otp ? (
-                            <div className="inline-flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-xl font-mono font-bold text-xs text-slate-800">
+                            <div className="inline-flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/80 px-2.5 py-1 rounded-xl  font-bold text-xs text-slate-800">
                               <span>{w.otp}</span>
                               <button
                                 type="button"
@@ -546,7 +545,7 @@ export default function AdminWithdrawalsPage() {
                               </div>
                               <div className="text-[10px] text-slate-500">
                                 <span className="font-bold text-purple-700">{w.paid_to_user.referral_code}</span> &bull;{' '}
-                                <span className="font-mono text-slate-400">{w.paid_to_user.phone}</span>
+                                <span className=" text-slate-400">{w.paid_to_user.phone}</span>
                               </div>
                             </div>
                           ) : (
@@ -663,7 +662,7 @@ export default function AdminWithdrawalsPage() {
                 </div>
                 <div className="flex justify-between items-center text-slate-600">
                   <span className="font-medium">Security OTP:</span>
-                  <span className="font-mono font-bold bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-slate-800">
+                  <span className=" font-bold bg-white px-2 py-0.5 rounded-lg border border-slate-200 text-slate-800">
                     {paymentModal.withdrawal.otp || '—'}
                   </span>
                 </div>
@@ -712,7 +711,7 @@ export default function AdminWithdrawalsPage() {
                               {u.full_name || 'No Name'}
                             </div>
                             <div className="text-[11px] text-slate-500">
-                              Phone: <span className="font-mono">{u.phone}</span> &bull; Code:{' '}
+                              Phone: <span className="">{u.phone}</span> &bull; Code:{' '}
                               <span className="font-bold text-[#009F6B]">{u.referral_code}</span>
                             </div>
                           </div>
@@ -750,7 +749,7 @@ export default function AdminWithdrawalsPage() {
                     type="text"
                     readOnly
                     value={selectedTargetUser?.phone || '—'}
-                    className="w-full bg-slate-100/90 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-slate-800 focus:outline-none cursor-not-allowed"
+                    className="w-full bg-slate-100/90 border border-slate-200 rounded-xl px-3 py-1.5 text-xs  font-bold text-slate-800 focus:outline-none cursor-not-allowed"
                   />
                 </div>
                 <div>

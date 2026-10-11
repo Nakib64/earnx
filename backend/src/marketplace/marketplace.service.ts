@@ -17,8 +17,8 @@ export class MarketplaceService {
   // ==========================================
   // POSTS
   // ==========================================
-  async getPosts(page = 1, limit = 20, currentUserId?: string) {
-    return this.postSubService.getPosts(page, limit, currentUserId);
+  async getPosts(page = 1, limit = 20, currentUserId?: string, authorId?: string) {
+    return this.postSubService.getPosts(page, limit, currentUserId, authorId);
   }
 
   async createPost(
@@ -30,6 +30,14 @@ export class MarketplaceService {
 
   async deletePost(userId: string, postId: string, isAdmin = false) {
     return this.postSubService.deletePost(userId, postId, isAdmin);
+  }
+
+  async getAdminPosts(page = 1, limit = 20, search = '') {
+    return this.postSubService.getAdminPosts(page, limit, search);
+  }
+
+  async getAdminStats() {
+    return this.postSubService.getAdminStats();
   }
 
   // ==========================================

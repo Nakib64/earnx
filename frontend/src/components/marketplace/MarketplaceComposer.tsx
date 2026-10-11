@@ -98,12 +98,10 @@ export function MarketplaceComposer({
         >
           {posting ? (
             <>
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               <span>Posting...</span>
             </>
           ) : (
             <>
-              <Send className="w-3.5 h-3.5 text-emerald-200" />
               <span>Publish Post</span>
             </>
           )}

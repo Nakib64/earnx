@@ -191,7 +191,7 @@ export default function UserInvestmentsPage() {
   ];
 
   return (
-    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto text-slate-900 pb-16 animate-fade-in select-none">
+    <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto text-slate-900 pb-16 animate-fade-in select-none font-[family-name:var(--font-montserrat)]">
       {/* 1. Compact, Clearly Structured Page Header (sitting directly on background) */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
         <div className="space-y-1.5 max-w-2xl">

@@ -80,24 +80,29 @@ export function InvestmentPlansGrid({
 
                 <div className="space-y-4 min-w-0">
                   {/* Title & Subtitle */}
-                  <div className="min-w-0 space-y-0.5">
-                    <h3 className="text-lg sm:text-xl font-black  text-slate-900 truncate">
-                      {plan.title}
-                    </h3>
-                    <p className="text-xs font-semibold text-slate-500 truncate">
-                      Monthly Dividend Plan
-                    </p>
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">
+                        {plan.title}
+                      </h3>
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200/80">
+                      <span>Tenure:</span>
+                      <strong className="text-slate-900">
+                        {plan.is_lifetime ? 'Lifetime' : `${plan.duration_months || 3} Months`}
+                      </strong>
+                    </div>
                   </div>
 
-                  {/* Price Tag Box */}
+                  {/* Min Investment Box */}
                   <div className="rounded-2xl p-4 flex items-center justify-between min-w-0 bg-white/80 border border-slate-200/90 text-slate-900 shadow-2xs specular-rim">
                     <div className="min-w-0">
                       <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
-                        Package Principal
+                        Min. Investment Capital
                       </span>
                       <NumericAmount value={packageAmt} size="2xl" className=" text-slate-900" />
                     </div>
-                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
+                    <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-[#009F6B] shrink-0 shadow-2xs">
                       <TrendingUp className="w-5.5 h-5.5" />
                     </div>
                   </div>
@@ -106,35 +111,33 @@ export function InvestmentPlansGrid({
                   <div className="grid grid-cols-2 gap-2.5 pt-1">
                     <div className="border border-slate-200/80 p-3 rounded-2xl bg-white/70 min-w-0 space-y-0.5 specular-rim">
                       <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
-                        Monthly Return
+                        Monthly Interest
                       </span>
-                      <div className="text-base sm:text-lg font-black  truncate text-emerald-700 tabular-nums">
+                      <div className="text-base sm:text-lg font-black truncate text-[#009F6B] tabular-nums">
                         +{returnPct}% / mo
                       </div>
                     </div>
 
                     <div className="border border-slate-200/80 p-3 rounded-2xl bg-white/70 min-w-0 space-y-0.5 specular-rim">
                       <span className="text-[10px] font-black uppercase tracking-wider block truncate text-slate-400">
-                        Est. Dividend
+                        Total Yield
                       </span>
-                      <div className="text-base sm:text-lg font-black  truncate text-slate-900 tabular-nums">
-                        ৳{monthlyDividend.toLocaleString()}
+                      <div className="text-base sm:text-lg font-black truncate text-slate-900 tabular-nums">
+                        +{returnPct * (plan.duration_months || 1)}% Total
                       </div>
                     </div>
                   </div>
 
-                  {/* Plan Duration Badge */}
-                  <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-slate-200/80 bg-white/70 text-xs font-bold min-w-0">
-                    <span className="text-slate-500 font-semibold shrink-0">Plan Duration:</span>
-                    {plan.is_lifetime ? (
-                      <span className="font-black text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full text-[11px] shrink-0">
-                        Lifetime Dividend
-                      </span>
-                    ) : (
-                      <span className="font-black  truncate text-slate-900">
-                        {plan.duration_months} Months
-                      </span>
-                    )}
+                  {/* Package Rules & Safeguards */}
+                  <div className="space-y-1.5 pt-0.5 text-[11px] font-medium text-slate-600 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
+                    <div className="flex items-center gap-1.5 text-slate-700">
+                      <span className="text-amber-600 font-bold">🔒</span>
+                      <span>Capital locked for {plan.duration_months || 3} months</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-emerald-800">
+                      <span className="text-[#009F6B] font-bold">⚡</span>
+                      <span>Monthly return added to wallet directly</span>
+                    </div>
                   </div>
                 </div>
 

@@ -22,8 +22,12 @@ import {
   RefreshCw,
   ArrowLeft,
   Sparkles,
+  Wallet,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { DepositGatewayConfig } from '../../../types';
 
 interface LoginHistoryItem {
   id: string;
@@ -63,6 +67,20 @@ export default function AdminSettingsPage() {
   const [savingAdminProfile, setSavingAdminProfile] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Deposit Gateway Numbers State (Used by User Dashboard)
+  const [gateways, setGateways] = useState<DepositGatewayConfig>({
+    bkash_number: '01700000000',
+    bkash_type: 'Personal (Send Money)',
+    nagad_number: '01800000000',
+    nagad_type: 'Personal (Send Money)',
+    rocket_number: '01900000000',
+    rocket_type: 'Personal (Send Money)',
+    deposit_instruction: 'Send money to the designated number and paste the Transaction ID (TrxID) below.',
+  });
+  const [loadingGateways, setLoadingGateways] = useState(true);
+  const [savingGateways, setSavingGateways] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
   // Login History State
   const [history, setHistory] = useState<LoginHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -77,6 +95,45 @@ export default function AdminSettingsPage() {
       setAdminPhone(admin.phone || '');
     }
   }, [admin]);
+
+  const fetchGateways = async () => {
+    setLoadingGateways(true);
+    const res = await apiFetch<DepositGatewayConfig>('/deposits/gateways', { isAdmin: true });
+    if (res.success && res.data) {
+      setGateways(res.data);
+    }
+    setLoadingGateways(false);
+  };
+
+  useEffect(() => {
+    fetchGateways();
+  }, []);
+
+  const handleCopy = (text: string, key: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    toast.success(`Copied ${key} number (${text})`);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const handleUpdateGateways = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingGateways(true);
+    const res = await apiFetch<DepositGatewayConfig>('/deposits/admin/gateways', {
+      method: 'PATCH',
+      isAdmin: true,
+      body: JSON.stringify(gateways),
+    });
+
+    if (res.success) {
+      toast.success('Deposit numbers & payment gateways updated successfully!');
+      if (res.data) setGateways(res.data);
+    } else {
+      toast.error(res.error?.message || 'Failed to update deposit gateways');
+    }
+    setSavingGateways(false);
+  };
 
   const fetchLoginHistory = async (page = 1) => {
     setHistoryLoading(true);
@@ -100,8 +157,12 @@ export default function AdminSettingsPage() {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refreshAdminProfile(), fetchLoginHistory(historyPage)]);
-      toast.info('Refreshed admin profile and login audit log');
+      await Promise.all([
+        refreshAdminProfile(),
+        fetchLoginHistory(historyPage),
+        fetchGateways(),
+      ]);
+      toast.info('Refreshed admin profile, deposit numbers, and login audit log');
     } catch {
       toast.error('Failed to refresh data');
     } finally {
@@ -211,7 +272,7 @@ export default function AdminSettingsPage() {
         )}
 
         {/* ── 2. SUMMARY KPI STATS CARDS ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 select-none">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 select-none">
           {/* Card 1: Admin Identity */}
           <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
             <div className="flex items-center justify-between">
@@ -265,6 +326,24 @@ export default function AdminSettingsPage() {
               </span>
             </div>
           </div>
+
+          {/* Card 4: Deposit Gateways */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Deposit Gateways</span>
+              <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
+                <Wallet className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-bold text-sky-700 tabular-nums">
+                3 Channels
+              </span>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+                bKash &bull; Nagad &bull; Rocket
+              </span>
+            </div>
+          </div>
         </div>
 
         {/* ── 3. ADMIN PROFILE SETTINGS CARD ── */}
@@ -280,10 +359,7 @@ export default function AdminSettingsPage() {
               </div>
             </div>
 
-            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-emerald-50 text-[#009F6B] border border-emerald-200/80 hidden sm:inline-flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#009F6B]" />
-              <span>Verified Superadmin</span>
-            </span>
+         
           </div>
 
           <form onSubmit={handleUpdateAdminProfile} className="space-y-4">
@@ -385,7 +461,236 @@ export default function AdminSettingsPage() {
           </form>
         </div>
 
-        {/* ── 4. ADMIN LOGIN HISTORY AUDIT CARD ── */}
+        {/* ── 4. OFFICIAL DEPOSIT NUMBERS & PAYMENT GATEWAYS CARD ── */}
+        <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100/80 pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
+                <Wallet className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                    Official Deposit Numbers &amp; Gateways
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80">
+                    Live
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-normal">
+                  Configure official bKash, Nagad, and Rocket numbers and instructions used on member deposit dashboard.
+                </p>
+              </div>
+            </div>
+
+            <span className="text-xs font-semibold px-3 py-1 rounded-xl bg-slate-100/90 text-slate-700 border border-slate-200/80 hidden sm:inline-flex items-center gap-1.5 self-start sm:self-auto">
+              <span className="w-2 h-2 rounded-full bg-[#009F6B] animate-pulse" />
+              <span>User Dashboard Active</span>
+            </span>
+          </div>
+
+          <form onSubmit={handleUpdateGateways} className="space-y-5">
+            {/* 3 Gateway Cards in a grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* bKash Card */}
+              <div className="bg-white/90 border border-slate-200/80 rounded-2xl p-4.5 space-y-3.5 shadow-2xs hover:border-pink-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-pink-50 border border-pink-200 text-pink-700">
+                    bKash (বিকাশ)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(gateways.bkash_number, 'bKash')}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {copiedKey === 'bKash' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-600 font-bold">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    bKash Number <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="text"
+                      required
+                      value={gateways.bkash_number}
+                      onChange={(e) => setGateways({ ...gateways, bkash_number: e.target.value })}
+                      placeholder="017XXXXXXXX"
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Account Type
+                  </label>
+                  <input
+                    type="text"
+                    value={gateways.bkash_type}
+                    onChange={(e) => setGateways({ ...gateways, bkash_type: e.target.value })}
+                    placeholder="Personal (Send Money)"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* Nagad Card */}
+              <div className="bg-white/90 border border-slate-200/80 rounded-2xl p-4.5 space-y-3.5 shadow-2xs hover:border-amber-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-amber-50 border border-amber-200 text-amber-700">
+                    Nagad (নগদ)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(gateways.nagad_number, 'Nagad')}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {copiedKey === 'Nagad' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-600 font-bold">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Nagad Number <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="text"
+                      required
+                      value={gateways.nagad_number}
+                      onChange={(e) => setGateways({ ...gateways, nagad_number: e.target.value })}
+                      placeholder="018XXXXXXXX"
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Account Type
+                  </label>
+                  <input
+                    type="text"
+                    value={gateways.nagad_type}
+                    onChange={(e) => setGateways({ ...gateways, nagad_type: e.target.value })}
+                    placeholder="Personal (Send Money)"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                  />
+                </div>
+              </div>
+
+              {/* Rocket Card */}
+              <div className="bg-white/90 border border-slate-200/80 rounded-2xl p-4.5 space-y-3.5 shadow-2xs hover:border-purple-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase bg-purple-50 border border-purple-200 text-purple-700">
+                    Rocket (রকেট)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(gateways.rocket_number, 'Rocket')}
+                    className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    {copiedKey === 'Rocket' ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-600 font-bold">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Rocket Number <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="text"
+                      required
+                      value={gateways.rocket_number}
+                      onChange={(e) => setGateways({ ...gateways, rocket_number: e.target.value })}
+                      placeholder="019XXXXXXXX"
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Account Type
+                  </label>
+                  <input
+                    type="text"
+                    value={gateways.rocket_type}
+                    onChange={(e) => setGateways({ ...gateways, rocket_type: e.target.value })}
+                    placeholder="Personal (Send Money)"
+                    className="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Deposit Instructions Textarea */}
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                Deposit Guidelines &amp; Member Instructions
+              </label>
+              <textarea
+                rows={2}
+                value={gateways.deposit_instruction || ''}
+                onChange={(e) => setGateways({ ...gateways, deposit_instruction: e.target.value })}
+                placeholder="Send money to the designated number and paste the Transaction ID (TrxID) below."
+                className="w-full px-3.5 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs resize-none"
+              />
+              <p className="text-[11px] text-slate-400 font-normal">
+                This notice will be displayed to members on the deposit page before submitting their transaction ID.
+              </p>
+            </div>
+
+            {/* Action Button */}
+            <button
+              type="submit"
+              disabled={savingGateways || loadingGateways}
+              className="w-full py-3 bg-[#009F6B] hover:bg-[#008C5F] disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98]"
+            >
+              <Save className="w-4 h-4 text-emerald-100" />
+              <span>{savingGateways ? 'Updating Deposit Gateways...' : 'Save Deposit Numbers'}</span>
+            </button>
+          </form>
+        </div>
+
+        {/* ── 5. ADMIN LOGIN HISTORY AUDIT CARD ── */}
         <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
           <div className="flex items-center justify-between border-b border-slate-100/80 pb-4">
             <div className="flex items-center space-x-3">

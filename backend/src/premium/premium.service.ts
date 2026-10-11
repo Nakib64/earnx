@@ -27,10 +27,14 @@ export class PremiumService {
 
   async createPackage(data: {
     title: string;
+    description?: string;
+    original_price?: number;
+    discount_percent?: number;
     price: number;
     daily_ads_count: number;
     daily_reward_amount: number;
     duration_days?: number;
+    direct_referral_commission?: number;
   }) {
     return this.packageSubService.createPackage(data);
   }
@@ -39,11 +43,15 @@ export class PremiumService {
     id: string,
     data: Partial<{
       title: string;
+      description: string;
+      original_price: number;
+      discount_percent: number;
       price: number;
       daily_ads_count: number;
       daily_reward_amount: number;
       duration_days: number;
       is_active: boolean;
+      direct_referral_commission: number;
     }>,
   ) {
     return this.packageSubService.updatePackage(id, data);

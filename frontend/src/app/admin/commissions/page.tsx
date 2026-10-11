@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { CommissionRule, CommissionType } from '../../../types';
+import { CommissionRule, CommissionType, PremiumPackage } from '../../../types';
 import { ConfirmModal } from '../../../components/common/ConfirmModal';
 import {
   Layers,
@@ -20,17 +20,20 @@ import {
   Sparkles,
   Edit2,
   CheckCircle2,
+  ArrowRight,
+  Package,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function AdminCommissionsPage() {
   const { admin } = useAuth();
   const [rules, setRules] = useState<CommissionRule[]>([]);
+  const [packages, setPackages] = useState<PremiumPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Form State
-  const [level, setLevel] = useState(1);
+  // Form State (Levels 2 to 5 only; Level 1 is on PremiumPackage)
+  const [level, setLevel] = useState(2);
   const [amount, setAmount] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -40,11 +43,17 @@ export default function AdminCommissionsPage() {
 
   const fetchRules = async () => {
     setLoading(true);
-    const res = await apiFetch<CommissionRule[]>('/admin/commissions/rules', { isAdmin: true });
+    const [res, pkgRes] = await Promise.all([
+      apiFetch<CommissionRule[]>('/admin/commissions/rules', { isAdmin: true, skipCache: true, forceRefresh: true }),
+      apiFetch<PremiumPackage[]>('/premium/admin/packages', { isAdmin: true, skipCache: true, forceRefresh: true }),
+    ]);
     if (res.success && res.data) {
-      // Filter only PREMIUM commission rules
-      const premiumRules = res.data.filter((r) => r.type === CommissionType.PREMIUM);
+      // Filter only PREMIUM commission rules for indirect uplines (Levels 2 to 5)
+      const premiumRules = res.data.filter((r) => r.type === CommissionType.PREMIUM && Number(r.level) >= 2);
       setRules(premiumRules);
+    }
+    if (pkgRes.success && pkgRes.data) {
+      setPackages(pkgRes.data);
     }
     setLoading(false);
   };
@@ -75,20 +84,32 @@ export default function AdminCommissionsPage() {
     return rules.reduce((acc, r) => acc + Number(r.amount || 0), 0);
   }, [rules]);
 
-  const level1Rule = useMemo(() => {
-    return rules.find((r) => Number(r.level) === 1);
-  }, [rules]);
-
-  const level1Amount = Number(level1Rule?.amount || 0);
-
   const indirectPool = useMemo(() => {
     return rules
-      .filter((r) => Number(r.level) > 1)
+      .filter((r) => Number(r.level) >= 2)
       .reduce((acc, r) => acc + Number(r.amount || 0), 0);
   }, [rules]);
 
+  // Direct sponsor commission summary from packages
+  const directCommissionDisplay = useMemo(() => {
+    if (!packages || packages.length === 0) return '৳0.00';
+    const amounts = packages.map((pkg) => Number(pkg.direct_referral_commission || 0));
+    const min = Math.min(...amounts);
+    const max = Math.max(...amounts);
+    if (min === max) {
+      return `৳${min.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `৳${min.toLocaleString()} - ৳${max.toLocaleString()}`;
+  }, [packages]);
+
+  const level1Amount = useMemo(() => {
+    if (!packages || packages.length === 0) return 0;
+    return Number(packages[0]?.direct_referral_commission || 0);
+  }, [packages]);
+
   // Quick edit rule handler
   const handleEditRule = (r: CommissionRule) => {
+    if (Number(r.level) < 2) return;
     setLevel(Number(r.level));
     setAmount(String(r.amount));
     toast.info(`Editing Level ${r.level} commission rule`);
@@ -98,8 +119,8 @@ export default function AdminCommissionsPage() {
     e.preventDefault();
 
     const levelNum = Number(level);
-    if (levelNum < 1 || levelNum > 5) {
-      toast.warning('Tree level depth must be between Level 1 and Level 5');
+    if (levelNum < 2 || levelNum > 5) {
+      toast.warning('Tree level depth must be between Level 2 and Level 5. Direct sponsor is configured on packages.');
       return;
     }
 
@@ -210,7 +231,7 @@ export default function AdminCommissionsPage() {
                 <span className="w-2 h-2 rounded-full bg-[#009F6B] animate-pulse" />
                 Live Compensation Matrix &bull;{' '}
                 <strong className="text-slate-900 font-semibold">
-                  {rules.length} / 5 Referral Levels Configured
+                  {rules.length} / 4 Upline Tiers Configured (L2-L5)
                 </strong>
               </span>
             </div>
@@ -250,28 +271,28 @@ export default function AdminCommissionsPage() {
             </div>
             <div className="mt-2">
               <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">
-                {rules.length} <span className="text-sm font-semibold text-slate-400">/ 5</span>
+                {rules.length} <span className="text-sm font-semibold text-slate-400">/ 4</span>
               </span>
               <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
-                Upline commission tiers
+                Upline tiers (L2 - L5)
               </span>
             </div>
           </div>
 
-          {/* Card 2: Total Package Payout */}
+          {/* Card 2: Indirect Tree Pool */}
           <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Total Tree Payout</span>
+              <span className="text-xs font-semibold text-slate-500">Indirect Tree Pool</span>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
                 <DollarSign className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2">
               <span className="text-2xl sm:text-3xl font-bold text-[#009F6B] tabular-nums">
-                ৳{totalPayout.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                ৳{indirectPool.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
               <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
-                Full 5-tier distribution sum
+                Total sum of L2-L5 pool
               </span>
             </div>
           </div>
@@ -286,34 +307,89 @@ export default function AdminCommissionsPage() {
             </div>
             <div className="mt-2">
               <span className="text-2xl sm:text-3xl font-bold text-amber-600 tabular-nums">
-                ৳{level1Amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {directCommissionDisplay}
               </span>
               <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
-                Immediate referrer bonus
+                {packages.length > 0 ? `Across ${packages.length} VIP packages` : 'Immediate referrer bonus'}
               </span>
             </div>
           </div>
 
-          {/* Card 4: Indirect Upline Pool */}
+          {/* Card 4: Configured Packages */}
           <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Upline Pool (L2-L5)</span>
+              <span className="text-xs font-semibold text-slate-500">Configured Packages</span>
               <div className="w-8 h-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
-                <TrendingUp className="w-4 h-4" />
+                <Package className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2">
               <span className="text-2xl sm:text-3xl font-bold text-sky-600 tabular-nums">
-                ৳{indirectPool.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {packages.length}
               </span>
               <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
-                Multi-tier network pool
+                VIP packages active
               </span>
             </div>
           </div>
         </div>
 
-        {/* ── 3. CONFIGURE COMMISSION LEVEL FORM ── */}
+        {/* ── 3. DIRECT SPONSOR COMMISSIONS (CONFIGURED PER PACKAGE) ── */}
+        <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100/80 pb-3.5">
+            <div className="flex items-center space-x-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shrink-0">
+                <Crown className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                  <span>Direct Referral Commissions</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                    Package-Specific
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 font-normal">
+                  Direct sponsor bonus (Level 1) is configured individually per VIP package. When a user buys a package, their direct referrer earns that package's direct commission.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/admin/premium"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-bold text-amber-900 transition-all shadow-2xs self-start sm:self-center shrink-0 cursor-pointer"
+            >
+              <Package className="w-3.5 h-3.5 text-amber-700" />
+              <span>Configure On Packages</span>
+              <ArrowRight className="w-3 h-3 text-amber-700" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {packages.map((pkg) => (
+              <div
+                key={pkg.id}
+                className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200/70 flex items-center justify-between hover:bg-amber-50/70 transition-all"
+              >
+                <div>
+                  <div className="text-xs font-bold text-slate-900">{pkg.title}</div>
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    Price: ৳{Number(pkg.price).toLocaleString()}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">
+                    Direct Refer
+                  </div>
+                  <div className="text-base font-bold text-amber-900 tabular-nums">
+                    ৳{Number(pkg.direct_referral_commission || 0).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── 4. CONFIGURE COMMISSION LEVEL FORM ── */}
         <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
           <div className="flex items-center justify-between border-b border-slate-100/80 pb-3.5">
             <div className="flex items-center space-x-3">
@@ -339,14 +415,14 @@ export default function AdminCommissionsPage() {
           <form onSubmit={handleSaveRule} className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 items-end">
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                Tree Level Depth (Level 1 - 5) <span className="text-rose-500">*</span>
+                Tree Level Depth (Level 2 - 5) <span className="text-rose-500">*</span>
               </label>
               <select
                 value={level}
                 onChange={(e) => setLevel(parseInt(e.target.value, 10))}
                 className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs cursor-pointer"
               >
-                {[1, 2, 3, 4, 5].map((lvl) => {
+                {[2, 3, 4, 5].map((lvl) => {
                   const info = getLevelBadgeInfo(lvl);
                   const existingRule = rules.find((r) => Number(r.level) === lvl);
                   return (
@@ -428,7 +504,7 @@ export default function AdminCommissionsPage() {
                 ) : sortedRules.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-10 text-center text-slate-400 font-semibold">
-                      No commission rules defined yet. Use the form above to configure Level 1 to Level 5.
+                      No commission rules defined yet. Use the form above to configure Level 2 to Level 5.
                     </td>
                   </tr>
                 ) : (

@@ -84,7 +84,12 @@ function autoInvalidateOnMutation(endpoint: string): void {
   const ep = endpoint.toLowerCase();
   if (ep.includes('wallet') || ep.includes('withdraw') || ep.includes('deposit') || ep.includes('transfer')) {
     invalidateApiCache('wallet');
+    invalidateApiCache('deposit');
+    invalidateApiCache('withdraw');
     invalidateApiCache('/auth/profile');
+  }
+  if (ep.includes('marketplace')) {
+    invalidateApiCache('marketplace');
   }
   if (ep.includes('coin')) {
     invalidateApiCache('coin');

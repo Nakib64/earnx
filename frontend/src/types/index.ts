@@ -72,6 +72,7 @@ export interface PremiumPackage {
   daily_reward_amount: number | string;
   duration_days: number;
   is_active: boolean;
+  direct_referral_commission?: number | string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -416,3 +417,68 @@ export interface LeaderboardEntry {
 }
 
 export type SystemConfigMap = Record<string, string>;
+
+// ==========================================
+// ECOMMERCE & ORDERS DOMAIN
+// ==========================================
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string | null;
+  price: number | string;
+  images: string[];
+  stock: number;
+  category?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id?: string | null;
+  product_name: string;
+  product_image?: string | null;
+  unit_price: number | string;
+  quantity: number;
+  total_price: number | string;
+}
+
+export interface Order {
+  id: string;
+  order_number: string;
+  user_id: string;
+  total_amount: number | string;
+  status: OrderStatus;
+  customer_name: string;
+  customer_phone: string;
+  district: string;
+  city?: string | null;
+  delivery_address: string;
+  notes?: string | null;
+  payment_method: string;
+  paid_at: string;
+  items: OrderItem[];
+  user?: UserSummary;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  quantity: number;
+  stock: number;
+}

@@ -13,11 +13,13 @@ export class MarketplacePostSubService {
   /**
    * Get paginated posts feed with likes count, comments, and nested replies
    */
-  async getPosts(page = 1, limit = 20, currentUserId?: string) {
+  async getPosts(page = 1, limit = 20, currentUserId?: string, authorId?: string) {
     const skip = (page - 1) * limit;
+    const where = authorId ? { user_id: authorId } : {};
 
     const [posts, total] = await Promise.all([
       this.prisma.marketplacePost.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { created_at: 'desc' },
@@ -80,7 +82,7 @@ export class MarketplacePostSubService {
           },
         },
       }),
-      this.prisma.marketplacePost.count(),
+      this.prisma.marketplacePost.count({ where }),
     ]);
 
     const formatted = posts.map((p) => {
@@ -181,5 +183,140 @@ export class MarketplacePostSubService {
     }
 
     return { success: true, message: 'Post deleted successfully' };
+  }
+
+  /**
+   * Get all posts with author details, comments, and search filtering for Admin
+   */
+  async getAdminPosts(page = 1, limit = 20, search = '') {
+    const skip = (page - 1) * limit;
+    const cleanSearch = search?.trim();
+
+    const where: any = {};
+    if (cleanSearch) {
+      where.OR = [
+        { content: { contains: cleanSearch, mode: 'insensitive' } },
+        { user: { full_name: { contains: cleanSearch, mode: 'insensitive' } } },
+        { user: { email: { contains: cleanSearch, mode: 'insensitive' } } },
+        { user: { phone: { contains: cleanSearch, mode: 'insensitive' } } },
+      ];
+    }
+
+    const [posts, total] = await Promise.all([
+      this.prisma.marketplacePost.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              full_name: true,
+              phone: true,
+              email: true,
+              avatar_url: true,
+              referral_code: true,
+              is_premium: true,
+              created_at: true,
+              designation: { select: { name: true, stars: true } },
+            },
+          },
+          comments: {
+            where: { parent_id: null },
+            orderBy: { created_at: 'asc' },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  full_name: true,
+                  phone: true,
+                  email: true,
+                  avatar_url: true,
+                  is_premium: true,
+                },
+              },
+              replies: {
+                orderBy: { created_at: 'asc' },
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      full_name: true,
+                      phone: true,
+                      email: true,
+                      avatar_url: true,
+                      is_premium: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _count: {
+            select: {
+              likes: true,
+              comments: true,
+            },
+          },
+        },
+      }),
+      this.prisma.marketplacePost.count({ where }),
+    ]);
+
+    const formatted = posts.map((p) => ({
+      id: p.id,
+      content: p.content,
+      image_url: p.image_url,
+      created_at: p.created_at,
+      updated_at: p.updated_at,
+      user: p.user,
+      likes_count: p._count.likes,
+      comments_count: p._count.comments,
+      comments: p.comments,
+    }));
+
+    return {
+      success: true,
+      data: formatted,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get marketplace overview metrics for Admin
+   */
+  async getAdminStats() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [totalPosts, totalComments, totalLikes, todayPosts, distinctAuthors] =
+      await Promise.all([
+        this.prisma.marketplacePost.count(),
+        this.prisma.marketplaceComment.count(),
+        this.prisma.marketplaceLike.count(),
+        this.prisma.marketplacePost.count({
+          where: { created_at: { gte: today } },
+        }),
+        this.prisma.marketplacePost.groupBy({
+          by: ['user_id'],
+        }),
+      ]);
+
+    return {
+      success: true,
+      data: {
+        totalPosts,
+        totalComments,
+        totalLikes,
+        todayPosts,
+        activeAuthors: distinctAuthors.length,
+      },
+    };
   }
 }

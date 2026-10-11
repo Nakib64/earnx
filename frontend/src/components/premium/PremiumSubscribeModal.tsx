@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { PremiumPackage } from '../../types';
 import { apiFetch } from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 
 interface PremiumSubscribeModalProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ interface PremiumSubscribeModalProps {
   onClose: () => void;
   onConfirm: (
     pkg: PremiumPackage,
-    referrerCode?: string,
+    referrerCode: string,
   ) => Promise<{ success: boolean; error?: string } | void>;
 }
 
@@ -33,6 +34,7 @@ export function PremiumSubscribeModal({
   onClose,
   onConfirm,
 }: PremiumSubscribeModalProps) {
+  const { user } = useAuth();
   const [referrerCode, setReferrerCode] = useState('');
   const [checking, setChecking] = useState(false);
   const [referrerUser, setReferrerUser] = useState<{
@@ -41,6 +43,7 @@ export function PremiumSubscribeModal({
     referral_code: string;
   } | null>(null);
   const [isInvalid, setIsInvalid] = useState(false);
+  const [invalidMsg, setInvalidMsg] = useState<string>('');
   const [localError, setLocalError] = useState<string | null>(null);
 
   // Reset form and errors when modal opens
@@ -50,6 +53,7 @@ export function PremiumSubscribeModal({
       setChecking(false);
       setReferrerUser(null);
       setIsInvalid(false);
+      setInvalidMsg('');
       setLocalError(null);
     }
   }, [isOpen]);
@@ -61,6 +65,15 @@ export function PremiumSubscribeModal({
       setChecking(false);
       setReferrerUser(null);
       setIsInvalid(false);
+      setInvalidMsg('');
+      return;
+    }
+
+    if (user?.referral_code && code.toLowerCase() === user.referral_code.toLowerCase()) {
+      setChecking(false);
+      setReferrerUser(null);
+      setIsInvalid(true);
+      setInvalidMsg('You cannot use your own referral code.');
       return;
     }
 
@@ -73,22 +86,31 @@ export function PremiumSubscribeModal({
         }>(`/users/check-referrer?code=${encodeURIComponent(code)}`);
 
         if (res.success && res.data?.exists && res.data.user) {
-          setReferrerUser(res.data.user);
-          setIsInvalid(false);
+          if (user?.id && res.data.user.id === user.id) {
+            setReferrerUser(null);
+            setIsInvalid(true);
+            setInvalidMsg('You cannot use your own referral code.');
+          } else {
+            setReferrerUser(res.data.user);
+            setIsInvalid(false);
+            setInvalidMsg('');
+          }
         } else {
           setReferrerUser(null);
           setIsInvalid(true);
+          setInvalidMsg('Sponsor code not found. Please enter a valid referral code.');
         }
       } catch (err) {
         setReferrerUser(null);
         setIsInvalid(true);
+        setInvalidMsg('Failed to verify sponsor code. Please try again.');
       } finally {
         setChecking(false);
       }
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [referrerCode]);
+  }, [referrerCode, user]);
 
   if (!isOpen || !pkg) return null;
 
@@ -99,8 +121,18 @@ export function PremiumSubscribeModal({
     if (subscribing) return;
     setLocalError(null);
 
-    const finalReferrer = referrerUser ? referrerUser.referral_code : 'earnx-123';
-    const result = await onConfirm(pkg, finalReferrer);
+    const cleanCode = referrerCode.trim();
+    if (!cleanCode) {
+      setLocalError('A valid sponsor referral code is mandatory to purchase a premium package.');
+      return;
+    }
+
+    if (!referrerUser) {
+      setLocalError('Please verify a valid sponsor referral code before subscribing.');
+      return;
+    }
+
+    const result = await onConfirm(pkg, referrerUser.referral_code);
     if (result && !result.success && result.error) {
       setLocalError(result.error);
     }
@@ -175,7 +207,7 @@ export function PremiumSubscribeModal({
             </div>
           </div>
 
-          {/* Referrer ID Field (Optional) */}
+          {/* Referrer ID Field (Mandatory) */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label
@@ -183,10 +215,11 @@ export function PremiumSubscribeModal({
                 className="text-xs font-semibold text-slate-700 flex items-center gap-1.5"
               >
                 <User className="w-3.5 h-3.5 text-slate-500" />
-                <span>Referrer ID (Optional)</span>
+                <span>Sponsor Referral Code</span>
+                <span className="text-rose-500 font-bold">*</span>
               </label>
-              <span className="text-[10px] font-medium px-2 py-0.5 rounded-[4px] bg-slate-100 text-slate-500">
-                Optional
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-[4px] bg-rose-50 text-rose-700 border border-rose-200">
+                Required
               </span>
             </div>
 
@@ -194,14 +227,15 @@ export function PremiumSubscribeModal({
               <input
                 id="referrer-input"
                 type="text"
+                required
                 value={referrerCode}
                 onChange={(e) => setReferrerCode(e.target.value)}
-                placeholder="Enter referrer code (e.g. REF002, EX1001)..."
+                placeholder="Enter your sponsor's referral code..."
                 disabled={subscribing}
                 className={`w-full bg-white border rounded-[10px] pl-4 pr-10 py-3 text-sm font-medium text-slate-900 focus:outline-none transition-colors ${referrerUser
                   ? 'border-[#009F6B] ring-2 ring-[#009F6B]/20 bg-emerald-50/20'
                   : isInvalid
-                    ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20'
+                    ? 'border-rose-400 ring-2 ring-rose-400/20 bg-rose-50/20'
                     : 'border-[#E5EBE7] focus:border-[#009F6B] focus:ring-2 focus:ring-[#009F6B]/20'
                   }`}
               />
@@ -212,7 +246,7 @@ export function PremiumSubscribeModal({
                 ) : referrerUser ? (
                   <CheckCircle2 className="w-4 h-4 text-[#009F6B]" />
                 ) : isInvalid ? (
-                  <AlertCircle className="w-4 h-4 text-amber-500" />
+                  <AlertCircle className="w-4 h-4 text-rose-500" />
                 ) : null}
               </div>
             </div>
@@ -221,7 +255,7 @@ export function PremiumSubscribeModal({
             {checking ? (
               <p className="text-xs text-slate-400 font-normal flex items-center gap-1.5">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                <span>Validating referrer in database...</span>
+                <span>Validating sponsor in database...</span>
               </p>
             ) : referrerUser ? (
               <div className="p-2.5 rounded-[8px] bg-emerald-50 border border-emerald-200/80 text-emerald-900 flex items-center gap-2">
@@ -231,22 +265,22 @@ export function PremiumSubscribeModal({
                   <strong className="font-semibold text-emerald-950">
                     {referrerUser.full_name}
                   </strong>{' '}
-                  <span className="text-emerald-700 ">({referrerUser.referral_code})</span>
+                  <span className="text-emerald-700">({referrerUser.referral_code})</span>
                 </span>
               </div>
             ) : isInvalid ? (
-              <div className="p-2.5 rounded-[8px] bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="p-2.5 rounded-[8px] bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div className="text-xs font-normal">
-                  <strong className="font-semibold text-amber-950 block">Invalid Referrer ID</strong>
-                  You can still continue your subscription. Your account will automatically be placed under company sponsor (<strong>earnx-123</strong>).
+                  <strong className="font-semibold text-rose-950 block">Invalid Sponsor ID</strong>
+                  {invalidMsg || 'Sponsor code was not found. A valid referral code is strictly required to subscribe.'}
                 </div>
               </div>
             ) : (
-              <p className="text-[11px] text-slate-400 font-normal flex items-center gap-1.5">
-                <HelpCircle className="w-3 h-3 text-slate-400" />
+              <p className="text-[11px] text-slate-500 font-normal flex items-center gap-1.5">
+                <HelpCircle className="w-3 h-3 text-slate-400 shrink-0" />
                 <span>
-                  Leave blank to automatically register under company sponsor (<strong>earnx-123</strong>).
+                  A valid referral code from an existing member is mandatory to buy this package.
                 </span>
               </p>
             )}
@@ -265,8 +299,8 @@ export function PremiumSubscribeModal({
 
             <button
               type="submit"
-              disabled={subscribing}
-              className="premium-subscribe-btn !w-auto !h-auto px-6 py-3"
+              disabled={subscribing || checking || !referrerUser}
+              className="premium-subscribe-btn !w-auto !h-auto px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {subscribing ? (
                 <span className="flex items-center gap-2 text-white">

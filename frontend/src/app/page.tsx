@@ -4,6 +4,7 @@ import React from 'react';
 import HeroSection from '../components/landing/HeroSection';
 import AboutSection from '../components/landing/AboutSection';
 import WaysToEarnSection from '../components/landing/WaysToEarnSection';
+import LatestProductsSection from '../components/landing/LatestProductsSection';
 import MetricsStrip from '../components/landing/MetricsStrip';
 import HowItWorksSection from '../components/landing/HowItWorksSection';
 import AgencyAndInvestmentSection from '../components/landing/AgencyAndInvestmentSection';
@@ -25,7 +26,10 @@ export default function Homepage() {
       {/* 3. MULTIPLE WAYS TO EARN (3 Tinted Cards) */}
       <WaysToEarnSection />
 
-      {/* 4. METRICS / STATS STRIP */}
+      {/* 4. LATEST PRODUCTS SHOWCASE (10 Latest Items) */}
+      <LatestProductsSection />
+
+      {/* 5. METRICS / STATS STRIP */}
       <MetricsStrip />
 
       {/* 5. HOW EARNX CAPITAL WORKS? (4 Horizontal Connected Steps) */}

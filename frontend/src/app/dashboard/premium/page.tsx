@@ -36,6 +36,8 @@ export default function PremiumDashboardPage() {
       setAlertMsg,
       handleStartWatchAd,
       handleFinishAd,
+      handleCompleteVideoAd,
+      handleCancelVideoAd,
       handleClaimReward,
       handleOpenSubscribeModal,
       handleCloseSubscribeModal,
@@ -154,10 +156,12 @@ export default function PremiumDashboardPage() {
         {/* Ad Player Modal */}
         <PremiumAdModal
           isOpen={adModalOpen}
-          adCountdown={adCountdown}
           adCompleted={adCompleted}
           recordingAd={recordingAd}
+          rewardPerAd={dailyTask?.reward_per_ad}
           onFinishAd={handleFinishAd}
+          onCompleteAd={handleCompleteVideoAd}
+          onCancelAd={handleCancelVideoAd}
         />
 
         {/* Restrained Reward Rules Modal */}

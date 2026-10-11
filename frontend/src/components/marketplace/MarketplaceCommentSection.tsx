@@ -9,6 +9,7 @@ interface MarketplaceCommentSectionProps {
   comments: MarketplaceComment[];
   currentUserId?: string;
   isPostAuthor: boolean;
+  isAdmin?: boolean;
   currentUserAvatar?: string | null;
   currentUserName?: string | null;
   replyingToTarget: { commentId: string; name: string } | null;
@@ -27,6 +28,7 @@ export function MarketplaceCommentSection({
   comments,
   currentUserId,
   isPostAuthor,
+  isAdmin = false,
   currentUserAvatar,
   currentUserName,
   replyingToTarget,
@@ -87,13 +89,18 @@ export function MarketplaceCommentSection({
                     >
                       Reply
                     </button>
-                    {(currentUserId === comment.user_id || isPostAuthor) && (
+                    {(currentUserId === comment.user_id || isPostAuthor || isAdmin) && (
                       <button
                         type="button"
                         onClick={() => onDeleteComment(comment.id)}
-                        className="hover:text-rose-600 transition-colors cursor-pointer"
+                        className={`transition-colors cursor-pointer ${
+                          isAdmin && currentUserId !== comment.user_id && !isPostAuthor
+                            ? 'text-rose-500 hover:text-rose-700 font-bold'
+                            : 'hover:text-rose-600'
+                        }`}
+                        title={isAdmin && currentUserId !== comment.user_id && !isPostAuthor ? 'Admin Moderation Delete' : 'Delete Comment'}
                       >
-                        Delete
+                        {isAdmin && currentUserId !== comment.user_id && !isPostAuthor ? 'Delete (Admin)' : 'Delete'}
                       </button>
                     )}
                   </div>
@@ -130,14 +137,19 @@ export function MarketplaceCommentSection({
                             {reply.content}
                           </p>
                         </div>
-                        {(currentUserId === reply.user_id || isPostAuthor) && (
+                        {(currentUserId === reply.user_id || isPostAuthor || isAdmin) && (
                           <div className="pl-2 pt-0.5 text-[10px] font-bold text-slate-400">
                             <button
                               type="button"
                               onClick={() => onDeleteComment(reply.id)}
-                              className="hover:text-rose-600 transition-colors cursor-pointer"
+                              className={`transition-colors cursor-pointer ${
+                                isAdmin && currentUserId !== reply.user_id && !isPostAuthor
+                                  ? 'text-rose-500 hover:text-rose-700 font-bold'
+                                  : 'hover:text-rose-600'
+                              }`}
+                              title={isAdmin && currentUserId !== reply.user_id && !isPostAuthor ? 'Admin Moderation Delete' : 'Delete Reply'}
                             >
-                              Delete
+                              {isAdmin && currentUserId !== reply.user_id && !isPostAuthor ? 'Delete (Admin)' : 'Delete'}
                             </button>
                           </div>
                         )}

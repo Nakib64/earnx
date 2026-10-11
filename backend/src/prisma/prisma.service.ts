@@ -36,6 +36,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
     try {
       await this.$executeRawUnsafe(
+        `ALTER TABLE "PremiumPackage" ADD COLUMN IF NOT EXISTS "direct_referral_commission" DECIMAL(12, 2) DEFAULT 0;`,
+      );
+    } catch (err) {}
+
+    try {
+      await this.$executeRawUnsafe(
         `ALTER TABLE "InvestmentPlan" ADD COLUMN IF NOT EXISTS "is_lifetime" BOOLEAN DEFAULT false;`,
       );
       await this.$executeRawUnsafe(

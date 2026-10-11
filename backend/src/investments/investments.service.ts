@@ -30,7 +30,9 @@ export class InvestmentsService {
 
   async createPlan(data: {
     title: string;
-    amount: number;
+    amount?: number;
+    min_amount?: number;
+    max_amount?: number;
     monthly_return_percent: number;
     duration_months?: number;
     is_lifetime?: boolean;
@@ -43,6 +45,8 @@ export class InvestmentsService {
     data: Partial<{
       title: string;
       amount: number;
+      min_amount: number;
+      max_amount: number | null;
       monthly_return_percent: number;
       duration_months: number;
       is_lifetime: boolean;
@@ -59,8 +63,8 @@ export class InvestmentsService {
   // ==========================================
   // USER INVESTMENTS & UPGRADES / WITHDRAWALS
   // ==========================================
-  async createInvestment(userId: string, planId: string, amount?: number) {
-    return this.executionSubService.createInvestment(userId, planId, amount);
+  async createInvestment(userId: string, planId: string, amount?: number, durationMonths?: number) {
+    return this.executionSubService.createInvestment(userId, planId, amount, durationMonths);
   }
 
   async requestUpgrade(userId: string, currentInvestmentId: string, targetPlanId: string) {

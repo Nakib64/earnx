@@ -33,6 +33,7 @@ export class CommissionService {
     sourceUserId: string,
     commissionType: CommissionType = CommissionType.PREMIUM,
     externalTx?: Prisma.TransactionClient,
+    subscribedPackage?: any,
   ): Promise<CommissionPayoutRecord[]> {
     // If anything tries to trigger ACTIVATION commission, ignore since activation system is removed
     if (commissionType === CommissionType.ACTIVATION) {
@@ -48,11 +49,6 @@ export class CommissionService {
         orderBy: { level: 'asc' },
       });
 
-      if (rules.length === 0) {
-        this.logger.log(`No commission rules found for type ${commissionType}`);
-        return payoutSummary;
-      }
-
       // Source user subscribing or upgrading to premium
       const sourceUser = await tx.user.findUnique({
         where: { id: sourceUserId },
@@ -62,6 +58,8 @@ export class CommissionService {
       if (!sourceUser || !sourceUser.referred_by_id) {
         return payoutSummary; // No referrer to pay
       }
+
+      const sourceLabel = sourceUser.full_name || sourceUser.phone;
 
       // Multi-level depth up to 5 levels
       const maxAllowedTreeDepth = 5;
@@ -86,9 +84,29 @@ export class CommissionService {
 
         const ruleForLevel = rules.find((r) => r.level === currentLevel);
 
-        if (ruleForLevel && Number(ruleForLevel.amount) > 0) {
-          const payoutAmount = Number(ruleForLevel.amount);
+        // Determine payout amount and description for this level
+        let payoutAmount = 0;
+        let description = '';
 
+        if (currentLevel === 1) {
+          // Level 1: Direct Referral Commission from Package (e.g. 500, 800)
+          const pkgDirect = subscribedPackage ? Number(subscribedPackage.direct_referral_commission || 0) : 0;
+          if (pkgDirect > 0) {
+            payoutAmount = pkgDirect;
+            description = `Direct Referral Commission (${subscribedPackage.title}) from ${sourceLabel} (${sourceUser.referral_code || sourceUser.phone})`;
+          } else if (ruleForLevel && Number(ruleForLevel.amount) > 0) {
+            payoutAmount = Number(ruleForLevel.amount);
+            description = `Direct Referral Commission from ${sourceLabel} (${sourceUser.referral_code || sourceUser.phone})`;
+          }
+        } else {
+          // Levels 2 - 5: Multi-level rules
+          if (ruleForLevel && Number(ruleForLevel.amount) > 0) {
+            payoutAmount = Number(ruleForLevel.amount);
+            description = `Premium Level ${currentLevel} Referral Commission from ${sourceLabel} (${sourceUser.referral_code || sourceUser.phone})`;
+          }
+        }
+
+        if (payoutAmount > 0) {
           // Rule 1: Upline parent must be ACTIVE
           if (parent.status !== UserStatus.ACTIVE) {
             payoutSummary.push({
@@ -100,7 +118,25 @@ export class CommissionService {
               reason: `Upline user (${parent.phone}) at level ${currentLevel} is not ACTIVE`,
             });
           }
-          // Rule 2: For PREMIUM commissions, upline MUST be a Premium member
+          // Rule 2 for Level 1: Direct sponsor is rewarded if active
+          else if (currentLevel === 1) {
+            await this.walletService.processTransaction(
+              parent.id,
+              TransactionType.COMMISSION,
+              payoutAmount,
+              description,
+              tx,
+            );
+
+            payoutSummary.push({
+              level: currentLevel,
+              parentId: parent.id,
+              parentPhone: parent.phone,
+              amount: payoutAmount,
+              qualified: true,
+            });
+          }
+          // Rule 2 & 3 for Levels 2+: Upline MUST be a Premium member and designation rank cap applies
           else if (!parent.is_premium) {
             payoutSummary.push({
               level: currentLevel,
@@ -111,14 +147,10 @@ export class CommissionService {
               reason: `Upline user (${parent.phone}) at level ${currentLevel} is not a Premium member`,
             });
           } else {
-            // Rule 3: Designation Rank Cap (if parent has a designation with max_level, respects it; otherwise defaults to 5 levels)
             const maxUnlockedLevel = parent.designation ? parent.designation.max_level : 5;
             const isQualified = parent.is_premium && maxUnlockedLevel >= currentLevel;
 
             if (isQualified) {
-              const sourceLabel = sourceUser.full_name || sourceUser.phone;
-              const description = `Premium Level ${currentLevel} Referral Commission from ${sourceLabel} (${sourceUser.referral_code || sourceUser.phone})`;
-
               await this.walletService.processTransaction(
                 parent.id,
                 TransactionType.COMMISSION,
@@ -162,10 +194,10 @@ export class CommissionService {
     return this.prisma.$transaction(async (tx) => runner(tx), { maxWait: 10000, timeout: 30000 });
   }
 
-  // Admin rule configuration methods
+  // Admin rule configuration methods (Levels 2 to 5 for indirect uplines; Level 1 is on PremiumPackage)
   async getCommissionRules() {
     return this.prisma.commissionRule.findMany({
-      where: { type: CommissionType.PREMIUM },
+      where: { type: CommissionType.PREMIUM, level: { gte: 2 } },
       orderBy: [{ level: 'asc' }],
     });
   }
@@ -173,6 +205,11 @@ export class CommissionService {
   async upsertCommissionRule(type: CommissionType, level: number, amount: number) {
     if (type === CommissionType.ACTIVATION) {
       throw new BadRequestException('Activation system has been removed. Only Premium commissions are supported.');
+    }
+    if (level < 2 || level > 5) {
+      throw new BadRequestException(
+        'Commission rules in this module configure upline Levels 2 to 5. Direct sponsor (Level 1) commission is configured directly on each Premium Package.',
+      );
     }
     return this.prisma.commissionRule.upsert({
       where: {

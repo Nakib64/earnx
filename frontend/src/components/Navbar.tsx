@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import {
   Wallet,
   LogOut,
@@ -39,10 +40,12 @@ import {
   MessageSquare,
   Lock,
   BarChart3,
+  Package,
 } from 'lucide-react';
 
 export default function Navbar() {
   const { user, admin, logoutUser, logoutAdmin, isLoading } = useAuth();
+  const { cartCount, setIsCartOpen } = useCart();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -63,6 +66,7 @@ export default function Navbar() {
   const userItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/purchase', label: 'Package Purchase', icon: ShoppingBag },
+    { href: '/dashboard/orders', label: 'My Orders', icon: Package },
     { href: '/dashboard/deposit', label: 'Deposit Funds', icon: ArrowDownCircle },
     { href: '/dashboard/premium', label: 'Premium VIP & Ads', icon: Crown },
     { href: '/dashboard/marketplace', label: 'Community Feed', icon: MessageSquare },
@@ -77,12 +81,15 @@ export default function Navbar() {
 
   const adminItems = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/products', label: 'Products Catalog', icon: ShoppingBag },
+    { href: '/admin/orders', label: 'Ecommerce Orders', icon: Package },
     { href: '/admin/ads-analytics', label: 'Ads Analytics', icon: BarChart3 },
     { href: '/admin/deposits', label: 'Deposit Requests', icon: ArrowDownCircle },
     { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
     { href: '/admin/premium', label: 'Premium Packages', icon: Crown },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
+    { href: '/admin/marketplace', label: 'Marketplace Feed', icon: MessageSquare },
     { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/admin/users', label: 'Users & Accounts', icon: Users },
@@ -94,6 +101,7 @@ export default function Navbar() {
 
   const publicItems = [
     { href: '/', label: 'Home', icon: Home },
+    { href: '/products', label: 'Shop / Products', icon: ShoppingBag },
     { href: '/about', label: 'About Us', icon: Info },
     { href: '/contact', label: 'Contact', icon: Headset },
   ];
@@ -355,6 +363,15 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
+                  href="/products"
+                  className={`text-sm font-bold transition-colors ${pathname === '/products'
+                    ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                    : 'text-slate-600 hover:text-emerald-700'
+                    }`}
+                >
+                  Shop
+                </Link>
+                <Link
                   href="/about"
                   className={`text-sm font-bold transition-colors ${pathname === '/about'
                     ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
@@ -377,6 +394,21 @@ export default function Navbar() {
 
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
+              {/* Shopping Cart Button */}
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200/80 bg-white/80 hover:bg-white text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                title="View Shopping Cart"
+              >
+                <ShoppingBag className="w-5 h-5 text-slate-700" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-[#009F6B] text-white text-[10px] font-black flex items-center justify-center shadow-xs">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
               {(!mounted || isLoading) ? (
                 <div className="h-10 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (

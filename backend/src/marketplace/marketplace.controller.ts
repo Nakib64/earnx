@@ -18,6 +18,7 @@ import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import { MarketplaceService } from './marketplace.service';
 import { UserJwtGuard } from '../user-auth/guards/user-jwt.guard';
+import { AdminJwtGuard } from '../admin-auth/guards/admin-jwt.guard';
 
 const uploadStorage = diskStorage({
   destination: (req, file, cb) => {
@@ -47,11 +48,13 @@ export class MarketplaceController {
     @Query('page') page = '1',
     @Query('limit') limit = '20',
     @Query('user_id') currentUserId?: string,
+    @Query('author_id') authorId?: string,
   ) {
     return this.marketplaceService.getPosts(
       parseInt(page, 10) || 1,
       parseInt(limit, 10) || 20,
       currentUserId,
+      authorId,
     );
   }
 
@@ -132,5 +135,53 @@ export class MarketplaceController {
   @Delete('comments/:id')
   async deleteComment(@Request() req: any, @Param('id') id: string) {
     return this.marketplaceService.deleteComment(req.user.id, id, req.user?.role === 'admin');
+  }
+
+  // ==========================================
+  // ADMIN MODERATION ENDPOINTS
+  // ==========================================
+
+  /**
+   * Admin: Get all posts with author details and comments
+   */
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/posts')
+  async getAdminPosts(
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+    @Query('search') search = '',
+  ) {
+    return this.marketplaceService.getAdminPosts(
+      parseInt(page, 10) || 1,
+      parseInt(limit, 10) || 20,
+      search,
+    );
+  }
+
+  /**
+   * Admin: Get marketplace statistics
+   */
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/stats')
+  async getAdminStats() {
+    return this.marketplaceService.getAdminStats();
+  }
+
+  /**
+   * Admin: Force delete any post
+   */
+  @UseGuards(AdminJwtGuard)
+  @Delete('admin/posts/:id')
+  async adminDeletePost(@Param('id') id: string) {
+    return this.marketplaceService.deletePost('', id, true);
+  }
+
+  /**
+   * Admin: Force delete any comment or reply
+   */
+  @UseGuards(AdminJwtGuard)
+  @Delete('admin/comments/:id')
+  async adminDeleteComment(@Param('id') id: string) {
+    return this.marketplaceService.deleteComment('', id, true);
   }
 }

@@ -29,6 +29,7 @@ import {
   ArrowDownCircle,
   MessageSquare,
   BarChart3,
+  Package,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -67,6 +68,7 @@ export default function Sidebar() {
   const userItems: LinkItem[] = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/purchase', label: 'Package Purchase', icon: ShoppingBag },
+    { href: '/dashboard/orders', label: 'My Orders', icon: Package },
     { href: '/dashboard/deposit', label: 'Deposit Funds', icon: ArrowDownCircle },
     { href: '/dashboard/premium', label: 'Packages & Ads', icon: Crown },
     { href: '/dashboard/marketplace', label: 'Community Feed', icon: MessageSquare },
@@ -81,12 +83,15 @@ export default function Sidebar() {
 
   const adminTopItems: LinkItem[] = [
     { href: '/admin/dashboard', label: 'Admin Overview', icon: LayoutDashboard },
+    { href: '/admin/products', label: 'Products Catalog', icon: ShoppingBag },
+    { href: '/admin/orders', label: 'Ecommerce Orders', icon: Package },
     { href: '/admin/ads-analytics', label: 'Ads Analytics', icon: BarChart3 },
     { href: '/admin/deposits', label: 'Deposit Requests', icon: ArrowDownCircle },
     { href: '/admin/withdrawals', label: 'Withdrawals', icon: Banknote },
     { href: '/admin/premium', label: 'Premium Packages', icon: Crown },
     { href: '/admin/investments', label: 'Investment Plans', icon: TrendingUp },
     { href: '/admin/coins', label: 'Coin Management', icon: Coins },
+    { href: '/admin/marketplace', label: 'Marketplace Feed', icon: MessageSquare },
     { href: '/admin/notices', label: 'Notice Board', icon: Megaphone },
     { href: '/admin/leaderboard', label: 'Top 100 Leaderboard', icon: Trophy },
     { href: '/admin/users', label: 'Users & Accounts', icon: Users },

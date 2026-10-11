@@ -45,6 +45,7 @@ export class PremiumPackageSubService implements OnModuleInit {
               daily_reward_amount: new Prisma.Decimal(30),
               duration_days: 365,
               is_active: true,
+              direct_referral_commission: new Prisma.Decimal(500),
             },
             {
               title: 'Silver VIP Package',
@@ -56,6 +57,7 @@ export class PremiumPackageSubService implements OnModuleInit {
               daily_reward_amount: new Prisma.Decimal(60),
               duration_days: 365,
               is_active: true,
+              direct_referral_commission: new Prisma.Decimal(800),
             },
             {
               title: 'Gold VIP Package',
@@ -67,6 +69,7 @@ export class PremiumPackageSubService implements OnModuleInit {
               daily_reward_amount: new Prisma.Decimal(120),
               duration_days: 365,
               is_active: true,
+              direct_referral_commission: new Prisma.Decimal(1500),
             },
           ],
         });
@@ -82,16 +85,35 @@ export class PremiumPackageSubService implements OnModuleInit {
   // ==========================================
 
   async getActivePackages() {
-    return this.prisma.premiumPackage.findMany({
-      where: { is_active: true },
-      orderBy: { price: 'asc' },
-    });
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<any[]>(`
+        SELECT id, title, description, original_price, discount_percent, price, daily_ads_count, daily_reward_amount, duration_days, is_active, direct_referral_commission, created_at, updated_at
+        FROM "PremiumPackage"
+        WHERE is_active = true
+        ORDER BY price ASC
+      `);
+      return rows;
+    } catch {
+      return this.prisma.premiumPackage.findMany({
+        where: { is_active: true },
+        orderBy: { price: 'asc' },
+      });
+    }
   }
 
   async getAllPackages() {
-    return this.prisma.premiumPackage.findMany({
-      orderBy: { price: 'asc' },
-    });
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<any[]>(`
+        SELECT id, title, description, original_price, discount_percent, price, daily_ads_count, daily_reward_amount, duration_days, is_active, direct_referral_commission, created_at, updated_at
+        FROM "PremiumPackage"
+        ORDER BY price ASC
+      `);
+      return rows;
+    } catch {
+      return this.prisma.premiumPackage.findMany({
+        orderBy: { price: 'asc' },
+      });
+    }
   }
 
   async createPackage(data: {
@@ -103,12 +125,13 @@ export class PremiumPackageSubService implements OnModuleInit {
     daily_ads_count: number;
     daily_reward_amount: number;
     duration_days?: number;
+    direct_referral_commission?: number;
   }) {
     if (data.price <= 0) throw new BadRequestException('Package price must be greater than zero');
     if (data.daily_ads_count <= 0) throw new BadRequestException('Daily ads count must be at least 1');
     if (data.daily_reward_amount <= 0) throw new BadRequestException('Daily reward amount must be greater than zero');
 
-    return this.prisma.premiumPackage.create({
+    const created = await this.prisma.premiumPackage.create({
       data: {
         title: data.title.trim(),
         description: data.description?.trim() || null,
@@ -119,8 +142,21 @@ export class PremiumPackageSubService implements OnModuleInit {
         daily_reward_amount: new Prisma.Decimal(data.daily_reward_amount),
         duration_days: data.duration_days || 365,
         is_active: true,
+        direct_referral_commission: new Prisma.Decimal(data.direct_referral_commission || 0),
       },
     });
+
+    if (data.direct_referral_commission !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE "PremiumPackage" SET direct_referral_commission = $1 WHERE id = $2`,
+          Number(data.direct_referral_commission),
+          created.id,
+        );
+      } catch {}
+    }
+
+    return created;
   }
 
   async updatePackage(
@@ -135,6 +171,7 @@ export class PremiumPackageSubService implements OnModuleInit {
       daily_reward_amount: number;
       duration_days: number;
       is_active: boolean;
+      direct_referral_commission: number;
     }>,
   ) {
     const pkg = await this.prisma.premiumPackage.findUnique({ where: { id } });
@@ -153,11 +190,35 @@ export class PremiumPackageSubService implements OnModuleInit {
       updateData.daily_reward_amount = new Prisma.Decimal(data.daily_reward_amount);
     if (data.duration_days !== undefined) updateData.duration_days = data.duration_days;
     if (data.is_active !== undefined) updateData.is_active = data.is_active;
+    if (data.direct_referral_commission !== undefined)
+      updateData.direct_referral_commission = new Prisma.Decimal(data.direct_referral_commission);
 
-    return this.prisma.premiumPackage.update({
+    const updated = await this.prisma.premiumPackage.update({
       where: { id },
       data: updateData,
     });
+
+    if (data.direct_referral_commission !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE "PremiumPackage" SET direct_referral_commission = $1, updated_at = NOW() WHERE id = $2`,
+          Number(data.direct_referral_commission),
+          id,
+        );
+      } catch {}
+    }
+
+    try {
+      const freshRows = await this.prisma.$queryRawUnsafe<any[]>(
+        `SELECT id, title, description, original_price, discount_percent, price, daily_ads_count, daily_reward_amount, duration_days, is_active, direct_referral_commission, created_at, updated_at FROM "PremiumPackage" WHERE id = $1`,
+        id,
+      );
+      if (freshRows && freshRows[0]) {
+        return freshRows[0];
+      }
+    } catch {}
+
+    return updated;
   }
 
   async deletePackage(id: string) {
@@ -187,53 +248,32 @@ export class PremiumPackageSubService implements OnModuleInit {
           now.getTime() + (pkg.duration_days || 365) * 24 * 60 * 60 * 1000,
         );
 
-        // Handle Referrer Assignment (Optional Referrer ID or fallback to company earnx-123)
-        const COMPANY_CODE = 'earnx-123';
+        // Mandatory Sponsor Referral Code: A valid code from an existing active user is required
         const cleanRefCode = referrerCode?.trim();
-
-        let sponsorToSet: any = null;
-        if (cleanRefCode) {
-          sponsorToSet = await tx.user.findFirst({
-            where: {
-              referral_code: { equals: cleanRefCode, mode: 'insensitive' },
-              NOT: { id: userId },
-            },
-          });
+        if (!cleanRefCode) {
+          throw new BadRequestException('A valid sponsor referral code is mandatory to purchase a premium package.');
         }
 
-        // If no user found for provided code, or no code was provided: fallback to company ID earnx-123
+        const sponsorToSet = await tx.user.findFirst({
+          where: {
+            referral_code: { equals: cleanRefCode, mode: 'insensitive' },
+          },
+        });
+
         if (!sponsorToSet) {
-          sponsorToSet = await tx.user.findFirst({
-            where: {
-              referral_code: { equals: COMPANY_CODE, mode: 'insensitive' },
-              NOT: { id: userId },
-            },
-          });
-
-          if (!sponsorToSet) {
-            sponsorToSet = await tx.user.create({
-              data: {
-                phone: '01700000000',
-                email: 'company@earnx.com',
-                password_hash: '$2b$10$earnxcompanyhashfallbackplaceholder',
-                full_name: 'EarnX Official',
-                referral_code: COMPANY_CODE,
-                status: UserStatus.ACTIVE,
-                is_premium: true,
-                country: 'Bangladesh',
-              },
-            });
-          }
+          throw new BadRequestException(`Sponsor referral code "${cleanRefCode}" is invalid or does not exist.`);
         }
 
-        // Set user sponsor so user goes under this referrer/company
-        if (sponsorToSet && sponsorToSet.id !== userId) {
-          if (!user.referred_by_id || user.referred_by_id !== sponsorToSet.id) {
-            await tx.user.update({
-              where: { id: userId },
-              data: { referred_by_id: sponsorToSet.id },
-            });
-          }
+        if (sponsorToSet.id === userId) {
+          throw new BadRequestException('You cannot use your own referral code to purchase a package.');
+        }
+
+        // Link user to this sponsor
+        if (!user.referred_by_id || user.referred_by_id !== sponsorToSet.id) {
+          await tx.user.update({
+            where: { id: userId },
+            data: { referred_by_id: sponsorToSet.id },
+          });
         }
 
         // Deduct balance atomically
@@ -277,12 +317,13 @@ export class PremiumPackageSubService implements OnModuleInit {
           },
         });
 
-        // Distribute multi-level Premium referral commissions (uplines must be Premium)
+        // Distribute multi-level Premium referral commissions (direct sponsor gets package direct referral commission)
         try {
           await this.commissionService.distributeCommissions(
             userId,
             CommissionType.PREMIUM,
             tx,
+            pkg,
           );
         } catch (commErr) {
           this.logger.error(`Commission distribution error for user ${userId}:`, commErr);

@@ -85,9 +85,9 @@ export function InvestmentActiveBanner({
               onClick={() => onOpenWithdrawCapital(activeInv)}
               variant={isLocked ? 'secondary' : 'primary'}
               size="md"
-              icon={<MinusCircle className="w-4 h-4" />}
+              icon={isLocked ? <Lock className="w-4 h-4 text-amber-600" /> : <MinusCircle className="w-4 h-4" />}
             >
-              Withdraw Capital
+              {isLocked ? 'Capital Locked' : 'Withdraw Capital'}
             </GlassButton>
           )}
         </div>

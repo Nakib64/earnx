@@ -17,6 +17,7 @@ export default function UserDepositPage() {
   const { isLoading: isSkeletonReviewMode } = useDesignSystem();
   const {
     state: {
+      gateways,
       deposits,
       loadingHistory,
       submitting,
@@ -103,6 +104,7 @@ export default function UserDepositPage() {
             getMethodInfo={getMethodInfo}
             copiedKey={copiedKey}
             handleCopy={handleCopy}
+            instruction={gateways?.deposit_instruction}
           />
         </div>
 

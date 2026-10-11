@@ -17,7 +17,7 @@ export class InvestmentExecutionSubService {
   // USER SUBSCRIPTIONS & UPGRADES / WITHDRAWALS
   // ==========================================
 
-  async createInvestment(userId: string, planId: string, amount?: number) {
+  async createInvestment(userId: string, planId: string, amount?: number, durationMonths?: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
@@ -47,14 +47,14 @@ export class InvestmentExecutionSubService {
     const returnPercent = Number(plan.monthly_return_percent);
     const monthlyPayout = (investAmount * returnPercent) / 100;
     const isLifetime = plan.is_lifetime || false;
-    const durationMonths = isLifetime ? null : plan.duration_months || 12;
+    const finalDurationMonths = isLifetime ? null : (durationMonths || plan.duration_months || 3);
 
     const now = new Date();
     const nextPayout = new Date();
     nextPayout.setMonth(now.getMonth() + 1);
 
-    const endsAt = durationMonths
-      ? new Date(now.getFullYear(), now.getMonth() + durationMonths, now.getDate())
+    const endsAt = finalDurationMonths
+      ? new Date(now.getFullYear(), now.getMonth() + finalDurationMonths, now.getDate())
       : null;
 
     return this.prisma.$transaction(
@@ -104,8 +104,8 @@ export class InvestmentExecutionSubService {
             status: RequestStatus.APPROVED,
             request_type: 'NEW',
             total_payouts_made: 0,
-            max_payouts: durationMonths,
-            duration_months: durationMonths,
+            max_payouts: finalDurationMonths,
+            duration_months: finalDurationMonths,
             is_lifetime: isLifetime,
             starts_at: now,
             ends_at: endsAt,
@@ -550,13 +550,37 @@ export class InvestmentExecutionSubService {
             },
           });
 
-          // 3. Update investment record
+          // 3. If tenure is completed on this final payout, return 100% invested principal back to user wallet
+          let finalBalAfter = userBalAfter;
+          if (isCompleted && !inv.is_principal_returned) {
+            const principalAmt = Number(inv.amount);
+            if (principalAmt > 0) {
+              finalBalAfter = userBalAfter + principalAmt;
+              await tx.user.update({
+                where: { id: inv.user_id },
+                data: { wallet_balance: new Prisma.Decimal(finalBalAfter) },
+              });
+              await tx.walletTransaction.create({
+                data: {
+                  user_id: inv.user_id,
+                  type: TransactionType.INVESTMENT_PAYOUT,
+                  amount: new Prisma.Decimal(principalAmt),
+                  balance_before: new Prisma.Decimal(userBalAfter),
+                  balance_after: new Prisma.Decimal(finalBalAfter),
+                  description: `Tenure concluded: 100% principal capital refunded (৳${principalAmt.toLocaleString()})`,
+                },
+              });
+            }
+          }
+
+          // 4. Update investment record
           await tx.userInvestment.update({
             where: { id: inv.id },
             data: {
               total_payouts_made: newPayoutCount,
               last_payout_at: now,
               next_payout_at: isCompleted ? null : nextDate,
+              is_principal_returned: isCompleted ? true : inv.is_principal_returned,
             },
           });
         },
@@ -624,7 +648,30 @@ export class InvestmentExecutionSubService {
             },
           });
 
-          // 3. Update investment record
+          // 3. If tenure is completed, return 100% invested principal back to user wallet
+          let finalBalAfter = userBalAfter;
+          if (isCompleted && !inv.is_principal_returned) {
+            const principalAmt = Number(inv.amount);
+            if (principalAmt > 0) {
+              finalBalAfter = userBalAfter + principalAmt;
+              await tx.user.update({
+                where: { id: inv.user_id },
+                data: { wallet_balance: new Prisma.Decimal(finalBalAfter) },
+              });
+              await tx.walletTransaction.create({
+                data: {
+                  user_id: inv.user_id,
+                  type: TransactionType.INVESTMENT_PAYOUT,
+                  amount: new Prisma.Decimal(principalAmt),
+                  balance_before: new Prisma.Decimal(userBalAfter),
+                  balance_after: new Prisma.Decimal(finalBalAfter),
+                  description: `Tenure concluded: 100% principal capital refunded (৳${principalAmt.toLocaleString()})`,
+                },
+              });
+            }
+          }
+
+          // 4. Update investment record
           await tx.userInvestment.update({
             where: { id: inv.id },
             data: {
@@ -632,6 +679,7 @@ export class InvestmentExecutionSubService {
               total_payouts_made: newPayoutCount,
               last_payout_at: now,
               next_payout_at: isCompleted ? null : nextDate,
+              is_principal_returned: isCompleted ? true : inv.is_principal_returned,
             },
           });
         },

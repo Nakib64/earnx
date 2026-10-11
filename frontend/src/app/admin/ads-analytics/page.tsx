@@ -320,11 +320,10 @@ export default function AdminAdsAnalyticsPage() {
                   key={tf.key}
                   type="button"
                   onClick={() => setTimeframe(tf.key)}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 active:scale-[0.98] ${
-                    isActive
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 active:scale-[0.98] ${isActive
                       ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
-                  }`}
+                    }`}
                 >
                   {tf.label}
                 </button>
@@ -437,33 +436,30 @@ export default function AdminAdsAnalyticsPage() {
                 <button
                   type="button"
                   onClick={() => setInterpolationMode('monotone')}
-                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    interpolationMode === 'monotone'
+                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${interpolationMode === 'monotone'
                       ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Monotone
                 </button>
                 <button
                   type="button"
                   onClick={() => setInterpolationMode('default')}
-                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    interpolationMode === 'default'
+                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${interpolationMode === 'default'
                       ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Cubic
                 </button>
                 <button
                   type="button"
                   onClick={() => setInterpolationMode('linear')}
-                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    interpolationMode === 'linear'
+                  className={`min-h-[30px] px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${interpolationMode === 'linear'
                       ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Linear
                 </button>
@@ -474,33 +470,30 @@ export default function AdminAdsAnalyticsPage() {
                 <button
                   type="button"
                   onClick={() => setActiveMetric('both')}
-                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    activeMetric === 'both'
+                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'both'
                       ? 'bg-slate-900 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Both
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveMetric('ads')}
-                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    activeMetric === 'ads'
+                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'ads'
                       ? 'bg-[#009F6B] text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Ads
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveMetric('earnings')}
-                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    activeMetric === 'earnings'
+                  className={`min-h-[30px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'earnings'
                       ? 'bg-amber-600 text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   Payouts
                 </button>
@@ -636,7 +629,7 @@ export default function AdminAdsAnalyticsPage() {
                         <td className="py-3">
                           <div className="font-bold text-slate-900">{item.user_name}</div>
                           {item.user_phone && (
-                            <div className="text-[11px] text-slate-400 font-mono">
+                            <div className="text-[11px] text-slate-400 ">
                               {item.user_phone}
                             </div>
                           )}

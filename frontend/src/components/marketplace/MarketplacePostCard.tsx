@@ -9,6 +9,7 @@ import { GlassCard } from '../design-system/GlassCard';
 interface MarketplacePostCardProps {
   post: MarketplacePost;
   currentUserId?: string;
+  isAdmin?: boolean;
   currentUserAvatar?: string | null;
   currentUserName?: string | null;
   isCommentsOpen: boolean;
@@ -30,6 +31,7 @@ interface MarketplacePostCardProps {
 export function MarketplacePostCard({
   post,
   currentUserId,
+  isAdmin = false,
   currentUserAvatar,
   currentUserName,
   isCommentsOpen,
@@ -83,11 +85,15 @@ export function MarketplacePostCard({
           </div>
         </div>
 
-        {isAuthor && (
+        {(isAuthor || isAdmin) && (
           <button
             onClick={() => onDeletePost(post.id)}
-            className="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50/80 transition-colors cursor-pointer"
-            title="Delete Post"
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${
+              isAdmin && !isAuthor
+                ? 'text-rose-500 hover:text-rose-700 hover:bg-rose-100/60 ring-1 ring-rose-200'
+                : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50/80'
+            }`}
+            title={isAdmin && !isAuthor ? 'Delete Post (Admin Moderation)' : 'Delete Post'}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -168,6 +174,7 @@ export function MarketplacePostCard({
           comments={post.comments || []}
           currentUserId={currentUserId}
           isPostAuthor={isAuthor}
+          isAdmin={isAdmin}
           currentUserAvatar={currentUserAvatar}
           currentUserName={currentUserName}
           replyingToTarget={replyingToTarget}

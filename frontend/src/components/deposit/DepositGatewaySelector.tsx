@@ -16,6 +16,7 @@ interface DepositGatewaySelectorProps {
   };
   copiedKey: string | null;
   handleCopy: (text: string, key: string) => void;
+  instruction?: string;
 }
 
 export function DepositGatewaySelector({
@@ -24,6 +25,7 @@ export function DepositGatewaySelector({
   getMethodInfo,
   copiedKey,
   handleCopy,
+  instruction,
 }: DepositGatewaySelectorProps) {
   return (
     <GlassCard variant="standard" className="p-5 sm:p-6 space-y-4">
@@ -97,7 +99,15 @@ export function DepositGatewaySelector({
       </div>
 
       <div className="p-3.5 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-[11px] text-amber-900 leading-relaxed font-semibold">
-        ⚠️ <strong>Important:</strong> Only transfer from your personal bKash/Nagad/Rocket account. Keep your Transaction ID (TrxID) handy to submit below for automatic balance crediting.
+        {instruction ? (
+          <>
+            📢 <strong>Notice:</strong> {instruction}
+          </>
+        ) : (
+          <>
+            ⚠️ <strong>Important:</strong> Only transfer from your personal bKash/Nagad/Rocket account. Keep your Transaction ID (TrxID) handy to submit below for automatic balance crediting.
+          </>
+        )}
       </div>
     </GlassCard>
   );

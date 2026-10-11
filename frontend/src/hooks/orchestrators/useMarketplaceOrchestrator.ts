@@ -6,7 +6,8 @@ import { apiFetch } from '../../lib/api';
 import { MarketplacePost, MarketplaceComment } from '../../types';
 
 export function useMarketplaceOrchestrator() {
-  const { user } = useAuth();
+  const { user, admin } = useAuth();
+  const isAdmin = Boolean(admin);
   const [posts, setPosts] = useState<MarketplacePost[]>([]);
   const [loading, setLoading] = useState(true);
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -27,22 +28,36 @@ export function useMarketplaceOrchestrator() {
   // Expanded comments section toggles: { [postId]: boolean }
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
 
-  const fetchPosts = useCallback(async () => {
-    setLoading(true);
-    const res = await apiFetch<any>(
-      `/marketplace/posts?page=1&limit=30${user?.id ? `&user_id=${user.id}` : ''}`,
-    );
-    if (res.success && res.data) {
-      setPosts(res.data.data || []);
-    } else {
-      setAlertMsg({ type: 'error', text: res.error?.message || 'Failed to load community feed.' });
-    }
-    setLoading(false);
-  }, [user?.id]);
+  // Feed Tab Filter: 'all' (Global Feed) | 'mine' (My Posts)
+  const [feedTab, setFeedTab] = useState<'all' | 'mine'>('all');
+
+  const fetchPosts = useCallback(
+    async (tabOverride?: 'all' | 'mine') => {
+      setLoading(true);
+      const activeTab = tabOverride ?? feedTab;
+      const authorParam = activeTab === 'mine' && user?.id ? `&author_id=${user.id}` : '';
+      const userParam = user?.id ? `&user_id=${user.id}` : '';
+      const res = await apiFetch<any>(
+        `/marketplace/posts?page=1&limit=30${userParam}${authorParam}`,
+      );
+      if (res.success && res.data) {
+        setPosts(res.data.data || []);
+      } else {
+        setAlertMsg({ type: 'error', text: res.error?.message || 'Failed to load community feed.' });
+      }
+      setLoading(false);
+    },
+    [user?.id, feedTab],
+  );
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  const handleTabChange = (newTab: 'all' | 'mine') => {
+    setFeedTab(newTab);
+    fetchPosts(newTab);
+  };
 
   // Handle image file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +183,8 @@ export function useMarketplaceOrchestrator() {
   const handleDeletePost = async (postId: string) => {
     if (!confirm('Are you sure you want to delete this post?')) return;
 
-    const res = await apiFetch(`/marketplace/posts/${postId}`, { method: 'DELETE' });
+    const endpoint = isAdmin ? `/marketplace/admin/posts/${postId}` : `/marketplace/posts/${postId}`;
+    const res = await apiFetch(endpoint, { method: 'DELETE', isAdmin });
     if (res.success) {
       setAlertMsg({ type: 'success', text: 'Post deleted successfully.' });
       fetchPosts();
@@ -181,7 +197,8 @@ export function useMarketplaceOrchestrator() {
   const handleDeleteComment = async (commentId: string) => {
     if (!confirm('Are you sure you want to delete this comment?')) return;
 
-    const res = await apiFetch(`/marketplace/comments/${commentId}`, { method: 'DELETE' });
+    const endpoint = isAdmin ? `/marketplace/admin/comments/${commentId}` : `/marketplace/comments/${commentId}`;
+    const res = await apiFetch(endpoint, { method: 'DELETE', isAdmin });
     if (res.success) {
       fetchPosts();
     } else {
@@ -194,6 +211,7 @@ export function useMarketplaceOrchestrator() {
       posts,
       loading,
       alertMsg,
+      feedTab,
       newPostContent,
       selectedFile,
       previewUrl,
@@ -206,8 +224,13 @@ export function useMarketplaceOrchestrator() {
     },
     computed: {
       user,
+      admin,
+      isAdmin,
+      myPostsCount: posts.filter((p) => p.user?.id === user?.id).length,
     },
     actions: {
+      setFeedTab,
+      handleTabChange,
       setNewPostContent,
       setAlertMsg,
       setCommentInputs,

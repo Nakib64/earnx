@@ -496,7 +496,7 @@ export default function LoginPage() {
                 {/* Security Code Label + Counter */}
                 <div className="flex items-center justify-between text-[10px] sm:text-[10.5px] font-black uppercase tracking-[0.2em] text-slate-500 mb-3.5">
                   <span>SECURITY CODE</span>
-                  <span className="font-mono text-emerald-700 font-bold tracking-[0.16em]">
+                  <span className=" text-emerald-700 font-bold tracking-[0.16em]">
                     {forgotOtp.length} / 6
                   </span>
                 </div>
@@ -521,13 +521,12 @@ export default function LoginPage() {
                       return (
                         <div
                           key={idx}
-                          className={`w-full aspect-[4/5] rounded-xl flex items-center justify-center transition-all duration-150 ${
-                            char
+                          className={`w-full aspect-[4/5] rounded-xl flex items-center justify-center transition-all duration-150 ${char
                               ? 'bg-white border-2 border-emerald-600 text-slate-900 text-2xl font-black shadow-xs'
                               : isCurrent
-                              ? 'bg-white border-2 border-emerald-600 shadow-[0_0_0_4px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.95)]'
-                              : 'bg-slate-50/80 border border-slate-200/90 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)]'
-                          }`}
+                                ? 'bg-white border-2 border-emerald-600 shadow-[0_0_0_4px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.95)]'
+                                : 'bg-slate-50/80 border border-slate-200/90 shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)]'
+                            }`}
                         >
                           {char ? (
                             char
@@ -594,11 +593,10 @@ export default function LoginPage() {
                 <button
                   type="submit"
                   disabled={forgotLoading || forgotOtp.length !== 6 || !forgotNewPassword}
-                  className={`w-full py-4 rounded-2xl font-black text-xs tracking-[0.18em] uppercase flex items-center justify-center gap-2.5 transition-all cursor-pointer mt-6 ${
-                    forgotOtp.length === 6 && forgotNewPassword && !forgotLoading
+                  className={`w-full py-4 rounded-2xl font-black text-xs tracking-[0.18em] uppercase flex items-center justify-center gap-2.5 transition-all cursor-pointer mt-6 ${forgotOtp.length === 6 && forgotNewPassword && !forgotLoading
                       ? 'bg-gradient-to-r from-[#01281a] via-[#02432b] to-[#01281a] hover:from-[#013523] hover:to-[#013523] text-white shadow-[0_12px_28px_rgba(1,40,26,0.22),inset_0_1px_1px_rgba(255,255,255,0.25)] hover:shadow-[0_16px_34px_rgba(1,40,26,0.28)] active:scale-[0.99]'
                       : 'bg-slate-100 border border-slate-200/80 text-slate-400 font-black tracking-[0.18em] cursor-not-allowed opacity-100'
-                  }`}
+                    }`}
                 >
                   {forgotLoading ? (
                     <>
@@ -622,7 +620,7 @@ export default function LoginPage() {
                     <Clock className="w-3.5 h-3.5 text-emerald-600 stroke-[2]" />
                     <span>
                       Resend in{' '}
-                      <strong className="text-slate-900 font-black font-mono">
+                      <strong className="text-slate-900 font-black ">
                         {formatTimer(cooldown)}
                       </strong>
                     </span>

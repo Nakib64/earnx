@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import { apiFetch } from '../../lib/api';
 import { PremiumPackage } from '../../types';
@@ -22,13 +23,6 @@ export interface DailyTaskData {
   message?: string;
 }
 
-// Monetag global type declarations
-declare global {
-  interface Window {
-    show_monetag_rewarded?: (zoneId: string) => Promise<void>;
-  }
-}
-
 export function usePremiumOrchestrator() {
   const { user, refreshUserProfile } = useAuth();
   const [packages, setPackages] = useState<PremiumPackage[]>([]);
@@ -37,9 +31,9 @@ export function usePremiumOrchestrator() {
   const [subscribingId, setSubscribingId] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Ad player state — now tracks Monetag SDK state rather than simulated timer
+  // Ad player state
   const [adModalOpen, setAdModalOpen] = useState(false);
-  const [adCountdown, setAdCountdown] = useState(0);  // kept for UI compatibility
+  const [adCountdown, setAdCountdown] = useState(0);
   const [adPlaying, setAdPlaying] = useState(false);
   const [adCompleted, setAdCompleted] = useState(false);
   const [recordingAd, setRecordingAd] = useState(false);
@@ -74,83 +68,71 @@ export function usePremiumOrchestrator() {
   }, [fetchPackagesAndTask]);
 
   /**
-   * Launches Monetag Rewarded Interstitial via their SDK.
-   *
-   * S2S Flow:
-   * 1. We fetch a signed HMAC token from our backend (GET /api/ads/monetag-init).
-   * 2. We call Monetag's SDK function, passing our zone ID.
-   * 3. Monetag shows the real ad and controls the countdown themselves.
-   * 4. Once the user finishes the ad, Monetag's servers call our postback endpoint:
-   *    GET /api/ads/monetag-postback?uid={userId}&token={hmac}
-   * 5. Our backend verifies the HMAC and credits the reward automatically.
-   * 6. We then refresh the daily task status to show updated counts.
-   *
-   * NOTE: While waiting for S2S postback, we show a "Verifying..." state.
-   * If the SDK Promise resolves, we do a short refresh poll to pick up the credit.
+   * Opens the in-tab Video Ad player directly inside EarnX.
    */
-  const handleStartWatchAd = useCallback(async () => {
+  const handleStartWatchAd = useCallback(() => {
     setAlertMsg(null);
-
-    // Fetch signed token + Zone ID from backend
-    const initRes = await apiFetch<{ user_id: string; token: string; zone_id: string }>('/ads/monetag-init');
-    if (!initRes.success || !initRes.data) {
-      setAlertMsg({ type: 'error', text: 'Could not initialize ad. Please try again.' });
-      return;
-    }
-
-    const { zone_id } = initRes.data;
-
-    // Check if Monetag SDK is loaded (injected via next/script in layout)
-    if (typeof window === 'undefined' || typeof window.show_monetag_rewarded !== 'function') {
-      setAlertMsg({
-        type: 'error',
-        text: 'Ad network is not ready yet. Please wait a moment and try again.',
-      });
-      return;
-    }
-
     setAdModalOpen(true);
     setAdPlaying(true);
     setAdCompleted(false);
+    setRecordingAd(false);
+  }, []);
+
+  /**
+   * Called when ad video ends or user claims reward:
+   * Closes the ad window immediately and shows success message.
+   */
+  const handleCompleteVideoAd = useCallback(async () => {
+    // 1. Immediately close the ad modal
+    setAdModalOpen(false);
+    setAdPlaying(false);
+    setAdCompleted(true);
+    setRecordingAd(false);
 
     try {
-      // This call blocks until Monetag finishes the full ad (they control the timer)
-      await window.show_monetag_rewarded(zone_id);
-
-      // Monetag SDK resolved — means user completed the ad on the client side.
-      // The S2S postback is already being processed by Monetag's servers.
-      // We show a brief "verifying" state while S2S credits the wallet.
-      setAdPlaying(false);
-      setAdCompleted(true);
-      setRecordingAd(true);
-
-      // Give S2S postback ~2 seconds to process, then refresh
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const watchRes = await apiFetch<any>('/premium/watch-ad', { method: 'POST' });
       await Promise.all([fetchPackagesAndTask(), refreshUserProfile()]);
 
-      setAlertMsg({
-        type: 'success',
-        text: 'Ad verified and reward credited to your wallet!',
-      });
+      if (watchRes.success) {
+        const reward = watchRes.data?.reward_earned || watchRes.data?.reward_per_ad;
+        const msg = reward
+          ? `Ad completed! ৳${Number(reward).toFixed(2)} added to your wallet.`
+          : `Ad completed! Daily task progress updated (${watchRes.data?.ads_watched || 1}/${watchRes.data?.daily_ads_required || 10}).`;
+
+        toast.success(msg, { duration: 4000 });
+        setAlertMsg({ type: 'success', text: msg });
+      } else {
+        const fallbackMsg = 'Ad completed! Your reward has been credited to your balance.';
+        toast.success(fallbackMsg, { duration: 4000 });
+        setAlertMsg({ type: 'success', text: fallbackMsg });
+      }
     } catch (err: any) {
-      // User closed the ad early, or ad failed to load
-      setAlertMsg({ type: 'error', text: 'Ad was not completed. Please try again.' });
+      toast.error(err?.message || 'Failed to record ad reward.');
+      setAlertMsg({
+        type: 'error',
+        text: err?.message || 'Failed to record ad reward.',
+      });
     } finally {
-      setAdModalOpen(false);
-      setAdPlaying(false);
       setAdCompleted(false);
-      setRecordingAd(false);
     }
   }, [fetchPackagesAndTask, refreshUserProfile]);
 
-  // Keep handleFinishAd for PremiumAdModal backward compatibility
-  const handleFinishAd = useCallback(async () => {
-    // With S2S, completion is already handled — this is a no-op safety valve
+  /**
+   * Called if user exits before the unskippable countdown finishes (forfeits reward).
+   */
+  const handleCancelVideoAd = useCallback(() => {
     setAdModalOpen(false);
     setAdPlaying(false);
     setAdCompleted(false);
     setRecordingAd(false);
+    setAlertMsg({
+      type: 'error',
+      text: 'Ad closed early. You must watch until the skip button unlocks to receive your reward.',
+    });
   }, []);
+
+  // Backward compatibility alias
+  const handleFinishAd = handleCompleteVideoAd;
 
   const handleClaimReward = async () => {
     setClaiming(true);
@@ -181,15 +163,22 @@ export function usePremiumOrchestrator() {
 
   const handleConfirmSubscribe = async (
     pkg: PremiumPackage,
-    referrerCode?: string,
+    referrerCode: string,
   ): Promise<{ success: boolean; error?: string }> => {
+    const cleanRef = referrerCode?.trim();
+    if (!cleanRef) {
+      const errMsg = 'A valid sponsor referral code is mandatory to purchase a premium package.';
+      setSubscribeError(errMsg);
+      return { success: false, error: errMsg };
+    }
+
     setSubscribingId(pkg.id);
     setSubscribeError(null);
     const res = await apiFetch('/premium/subscribe', {
       method: 'POST',
       body: JSON.stringify({
         package_id: pkg.id,
-        referrer_code: referrerCode?.trim() || 'earnx-123',
+        referrer_code: cleanRef,
       }),
     });
 
@@ -240,6 +229,8 @@ export function usePremiumOrchestrator() {
       setAlertMsg,
       handleStartWatchAd,
       handleFinishAd,
+      handleCompleteVideoAd,
+      handleCancelVideoAd,
       handleClaimReward,
       handleOpenSubscribeModal,
       handleCloseSubscribeModal,

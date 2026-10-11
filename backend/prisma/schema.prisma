@@ -31,6 +31,15 @@ enum TransactionType {
   INVESTMENT_PAYOUT
   BALANCE_TRANSFER
   COIN_PURCHASE
+  ECOMMERCE_ORDER
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 enum CoinTransactionType {
@@ -115,6 +124,7 @@ model User {
   marketplace_comments       MarketplaceComment[]
   marketplace_likes          MarketplaceLike[]
   daily_ad_claims            DailyAdClaim[]
+  orders                     Order[]
   created_at                 DateTime            @default(now())
   updated_at                 DateTime            @updatedAt
 
@@ -134,11 +144,12 @@ model PremiumPackage {
   daily_ads_count     Int            @default(30)
   daily_reward_amount Decimal        @db.Decimal(12, 2)
   duration_days       Int            @default(365)
-  is_active           Boolean        @default(true)
-  users               User[]
-  daily_claims        DailyAdClaim[]
-  created_at          DateTime       @default(now())
-  updated_at          DateTime       @updatedAt
+  is_active                  Boolean        @default(true)
+  direct_referral_commission Decimal        @default(0) @db.Decimal(12, 2)
+  users                      User[]
+  daily_claims               DailyAdClaim[]
+  created_at                 DateTime       @default(now())
+  updated_at                 DateTime       @updatedAt
 }
 
 model DailyAdClaim {
@@ -452,4 +463,61 @@ model Notice {
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?     @db.Text
+  price       Decimal     @db.Decimal(12, 2)
+  images      String[]    @default([])
+  stock       Int         @default(100)
+  category    String?     @default("General")
+  is_active   Boolean     @default(true)
+  order_items OrderItem[]
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  @@index([created_at])
+  @@index([is_active])
+}
+
+model Order {
+  id               String      @id @default(uuid())
+  order_number     String      @unique
+  user_id          String
+  user             User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  total_amount     Decimal     @db.Decimal(12, 2)
+  status           OrderStatus @default(PENDING)
+  customer_name    String
+  customer_phone   String
+  district         String
+  city             String?
+  delivery_address String      @db.Text
+  notes            String?
+  payment_method   String      @default("WALLET")
+  paid_at          DateTime    @default(now())
+  items            OrderItem[]
+  created_at       DateTime    @default(now())
+  updated_at       DateTime    @updatedAt
+
+  @@index([user_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+model OrderItem {
+  id            String   @id @default(uuid())
+  order_id      String
+  order         Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product_id    String?
+  product       Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  product_name  String
+  product_image String?
+  unit_price    Decimal  @db.Decimal(12, 2)
+  quantity      Int      @default(1)
+  total_price   Decimal  @db.Decimal(12, 2)
+
+  @@index([order_id])
+  @@index([product_id])
 }

@@ -1,30 +1,32 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { PremiumLockScreen } from '../../components/common/PremiumLockScreen';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoading && !user) {
       router.replace('/login');
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, router, mounted]);
 
-  if (!user) {
-    if (isLoading) {
-      return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
-        </div>
-      );
-    }
-    return null;
+  if (!mounted || isLoading || !user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-700"></div>
+      </div>
+    );
   }
 
   // All pages are accessible to members, except Coins, Investments, and Marketplace which require Premium / active package

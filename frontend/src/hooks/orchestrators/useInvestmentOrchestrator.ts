@@ -21,7 +21,7 @@ export function useInvestmentOrchestrator() {
 
   // Flexible tenure and custom amount states
   const [customInvestAmount, setCustomInvestAmount] = useState<string>('');
-  const [selectedDuration, setSelectedDuration] = useState<3 | 6 | 12>(6);
+  const [selectedDuration, setSelectedDuration] = useState<number>(3);
 
   const fetchData = useCallback(async () => {
     if (plans.length === 0) {
@@ -49,7 +49,7 @@ export function useInvestmentOrchestrator() {
     setSelectedPlan(plan);
     setMessage(null);
     setCustomInvestAmount(String(plan.min_amount || plan.amount || 1000));
-    setSelectedDuration((plan.duration_months as any) || 6);
+    setSelectedDuration(Number(plan.duration_months) || 3);
 
     const targetAmt = Number(plan.amount || plan.min_amount);
     const currentAmt = activeInv ? Number(activeInv.amount) : 0;
@@ -79,19 +79,20 @@ export function useInvestmentOrchestrator() {
     setSubmitting(true);
     setMessage(null);
 
+    const durationMonths = Number(selectedPlan.duration_months) || selectedDuration || 3;
     const res = await apiFetch<UserInvestment>('/investments/subscribe', {
       method: 'POST',
       body: JSON.stringify({
         planId: selectedPlan.id,
         amount: investAmt,
-        durationMonths: selectedDuration,
+        durationMonths,
       }),
     });
 
     if (res.success) {
       setMessage({
         type: 'success',
-        text: `Investment activated! ৳${investAmt.toLocaleString()} has been locked in principal for ${selectedDuration} months.`,
+        text: `Investment activated! ৳${investAmt.toLocaleString()} has been locked in principal for ${durationMonths} months.`,
       });
       setSelectedPlan(null);
       await refreshUserProfile();

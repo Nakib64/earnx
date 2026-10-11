@@ -40,13 +40,18 @@ export default function AdminPremiumPage() {
     price: '',
     daily_reward_amount: '',
     daily_ads_count: '30',
+    direct_referral_commission: '500',
     is_active: true,
   });
   const [saving, setSaving] = useState(false);
 
   const fetchPackages = useCallback(async () => {
     setLoading(true);
-    const res = await apiFetch<PremiumPackage[]>('/premium/admin/packages', { isAdmin: true });
+    const res = await apiFetch<PremiumPackage[]>('/premium/admin/packages', {
+      isAdmin: true,
+      skipCache: true,
+      forceRefresh: true,
+    });
     if (res.success && res.data) {
       setPackages(res.data);
     } else {
@@ -69,6 +74,7 @@ export default function AdminPremiumPage() {
       price: '',
       daily_reward_amount: '',
       daily_ads_count: '30',
+      direct_referral_commission: '500',
       is_active: true,
     });
     setModalOpen(true);
@@ -84,6 +90,7 @@ export default function AdminPremiumPage() {
       price: String(pkg.price),
       daily_reward_amount: String(pkg.daily_reward_amount),
       daily_ads_count: String(pkg.daily_ads_count),
+      direct_referral_commission: pkg.direct_referral_commission !== undefined && pkg.direct_referral_commission !== null ? String(pkg.direct_referral_commission) : '0',
       is_active: pkg.is_active,
     });
     setModalOpen(true);
@@ -122,6 +129,7 @@ export default function AdminPremiumPage() {
       price: parseFloat(formData.price),
       daily_reward_amount: parseFloat(formData.daily_reward_amount),
       daily_ads_count: parseInt(formData.daily_ads_count, 10),
+      direct_referral_commission: formData.direct_referral_commission ? parseFloat(formData.direct_referral_commission) : 0,
       is_active: formData.is_active,
     };
 
@@ -439,6 +447,16 @@ export default function AdminPremiumPage() {
                         <span className="text-[#009F6B] font-bold">৳{rewardPerAd} / ad</span>
                       </div>
 
+                      <div className="flex justify-between items-center py-1.5 px-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
+                        <span className="font-bold text-amber-900 flex items-center gap-1">
+                          <Crown className="w-3.5 h-3.5 text-amber-600" />
+                          Direct Refer Commission:
+                        </span>
+                        <strong className="text-amber-800 font-bold text-sm">
+                          ৳{Number(pkg.direct_referral_commission || 0).toLocaleString()}
+                        </strong>
+                      </div>
+
                       <div className="flex justify-between items-center text-[10px] text-slate-400 pt-0.5">
                         <span>Validity Period:</span>
                         <span className="font-semibold">{pkg.duration_days || 365} Days (1 Year)</span>
@@ -592,6 +610,32 @@ export default function AdminPremiumPage() {
                       <span className="text-xs font-bold text-slate-700">Active Membership</span>
                     </label>
                   </div>
+                </div>
+
+                <div className="space-y-1.5 p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Direct Referral Commission (৳)</span>
+                      <span className="text-rose-500">*</span>
+                    </label>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900">
+                      Direct Sponsor Reward
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    required
+                    placeholder="e.g. 500, 800"
+                    value={formData.direct_referral_commission}
+                    onChange={(e) => setFormData({ ...formData, direct_referral_commission: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-white border border-amber-300 focus:border-amber-500 rounded-xl text-xs font-bold text-slate-900 outline-none transition-all shadow-2xs"
+                  />
+                  <p className="text-[11px] text-amber-700 font-medium leading-relaxed">
+                    Fixed commission instantly credited to the direct sponsor whenever a member purchases this specific package.
+                  </p>
                 </div>
 
                 {formData.daily_reward_amount && formData.daily_ads_count && (

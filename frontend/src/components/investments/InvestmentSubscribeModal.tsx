@@ -2,14 +2,14 @@
 
 import React from 'react';
 import { InvestmentPlan } from '../../types';
-import { Lock } from 'lucide-react';
+import { Lock, ShieldCheck, Wallet, ArrowRight, TrendingUp } from 'lucide-react';
 
 interface InvestmentSubscribeModalProps {
   selectedPlan: InvestmentPlan;
   customInvestAmount: string;
   setCustomInvestAmount: (val: string) => void;
-  selectedDuration: 3 | 6 | 12;
-  setSelectedDuration: (dur: 3 | 6 | 12) => void;
+  selectedDuration: number;
+  setSelectedDuration: (dur: number) => void;
   walletBal: number;
   submitting: boolean;
   onClose: () => void;
@@ -27,15 +27,17 @@ export function InvestmentSubscribeModal({
   onClose,
   onConfirm,
 }: InvestmentSubscribeModalProps) {
-  const investAmt =
-    parseFloat(customInvestAmount) || Number(selectedPlan.amount || selectedPlan.min_amount || 1000);
-  const minRequired = Number(selectedPlan.min_amount || selectedPlan.amount || 500);
+  const minRequired = Number(selectedPlan.min_amount || selectedPlan.amount || 1000);
+  const investAmt = parseFloat(customInvestAmount) || minRequired;
 
-  const returnRate = selectedDuration === 3 ? 5 : selectedDuration === 6 ? 7.5 : 10;
-  const estimatedDividend = (investAmt * returnRate) / 100;
-  const unlockDate = new Date(
-    Date.now() + selectedDuration * 30 * 24 * 60 * 60 * 1000,
-  ).toLocaleDateString('en-US', {
+  const planDuration = selectedPlan.duration_months || selectedDuration || 3;
+  const returnRate = Number(selectedPlan.monthly_return_percent || 10);
+  const estimatedMonthlyDividend = (investAmt * returnRate) / 100;
+  const estimatedTotalProfit = estimatedMonthlyDividend * planDuration;
+
+  const unlockDate = new Date();
+  unlockDate.setMonth(unlockDate.getMonth() + planDuration);
+  const unlockDateStr = unlockDate.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -45,20 +47,27 @@ export function InvestmentSubscribeModal({
   const isBelowMin = investAmt < minRequired;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6 space-y-6 shadow-xl border border-slate-200 animate-in fade-in zoom-in duration-200">
-        <div className="flex justify-between items-start border-b border-slate-100 pb-3">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-[family-name:var(--font-montserrat)]">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 space-y-5 shadow-2xl border border-slate-200/90 animate-in fade-in zoom-in duration-200">
+        
+        {/* Header */}
+        <div className="flex justify-between items-start border-b border-slate-100 pb-3.5">
           <div className="min-w-0 flex-1">
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 truncate">
-              Subscribe to {selectedPlan.title}
-            </h3>
-            <p className="text-xs text-slate-500 font-semibold truncate">
-              Fixed Package Subscription
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 truncate">
+                {selectedPlan.title}
+              </h3>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80">
+                {planDuration} Mo. Term
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium truncate mt-0.5">
+              Fixed-Tenure Capital Investment Plan
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 text-lg font-bold shrink-0 ml-2 cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm shrink-0 ml-2 cursor-pointer transition-colors"
           >
             ✕
           </button>
@@ -68,107 +77,103 @@ export function InvestmentSubscribeModal({
           {/* Custom Invested Amount */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center text-xs">
-              <span className="font-bold text-slate-700">Investment Amount (৳ BDT)</span>
+              <span className="font-bold text-slate-700">Investment Amount (BDT)</span>
               <span className="text-[11px] text-slate-500 font-semibold">
-                Min: ৳{minRequired.toLocaleString()}
+                Min. Required: <strong className="text-slate-900">৳{minRequired.toLocaleString()}</strong>
               </span>
             </div>
             <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-slate-400 font-black text-sm">৳</span>
+              <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">৳</span>
               <input
                 type="number"
                 step="any"
                 min={minRequired}
                 value={customInvestAmount}
                 onChange={(e) => setCustomInvestAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl  font-black text-slate-900 text-sm focus:ring-2 focus:ring-[#005A36]"
+                placeholder={String(minRequired)}
+                className="w-full pl-8 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl font-bold text-slate-900 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs"
               />
             </div>
+            {isBelowMin && (
+              <p className="text-[11px] text-rose-500 font-semibold">
+                Minimum investment amount is ৳{minRequired.toLocaleString()}
+              </p>
+            )}
           </div>
 
-          {/* Flexible Tenure Duration Options */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700">Tenure & Duration Lock</label>
-            <div className="grid grid-cols-3 gap-2">
-              {([3, 6, 12] as const).map((dur) => {
-                const isSelected = selectedDuration === dur;
-                return (
-                  <button
-                    type="button"
-                    key={dur}
-                    onClick={() => setSelectedDuration(dur)}
-                    className={`py-2 px-2 rounded-xl border text-center transition-all ${isSelected
-                      ? 'border-[#005A36] bg-[#005A36] text-white shadow-sm font-black'
-                      : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold'
-                      }`}
-                  >
-                    <div className="text-xs">{dur} Months</div>
-                    <div
-                      className={`text-[10px] ${isSelected ? 'text-emerald-200' : 'text-slate-500'
-                        }`}
-                    >
-                      {dur === 3 ? '5%/mo' : dur === 6 ? '7.5%/mo' : '10%/mo'}
-                    </div>
-                  </button>
-                );
-              })}
+          {/* Tenure Information */}
+          <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-3.5 space-y-2.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 font-medium">Package Tenure:</span>
+              <span className="font-bold text-slate-900">{planDuration} Months Lock</span>
             </div>
-          </div>
-
-          {/* Breakdown Details */}
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2 text-xs">
-            <div className="flex justify-between text-slate-600">
-              <span className="font-bold">Your Account Balance:</span>
-              <span className="font-black text-primary ">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 font-medium">Monthly Interest Rate:</span>
+              <span className="font-bold text-[#009F6B] tabular-nums">+{returnRate}% / month</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
+              <span className="text-slate-600 font-semibold">Monthly Return (To Wallet):</span>
+              <span className="font-bold text-[#009F6B] text-sm tabular-nums">
+                ৳{estimatedMonthlyDividend.toLocaleString()} / mo
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-600 font-semibold">Total Profit over {planDuration} Mo:</span>
+              <span className="font-bold text-slate-900 tabular-nums">
+                ৳{estimatedTotalProfit.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 font-medium">Principal Unlock Date:</span>
+              <span className="font-bold text-slate-900 tabular-nums">{unlockDateStr}</span>
+            </div>
+            <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
+              <span className="text-slate-500 font-medium">Your Current Wallet:</span>
+              <span className={`font-bold tabular-nums ${isInsufficient ? 'text-rose-600' : 'text-slate-900'}`}>
                 ৳{walletBal.toLocaleString()}
               </span>
             </div>
-            <div className="flex justify-between text-slate-600">
-              <span className="font-bold">Monthly Return Rate:</span>
-              <span className="font-black text-[#01281a] ">{returnRate}% / month</span>
-            </div>
-            <div className="flex justify-between text-slate-600 pt-1 border-t border-slate-200">
-              <span className="font-bold">Estimated Monthly Dividend:</span>
-              <span className="font-black text-[#005A36]  text-sm">
-                ৳{estimatedDividend.toLocaleString()} / mo
-              </span>
-            </div>
-            <div className="flex justify-between text-slate-600">
-              <span className="font-bold">Principal Unlock Date:</span>
-              <span className="font-black text-slate-900 ">{unlockDate}</span>
-            </div>
           </div>
 
-          {/* Lock-In Notice */}
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] font-medium text-amber-900 space-y-0.5">
-            <span className="font-black text-amber-950 flex items-center gap-1">
-              <Lock className="w-3.5 h-3.5 text-amber-600" />
-              Principal Capital Lock-In:
-            </span>
-            <p>
-              Principal is locked until the {selectedDuration}-month tenure finishes. Monthly
-              profits will be credited to your wallet balance on schedule.
+          {/* Capital Lock Notice Banner */}
+          <div className="p-3.5 bg-amber-50/80 border border-amber-200/80 rounded-2xl text-[11px] text-amber-900 space-y-1">
+            <div className="flex items-center gap-1.5 font-bold text-amber-950">
+              <Lock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span>Capital Principal Lock Policy</span>
+            </div>
+            <p className="leading-relaxed">
+              Before the {planDuration}-month package ends, the invested capital cannot be withdrawn. Monthly interest (৳{estimatedMonthlyDividend.toLocaleString()}) is added directly to your Cash Wallet every month.
             </p>
           </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex space-x-3 pt-2">
           <button
+            type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl border border-slate-300 font-black text-xs text-slate-700 hover:bg-slate-100 truncate cursor-pointer"
+            className="flex-1 py-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 font-bold text-xs text-slate-700 transition-all cursor-pointer"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             disabled={submitting || isInsufficient || isBelowMin}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 font-black text-xs shadow-md disabled:opacity-50 truncate cursor-pointer"
+            className="flex-1 py-3 rounded-xl bg-[#009F6B] hover:bg-[#008C5F] text-white font-bold text-xs shadow-sm disabled:opacity-50 transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
           >
-            {submitting
-              ? 'Processing...'
-              : isInsufficient
-                ? 'Insufficient Balance'
-                : 'Lock Investment'}
+            {submitting ? (
+              'Processing...'
+            ) : isInsufficient ? (
+              'Insufficient Balance'
+            ) : isBelowMin ? (
+              'Below Minimum'
+            ) : (
+              <>
+                <span>Lock Investment</span>
+                <ArrowRight className="w-3.5 h-3.5 text-emerald-200" />
+              </>
+            )}
           </button>
         </div>
       </div>

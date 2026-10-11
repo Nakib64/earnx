@@ -28,10 +28,17 @@ export class InvestmentsController {
 
   @UseGuards(UserJwtGuard)
   @Post('subscribe')
-  async subscribe(@Request() req, @Body() body: { planId: string }) {
+  async subscribe(
+    @Request() req,
+    @Body() body: { planId: string; amount?: number; durationMonths?: number },
+  ) {
     return this.investmentsService.createInvestment(
       req.user.id,
       body.planId,
+      body.amount !== undefined && !isNaN(Number(body.amount)) ? Number(body.amount) : undefined,
+      body.durationMonths !== undefined && !isNaN(Number(body.durationMonths))
+        ? Number(body.durationMonths)
+        : undefined,
     );
   }
 
@@ -89,12 +96,15 @@ export class InvestmentsController {
       is_lifetime?: boolean;
     },
   ) {
-    const amt = Number(body.amount || body.min_amount || 0);
+    const minAmt = Number(body.min_amount || body.amount || 0);
+    const maxAmt = body.max_amount ? Number(body.max_amount) : undefined;
     return this.investmentsService.createPlan({
       title: body.title,
-      amount: amt,
+      amount: minAmt,
+      min_amount: minAmt,
+      max_amount: maxAmt,
       monthly_return_percent: Number(body.monthly_return_percent),
-      duration_months: body.duration_months,
+      duration_months: body.duration_months ? Number(body.duration_months) : 3,
       is_lifetime: body.is_lifetime,
     });
   }

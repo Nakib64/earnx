@@ -110,7 +110,7 @@ export default function AdminWalletPage() {
   return (
     <div className="relative z-10 min-h-full text-[#111827] pb-16 font-[family-name:var(--font-montserrat)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 select-none">
-        
+
         {/* ── 1. PAGE HEADER (Sitting directly on background per Design System) ── */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
           <div className="space-y-1.5 max-w-2xl select-none">
@@ -491,7 +491,7 @@ export default function AdminWalletPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-900 text-sm sm:text-base">Transaction Ledger Details</h3>
-                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">ID: {selectedTx.id}</p>
+                    <p className="text-[10px] text-slate-400  truncate max-w-[200px]">ID: {selectedTx.id}</p>
                   </div>
                 </div>
                 <button
