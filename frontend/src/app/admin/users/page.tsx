@@ -56,75 +56,78 @@ function AdminUsersContent() {
   const totalNetworkBalance = users.reduce((acc, u) => acc + Number(u.wallet_balance || 0), 0);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      {/* Top Luxury Banner */}
-      <AdminUsersBanner
-        totalMembers={totalMembers}
-        onRefresh={loadData}
-      />
+    <div className="relative z-10 min-h-full text-[#111827] pb-16 font-[family-name:var(--font-montserrat)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 select-none">
+        {/* 1. Header sitting directly on background with live indicator */}
+        <AdminUsersBanner
+          totalMembers={totalMembers}
+          onRefresh={loadData}
+          loading={loading}
+        />
 
-      {/* Summary Metric Cards */}
-      <AdminUsersSummaryCards
-        totalMembers={totalMembers}
-        badgedLeadersCount={badgedLeadersCount}
-        premiumAccountsCount={premiumAccountsCount}
-        totalNetworkBalance={totalNetworkBalance}
-      />
+        {/* 2. Top 4 KPI Summary Metric Cards (Matches User Dashboard Boxes) */}
+        <AdminUsersSummaryCards
+          totalMembers={totalMembers}
+          badgedLeadersCount={badgedLeadersCount}
+          premiumAccountsCount={premiumAccountsCount}
+          totalNetworkBalance={totalNetworkBalance}
+        />
 
-      {/* Breadcrumb Trail for In-Place Tree Exploration */}
-      <UserBreadcrumbs
-        breadcrumbs={breadcrumbs}
-        onBreadcrumbClick={handleBreadcrumbClick}
-      />
+        {/* 3. Breadcrumb Trail for In-Place Tree Exploration */}
+        <UserBreadcrumbs
+          breadcrumbs={breadcrumbs}
+          onBreadcrumbClick={handleBreadcrumbClick}
+        />
 
-      {/* Main Table Card Section */}
-      <AdminUsersTableSection
-        users={users}
-        userColumns={userColumns}
-        loading={loading}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onRowClick={handleRowClick}
-        currentParentName={currentParent.name}
-        isRootParent={currentParent.id === null}
-      />
+        {/* 4. Main Table Card Section (Liquid Glassmorphism) */}
+        <AdminUsersTableSection
+          users={users}
+          userColumns={userColumns}
+          loading={loading}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onRowClick={handleRowClick}
+          currentParentName={currentParent.name}
+          isRootParent={currentParent.id === null}
+        />
 
-      {/* Selected Member Details & Transaction History Cards */}
-      <UserDetailCards
-        user={selectedUserForCards}
-        onAdjustBalance={(user) => setAdjustUser(user)}
-        onAssignBadge={(user) => openBadgeModal(user)}
-        onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
-        onTogglePremium={(user, isPremium) => handleTogglePremium(user, isPremium)}
-        updatingPremium={updatingPremium}
-        onDeleteUser={(user) => setDeleteConfirmTarget(user)}
-      />
+        {/* 5. Selected Member Details & Transaction History Cards */}
+        <UserDetailCards
+          user={selectedUserForCards}
+          onAdjustBalance={(user) => setAdjustUser(user)}
+          onAssignBadge={(user) => openBadgeModal(user)}
+          onToggleStatus={(e, user, newStatus) => openStatusConfirmModal(e, user, newStatus)}
+          onTogglePremium={(user, isPremium) => handleTogglePremium(user, isPremium)}
+          updatingPremium={updatingPremium}
+          onDeleteUser={(user) => setDeleteConfirmTarget(user)}
+        />
 
-      {/* Action Modals Container */}
-      <AdminUsersModals
-        deleteConfirmTarget={deleteConfirmTarget}
-        deletingUser={deletingUser}
-        onDeleteConfirm={handleDeleteUserConfirm}
-        onDeleteClose={() => setDeleteConfirmTarget(null)}
-        statusConfirmTarget={statusConfirmTarget}
-        updatingStatus={updatingStatus}
-        onStatusConfirm={handleStatusChangeConfirm}
-        onStatusClose={() => setStatusConfirmTarget(null)}
-        adjustUser={adjustUser}
-        adjusting={adjusting}
-        onAdjustClose={() => setAdjustUser(null)}
-        onAdjustSubmit={handleBalanceAdjustSubmit}
-        selectedUserForBadge={selectedUserForBadge}
-        designations={designations}
-        allBadgedLeaders={allBadgedLeaders}
-        targetDesignation={targetDesignation}
-        targetSponsorId={targetSponsorId}
-        savingBadge={savingBadge}
-        onBadgeClose={() => setSelectedUserForBadge(null)}
-        onTargetDesignationChange={setTargetDesignation}
-        onTargetSponsorIdChange={setTargetSponsorId}
-        onBadgeSubmit={handleAssignDesignation}
-      />
+        {/* 6. Action Modals Container */}
+        <AdminUsersModals
+          deleteConfirmTarget={deleteConfirmTarget}
+          deletingUser={deletingUser}
+          onDeleteConfirm={handleDeleteUserConfirm}
+          onDeleteClose={() => setDeleteConfirmTarget(null)}
+          statusConfirmTarget={statusConfirmTarget}
+          updatingStatus={updatingStatus}
+          onStatusConfirm={handleStatusChangeConfirm}
+          onStatusClose={() => setStatusConfirmTarget(null)}
+          adjustUser={adjustUser}
+          adjusting={adjusting}
+          onAdjustClose={() => setAdjustUser(null)}
+          onAdjustSubmit={handleBalanceAdjustSubmit}
+          selectedUserForBadge={selectedUserForBadge}
+          designations={designations}
+          allBadgedLeaders={allBadgedLeaders}
+          targetDesignation={targetDesignation}
+          targetSponsorId={targetSponsorId}
+          savingBadge={savingBadge}
+          onBadgeClose={() => setSelectedUserForBadge(null)}
+          onTargetDesignationChange={setTargetDesignation}
+          onTargetSponsorIdChange={setTargetSponsorId}
+          onBadgeSubmit={handleAssignDesignation}
+        />
+      </div>
     </div>
   );
 }

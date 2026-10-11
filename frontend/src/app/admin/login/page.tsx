@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFetch } from '../../../lib/api';
-import { Phone, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Phone, Lock, Eye, EyeOff, ArrowRight, RefreshCw, ShieldCheck } from 'lucide-react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 
 export default function AdminLoginPage() {
@@ -24,129 +24,138 @@ export default function AdminLoginPage() {
 
     const res = await apiFetch<{ accessToken: string; admin: any }>('/admin/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ phone, password }),
+      body: JSON.stringify({ phone: phone.trim(), password }),
     });
 
     if (res.success && res.data) {
       loginAdmin(res.data.accessToken, res.data.admin);
       router.push('/admin/dashboard');
     } else {
-      setError(res.error?.message || 'Admin authentication failed.');
+      setError(res.error?.message || 'Invalid admin credentials.');
     }
     setLoading(false);
   };
 
   return (
-    <div className="space-y-6 max-w-md mx-auto p-4 sm:p-6 lg:p-8 min-h-[80vh] flex flex-col justify-center">
+    <div className="min-h-[85vh] flex flex-col justify-center items-center py-12 px-4 sm:px-6 relative overflow-hidden">
+      {/* Soft Ambient Light Glows */}
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-emerald-500/[0.07] rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 -right-24 w-80 h-80 bg-sky-500/[0.05] rounded-full blur-3xl pointer-events-none" />
 
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <Link href="/" className="inline-block">
-          <img
-            src="/logo.png"
-            alt="EarnX Capital"
-            className="h-14 w-auto object-contain mx-auto"
-          />
-        </Link>
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">Admin Portal</h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">EarnX System Administration & Management</p>
-        </div>
-      </div>
-
-      {error && <AlertBanner type="error" message={error} onClose={() => setError(null)} />}
-
-      {/* Admin Banner */}
-      <div className="bg-[#005A36] rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-2">
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-700/60 border border-emerald-500/30 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-5 h-5 text-secondary" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-sm sm:text-base font-black  text-white">
-              Restricted Access
-            </h3>
-            <p className="text-xs text-emerald-100/80 font-medium">
-              This portal is for authorized system administrators only. All login attempts are logged.
+      <div className="w-full max-w-[420px] relative z-10 space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <Link href="/" className="inline-block group">
+            <div className="inline-flex items-center justify-center p-2.5 rounded-2xl bg-white/80 backdrop-blur-md border border-white/95 shadow-xs transition-transform group-hover:scale-105 specular-rim">
+              <img
+                src="/logo.png"
+                alt="EarnX Capital"
+                className="h-10 sm:h-11 w-auto object-contain"
+              />
+            </div>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              Admin Portal
+            </h1>
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
+              Sign in to manage EarnX Capital platform
             </p>
           </div>
         </div>
-      </div>
 
-      {/* Login Form Card */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
-            <ShieldCheck className="w-5 h-5" />
+        {/* Error Alert */}
+        {error && (
+          <AlertBanner type="error" message={error} onClose={() => setError(null)} />
+        )}
+
+        {/* Clean Glassmorphic Card */}
+        <div className="bg-white/85 backdrop-blur-2xl border border-white/95 rounded-[26px] p-6 sm:p-8 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.07)] specular-rim space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Phone */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-600">
+                Phone Number
+              </label>
+              <div className="relative group">
+                <div className="absolute left-3.5 top-3.5 flex items-center justify-center w-5 h-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                  <Phone className="w-4.5 h-4.5" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  placeholder="01700000000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-emerald-600 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)] focus:shadow-[0_0_0_4px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.95)] outline-none transition-all duration-200"
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black uppercase tracking-wider text-slate-600">
+                Password
+              </label>
+              <div className="relative group">
+                <div className="absolute left-3.5 top-3.5 flex items-center justify-center w-5 h-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors">
+                  <Lock className="w-4.5 h-4.5" />
+                </div>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-11 pr-11 py-3 bg-slate-50/80 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-emerald-600 rounded-2xl text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal shadow-[inset_0_1.5px_3px_rgba(0,0,0,0.03)] focus:shadow-[0_0_0_4px_rgba(5,150,105,0.12),inset_0_1px_1px_rgba(255,255,255,0.95)] outline-none transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#01281a] via-[#02432b] to-[#01281a] hover:from-[#013523] hover:to-[#013523] text-white font-black text-sm flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(1,40,26,0.22),inset_0_1px_1px_rgba(255,255,255,0.25)] hover:shadow-[0_16px_34px_rgba(1,40,26,0.28)] transition-all active:scale-[0.985] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-3"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" />
+                  <span>Signing In...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-4 h-4 text-emerald-300 ml-0.5" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Discreet Client Portal Link */}
+          <div className="pt-3 border-t border-slate-100 text-center">
+            <Link
+              href="/login"
+              className="text-xs font-bold text-slate-400 hover:text-emerald-700 transition-colors inline-flex items-center gap-1"
+            >
+              <span>Back to Client Login</span>
+            </Link>
           </div>
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Admin Sign In</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Admin Phone Number
-            </label>
-            <div className="relative">
-              <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                required
-                placeholder="01700000000"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Password
-            </label>
-            <div className="relative">
-              <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-11 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md shadow-emerald-900/10"
-          >
-            <ShieldCheck className="w-4 h-4 text-secondary" />
-            <span>{loading ? 'Authenticating...' : 'Enter Admin Console'}</span>
-            {loading && (
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            )}
-          </button>
-        </form>
-      </div>
-
-      {/* Back Link Card */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm">
-        <Link
-          href="/login"
-          className="text-xs font-extrabold text-slate-400 hover:text-primary flex items-center justify-center space-x-1.5 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to User Login</span>
-        </Link>
+        {/* Minimal Bottom Trust Badge */}
+        <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-slate-400">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>Encrypted Admin Session</span>
+        </div>
       </div>
     </div>
   );

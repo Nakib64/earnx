@@ -129,8 +129,6 @@ export class ApprovalsService {
           is_premium: true,
           premium_started_at: now,
           premium_expires_at: expiresAt,
-          premium_payout_count: 0,
-          last_premium_payout_at: null,
         },
       });
 

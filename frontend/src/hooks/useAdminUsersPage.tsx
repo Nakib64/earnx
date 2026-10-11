@@ -126,83 +126,215 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
     handleDeleteUserConfirm: triggerDeleteUser,
   } = useUserDeletion();
 
-  // Composed Handlers
+  // Composed Handlers with Instant Optimistic State Updates
   const handleStatusChangeConfirm = useCallback(async () => {
-    await triggerStatusChange((user, newStatus) => {
+    if (!statusConfirmTarget) return;
+    const { user, newStatus } = statusConfirmTarget;
+    const previousStatus = user.status;
+
+    // Instant optimistic update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)),
+    );
+    if (selectedUserForCards?.id === user.id) {
+      setSelectedUserForCards((prev) => (prev ? { ...prev, status: newStatus } : null));
+    }
+    setStatusConfirmTarget(null);
+    toast.success(`User ${user.full_name || user.phone} status updated to ${newStatus}`);
+
+    try {
+      const res = await apiFetch(`/admin/users/${user.id}/status`, {
+        method: 'PATCH',
+        isAdmin: true,
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.success) {
+        throw new Error(res.error?.message || 'Status update failed');
+      }
+    } catch (err: any) {
+      // Rollback on error
       setUsers((prev) =>
-        prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)),
+        prev.map((u) => (u.id === user.id ? { ...u, status: previousStatus } : u)),
       );
       if (selectedUserForCards?.id === user.id) {
-        setSelectedUserForCards((prev) => (prev ? { ...prev, status: newStatus } : null));
+        setSelectedUserForCards((prev) => (prev ? { ...prev, status: previousStatus } : null));
       }
-    });
-  }, [triggerStatusChange, setUsers, selectedUserForCards, setSelectedUserForCards]);
+      toast.error(err.message || 'Failed to update user status');
+    }
+  }, [statusConfirmTarget, setUsers, selectedUserForCards, setSelectedUserForCards, setStatusConfirmTarget]);
 
   const handleAssignDesignation = useCallback(async () => {
-    await triggerAssignDesignation(designations, (selectedUser, updatedUser, targetDesId, newDesObj) => {
+    if (!selectedUserForBadge) return;
+    const targetUser = selectedUserForBadge;
+    const prevDesId = targetUser.designation_id;
+    const prevDes = targetUser.designation;
+    const newDesObj = designations.find((d) => d.id === targetDesignation) || null;
+
+    // Instant optimistic update
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === targetUser.id
+          ? {
+              ...u,
+              designation_id: targetDesignation || null,
+              designation: newDesObj,
+            }
+          : u,
+      ),
+    );
+    if (selectedUserForCards?.id === targetUser.id) {
+      setSelectedUserForCards((prev) =>
+        prev
+          ? {
+              ...prev,
+              designation_id: targetDesignation || null,
+              designation: newDesObj,
+            }
+          : null,
+      );
+    }
+    setSelectedUserForBadge(null);
+    toast.success(`Designation badge updated for ${targetUser.full_name || targetUser.phone}`);
+
+    try {
+      const payload: any = { designation_id: targetDesignation || null };
+      if (targetSponsorId === 'ROOT') {
+        payload.referred_by_id = null;
+      } else if (targetSponsorId && targetSponsorId !== 'CURRENT') {
+        payload.referred_by_id = targetSponsorId;
+      }
+
+      const res = await apiFetch<User>(`/admin/users/${targetUser.id}/designation`, {
+        method: 'PATCH',
+        isAdmin: true,
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.success) {
+        throw new Error(res.error?.message || 'Designation assignment failed');
+      }
+    } catch (err: any) {
+      // Rollback on error
       setUsers((prev) =>
         prev.map((u) =>
-          u.id === selectedUser.id
-            ? {
-              ...u,
-              ...updatedUser,
-              designation_id: targetDesId || null,
-              designation: newDesObj || (updatedUser as any).designation || null,
-            }
+          u.id === targetUser.id
+            ? { ...u, designation_id: prevDesId, designation: prevDes }
             : u,
         ),
       );
-      if (selectedUserForCards?.id === selectedUser.id) {
+      if (selectedUserForCards?.id === targetUser.id) {
         setSelectedUserForCards((prev) =>
           prev
-            ? {
-              ...prev,
-              designation_id: targetDesId || null,
-              designation: newDesObj || null,
-            }
+            ? { ...prev, designation_id: prevDesId, designation: prevDes }
             : null,
         );
       }
-    });
-  }, [triggerAssignDesignation, designations, setUsers, selectedUserForCards, setSelectedUserForCards]);
+      toast.error(err.message || 'Designation assignment failed');
+    }
+  }, [
+    selectedUserForBadge,
+    targetDesignation,
+    targetSponsorId,
+    designations,
+    setUsers,
+    selectedUserForCards,
+    setSelectedUserForCards,
+    setSelectedUserForBadge,
+  ]);
 
   const handleBalanceAdjustSubmit = useCallback(
     async (user: User, rawAmount: number, type: 'ADD' | 'SUBTRACT', reason: string) => {
-      await triggerBalanceAdjust(user, rawAmount, type, reason, (targetId, finalAmount) => {
-        setUsers((prev) =>
-          prev.map((u) => {
-            if (u.id === targetId) {
-              const newBal = Number(u.wallet_balance || 0) + finalAmount;
-              return { ...u, wallet_balance: newBal };
-            }
-            return u;
+      const finalAmount = type === 'ADD' ? rawAmount : -rawAmount;
+      const previousBal = Number(user.wallet_balance || 0);
+      const newBal = previousBal + finalAmount;
+
+      // Instant optimistic update
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, wallet_balance: newBal } : u)),
+      );
+      if (selectedUserForCards?.id === user.id) {
+        setSelectedUserForCards((prev) => (prev ? { ...prev, wallet_balance: newBal } : null));
+      }
+      setAdjustUser(null);
+      toast.success(
+        `${type === 'ADD' ? 'Added' : 'Subtracted'} ৳${rawAmount} ${
+          type === 'ADD' ? 'to' : 'from'
+        } ${user.full_name || user.phone}'s balance`,
+      );
+
+      try {
+        const res = await apiFetch('/admin/wallet/adjust', {
+          method: 'POST',
+          isAdmin: true,
+          body: JSON.stringify({
+            user_id: user.id,
+            amount: finalAmount,
+            description: reason.trim() || 'Admin Direct Adjustment',
           }),
-        );
-        if (selectedUserForCards?.id === targetId) {
-          setSelectedUserForCards((prev) =>
-            prev
-              ? { ...prev, wallet_balance: Number(prev.wallet_balance || 0) + finalAmount }
-              : null,
-          );
+        });
+
+        if (!res.success) {
+          throw new Error(res.error?.message || 'Balance adjustment failed');
         }
-      });
+      } catch (err: any) {
+        // Rollback on error
+        setUsers((prev) =>
+          prev.map((u) => (u.id === user.id ? { ...u, wallet_balance: previousBal } : u)),
+        );
+        if (selectedUserForCards?.id === user.id) {
+          setSelectedUserForCards((prev) => (prev ? { ...prev, wallet_balance: previousBal } : null));
+        }
+        toast.error(err.message || 'Balance adjustment failed');
+      }
     },
-    [triggerBalanceAdjust, setUsers, selectedUserForCards, setSelectedUserForCards],
+    [setUsers, selectedUserForCards, setSelectedUserForCards, setAdjustUser],
   );
 
   const handleDeleteUserConfirm = useCallback(async () => {
-    await triggerDeleteUser(async (deletedUser) => {
-      if (selectedUserForCards?.id === deletedUser.id) {
-        setSelectedUserForCards(null);
+    if (!deleteConfirmTarget) return;
+    const targetUser = deleteConfirmTarget;
+
+    // Instant optimistic removal
+    setUsers((prev) => prev.filter((u) => u.id !== targetUser.id));
+    if (selectedUserForCards?.id === targetUser.id) {
+      setSelectedUserForCards(null);
+    }
+    setDeleteConfirmTarget(null);
+    toast.success(`User ${targetUser.full_name || targetUser.phone} deleted successfully`);
+
+    try {
+      const res = await apiFetch(`/admin/users/${targetUser.id}`, {
+        method: 'DELETE',
+        isAdmin: true,
+      });
+
+      if (!res.success) {
+        throw new Error(res.error?.message || 'Failed to delete user');
       }
-      await loadData();
-    });
-  }, [triggerDeleteUser, selectedUserForCards, setSelectedUserForCards, loadData]);
+    } catch (err: any) {
+      // Rollback on error
+      setUsers((prev) => [...prev, targetUser]);
+      toast.error(err.message || 'Failed to delete user');
+    }
+  }, [deleteConfirmTarget, setUsers, selectedUserForCards, setSelectedUserForCards, setDeleteConfirmTarget]);
 
   const handleTogglePremium = useCallback(
     async (targetUser: User, isPremium: boolean) => {
       if (updatingPremium) return;
       setUpdatingPremium(true);
+
+      // Instant optimistic state flip
+      setUsers((prev) =>
+        prev.map((u) => (u.id === targetUser.id ? { ...u, is_premium: isPremium } : u)),
+      );
+      if (selectedUserForCards?.id === targetUser.id) {
+        setSelectedUserForCards((prev) => (prev ? { ...prev, is_premium: isPremium } : null));
+      }
+      toast.success(
+        isPremium
+          ? `User ${targetUser.full_name || targetUser.phone} is now a Premium Member!`
+          : `Removed Premium status from ${targetUser.full_name || targetUser.phone}.`
+      );
 
       try {
         const res = await apiFetch<any>(`/admin/users/${targetUser.id}/premium`, {
@@ -211,22 +343,17 @@ export function useAdminUsersPage(): UseAdminUsersPageReturn {
           isAdmin: true,
         });
 
-        if (res.success) {
-          toast.success(
-            isPremium
-              ? `User ${targetUser.full_name || targetUser.phone} is now a Premium Member!`
-              : `Removed Premium status from ${targetUser.full_name || targetUser.phone}.`
-          );
-          setUsers((prev) =>
-            prev.map((u) => (u.id === targetUser.id ? { ...u, is_premium: isPremium } : u)),
-          );
-          if (selectedUserForCards?.id === targetUser.id) {
-            setSelectedUserForCards((prev) => (prev ? { ...prev, is_premium: isPremium } : null));
-          }
-        } else {
-          toast.error(res.error?.message || 'Failed to update Premium status.');
+        if (!res.success) {
+          throw new Error(res.error?.message || 'Failed to update Premium status.');
         }
       } catch (err: any) {
+        // Rollback on error
+        setUsers((prev) =>
+          prev.map((u) => (u.id === targetUser.id ? { ...u, is_premium: !isPremium } : u)),
+        );
+        if (selectedUserForCards?.id === targetUser.id) {
+          setSelectedUserForCards((prev) => (prev ? { ...prev, is_premium: !isPremium } : null));
+        }
         toast.error(err.message || 'Failed to update Premium status.');
       } finally {
         setUpdatingPremium(false);

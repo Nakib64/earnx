@@ -58,9 +58,10 @@ const TIMEFRAMES: TimeframeOption[] = [
 
 export interface UserAdsAnalyticsChartProps {
   user?: any;
+  isAdmin?: boolean;
 }
 
-export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartProps = {}) {
+export function UserAdsAnalyticsChart({ user: propUser, isAdmin = false }: UserAdsAnalyticsChartProps = {}) {
   const { user: authUser } = useAuth();
   const currentUser = propUser || authUser;
 
@@ -72,13 +73,18 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const fetchAnalytics = useCallback(async (tf: string) => {
-    if (!data) {
-      setLoading(true);
-    }
+    setLoading(true);
     try {
-      const res = await apiFetch<UserAdsAnalyticsResponse>(
-        `/premium/user/ads-analytics?timeframe=${tf}`,
-      );
+      const endpoint =
+        isAdmin && currentUser?.id
+          ? `/premium/admin/users/${currentUser.id}/ads-analytics?timeframe=${tf}`
+          : `/premium/user/ads-analytics?timeframe=${tf}`;
+
+      const res = await apiFetch<UserAdsAnalyticsResponse>(endpoint, {
+        isAdmin: Boolean(isAdmin),
+        skipCache: true,
+      });
+
       if (res.success && res.data) {
         setData(res.data);
       } else {
@@ -88,7 +94,7 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
       setData(null);
     }
     setLoading(false);
-  }, []);
+  }, [currentUser?.id, isAdmin]);
 
   useEffect(() => {
     fetchAnalytics(timeframe);
@@ -294,7 +300,7 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
               Ads Views &amp; Earnings
             </h2>
             <span className="px-2 py-0.5 rounded-full bg-emerald-50/90 text-emerald-800 text-[10px] font-bold border border-emerald-200/80">
-              Personal
+              {isAdmin ? `${currentUser?.full_name || currentUser?.phone || 'Member'} Activity` : 'Personal'}
             </span>
           </div>
 
@@ -427,14 +433,21 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
               </div>
             </div>
 
-            {/* Content 2: CTA Button */}
-            <Link
-              href="/dashboard/premium"
-              className="relative z-10 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#009F6B] hover:bg-[#008C5F] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer shrink-0 min-h-[44px]"
-            >
-              <PlayCircle className="w-4 h-4 text-white" />
-              <span>Watch Ads</span>
-            </Link>
+            {/* Content 2: CTA or Status Badge */}
+            {isAdmin ? (
+              <span className="relative z-10 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200/80 text-xs font-bold shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-[#009F6B]" />
+                <span>Subscribed VIP Tier</span>
+              </span>
+            ) : (
+              <Link
+                href="/dashboard/premium"
+                className="relative z-10 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#009F6B] hover:bg-[#008C5F] text-white font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer shrink-0 min-h-[44px]"
+              >
+                <PlayCircle className="w-4 h-4 text-white" />
+                <span>Watch Ads</span>
+              </Link>
+            )}
           </div>
         )}
 

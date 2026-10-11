@@ -20,7 +20,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   RefreshCw,
+  ArrowLeft,
+  Sparkles,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface LoginHistoryItem {
   id: string;
@@ -66,6 +69,7 @@ export default function AdminSettingsPage() {
   const [historyPage, setHistoryPage] = useState(1);
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [historyTotal, setHistoryTotal] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (admin) {
@@ -93,6 +97,18 @@ export default function AdminSettingsPage() {
     }
   }, [admin, historyPage]);
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refreshAdminProfile(), fetchLoginHistory(historyPage)]);
+      toast.info('Refreshed admin profile and login audit log');
+    } catch {
+      toast.error('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const handleUpdateAdminProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingAdminProfile(true);
@@ -115,278 +131,379 @@ export default function AdminSettingsPage() {
 
     if (res.success) {
       setMessage({ type: 'success', text: 'Admin profile updated successfully!' });
+      toast.success('Admin profile credentials updated successfully');
       setCurrentPassword('');
       setNewPassword('');
       await refreshAdminProfile();
     } else {
-      setMessage({ type: 'error', text: res.error?.message || 'Failed to update admin profile' });
+      const errMsg = res.error?.message || 'Failed to update admin profile';
+      setMessage({ type: 'error', text: errMsg });
+      toast.error(errMsg);
     }
     setSavingAdminProfile(false);
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="relative z-10 min-h-full text-[#111827] pb-16 font-[family-name:var(--font-montserrat)]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 select-none">
+        
+        {/* ── 1. PAGE HEADER (Sitting directly on background per Design System) ── */}
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pt-1">
+          <div className="space-y-1.5 max-w-2xl select-none">
+            {/* Eyebrow Label */}
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">
+              Security Governance &amp; Profile Credentials
+            </div>
 
-      {message && <AlertBanner type={message.type} message={message.text} onClose={() => setMessage(null)} />}
-
-      {/* Top Banner — Dark Emerald & Gold Luxury Banner */}
-      <div className="bg-gradient-to-r from-[#01281a] via-[#011f15] to-[#00170f] border border-[#d4af37]/35 rounded-2xl p-5 sm:p-6 text-white shadow-xl space-y-3">
-        <div className="flex items-start space-x-3.5">
-          <div className="w-12 h-12 rounded-xl bg-[#023322] border border-[#d4af37]/50 flex items-center justify-center shrink-0 shadow-md">
-            <User className="w-6 h-6 text-[#f3ba2f]" />
-          </div>
-          <div className="space-y-1 flex-1">
-            <h1 className="text-lg sm:text-xl font-black  text-white">
-              Admin Profile & Security
+            {/* Prominent Main Heading */}
+            <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 leading-tight">
+              Admin Profile &amp; Security
             </h1>
-            <p className="text-xs text-slate-300 font-semibold">
-              Update administrator display name, login phone number, security password, and review login history.
+
+            {/* Supporting Description */}
+            <p className="text-sm sm:text-[15px] text-slate-600 font-normal leading-relaxed">
+              Update administrator identity keys, access phone credentials, change security passwords, and inspect client login audits.
             </p>
-          </div>
-        </div>
 
-        {/* Link to Global Settings */}
-        <div className="border-t border-[#053d29] pt-3">
-          <Link
-            href="/admin/settings/global"
-            className="py-2.5 px-4 bg-[#023322] hover:bg-[#03442e] text-amber-200 font-black text-xs rounded-xl inline-flex items-center space-x-2 transition-all border border-[#d4af37]/35 shadow-md"
-          >
-            <Globe className="w-4 h-4 text-[#f3ba2f]" />
-            <span>Manage Global System Settings</span>
-            <ChevronRight className="w-4 h-4 text-[#f3ba2f]" />
-          </Link>
-        </div>
-      </div>
-
-      {/* Admin Profile Settings Card */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-5 shadow-sm">
-        <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Admin Account Details</h2>
-        </div>
-
-        <form onSubmit={handleUpdateAdminProfile} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Admin Display Name <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <User className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                required
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
-                placeholder="Admin Name..."
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
+            {/* Operational Status Indicator */}
+            <div className="pt-1 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 font-medium">
+                <span className="w-2 h-2 rounded-full bg-[#009F6B] animate-pulse" />
+                Active Session Protected &bull;{' '}
+                <strong className="text-slate-900 font-semibold">
+                  {historyTotal} Total Login Events Audited
+                </strong>
+              </span>
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Admin Phone Number <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <Phone className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                required
-                value={adminPhone}
-                onChange={(e) => setAdminPhone(e.target.value)}
-                placeholder="01700000000"
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl  font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-              />
+          {/* Secondary Actions with Liquid Glassmorphism */}
+          <div className="flex items-center gap-2.5 self-start sm:self-center shrink-0 flex-wrap select-none">
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-white/90 text-xs font-semibold text-slate-700 hover:bg-white transition-all shadow-2xs cursor-pointer active:scale-[0.98]"
+            >
+              <ArrowLeft className="w-3.5 h-3.5 text-slate-500" />
+              <span>Dashboard</span>
+            </Link>
+
+         
+
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || historyLoading}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-white/90 text-xs font-semibold text-slate-700 hover:bg-white transition-all shadow-2xs cursor-pointer active:scale-[0.98]"
+              title="Refresh Security Status"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${refreshing || historyLoading ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Alert Notification */}
+        {message && (
+          <AlertBanner
+            type={message.type}
+            message={message.text}
+            onClose={() => setMessage(null)}
+          />
+        )}
+
+        {/* ── 2. SUMMARY KPI STATS CARDS ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 select-none">
+          {/* Card 1: Admin Identity */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Administrator</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+                <User className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 truncate block">
+                {admin?.name || 'Super Administrator'}
+              </span>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+                Role: Primary System Admin
+              </span>
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-3 space-y-4">
-            <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
-              <KeyRound className="w-4 h-4 text-primary" />
-              <span>Change Admin Password</span>
-            </h3>
+          {/* Card 2: Auth Phone */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Login Phone</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
+                <Phone className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-bold text-[#009F6B] tabular-nums truncate block">
+                {admin?.phone || '—'}
+              </span>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+                Verified access phone
+              </span>
+            </div>
+          </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                Current Password <span className="normal-case text-slate-400 font-medium">(Required to change)</span>
-              </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-                <input
-                  type="password"
-                  placeholder="Current password..."
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
+          {/* Card 3: Security Status */}
+          <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Security Audit Log</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-2">
+              <span className="text-2xl sm:text-3xl font-bold text-amber-600 tabular-nums">
+                {historyTotal} Events
+              </span>
+              <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+                Logged session access attempts
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── 3. ADMIN PROFILE SETTINGS CARD ── */}
+        <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
+          <div className="flex items-center justify-between border-b border-slate-100/80 pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Admin Account Credentials</h2>
+                <p className="text-xs text-slate-500 font-normal">Update your public administrator name and registered login phone number.</p>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-                New Password
-              </label>
-              <div className="relative">
-                <Lock className="w-5 h-5 text-slate-400 absolute left-3.5 top-3" />
-                <input
-                  type="password"
-                  placeholder="New password (min. 6 characters)..."
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
+            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-emerald-50 text-[#009F6B] border border-emerald-200/80 hidden sm:inline-flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-[#009F6B]" />
+              <span>Verified Superadmin</span>
+            </span>
+          </div>
+
+          <form onSubmit={handleUpdateAdminProfile} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Admin Display Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    required
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                    placeholder="Admin Name..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  Admin Phone Number <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                  <input
+                    type="text"
+                    required
+                    value={adminPhone}
+                    onChange={(e) => setAdminPhone(e.target.value)}
+                    placeholder="01700000000"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            disabled={savingAdminProfile}
-            className="w-full py-3.5 bg-[#005A36] hover:bg-[#044D2F] disabled:opacity-50 text-white font-black text-sm rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md shadow-emerald-900/10 mt-2"
-          >
-            <Save className="w-4 h-4 text-secondary" />
-            <span>{savingAdminProfile ? 'Saving Profile...' : 'Save Admin Credentials'}</span>
-          </button>
-        </form>
-      </div>
+            {/* Change Password Sub-section */}
+            <div className="border-t border-slate-100/80 pt-4 space-y-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-6 h-6 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+                  <KeyRound className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Change Security Password
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-normal">
+                    Leave blank if you do not want to change your existing password.
+                  </p>
+                </div>
+              </div>
 
-      {/* ── ADMIN LOGIN HISTORY AUDIT CARD ── */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700 shrink-0">
-              <History className="w-5 h-5" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Current Password <span className="normal-case text-slate-400 font-normal">(Required to change)</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="password"
+                      placeholder="Current password..."
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    New Password <span className="normal-case text-slate-400 font-normal">(Min. 6 chars)</span>
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+                    <input
+                      type="password"
+                      placeholder="New password..."
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50/70 hover:bg-slate-50 focus:bg-white border border-slate-200/80 focus:border-[#009F6B] rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#009F6B]/20 transition-all shadow-2xs placeholder:text-slate-400 placeholder:font-normal"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-slate-900">Admin Login History</h2>
-              <p className="text-[11px] font-medium text-slate-400">Security audit of all recent login events and client details</p>
-            </div>
-          </div>
-          <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 ">
-            {historyTotal} Events
-          </span>
+
+            <button
+              type="submit"
+              disabled={savingAdminProfile}
+              className="w-full py-3 bg-[#009F6B] hover:bg-[#008C5F] disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98] mt-2"
+            >
+              <Save className="w-4 h-4 text-emerald-100" />
+              <span>{savingAdminProfile ? 'Saving Credentials...' : 'Save Admin Credentials'}</span>
+            </button>
+          </form>
         </div>
 
-        {/* History Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider">
-              <tr>
-                <th className="px-4 py-3">Date & Time</th>
-                <th className="px-4 py-3">IP Address</th>
-                <th className="px-4 py-3">Browser / Device</th>
-                <th className="px-4 py-3 text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white font-medium text-slate-700">
-              {historyLoading && history.length === 0 ? (
+        {/* ── 4. ADMIN LOGIN HISTORY AUDIT CARD ── */}
+        <div className="bg-white/80 backdrop-blur-md border border-white/90 rounded-2xl sm:rounded-3xl p-5 sm:p-6 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] select-none">
+          <div className="flex items-center justify-between border-b border-slate-100/80 pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                <History className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Admin Login History Audit</h2>
+                <p className="text-xs text-slate-500 font-normal">Security audit of all recent administrative sign-in attempts and client details.</p>
+              </div>
+            </div>
+            <span className="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-700 border border-slate-200/80">
+              {historyTotal} Events Logged
+            </span>
+          </div>
+
+          {/* History Table */}
+          <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/50">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-400">
-                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-1.5 text-[#005A36]" />
-                    <span>Loading login audit log...</span>
-                  </td>
+                  <th className="px-4 py-3">Date &amp; Time</th>
+                  <th className="px-4 py-3">IP Address</th>
+                  <th className="px-4 py-3">Browser / Device</th>
+                  <th className="px-4 py-3 text-right">Status</th>
                 </tr>
-              ) : history.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="py-8 text-center text-slate-400">
-                    No login events recorded yet.
-                  </td>
-                </tr>
-              ) : (
-                history.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3  font-bold text-slate-900 whitespace-nowrap">
-                      {new Date(item.created_at).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        hour12: true,
-                      })}
-                    </td>
-                    <td className="px-4 py-3 ">
-                      <span className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold text-slate-800 text-[11px]">
-                        {item.ip_address || '—'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <div className="flex items-center space-x-1.5 truncate max-w-[220px]" title={item.user_agent}>
-                        <Laptop className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span className="truncate">{parseUserAgent(item.user_agent)}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {item.status === 'SUCCESS' ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Success
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                          <AlertTriangle className="w-3 h-3" />
-                          Failed
-                        </span>
-                      )}
+              </thead>
+              <tbody className="divide-y divide-slate-100/80 bg-white/40 font-medium text-slate-700">
+                {historyLoading && history.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-10 text-center text-slate-400">
+                      <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#009F6B]" />
+                      <span className="text-xs font-semibold">Loading login audit log...</span>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ) : history.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-10 text-center text-xs text-slate-400 font-semibold">
+                      No administrative login events recorded yet.
+                    </td>
+                  </tr>
+                ) : (
+                  history.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-4 py-3.5 font-bold text-slate-900 whitespace-nowrap">
+                        {new Date(item.created_at).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          hour12: true,
+                        })}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className="bg-slate-100 border border-slate-200/80 px-2.5 py-0.5 rounded-lg font-bold text-slate-800 text-[11px]">
+                          {item.ip_address || '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-600">
+                        <div className="flex items-center space-x-1.5 truncate max-w-[240px]" title={item.user_agent}>
+                          <Laptop className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate font-medium">{parseUserAgent(item.user_agent)}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-right">
+                        {item.status === 'SUCCESS' ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-[#009F6B] border border-emerald-200/80">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Success
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200/80">
+                            <AlertTriangle className="w-3 h-3" />
+                            Failed
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Pagination */}
-        {historyTotalPages > 1 && (
-          <div className="flex items-center justify-between pt-2">
-            <span className="text-xs text-slate-500 font-medium">
-              Page {historyPage} of {historyTotalPages}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
-                disabled={historyPage <= 1}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Prev</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setHistoryPage((p) => Math.min(historyTotalPages, p + 1))}
-                disabled={historyPage >= historyTotalPages}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+          {/* Pagination Controls */}
+          {historyTotalPages > 1 && (
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-xs text-slate-500 font-medium">
+                Page <strong className="text-slate-900">{historyPage}</strong> of <strong className="text-slate-900">{historyTotalPages}</strong>
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                  disabled={historyPage <= 1}
+                  className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer transition-all shadow-2xs active:scale-[0.98]"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Previous</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHistoryPage((p) => Math.min(historyTotalPages, p + 1))}
+                  disabled={historyPage >= historyTotalPages}
+                  className="px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 flex items-center gap-1 cursor-pointer transition-all shadow-2xs active:scale-[0.98]"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-
-      {/* Global Settings Shortcut Card */}
-      <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
-            <Globe className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-sm font-extrabold text-slate-900">Global System Configurations</h3>
-            <p className="text-[11px] font-medium text-slate-400">Configure weekly payout amounts, coin market rates & run payouts</p>
-          </div>
+          )}
         </div>
-        <Link
-          href="/admin/settings/global"
-          className="py-2 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-primary border border-emerald-200/80 font-extrabold text-xs rounded-xl flex items-center space-x-1 transition-colors shrink-0"
-        >
-          <span>Open</span>
-          <ChevronRight className="w-4 h-4" />
-        </Link>
+
+     
+
       </div>
     </div>
   );

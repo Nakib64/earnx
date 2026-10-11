@@ -5,7 +5,20 @@ import { User, WalletTransaction, UserStatus } from '../../types';
 import { apiFetch } from '../../lib/api';
 import { DataTable, ColumnDef } from '../common/DataTable';
 import { StatusBadge } from '../common/StatusBadge';
-import { Users, Wallet, Award, DollarSign, Trash2, Shield, RefreshCw, ChevronLeft, ChevronRight, CheckCircle2, Crown } from 'lucide-react';
+import {
+  Users,
+  Wallet,
+  Award,
+  DollarSign,
+  Trash2,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Crown,
+  CheckCircle2,
+  ShieldAlert,
+  ArrowRight} from "lucide-react"
+import { UserAdsAnalyticsChart } from '../dashboard/UserAdsAnalyticsChart';
 
 interface UserDetailCardsProps {
   user: User | null;
@@ -23,7 +36,7 @@ export function UserDetailCards({
   onAssignBadge,
   onToggleStatus,
   onTogglePremium,
-  updatingPremium,
+  updatingPremium = false,
   onDeleteUser,
 }: UserDetailCardsProps) {
   // Direct Downlines Data
@@ -40,23 +53,28 @@ export function UserDetailCards({
   const fetchTransactions = useCallback(async (pageToFetch = 1) => {
     if (!user) return;
     setLoadingTx(true);
-    const resTx = await apiFetch<any>(
-      `/admin/wallet/transactions?user_id=${user.id}&page=${pageToFetch}&limit=10`,
-      { isAdmin: true },
-    );
-    if (resTx.success && resTx.data) {
-      const dataArr = resTx.data.data || (Array.isArray(resTx.data) ? resTx.data : []);
-      const meta = resTx.data.meta || {};
-      setTransactions(dataArr);
-      setTxPage(meta.page || pageToFetch);
-      setTxTotalPages(meta.totalPages || 1);
-      setTxTotalRecords(meta.total || dataArr.length);
-    } else {
+    try {
+      const resTx = await apiFetch<any>(
+        `/admin/wallet/transactions?user_id=${user.id}&page=${pageToFetch}&limit=10`,
+        { isAdmin: true, skipCache: true },
+      );
+      if (resTx.success && resTx.data) {
+        const dataArr = resTx.data.data || (Array.isArray(resTx.data) ? resTx.data : []);
+        const meta = resTx.data.meta || {};
+        setTransactions(dataArr);
+        setTxPage(meta.page || pageToFetch);
+        setTxTotalPages(meta.totalPages || 1);
+        setTxTotalRecords(meta.total || dataArr.length);
+      } else {
+        setTransactions([]);
+        setTxTotalPages(1);
+        setTxTotalRecords(0);
+      }
+    } catch {
       setTransactions([]);
-      setTxTotalPages(1);
-      setTxTotalRecords(0);
+    } finally {
+      setLoadingTx(false);
     }
-    setLoadingTx(false);
   }, [user]);
 
   const fetchUserData = useCallback(async () => {
@@ -64,14 +82,22 @@ export function UserDetailCards({
 
     // Fetch Direct Downlines
     setLoadingDownlines(true);
-    setDownlines([]); // Clear stale downlines immediately
-    const resDownlines = await apiFetch<any>(`/admin/users?referred_by_id=${user.id}&limit=100`, { isAdmin: true });
-    if (resDownlines.success && resDownlines.data) {
-      setDownlines(resDownlines.data.data || (Array.isArray(resDownlines.data) ? resDownlines.data : []));
-    } else {
+    setDownlines([]);
+    try {
+      const resDownlines = await apiFetch<any>(`/admin/users?referred_by_id=${user.id}&limit=100`, {
+        isAdmin: true,
+        skipCache: true,
+      });
+      if (resDownlines.success && resDownlines.data) {
+        setDownlines(resDownlines.data.data || (Array.isArray(resDownlines.data) ? resDownlines.data : []));
+      } else {
+        setDownlines([]);
+      }
+    } catch {
       setDownlines([]);
+    } finally {
+      setLoadingDownlines(false);
     }
-    setLoadingDownlines(false);
 
     // Reset and Fetch Page 1 Transactions
     setTxPage(1);
@@ -80,7 +106,7 @@ export function UserDetailCards({
 
   useEffect(() => {
     fetchUserData();
-  }, [user]);
+  }, [user, fetchUserData]);
 
   if (!user) return null;
 
@@ -93,7 +119,7 @@ export function UserDetailCards({
         return (
           <div className="flex items-center space-x-2">
             <StatusBadge status={tx.type} />
-            <span className={` font-black text-xs ${isCredit ? 'text-[#005A36]' : 'text-rose-600'}`}>
+            <span className={`font-bold text-xs tabular-nums ${isCredit ? 'text-[#009F6B]' : 'text-rose-600'}`}>
               {isCredit ? '+' : ''}৳{Number(tx.amount).toFixed(2)}
             </span>
           </div>
@@ -104,7 +130,7 @@ export function UserDetailCards({
       key: 'balance',
       header: 'Before → After',
       render: (tx) => (
-        <span className=" text-[10px] text-slate-500 font-extrabold truncate block max-w-[140px]">
+        <span className="text-[11px] text-slate-500 font-medium tabular-nums truncate block max-w-[160px]">
           ৳{Number(tx.balance_before).toFixed(2)} → ৳{Number(tx.balance_after).toFixed(2)}
         </span>
       ),
@@ -115,41 +141,42 @@ export function UserDetailCards({
       align: 'right',
       render: (tx) => (
         <div className="text-right">
-          <div className="text-slate-800 text-[10px] font-bold truncate max-w-[160px] sm:max-w-[220px] ml-auto">
+          <div className="text-slate-800 text-xs font-semibold truncate max-w-[160px] sm:max-w-[240px] ml-auto">
             {tx.description || '-'}
           </div>
-          <div className="text-slate-400 text-[9px] ">{new Date(tx.created_at).toLocaleString()}</div>
+          <div className="text-slate-400 text-[10px] font-medium">{new Date(tx.created_at).toLocaleString()}</div>
         </div>
       ),
     },
   ];
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-6 shadow-sm mt-6">
+    <div className="bg-white/75 backdrop-blur-xl border border-white/85 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-6 mt-6 select-none">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100/80 gap-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-[#005A36] flex items-center justify-center text-secondary font-black text-sm shrink-0 shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] font-bold text-sm shrink-0 shadow-2xs">
             {user.designation?.stars ? `${user.designation.stars}★` : 'U'}
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 ">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
                 {user.full_name || 'Member Details'}
               </h2>
               <StatusBadge status={user.status} />
             </div>
-            <p className="text-xs text-slate-500 ">
-              Phone: <strong className="text-slate-900">{user.phone}</strong> · Ref: <strong className="text-primary">{user.referral_code}</strong>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Phone: <strong className="text-slate-900 font-semibold">{user.phone}</strong> &bull; Referral Code:{' '}
+              <strong className="text-[#009F6B] font-semibold">{user.referral_code}</strong>
             </p>
           </div>
         </div>
 
         <button
           onClick={fetchUserData}
-          className="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors text-xs font-extrabold flex items-center space-x-1.5 self-start sm:self-auto border border-slate-200"
+          className="py-2 px-3.5 bg-white/80 hover:bg-white text-slate-700 rounded-xl transition-all text-xs font-semibold flex items-center space-x-1.5 self-start sm:self-auto border border-white/90 shadow-2xs cursor-pointer active:scale-[0.98]"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
+          <RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${loadingTx || loadingDownlines ? 'animate-spin' : ''}`} />
           <span>Refresh Details</span>
         </button>
       </div>
@@ -157,108 +184,103 @@ export function UserDetailCards({
       {/* Cards Overview Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Profile Card */}
-        <div className="bg-[#F2FBF6] border border-emerald-100/90 rounded-xl p-4 space-y-1.5">
-          <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Designation & Badge</div>
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4.5 space-y-2">
+          <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Designation &amp; Badge</div>
           <div className="flex items-center space-x-2">
-            <Award className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-sm font-black text-primary truncate">
+            <Award className="w-4 h-4 text-[#009F6B] shrink-0" />
+            <span className="text-sm font-bold text-slate-900 truncate">
               {user.designation?.name || 'Unbadged Member'}
             </span>
           </div>
           <div className="flex items-center space-x-1.5 pt-0.5">
             {user.is_premium ? (
-              <span className="inline-flex items-center space-x-1 text-[10px] font-black text-amber-300 bg-[#023322] border border-amber-500/40 px-2 py-0.5 rounded-full shadow-xs">
-                <Crown className="w-3 h-3 text-[#f3ba2f]" />
+              <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                <Crown className="w-3 h-3 text-amber-600" />
                 <span>Premium Member</span>
               </span>
             ) : (
-              <span className="inline-flex items-center space-x-1 text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">
+              <span className="inline-flex items-center space-x-1 text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 px-2.5 py-0.5 rounded-full">
                 <span>Standard Member</span>
               </span>
             )}
           </div>
           {user.designation && (
-            <div className="text-[11px] text-slate-600  font-bold pt-0.5">
-              Stars: {user.designation.stars}★ · Max Level Depth: {user.designation.max_level}
+            <div className="text-[11px] text-slate-500 font-medium pt-0.5">
+              Stars: {user.designation.stars}★ &bull; Level Depth: {user.designation.max_level}
             </div>
           )}
         </div>
 
         {/* Sponsor & Downlines Card */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-1.5">
-          <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Hierarchy & Downlines</div>
-          <div className="text-xs font-extrabold text-slate-800 truncate">
-            Sponsor: {user.referred_by ? `${user.referred_by.phone} (${user.referred_by.full_name || 'Member'})` : 'Top of Tree'}
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4.5 space-y-2">
+          <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Hierarchy &amp; Downlines</div>
+          <div className="text-xs font-bold text-slate-800 truncate">
+            Sponsor: {user.referred_by ? `${user.referred_by.phone} (${user.referred_by.full_name || 'Member'})` : 'Top of Tree (Root)'}
           </div>
-          <div className="text-[11px] text-primary font-extrabold flex items-center space-x-1">
-            <Users className="w-3.5 h-3.5 shrink-0 text-primary" />
+          <div className="text-xs text-[#009F6B] font-bold flex items-center space-x-1 pt-1">
+            <Users className="w-3.5 h-3.5 shrink-0 text-[#009F6B]" />
             <span>Direct Downlines: {downlines.length} Members</span>
           </div>
         </div>
 
-        {/* Wallet Balance & Operations Card */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+        {/* Wallet Balance & Direct Operations Card */}
+        <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4.5 space-y-3">
           <div>
-            <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">Wallet Balance</div>
-            <div className="text-xl font-black text-[#005A36]  mt-0.5">
+            <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Wallet Balance</div>
+            <div className="text-xl sm:text-2xl font-bold text-[#009F6B] tabular-nums mt-0.5">
               ৳{Number(user.wallet_balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </div>
           </div>
 
-          {/* Direct Operation Actions */}
+          {/* Quick Action Buttons with Liquid Glassmorphism */}
           <div className="flex items-center flex-wrap gap-1.5 pt-2 border-t border-slate-200/80">
+            {/* Balance Adjust */}
             <button
               onClick={() => onAdjustBalance(user)}
-              className="py-1 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-slate-200"
+              className="py-1.5 px-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-[11px] flex items-center space-x-1 transition-all border border-slate-200 shadow-2xs cursor-pointer active:scale-[0.98]"
             >
               <DollarSign className="w-3 h-3 text-slate-500" />
               <span>Adjust</span>
             </button>
 
+            {/* Badge Assignment */}
             <button
               onClick={() => onAssignBadge(user)}
-              className="py-1 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg font-extrabold text-[10px] transition-colors border border-slate-200"
+              className="py-1.5 px-2.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl font-bold text-[11px] transition-all border border-slate-200 shadow-2xs cursor-pointer active:scale-[0.98]"
             >
               Badge
             </button>
 
-            {/* Toggle Premium Status Action Button */}
+            {/* Toggle Premium */}
             {onTogglePremium && (
               user.is_premium ? (
                 <button
                   onClick={() => !updatingPremium && onTogglePremium(user, false)}
                   disabled={updatingPremium}
-                  className="py-1 px-2.5 bg-amber-50 text-amber-800 hover:bg-amber-100 disabled:opacity-60 rounded-lg font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-amber-300 cursor-pointer disabled:cursor-not-allowed"
+                  className="py-1.5 px-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 disabled:opacity-60 rounded-xl font-bold text-[11px] flex items-center space-x-1 transition-all border border-amber-200/80 cursor-pointer shadow-2xs active:scale-[0.98]"
                   title="Remove Premium status from user"
                 >
-                  {updatingPremium ? (
-                    <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
-                  ) : (
-                    <Crown className="w-3 h-3 text-amber-600" />
-                  )}
-                  <span>{updatingPremium ? 'Updating...' : 'Remove Premium'}</span>
+                  <Crown className="w-3 h-3 text-amber-600" />
+                  <span>Remove VIP</span>
                 </button>
               ) : (
                 <button
                   onClick={() => !updatingPremium && onTogglePremium(user, true)}
                   disabled={updatingPremium}
-                  className="py-1 px-2.5 bg-[#023322] text-amber-300 hover:bg-[#034932] disabled:opacity-60 rounded-lg font-extrabold text-[10px] flex items-center space-x-1 transition-colors border border-amber-500/40 shadow-xs cursor-pointer disabled:cursor-not-allowed"
-                  title="Make user a Premium Member"
+                  className="py-1.5 px-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 disabled:opacity-60 rounded-xl font-bold text-[11px] flex items-center space-x-1 transition-all border border-purple-200/80 cursor-pointer shadow-2xs active:scale-[0.98]"
+                  title="Grant Premium VIP status"
                 >
-                  {updatingPremium ? (
-                    <RefreshCw className="w-3 h-3 text-[#f3ba2f] animate-spin" />
-                  ) : (
-                    <Crown className="w-3 h-3 text-[#f3ba2f]" />
-                  )}
-                  <span>{updatingPremium ? 'Updating...' : 'Make Premium'}</span>
+                  <Crown className="w-3 h-3 text-purple-600" />
+                  <span>Make VIP</span>
                 </button>
               )
             )}
 
+            {/* Status Toggles */}
             {user.status === UserStatus.DISABLED && (
               <button
                 onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-                className="py-1 px-2.5 bg-[#005A36] text-white hover:bg-[#044D2F] rounded-lg font-extrabold text-[10px] transition-colors"
+                className="py-1.5 px-2.5 bg-[#009F6B] text-white hover:bg-[#008C5F] rounded-xl font-bold text-[11px] transition-all shadow-2xs cursor-pointer active:scale-[0.98]"
               >
                 Activate
               </button>
@@ -267,7 +289,7 @@ export function UserDetailCards({
             {user.status === UserStatus.ACTIVE && (
               <button
                 onClick={(e) => onToggleStatus(e, user, UserStatus.BLOCKED)}
-                className="py-1 px-2.5 bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-lg font-extrabold text-[10px] transition-colors border border-slate-200"
+                className="py-1.5 px-2.5 bg-white text-slate-700 hover:bg-amber-50 hover:text-amber-800 rounded-xl font-bold text-[11px] transition-all border border-slate-200 shadow-2xs cursor-pointer active:scale-[0.98]"
               >
                 Block
               </button>
@@ -276,45 +298,52 @@ export function UserDetailCards({
             {user.status === UserStatus.BLOCKED && (
               <button
                 onClick={(e) => onToggleStatus(e, user, UserStatus.ACTIVE)}
-                className="py-1 px-2.5 bg-slate-100 text-slate-800 hover:bg-slate-200 rounded-lg font-extrabold text-[10px] transition-colors border border-slate-200"
+                className="py-1.5 px-2.5 bg-white text-slate-700 hover:bg-emerald-50 hover:text-[#009F6B] rounded-xl font-bold text-[11px] transition-all border border-slate-200 shadow-2xs cursor-pointer active:scale-[0.98]"
               >
                 Unblock
               </button>
             )}
 
+            {/* Delete Profile */}
             <button
               onClick={() => onDeleteUser(user)}
-              className="py-1 px-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg font-extrabold text-[10px] transition-colors border border-rose-200"
+              className="py-1.5 px-2.5 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-xl font-bold text-[11px] transition-all border border-slate-200 hover:border-rose-200 shadow-2xs cursor-pointer active:scale-[0.98]"
+              title="Delete user profile"
             >
-              Delete
+              <Trash2 className="w-3 h-3" />
             </button>
           </div>
         </div>
       </div>
 
+      {/* User Ads & Earnings Analytics Graph Section */}
+      <div className="w-full pt-1">
+        <UserAdsAnalyticsChart user={user} isAdmin={true} />
+      </div>
+
       {/* Transaction History Section */}
       <div className="space-y-3 pt-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100/80 pb-3">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-primary shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
               <Wallet className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-extrabold text-slate-900 text-sm">
+              <h3 className="font-bold text-slate-900 text-sm">
                 Transaction History Log
               </h3>
-              <p className="text-[10px] font-medium text-slate-400">Recorded wallet activity ({txTotalRecords} entries)</p>
+              <p className="text-[10px] font-medium text-slate-400">Recorded wallet transactions ({txTotalRecords} total)</p>
             </div>
           </div>
           {txTotalPages > 1 && (
-            <span className="text-[10px] font-extrabold text-primary bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 ">
+            <span className="text-[10px] font-bold text-[#009F6B] bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80">
               Page {txPage} of {txTotalPages}
             </span>
           )}
         </div>
 
         {/* Styled Table Wrapper */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white/50">
           <DataTable<WalletTransaction>
             data={transactions}
             columns={transactionColumns}
@@ -326,21 +355,21 @@ export function UserDetailCards({
 
         {/* Pagination Footer Controls */}
         {txTotalPages > 1 && (
-          <div className="flex items-center justify-between pt-2 text-xs bg-slate-50 border border-slate-200 rounded-xl p-3">
+          <div className="flex items-center justify-between pt-2 text-xs bg-slate-50/70 border border-slate-200/80 rounded-2xl p-3">
             <button
               onClick={() => {
                 const newPage = Math.max(1, txPage - 1);
                 fetchTransactions(newPage);
               }}
               disabled={txPage <= 1 || loadingTx}
-              className="py-1.5 px-3 rounded-lg border border-slate-200 bg-white font-extrabold text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-xs cursor-pointer"
+              className="py-1.5 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-2xs cursor-pointer active:scale-[0.98]"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Previous</span>
             </button>
 
-            <span className=" text-slate-600 text-[11px] font-extrabold hidden sm:inline">
-              Page <strong>{txPage}</strong> of <strong>{txTotalPages}</strong> ({txTotalRecords} total transactions)
+            <span className="text-slate-600 text-[11px] font-medium hidden sm:inline">
+              Page <strong className="text-slate-900">{txPage}</strong> of <strong className="text-slate-900">{txTotalPages}</strong> ({txTotalRecords} transactions)
             </span>
 
             <button
@@ -349,7 +378,7 @@ export function UserDetailCards({
                 fetchTransactions(newPage);
               }}
               disabled={txPage >= txTotalPages || loadingTx}
-              className="py-1.5 px-3 rounded-lg border border-slate-200 bg-white font-extrabold text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-xs cursor-pointer"
+              className="py-1.5 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition-all flex items-center space-x-1 shadow-2xs cursor-pointer active:scale-[0.98]"
             >
               <span>Next</span>
               <ChevronRight className="w-3.5 h-3.5" />

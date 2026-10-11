@@ -23,7 +23,6 @@ export class SystemConfigService {
   async getAll(): Promise<Record<string, string>> {
     const configs = await this.prisma.systemConfig.findMany();
     const result: Record<string, string> = {
-      PREMIUM_WEEKLY_PAYOUT_AMOUNT: '100', // Default fallback
       COIN_PRICE: '10', // Default ৳10 per coin
       PREMIUM_FREE_COINS: '100', // Default 100 free coins on premium
       PREMIUM_FREE_COINS_REQUIRED_REFERRALS: '10', // Fixed 10 active referrals required

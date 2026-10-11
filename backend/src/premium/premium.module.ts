@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ScheduleModule } from '@nestjs/schedule';
 import { PremiumService } from './premium.service';
 import { PremiumController } from './premium.controller';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -9,7 +8,7 @@ import { DailyAdsSubService } from './sub-services/daily-ads.sub-service';
 import { CoinsModule } from '../coins/coins.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), PrismaModule, SystemConfigModule, CoinsModule],
+  imports: [PrismaModule, SystemConfigModule, CoinsModule],
   controllers: [PremiumController],
   providers: [
     PremiumPackageSubService,

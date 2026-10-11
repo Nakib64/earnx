@@ -101,6 +101,12 @@ function autoInvalidateOnMutation(endpoint: string): void {
     invalidateApiCache('ads');
     invalidateApiCache('/auth/profile');
   }
+  if (ep.includes('notice')) {
+    invalidateApiCache('notice');
+  }
+  if (ep.includes('leaderboard')) {
+    invalidateApiCache('leaderboard');
+  }
   if (ep.includes('profile') || ep.includes('user')) {
     invalidateApiCache('/auth/profile');
     invalidateApiCache('users');

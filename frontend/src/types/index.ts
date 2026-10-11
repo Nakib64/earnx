@@ -225,8 +225,6 @@ export interface User {
   premium_package?: PremiumPackage | null;
   premium_started_at?: string | null;
   premium_expires_at?: string | null;
-  premium_payout_count?: number;
-  last_premium_payout_at?: string | null;
   designation?: Designation | null;
   referred_by?: UserSummary | null;
   created_at?: string;

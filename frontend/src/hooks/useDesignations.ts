@@ -145,7 +145,7 @@ export function useDesignations(isAdmin = true) {
   };
 
   const filteredUsers = filterUsersByQuery(allUsers, userSearch);
-  const maxDepthLevel = 5;
+  const maxDepthLevel = designations.length > 0 ? Math.max(...designations.map((d) => d.max_level || 1)) : 1;
   const totalAssignedMembers = getTotalAssignedUsersFromDesignations(designations);
 
   return {

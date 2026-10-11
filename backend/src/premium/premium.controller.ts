@@ -103,5 +103,13 @@ export class PremiumController {
   async getAdsAnalytics(@Query('timeframe') timeframe?: string) {
     return this.premiumService.getAdsAnalytics(timeframe);
   }
-}
 
+  @UseGuards(AdminJwtGuard)
+  @Get('admin/users/:userId/ads-analytics')
+  async getUserAdsAnalyticsAdmin(
+    @Param('userId') userId: string,
+    @Query('timeframe') timeframe?: string,
+  ) {
+    return this.premiumService.getUserAdsAnalytics(userId, timeframe);
+  }
+}

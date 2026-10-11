@@ -92,14 +92,13 @@ export default function Sidebar() {
     { href: '/admin/users', label: 'Users & Accounts', icon: Users },
     { href: '/admin/designations', label: 'Designations & Badges', icon: Award },
     { href: '/admin/settings', label: 'Admin Profile', icon: Settings },
-    { href: '/admin/settings/global', label: 'Global Settings', icon: Globe },
   ];
 
 
 
   const adminBottomItems: LinkItem[] = [
     { href: '/admin/commissions', label: 'Commission Rules', icon: Layers },
-    { href: '/admin/wallet', label: ' & Adjustments', icon: DollarSign },
+    { href: '/admin/wallet', label: ' Transactions', icon: DollarSign },
   ];
 
   const getInitials = (name?: string) => {

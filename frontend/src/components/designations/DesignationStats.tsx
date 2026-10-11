@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Award, Star, Users } from 'lucide-react';
+import { Award, Layers, Users } from 'lucide-react';
 
 interface DesignationStatsProps {
   designationsCount: number;
@@ -15,46 +15,58 @@ export default function DesignationStats({
   totalAssignedMembers,
 }: DesignationStatsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-      <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Designation Badges
-          </span>
-          <div className="text-xl sm:text-2xl font-black text-slate-900  mt-0.5">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 select-none">
+      {/* Box 1: Configured Badges */}
+      <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500">Designation Badges</span>
+          <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+            <Award className="w-4 h-4" />
+          </div>
+        </div>
+        <div className="mt-2">
+          <span className="text-2xl sm:text-3xl font-bold text-slate-900 tabular-nums">
             {designationsCount}
-          </div>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#f3ba2f] shrink-0">
-          <Award className="w-5 h-5" />
+          </span>
+          <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+            Configured star rank tiers
+          </span>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-[#2a1a03] to-[#140b01] border border-amber-500/40 rounded-2xl p-4 shadow-lg text-white flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">
-            Max Depth Level Configured
-          </span>
-          <div className="text-xl sm:text-2xl font-black text-amber-100  mt-0.5">
+      {/* Box 2: Max Earning Depth */}
+      <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500">Max Tree Depth</span>
+          <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+            <Layers className="w-4 h-4" />
+          </div>
+        </div>
+        <div className="mt-2">
+          <span className="text-2xl sm:text-3xl font-bold text-amber-600 tabular-nums">
             Level {maxDepthLevel}
-          </div>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/50 flex items-center justify-center text-[#f3ba2f] shrink-0">
-          <Star className="w-5 h-5 fill-[#f3ba2f] text-[#f3ba2f]" />
+          </span>
+          <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+            Deepest unlocked commission level
+          </span>
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-[#023322] to-[#011a12] border border-[#d4af37]/35 rounded-2xl p-4 shadow-lg text-white flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-amber-200">
-            Assigned Members
-          </span>
-          <div className="text-xl sm:text-2xl font-black text-white  mt-0.5">
-            {totalAssignedMembers}
+      {/* Box 3: Assigned Leaders */}
+      <div className="bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 flex flex-col justify-between min-h-[110px] hover:bg-white/85 transition-all">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500">Assigned Leaders</span>
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
+            <Users className="w-4 h-4" />
           </div>
         </div>
-        <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#d4af37]/50 flex items-center justify-center text-[#f3ba2f] shrink-0">
-          <Users className="w-5 h-5" />
+        <div className="mt-2">
+          <span className="text-2xl sm:text-3xl font-bold text-[#009F6B] tabular-nums">
+            {totalAssignedMembers}
+          </span>
+          <span className="text-[11px] text-slate-400 font-medium block mt-0.5 truncate">
+            Active badged community members
+          </span>
         </div>
       </div>
     </div>
