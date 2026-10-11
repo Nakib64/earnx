@@ -25,10 +25,10 @@ export function DashboardNoticeBanner({ notices, notice }: DashboardNoticeBanner
   const rawList: NoticeItem[] = Array.isArray(notices)
     ? notices
     : notices
-    ? [notices]
-    : notice
-    ? [notice]
-    : [];
+      ? [notices]
+      : notice
+        ? [notice]
+        : [];
 
   const activeNotices = rawList.filter((item) => item.is_active !== false);
 
@@ -114,7 +114,7 @@ export function DashboardNoticeBanner({ notices, notice }: DashboardNoticeBanner
               <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200/80">
                 Notice
               </span>
-              <h2 className="text-sm sm:text-base font-black text-slate-900 tracking-tight truncate">
+              <h2 className="text-sm sm:text-base font-black text-slate-900  truncate">
                 {currentNotice.title || 'Official Announcement'}
               </h2>
             </div>
@@ -144,9 +144,8 @@ export function DashboardNoticeBanner({ notices, notice }: DashboardNoticeBanner
         return (
           <div
             key={slide.id || idx}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out ${
-              isCurrent ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            }`}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out ${isCurrent ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+              }`}
           >
             <img
               src={getFullImageUrl(slide.image_url)}
@@ -204,11 +203,10 @@ export function DashboardNoticeBanner({ notices, notice }: DashboardNoticeBanner
                   e.stopPropagation();
                   setCurrentIndex(idx);
                 }}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  isActive
+                className={`transition-all duration-300 rounded-full cursor-pointer ${isActive
                     ? 'w-6 sm:w-7 h-2 bg-white shadow-xs'
                     : 'w-2 h-2 bg-white/60 hover:bg-white/90'
-                }`}
+                  }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             );

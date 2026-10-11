@@ -70,7 +70,7 @@ export default function AdminDashboardPage() {
             <ShieldCheck className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
+            <h1 className="text-lg sm:text-xl font-black  text-white">
               Admin Control Center
             </h1>
             <p className="text-xs text-slate-300 font-semibold">
@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
               <Users className="w-7 h-7" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-white  tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-white  ">
                 {loading ? '...' : stats.totalUsers.toLocaleString()}
               </div>
               <div className="text-xs font-bold text-slate-300">Total Members</div>
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
               <Clock className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-amber-100  tracking-tight">
+              <div className="text-3xl sm:text-4xl font-black text-amber-100  ">
                 {loading ? '...' : stats.pendingApprovals}
               </div>
               <div className="text-xs font-bold text-amber-300">

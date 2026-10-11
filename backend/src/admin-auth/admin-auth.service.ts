@@ -11,18 +11,80 @@ export class AdminAuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  private failedAdminAttempts = new Map<string, { attempts: number; lockedUntil: number | null; lastAttempt: number }>();
+
+  private getAdminLockoutStatus(phone: string): { isLocked: boolean; remainingMinutes: number } {
+    const record = this.failedAdminAttempts.get(phone);
+    if (!record || !record.lockedUntil) {
+      return { isLocked: false, remainingMinutes: 0 };
+    }
+    const now = Date.now();
+    if (now < record.lockedUntil) {
+      const remainingMinutes = Math.ceil((record.lockedUntil - now) / 60000);
+      return { isLocked: true, remainingMinutes };
+    }
+    this.failedAdminAttempts.delete(phone);
+    return { isLocked: false, remainingMinutes: 0 };
+  }
+
+  private recordFailedAdminAttempt(phone: string): { remainingAttempts: number; isLocked: boolean; lockMinutes: number } {
+    const record = this.failedAdminAttempts.get(phone) || { attempts: 0, lockedUntil: null, lastAttempt: Date.now() };
+    const maxAttempts = 5;
+    const lockMinutes = 15;
+    const newAttempts = record.attempts + 1;
+
+    if (newAttempts >= maxAttempts) {
+      this.failedAdminAttempts.set(phone, {
+        attempts: newAttempts,
+        lockedUntil: Date.now() + lockMinutes * 60 * 1000,
+        lastAttempt: Date.now(),
+      });
+      return { remainingAttempts: 0, isLocked: true, lockMinutes };
+    }
+
+    this.failedAdminAttempts.set(phone, {
+      attempts: newAttempts,
+      lockedUntil: null,
+      lastAttempt: Date.now(),
+    });
+
+    return { remainingAttempts: maxAttempts - newAttempts, isLocked: false, lockMinutes: 0 };
+  }
+
+  private clearFailedAdminAttempts(phone: string) {
+    this.failedAdminAttempts.delete(phone);
+  }
+
   async login(dto: AdminLoginDto, ipAddress?: string, userAgent?: string) {
+    const cleanPhone = dto.phone.trim();
+
+    // 1. Check lockout status
+    const { isLocked, remainingMinutes } = this.getAdminLockoutStatus(cleanPhone);
+    if (isLocked) {
+      throw new UnauthorizedException(
+        `Too many failed admin login attempts. Account access is temporarily locked for security. Please try again in ${remainingMinutes} minute(s).`,
+      );
+    }
+
     const admin = await this.prisma.admin.findUnique({
-      where: { phone: dto.phone.trim() },
+      where: { phone: cleanPhone },
     });
 
     if (!admin) {
-      throw new UnauthorizedException('Invalid phone number or password');
+      const { remainingAttempts, isLocked: newlyLocked, lockMinutes } = this.recordFailedAdminAttempt(cleanPhone);
+      if (newlyLocked) {
+        throw new UnauthorizedException(
+          `Too many failed login attempts. Admin access is locked for ${lockMinutes} minutes.`,
+        );
+      }
+      throw new UnauthorizedException(
+        `Invalid phone number or password. ${remainingAttempts} attempt(s) remaining before temporary lockout.`,
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, admin.password_hash);
     if (!isPasswordValid) {
-      // Record failed login if admin exists
+      // Record failed login in history
       try {
         await (this.prisma as any).adminLoginHistory.create({
           data: {
@@ -33,8 +95,20 @@ export class AdminAuthService {
           },
         });
       } catch {}
-      throw new UnauthorizedException('Invalid phone number or password');
+
+      const { remainingAttempts, isLocked: newlyLocked, lockMinutes } = this.recordFailedAdminAttempt(cleanPhone);
+      if (newlyLocked) {
+        throw new UnauthorizedException(
+          `Too many failed login attempts. Admin access is locked for ${lockMinutes} minutes.`,
+        );
+      }
+      throw new UnauthorizedException(
+        `Invalid phone number or password. ${remainingAttempts} attempt(s) remaining before temporary lockout.`,
+      );
     }
+
+    // Success -> clear failed attempts
+    this.clearFailedAdminAttempts(cleanPhone);
 
     // Record successful login history
     try {

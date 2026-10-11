@@ -172,7 +172,7 @@ export default function AdminPremiumPage() {
             <Crown className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">
               Premium Package Management
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-500">
@@ -253,11 +253,10 @@ export default function AdminPremiumPage() {
                       <h3 className="text-lg font-black text-slate-900">{pkg.title}</h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase ${
-                            pkg.is_active
+                          className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase ${pkg.is_active
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-slate-100 text-slate-500'
-                          }`}
+                            }`}
                         >
                           {pkg.is_active ? 'Active' : 'Inactive'}
                         </span>

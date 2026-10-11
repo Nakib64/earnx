@@ -239,7 +239,7 @@ export default function AdminWithdrawalsPage() {
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-[#d4af37]/40 flex items-center justify-center text-[#d4af37] shrink-0 shadow-xs">
               <Banknote className="w-5 h-5" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">Withdrawal Management</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-white ">Withdrawal Management</h1>
           </div>
           <p className="text-xs text-slate-300 font-medium">
             Monitor user withdrawals, manage SMS OTP codes, and route payment balances directly to target member accounts.
@@ -271,7 +271,7 @@ export default function AdminWithdrawalsPage() {
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900  tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-slate-900  ">
             ৳{totalWithdrawnAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Across current page view</div>
@@ -285,7 +285,7 @@ export default function AdminWithdrawalsPage() {
               <Clock className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-amber-600  tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-amber-600  ">
             {pendingCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Awaiting payment routing</div>
@@ -299,7 +299,7 @@ export default function AdminWithdrawalsPage() {
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-700  tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-emerald-700  ">
             {approvedCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">Successfully settled</div>
@@ -313,7 +313,7 @@ export default function AdminWithdrawalsPage() {
               <Users className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900  tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-slate-900  ">
             {totalCount}
           </div>
           <div className="text-[10px] text-slate-400 font-medium mt-1">All time withdrawal requests</div>

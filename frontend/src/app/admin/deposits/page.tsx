@@ -170,7 +170,7 @@ export default function AdminDepositsPage() {
             <Wallet className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">
               Deposit Management
             </h1>
             <p className="text-xs sm:text-sm font-semibold text-slate-500">
@@ -347,8 +347,8 @@ export default function AdminDepositsPage() {
                 setPage(1);
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shrink-0 ${statusFilter === tab
-                  ? 'bg-[#005A36] text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                ? 'bg-[#005A36] text-white shadow-sm'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
                 }`}
             >
               {tab}

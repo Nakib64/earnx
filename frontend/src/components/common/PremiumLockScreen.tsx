@@ -137,7 +137,7 @@ export function PremiumLockScreen({
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               <span>Premium Access Only</span>
             </span>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 ">
               {title}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed max-w-lg mx-auto">

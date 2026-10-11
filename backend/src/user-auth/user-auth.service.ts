@@ -233,10 +233,73 @@ export class UserAuthService {
     };
   }
 
+  // In-memory sliding window for account brute-force protection (phone or email)
+  private failedAttempts = new Map<string, { attempts: number; lockedUntil: number | null; lastAttempt: number }>();
+
+  private getLockoutStatus(target: string): { isLocked: boolean; remainingMinutes: number } {
+    const record = this.failedAttempts.get(target);
+    if (!record || !record.lockedUntil) {
+      return { isLocked: false, remainingMinutes: 0 };
+    }
+    const now = Date.now();
+    if (now < record.lockedUntil) {
+      const remainingMinutes = Math.ceil((record.lockedUntil - now) / 60000);
+      return { isLocked: true, remainingMinutes };
+    }
+    // Expired lockout -> auto-reset
+    this.failedAttempts.delete(target);
+    return { isLocked: false, remainingMinutes: 0 };
+  }
+
+  private recordFailedAttempt(target: string): { remainingAttempts: number; isLocked: boolean; lockMinutes: number } {
+    if (this.failedAttempts.size > 500) {
+      const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+      for (const [key, value] of this.failedAttempts.entries()) {
+        if (value.lastAttempt < twoHoursAgo && (!value.lockedUntil || value.lockedUntil < Date.now())) {
+          this.failedAttempts.delete(key);
+        }
+      }
+    }
+
+    const record = this.failedAttempts.get(target) || { attempts: 0, lockedUntil: null, lastAttempt: Date.now() };
+    const maxAttempts = 5;
+    const lockMinutes = 15;
+    const newAttempts = record.attempts + 1;
+
+    if (newAttempts >= maxAttempts) {
+      this.failedAttempts.set(target, {
+        attempts: newAttempts,
+        lockedUntil: Date.now() + lockMinutes * 60 * 1000,
+        lastAttempt: Date.now(),
+      });
+      return { remainingAttempts: 0, isLocked: true, lockMinutes };
+    }
+
+    this.failedAttempts.set(target, {
+      attempts: newAttempts,
+      lockedUntil: null,
+      lastAttempt: Date.now(),
+    });
+
+    return { remainingAttempts: maxAttempts - newAttempts, isLocked: false, lockMinutes: 0 };
+  }
+
+  private clearFailedAttempts(target: string) {
+    this.failedAttempts.delete(target);
+  }
+
   async login(dto: UserLoginDto) {
-    const rawTarget = (dto.identifier || dto.phone || dto.email || '').trim();
+    const rawTarget = (dto.identifier || dto.phone || dto.email || '').trim().toLowerCase();
     if (!rawTarget) {
       throw new BadRequestException('Phone number or email is required');
+    }
+
+    // 1. Check account-level lockout status
+    const { isLocked, remainingMinutes } = this.getLockoutStatus(rawTarget);
+    if (isLocked) {
+      throw new UnauthorizedException(
+        `Too many failed login attempts. Account access is temporarily locked for security. Please try again in ${remainingMinutes} minute(s).`,
+      );
     }
 
     // Find by phone OR by email
@@ -262,7 +325,15 @@ export class UserAuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid login credentials');
+      const { remainingAttempts, isLocked: newlyLocked, lockMinutes } = this.recordFailedAttempt(rawTarget);
+      if (newlyLocked) {
+        throw new UnauthorizedException(
+          `Too many failed login attempts. Account access is temporarily locked for ${lockMinutes} minutes.`,
+        );
+      }
+      throw new UnauthorizedException(
+        `Invalid login credentials. ${remainingAttempts} attempt(s) remaining before temporary lockout.`,
+      );
     }
 
     if (user.status === UserStatus.BLOCKED) {
@@ -271,8 +342,19 @@ export class UserAuthService {
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password_hash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid login credentials');
+      const { remainingAttempts, isLocked: newlyLocked, lockMinutes } = this.recordFailedAttempt(rawTarget);
+      if (newlyLocked) {
+        throw new UnauthorizedException(
+          `Too many failed login attempts. Account access is temporarily locked for ${lockMinutes} minutes.`,
+        );
+      }
+      throw new UnauthorizedException(
+        `Invalid login credentials. ${remainingAttempts} attempt(s) remaining before temporary lockout.`,
+      );
     }
+
+    // Login successful -> clear failed attempt counter
+    this.clearFailedAttempts(rawTarget);
 
     const payload = { sub: user.id, phone: user.phone || user.email, role: 'user' };
     const accessToken = this.jwtService.sign(payload);

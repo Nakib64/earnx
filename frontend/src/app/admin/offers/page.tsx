@@ -71,7 +71,7 @@ export default function AdminOffersPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
       <div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Manage Offers & Tasks</h1>
+        <h1 className="text-2xl font-extrabold text-slate-900 ">Manage Offers & Tasks</h1>
         <p className="text-xs text-slate-500 mt-1">
           Create special task promotions viewable strictly by ACTIVE members
         </p>

@@ -64,7 +64,7 @@ export default function AboutSection() {
           >
 
             {/* Main Section Title */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950  leading-tight">
               Your Business.{' '}
               <span className="text-[#01281a] block sm:inline">Your Opportunity.</span>{' '}
               <span className="bg-gradient-to-r from-[#01281a] via-[#025a3a] to-[#d4af37] bg-clip-text text-transparent">

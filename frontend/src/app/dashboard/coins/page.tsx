@@ -85,7 +85,7 @@ export default function UserCoinsPage() {
             Solana P2P Exchange &amp; Hub
           </div>
 
-          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
             Solana (SOL) &amp; P2P Coin Hub
           </h1>
 
@@ -187,22 +187,20 @@ export default function UserCoinsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('OVERVIEW')}
-            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'OVERVIEW'
+            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeTab === 'OVERVIEW'
                 ? 'bg-[#009F6B] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+              }`}
           >
             Overview &amp; Buy
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('TRANSFER')}
-            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'TRANSFER'
+            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === 'TRANSFER'
                 ? 'bg-[#009F6B] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+              }`}
           >
             <Send className="w-3.5 h-3.5" />
             <span>Send Transfer</span>
@@ -210,11 +208,10 @@ export default function UserCoinsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('INCOMING')}
-            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'INCOMING'
+            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === 'INCOMING'
                 ? 'bg-[#009F6B] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+              }`}
           >
             <Inbox className="w-3.5 h-3.5" />
             <span>Incoming</span>
@@ -227,11 +224,10 @@ export default function UserCoinsPage() {
           <button
             type="button"
             onClick={() => setActiveTab('HISTORY')}
-            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'HISTORY'
+            className={`min-h-[36px] px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === 'HISTORY'
                 ? 'bg-[#009F6B] text-white shadow-xs'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
+              }`}
           >
             <History className="w-3.5 h-3.5" />
             <span>History</span>

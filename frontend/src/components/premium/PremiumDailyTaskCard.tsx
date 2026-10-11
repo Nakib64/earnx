@@ -55,7 +55,7 @@ export function PremiumDailyTaskCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Today&apos;s Watch & Earn Tasks</h2>
+              <h2 className="text-lg font-semibold text-slate-900 ">Today&apos;s Watch & Earn Tasks</h2>
               <span className="px-2.5 py-0.5 rounded-[6px] bg-emerald-50 text-emerald-800 text-[11px] font-semibold border border-emerald-200/80">
                 {dailyTask.package_title}
               </span>
@@ -166,10 +166,10 @@ export function PremiumDailyTaskCard({
               <div
                 key={idx}
                 className={`p-2 rounded-[8px] border text-center transition-all ${isWatched
-                    ? 'border-emerald-200 bg-emerald-50/70 text-emerald-800'
-                    : isNext
-                      ? 'border-[#009F6B] bg-white text-[#009F6B] ring-1 ring-[#009F6B]/30'
-                      : 'border-slate-200/70 bg-slate-50/60 text-slate-400'
+                  ? 'border-emerald-200 bg-emerald-50/70 text-emerald-800'
+                  : isNext
+                    ? 'border-[#009F6B] bg-white text-[#009F6B] ring-1 ring-[#009F6B]/30'
+                    : 'border-slate-200/70 bg-slate-50/60 text-slate-400'
                   }`}
                 title={`Ad #${idx + 1}: ${isWatched ? 'Completed & Credited' : isNext ? 'Ready to watch' : 'Pending'}`}
               >

@@ -55,7 +55,7 @@ export default function HowItWorks() {
       transition={{ duration: 0.6 }}
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-center"
     >
-      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+      <h2 className="text-2xl sm:text-3xl font-black text-slate-900 ">
         How It Works
       </h2>
 

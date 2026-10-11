@@ -77,7 +77,7 @@ export default function SecurityCustodySection() {
           <ShieldCheck className="w-3.5 h-3.5 text-[#005A36]" />
           <span>Institutional Custody Architecture</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 ">
           Defense-in-Depth Security & <br />
           <span className="bg-gradient-to-r from-[#01281a] via-[#005A36] to-[#d4af37] bg-clip-text text-transparent">
             Cryptographic Vault Custody

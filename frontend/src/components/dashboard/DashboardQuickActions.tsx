@@ -78,7 +78,7 @@ export function DashboardQuickActions() {
             <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-[#009F6B] shrink-0">
               <Zap className="w-4 h-4" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 ">
               Quick Actions
             </h2>
           </div>

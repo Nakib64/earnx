@@ -41,7 +41,7 @@ export function PurchaseModal({
           )}
 
           <div>
-            <h3 className="text-base font-black text-slate-900 tracking-tight">{modalState.title}</h3>
+            <h3 className="text-base font-black text-slate-900 ">{modalState.title}</h3>
           </div>
         </div>
 

@@ -77,7 +77,7 @@ export default function PurchasePage() {
             <ShoppingCart className="w-3.5 h-3.5" />
             Checkout Portal
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Package &amp; Plan Purchase</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">Package &amp; Plan Purchase</h1>
           <p className="text-xs text-slate-500 font-medium max-w-lg">
             Acquire VIP Premium Subscriptions or High-Yield Investment Plans directly using your account balance.
           </p>

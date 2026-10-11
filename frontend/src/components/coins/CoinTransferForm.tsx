@@ -46,7 +46,7 @@ export function CoinTransferForm({
             <ArrowRightLeft className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">P2P Coin Transfer</h2>
+            <h2 className="text-lg font-black text-slate-900 ">P2P Coin Transfer</h2>
             <p className="text-xs font-semibold text-slate-500">
               Transfer Solana coins to another user at your custom agreed exchange rate
             </p>

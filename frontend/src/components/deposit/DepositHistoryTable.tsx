@@ -25,7 +25,7 @@ export function DepositHistoryTable({
             <Clock className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h3 className="text-base font-black text-slate-900 tracking-tight">Your Deposit History</h3>
+            <h3 className="text-base font-black text-slate-900 ">Your Deposit History</h3>
             <p className="text-xs font-semibold text-slate-500">Track all your submitted manual deposits and approvals</p>
           </div>
         </div>

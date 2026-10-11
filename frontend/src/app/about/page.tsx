@@ -114,7 +114,7 @@ export default function AboutPage() {
             <span>ABOUT EARNX CAPITAL</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-white leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-black  text-white leading-tight">
             One Platform.{' '}
             <span className="bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-400 bg-clip-text text-transparent">
               Multiple Opportunities.
@@ -137,7 +137,7 @@ export default function AboutPage() {
                 OUR PHILOSOPHY
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-950  leading-tight">
                 Your Business.{' '}
                 <span className="text-[#01281a]">Your Opportunity.</span>{' '}
                 <span className="text-[#b38e1b]">Your Growth.</span>
@@ -198,7 +198,7 @@ export default function AboutPage() {
             <div className="text-emerald-700 font-extrabold text-xs sm:text-sm tracking-wider uppercase mb-2">
               THE PLATFORM ENGINE
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 ">
               6 Core Ecosystem Pillars
             </h2>
             <p className="mt-3 text-base text-slate-600 font-medium">
@@ -241,7 +241,7 @@ export default function AboutPage() {
             <div className="text-emerald-700 font-extrabold text-xs sm:text-sm tracking-wider uppercase mb-2">
               WHY WE DO IT
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 ">
               Our Guiding Principles
             </h2>
           </div>
@@ -274,7 +274,7 @@ export default function AboutPage() {
       <section className="py-16 sm:py-20 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-3xl bg-gradient-to-r from-[#01281a] via-[#023c28] to-[#012015] p-8 sm:p-14 text-center text-white border border-emerald-900/60 shadow-2xl space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-black ">
               Ready to grow with EarnX Capital?
             </h2>
             <p className="text-sm sm:text-base text-slate-200 max-w-xl mx-auto font-medium">

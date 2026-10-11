@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -42,12 +42,17 @@ type LinkItem = {
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, admin, userToken, adminToken, isLoading, logoutAdmin, logoutUser } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDashboardRoute = pathname?.startsWith('/dashboard');
   const isAdminRoute = pathname?.startsWith('/admin');
 
-  // Hide sidebar on public pages (only show on /dashboard or /admin when authenticated)
-  if (!isDashboardRoute && !isAdminRoute) {
+  // Prevent SSR hydration mismatch and hide on public pages
+  if (!mounted || (!isDashboardRoute && !isAdminRoute)) {
     return null;
   }
 
@@ -63,7 +68,7 @@ export default function Sidebar() {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/dashboard/purchase', label: 'Package Purchase', icon: ShoppingBag },
     { href: '/dashboard/deposit', label: 'Deposit Funds', icon: ArrowDownCircle },
-    { href: '/dashboard/premium', label: 'Premium VIP & Ads', icon: Crown },
+    { href: '/dashboard/premium', label: 'Packages & Ads', icon: Crown },
     { href: '/dashboard/marketplace', label: 'Community Feed', icon: MessageSquare },
     { href: '/dashboard/wallet', label: 'Cash Wallet', icon: Wallet },
     { href: '/dashboard/coins', label: 'Solana Coin Hub', icon: Coins },
@@ -125,7 +130,7 @@ export default function Sidebar() {
             <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Icon className="w-4.5 h-4.5" />
             </div>
-            <span className="font-extrabold text-sm text-emerald-950 tracking-tight truncate">
+            <span className="font-extrabold text-sm text-emerald-950  truncate">
               {item.label}
             </span>
           </div>

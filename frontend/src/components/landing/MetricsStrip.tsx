@@ -39,7 +39,7 @@ export default function MetricsStrip() {
             Easy &amp; convenient
           </p>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold ">
             Get paid by mobile banking
           </h2>
 

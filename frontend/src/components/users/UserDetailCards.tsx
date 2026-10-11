@@ -134,7 +134,7 @@ export function UserDetailCards({
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 ">
                 {user.full_name || 'Member Details'}
               </h2>
               <StatusBadge status={user.status} />

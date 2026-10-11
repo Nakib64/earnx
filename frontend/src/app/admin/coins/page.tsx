@@ -237,7 +237,7 @@ export default function AdminCoinsPage() {
               <SolanaLogo size={32} />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-white  tracking-tight flex items-center gap-1.5">
+              <div className="text-3xl sm:text-4xl font-black text-white   flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_available_coins || 0).toLocaleString()}
                 <SolanaLogo size={24} />
               </div>
@@ -260,7 +260,7 @@ export default function AdminCoinsPage() {
               <Lock className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black text-amber-100  tracking-tight flex items-center gap-1.5">
+              <div className="text-3xl sm:text-4xl font-black text-amber-100   flex items-center gap-1.5">
                 {loading ? '...' : (statsData?.stats.total_locked_coins || 0).toLocaleString()}
                 <SolanaLogo size={24} />
               </div>

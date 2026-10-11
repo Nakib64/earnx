@@ -36,7 +36,7 @@ export function DepositSubmitForm({
           <ArrowDownCircle className="w-6 h-6" />
         </div>
         <div>
-          <h2 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+          <h2 className="text-base sm:text-lg font-black text-slate-900 ">
             Submit Deposit Details
           </h2>
           <p className="text-xs font-semibold text-slate-500">

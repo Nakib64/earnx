@@ -77,7 +77,7 @@ export default function MarketplacePage() {
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">
               Community Marketplace Feed
             </h1>
             <p className="text-xs font-medium text-slate-500">

@@ -58,7 +58,7 @@ export function PremiumPackagesGrid({
                 {/* Header: Title and Discount / Active Badge */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
+                    <h3 className="text-lg font-semibold text-slate-900 ">
                       {pkg.title}
                     </h3>
                     {pkg.description && (
@@ -86,7 +86,7 @@ export function PremiumPackagesGrid({
                     </div>
                   )}
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-bold text-slate-900  tracking-tight">
+                    <span className="text-3xl font-bold text-slate-900  ">
                       ৳{Number(pkg.price).toLocaleString()}
                     </span>
                     <span className="text-xs text-slate-500 font-normal">
@@ -100,7 +100,7 @@ export function PremiumPackagesGrid({
                   <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     Daily Reward Pool
                   </div>
-                  <div className="text-2xl font-semibold text-[#009F6B]  tracking-tight">
+                  <div className="text-2xl font-semibold text-[#009F6B]  ">
                     ৳{Number(pkg.daily_reward_amount).toLocaleString()}{' '}
                     <span className="text-xs font-normal text-slate-500 font-sans">/ day</span>
                   </div>

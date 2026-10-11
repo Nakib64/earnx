@@ -90,7 +90,7 @@ export default function WalletPage() {
             Cash Wallet &amp;
           </div>
 
-          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
             Cash Wallet &amp; Transaction
           </h1>
 
@@ -186,7 +186,7 @@ export default function WalletPage() {
       {/* 3. Quick Action Buttons Bar (Liquid Glass) */}
       <div className="bg-white/75 backdrop-blur-xl border border-white/85 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 ">
             Wallet Operations
           </h3>
           <p className="text-xs text-slate-500 font-normal mt-0.5">
@@ -203,8 +203,8 @@ export default function WalletPage() {
               setAuditFilter('BALANCE_TRANSFER');
             }}
             className={`min-h-[44px] px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98] ${showTransferModal
-                ? 'bg-slate-900 text-white'
-                : 'bg-white/90 hover:bg-white text-slate-800 border border-slate-200/90'
+              ? 'bg-slate-900 text-white'
+              : 'bg-white/90 hover:bg-white text-slate-800 border border-slate-200/90'
               }`}
           >
             <ArrowRightLeft className="w-4 h-4" />
@@ -219,8 +219,8 @@ export default function WalletPage() {
               setAuditFilter('WITHDRAW');
             }}
             className={`min-h-[44px] px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.98] ${showWithdrawModal
-                ? 'bg-[#009F6B] text-white'
-                : 'bg-[#009F6B] hover:bg-[#008C5F] text-white'
+              ? 'bg-[#009F6B] text-white'
+              : 'bg-[#009F6B] hover:bg-[#008C5F] text-white'
               }`}
           >
             <MinusCircle className="w-4 h-4" />
@@ -269,12 +269,12 @@ export default function WalletPage() {
       )}
 
       {/* 4. Transaction Audit History Table in Liquid Glass */}
-        <WalletAuditTable
-          transactions={filteredTransactions}
-          loading={loading && filteredTransactions.length === 0}
-          auditFilter={auditFilter}
-          onFilterChange={setAuditFilter}
-        />
+      <WalletAuditTable
+        transactions={filteredTransactions}
+        loading={loading && filteredTransactions.length === 0}
+        auditFilter={auditFilter}
+        onFilterChange={setAuditFilter}
+      />
     </div>
   );
 }

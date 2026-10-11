@@ -223,7 +223,7 @@ export default function Navbar() {
                     <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                       <Icon className="w-4.5 h-4.5" />
                     </div>
-                    <span className="font-extrabold text-sm text-emerald-950 tracking-tight truncate">
+                    <span className="font-extrabold text-sm text-emerald-950  truncate">
                       {item.label}
                     </span>
                   </div>
@@ -349,8 +349,8 @@ export default function Navbar() {
                 <Link
                   href="/"
                   className={`text-sm font-bold transition-colors ${pathname === '/'
-                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
-                      : 'text-slate-600 hover:text-emerald-700'
+                    ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                    : 'text-slate-600 hover:text-emerald-700'
                     }`}
                 >
                   Home
@@ -358,8 +358,8 @@ export default function Navbar() {
                 <Link
                   href="/about"
                   className={`text-sm font-bold transition-colors ${pathname === '/about'
-                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
-                      : 'text-slate-600 hover:text-emerald-700'
+                    ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                    : 'text-slate-600 hover:text-emerald-700'
                     }`}
                 >
                   About Us
@@ -367,8 +367,8 @@ export default function Navbar() {
                 <Link
                   href="/contact"
                   className={`text-sm font-bold transition-colors ${pathname === '/contact'
-                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
-                      : 'text-slate-600 hover:text-emerald-700'
+                    ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                    : 'text-slate-600 hover:text-emerald-700'
                     }`}
                 >
                   Contact
@@ -378,7 +378,7 @@ export default function Navbar() {
 
             {/* Right Controls */}
             <div className="flex items-center space-x-3">
-              {isLoading ? (
+              {(!mounted || isLoading) ? (
                 <div className="h-10 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (
                 <div className="flex items-center space-x-2">

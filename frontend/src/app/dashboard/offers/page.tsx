@@ -47,7 +47,7 @@ export default function OffersPage() {
             <Lock className="w-8 h-8" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">Offers &amp; Tasks Locked</h2>
+            <h2 className="text-xl font-black text-slate-900 ">Offers &amp; Tasks Locked</h2>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
               Your member account is currently in <strong className="text-slate-900">{user?.status || 'PENDING'}</strong> status. Exclusive promotional tasks are only unlocked for <strong className="text-emerald-700">ACTIVE</strong> members.
             </p>
@@ -74,7 +74,7 @@ export default function OffersPage() {
             <Sparkles className="w-3.5 h-3.5" />
             Special Rewards
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Active Offers &amp; Tasks</h1>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 ">Active Offers &amp; Tasks</h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 max-w-xl">
             Complete partner campaigns and promotional tasks to earn instant bonus credits directly into your wallet.
           </p>
@@ -104,7 +104,7 @@ export default function OffersPage() {
                   </span>
                   <NumericAmount amount={Number(offer.reward_amount)} variant="gain" size="md" />
                 </div>
-                <h3 className="font-black text-slate-900 text-base tracking-tight">{offer.title}</h3>
+                <h3 className="font-black text-slate-900 text-base ">{offer.title}</h3>
                 <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">{offer.description}</p>
               </div>
 

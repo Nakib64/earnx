@@ -67,7 +67,7 @@ export default function ContactInfoGrid() {
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 flex items-center justify-center mx-auto shadow-xs">
                   <Icon className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-black text-slate-900 tracking-tight">
+                <h3 className="text-base font-black text-slate-900 ">
                   {item.title}
                 </h3>
                 <p className="text-xs font-bold  text-slate-800">

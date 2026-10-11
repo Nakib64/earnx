@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -10,10 +10,15 @@ import { useAuth } from '../context/AuthContext';
 export default function BottomNav() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const isDashboardRoute = pathname?.startsWith('/dashboard');
 
-  if (!user || !isDashboardRoute) return null;
+  if (!mounted || !user || !isDashboardRoute) return null;
 
   const isPremium = Boolean((user as any).is_premium);
 
@@ -51,11 +56,10 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 ${
-                isActive
+              className={`relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition-all duration-200 ${isActive
                   ? 'text-emerald-700 font-black'
                   : 'text-slate-400 hover:text-slate-700 font-bold'
-              }`}
+                }`}
             >
               <motion.div
                 whileTap={{ scale: 0.90 }}
@@ -63,15 +67,14 @@ export default function BottomNav() {
               >
                 <div className="relative">
                   <Icon
-                    className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-                      isActive ? 'text-emerald-600 scale-110' : 'text-slate-400'
-                    }`}
+                    className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isActive ? 'text-emerald-600 scale-110' : 'text-slate-400'
+                      }`}
                   />
                   {isLocked && (
                     <Lock className="w-2.5 h-2.5 text-amber-500 absolute -top-1 -right-1.5" />
                   )}
                 </div>
-                <span className="text-[10px] tracking-tight">{item.label}</span>
+                <span className="text-[10px] ">{item.label}</span>
               </motion.div>
             </Link>
           );

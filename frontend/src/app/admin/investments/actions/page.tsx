@@ -111,7 +111,7 @@ export default function AdminInvestmentActionsPage() {
             <Users className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">User Investment Actions</h1>
+            <h1 className="text-lg sm:text-xl font-black  text-white">User Investment Actions</h1>
             <p className="text-xs text-slate-300 font-semibold">Approve, reject, and manage all user investment records.</p>
           </div>
         </div>
@@ -149,14 +149,14 @@ export default function AdminInvestmentActionsPage() {
                 key={f}
                 onClick={() => setStatusFilter(f)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${statusFilter === f
-                    ? f === 'PENDING'
-                      ? 'bg-amber-100 text-[#854D0E] border border-amber-300'
-                      : f === 'APPROVED'
-                        ? 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
-                        : f === 'REJECTED'
-                          ? 'bg-slate-200 text-slate-700'
-                          : 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
-                    : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+                  ? f === 'PENDING'
+                    ? 'bg-amber-100 text-[#854D0E] border border-amber-300'
+                    : f === 'APPROVED'
+                      ? 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
+                      : f === 'REJECTED'
+                        ? 'bg-slate-200 text-slate-700'
+                        : 'bg-[#01281a] text-amber-200 border border-[#d4af37]/40 shadow-sm'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                   }`}
               >
                 {f === 'ALL' ? `All (${investments.length})` : f === 'PENDING' ? `Pending (${pendingCount})` : f === 'APPROVED' ? `Approved (${approvedCount})` : `Rejected (${rejectedCount})`}

@@ -61,7 +61,7 @@ export default function InvestmentSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight"
+            className="text-3xl sm:text-5xl font-black text-white  leading-tight"
           >
             Invest. Grow.{' '}
             <span className="bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-400 bg-clip-text text-transparent">

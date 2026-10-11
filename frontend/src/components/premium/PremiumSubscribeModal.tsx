@@ -17,14 +17,19 @@ interface PremiumSubscribeModalProps {
   isOpen: boolean;
   pkg: PremiumPackage | null;
   subscribing: boolean;
+  error?: string | null;
   onClose: () => void;
-  onConfirm: (pkg: PremiumPackage, referrerCode?: string) => Promise<void>;
+  onConfirm: (
+    pkg: PremiumPackage,
+    referrerCode?: string,
+  ) => Promise<{ success: boolean; error?: string } | void>;
 }
 
 export function PremiumSubscribeModal({
   isOpen,
   pkg,
   subscribing,
+  error,
   onClose,
   onConfirm,
 }: PremiumSubscribeModalProps) {
@@ -36,14 +41,16 @@ export function PremiumSubscribeModal({
     referral_code: string;
   } | null>(null);
   const [isInvalid, setIsInvalid] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  // Reset form when modal opens
+  // Reset form and errors when modal opens
   useEffect(() => {
     if (isOpen) {
       setReferrerCode('');
       setChecking(false);
       setReferrerUser(null);
       setIsInvalid(false);
+      setLocalError(null);
     }
   }, [isOpen]);
 
@@ -85,12 +92,18 @@ export function PremiumSubscribeModal({
 
   if (!isOpen || !pkg) return null;
 
+  const displayError = error || localError;
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (subscribing) return;
+    setLocalError(null);
 
     const finalReferrer = referrerUser ? referrerUser.referral_code : 'earnx-123';
-    await onConfirm(pkg, finalReferrer);
+    const result = await onConfirm(pkg, finalReferrer);
+    if (result && !result.success && result.error) {
+      setLocalError(result.error);
+    }
   };
 
   return (
@@ -113,7 +126,7 @@ export function PremiumSubscribeModal({
           <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">
             Confirm Subscription
           </div>
-          <h3 className="text-xl font-bold text-slate-900 tracking-tight">{pkg.title}</h3>
+          <h3 className="text-xl font-bold text-slate-900 ">{pkg.title}</h3>
           <p className="text-xs text-slate-500 mt-0.5 font-normal">
             365 days validity • Instant fractional payouts per ad
           </p>
@@ -121,6 +134,27 @@ export function PremiumSubscribeModal({
 
         {/* Modal Body */}
         <form onSubmit={handleFormSubmit} className="p-6 space-y-5">
+          {/* Subscription Error Notification */}
+          {displayError && (
+            <div className="p-3.5 rounded-[10px] bg-rose-50 border border-rose-200 text-rose-900 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1 duration-200">
+              <AlertCircle className="w-4.5 h-4.5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="text-xs space-y-1 flex-1">
+                <strong className="font-semibold text-rose-950 block">Subscription Failed</strong>
+                <p className="font-medium text-rose-800 leading-relaxed">{displayError}</p>
+                {displayError.toLowerCase().includes('balance') && (
+                  <div className="pt-1.5">
+                    <a
+                      href="/dashboard/deposit"
+                      className="inline-flex items-center gap-1 font-bold text-rose-700 hover:text-rose-950 underline underline-offset-2 transition-colors"
+                    >
+                      <span>Deposit funds to your wallet &rarr;</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Package Summary Card */}
           <div className="bg-slate-50 border border-[#E5EBE7] rounded-[10px] p-4 flex items-center justify-between">
             <div>
@@ -165,10 +199,10 @@ export function PremiumSubscribeModal({
                 placeholder="Enter referrer code (e.g. REF002, EX1001)..."
                 disabled={subscribing}
                 className={`w-full bg-white border rounded-[10px] pl-4 pr-10 py-3 text-sm font-medium text-slate-900 focus:outline-none transition-colors ${referrerUser
-                    ? 'border-[#009F6B] ring-2 ring-[#009F6B]/20 bg-emerald-50/20'
-                    : isInvalid
-                      ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20'
-                      : 'border-[#E5EBE7] focus:border-[#009F6B] focus:ring-2 focus:ring-[#009F6B]/20'
+                  ? 'border-[#009F6B] ring-2 ring-[#009F6B]/20 bg-emerald-50/20'
+                  : isInvalid
+                    ? 'border-amber-400 ring-2 ring-amber-400/20 bg-amber-50/20'
+                    : 'border-[#E5EBE7] focus:border-[#009F6B] focus:ring-2 focus:ring-[#009F6B]/20'
                   }`}
               />
 

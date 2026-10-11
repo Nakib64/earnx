@@ -52,7 +52,7 @@ export default function GlobalMetricsSection() {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>Real-Time Network Telemetry</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-white ">
               Enterprise Scale & <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-500 bg-clip-text text-transparent">
                 Institutional Reliability
@@ -77,7 +77,7 @@ export default function GlobalMetricsSection() {
                 <div className="w-10 h-10 rounded-xl bg-[#01281a] border border-[#d4af37]/40 flex items-center justify-center text-[#d4af37] mb-4 group-hover:scale-110 transition-transform">
                   <Icon className="w-5 h-5" />
                 </div>
-                <div className="text-2xl sm:text-3xl font-black text-white  tracking-tight">
+                <div className="text-2xl sm:text-3xl font-black text-white  ">
                   {item.value}
                 </div>
                 <div className="text-xs font-bold text-emerald-300 mt-1 uppercase tracking-wider">

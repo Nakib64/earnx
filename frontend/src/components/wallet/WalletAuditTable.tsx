@@ -70,7 +70,7 @@ export function WalletAuditTable({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div className="flex items-center space-x-2">
           <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
-          <h3 className="font-black text-slate-900 text-base tracking-tight truncate"> Audit History</h3>
+          <h3 className="font-black text-slate-900 text-base  truncate"> Audit History</h3>
         </div>
 
         {/* Audit History Filter Tabs */}

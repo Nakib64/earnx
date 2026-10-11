@@ -199,7 +199,7 @@ export default function UserInvestmentsPage() {
             Investments &amp; Dividends
           </div>
 
-          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
             Fixed-Term Investments &amp; Yields
           </h1>
 
@@ -305,7 +305,7 @@ export default function UserInvestmentsPage() {
       {/* 4. Investment Plans Grid (Liquid Glassmorphism) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 ">
             Available Investment Plans
           </h2>
           <span className="text-xs font-semibold text-slate-400">Guaranteed Dividends</span>
@@ -321,7 +321,7 @@ export default function UserInvestmentsPage() {
 
       {/* 5. Active Investments History Table (Liquid Glass Container) */}
       <div className="bg-white/75 backdrop-blur-xl border border-white/85 shadow-[0_8px_30px_rgb(0,0,0,0.04)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.95)] rounded-2xl sm:rounded-3xl p-5 sm:p-7 space-y-4 overflow-hidden">
-        <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center space-x-2 tracking-tight truncate">
+        <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center space-x-2  truncate">
           <ShieldCheck className="w-5 h-5 text-[#009F6B] shrink-0" />
           <span className="truncate">Investment History &amp; Dividends</span>
         </h2>

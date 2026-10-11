@@ -73,7 +73,7 @@ function ReferralContent() {
             Affiliate &amp; Network
           </div>
 
-          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
             Affiliate Team &amp; Referral Tree
           </h1>
 
@@ -206,15 +206,15 @@ function ReferralContent() {
       </div>
 
       {/* 5. Main Referral Tree Table in Liquid Glass Container */}
-        <ReferralTreeTable
-          displayMembers={displayMembers}
-          treeByParent={treeByParent}
-          loading={loading && allMembers.length === 0}
-          searchTerm={debouncedSearch}
-          currentParentName={currentParent?.name || 'Member'}
-          isDrilledDown={breadcrumbs.length > 1}
-          onRowClick={handleRowClick}
-        />
+      <ReferralTreeTable
+        displayMembers={displayMembers}
+        treeByParent={treeByParent}
+        loading={loading && allMembers.length === 0}
+        searchTerm={debouncedSearch}
+        currentParentName={currentParent?.name || 'Member'}
+        isDrilledDown={breadcrumbs.length > 1}
+        onRowClick={handleRowClick}
+      />
     </div>
   );
 }

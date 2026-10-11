@@ -85,14 +85,14 @@ export default function WhyEarnXSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-         
+
 
           <motion.h2
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950 tracking-tight leading-tight"
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-950  leading-tight"
           >
             Why Choose EarnX?
           </motion.h2>
@@ -139,7 +139,7 @@ export default function WhyEarnXSection() {
                   </div>
 
                   {/* Large Card Title */}
-                  <h3 className="text-2xl sm:text-3xl font-black text-slate-950 mb-4 tracking-tight group-hover:text-[#01281a] transition-colors">
+                  <h3 className="text-2xl sm:text-3xl font-black text-slate-950 mb-4  group-hover:text-[#01281a] transition-colors">
                     {item.title}
                   </h3>
 

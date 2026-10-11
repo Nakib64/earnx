@@ -76,7 +76,7 @@ export default function HeroBanner({
           >
             <motion.h1
               variants={fadeInUp}
-              className="text-sm xs:text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.1]"
+              className="text-sm xs:text-xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black  text-white leading-[1.1]"
             >
               {title}
             </motion.h1>

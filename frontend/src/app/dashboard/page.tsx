@@ -71,7 +71,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Prominent main heading (~30-32px on desktop) */}
-            <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
               Personal Dashboard &amp; Activity Overview
             </h1>
 
@@ -84,9 +84,8 @@ export default function DashboardPage() {
             <div className="pt-1 flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 font-medium">
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isPremium ? 'bg-[#009F6B]' : 'bg-slate-400'
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isPremium ? 'bg-[#009F6B]' : 'bg-slate-400'
+                    }`}
                 />
                 Status:{' '}
                 <strong className="text-slate-900 font-semibold">
@@ -119,11 +118,10 @@ export default function DashboardPage() {
         {/* Alert Messages (if any) */}
         {message && (
           <div
-            className={`p-3.5 sm:p-4 rounded-[10px] text-xs sm:text-sm font-semibold flex items-center space-x-2 border shadow-2xs ${
-              message.type === 'success'
+            className={`p-3.5 sm:p-4 rounded-[10px] text-xs sm:text-sm font-semibold flex items-center space-x-2 border shadow-2xs ${message.type === 'success'
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                 : 'bg-rose-50 text-rose-800 border-rose-200'
-            }`}
+              }`}
           >
             {message.type === 'success' ? (
               <Check className="w-5 h-5 text-[#009F6B] shrink-0" />

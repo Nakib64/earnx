@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
           />
         </Link>
         <div>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Admin Portal</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 ">Admin Portal</h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">EarnX System Administration & Management</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function AdminLoginPage() {
             <ShieldCheck className="w-5 h-5 text-secondary" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm sm:text-base font-black tracking-tight text-white">
+            <h3 className="text-sm sm:text-base font-black  text-white">
               Restricted Access
             </h3>
             <p className="text-xs text-emerald-100/80 font-medium">

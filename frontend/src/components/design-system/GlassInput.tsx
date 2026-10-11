@@ -15,7 +15,7 @@ export const GlassInput = React.forwardRef<HTMLInputElement, GlassInputProps>(
     return (
       <div className="space-y-1.5 w-full text-left">
         {label && (
-          <label className="block text-xs font-bold text-slate-700 tracking-tight">
+          <label className="block text-xs font-bold text-slate-700 ">
             {label}
             {props.required && <span className="text-rose-500 ml-0.5">*</span>}
           </label>
@@ -30,13 +30,11 @@ export const GlassInput = React.forwardRef<HTMLInputElement, GlassInputProps>(
 
           <input
             ref={ref}
-            className={`w-full py-3 px-4 rounded-2xl bg-white/60 backdrop-blur-md border text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal transition-all duration-200 shadow-xs focus:outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 disabled:opacity-50 disabled:bg-slate-100 ${
-              leftIcon ? 'pl-11' : ''
-            } ${rightIcon ? 'pr-11' : ''} ${
-              error
+            className={`w-full py-3 px-4 rounded-2xl bg-white/60 backdrop-blur-md border text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal transition-all duration-200 shadow-xs focus:outline-none focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 disabled:opacity-50 disabled:bg-slate-100 ${leftIcon ? 'pl-11' : ''
+              } ${rightIcon ? 'pr-11' : ''} ${error
                 ? 'border-rose-300 focus:border-rose-500 focus:ring-rose-500/10'
                 : 'border-slate-200/90'
-            } ${className}`}
+              } ${className}`}
             {...props}
           />
 

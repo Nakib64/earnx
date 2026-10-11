@@ -136,7 +136,7 @@ export default function AdminCommissionsPage() {
             <Layers className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1 flex-1">
-            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
+            <h1 className="text-lg sm:text-xl font-black  text-white">
               Premium Commission Rules Matrix
             </h1>
             <p className="text-xs text-slate-300 font-semibold">

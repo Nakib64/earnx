@@ -67,7 +67,7 @@ export default function TestimonialsAndFaqSection() {
             transition={{ duration: 0.6 }}
             className="lg:col-span-6 space-y-6"
           >
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 ">
               What Our Members Say
             </h2>
 
@@ -117,7 +117,7 @@ export default function TestimonialsAndFaqSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="lg:col-span-6 space-y-6"
           >
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-950 ">
               Frequently Asked Questions
             </h2>
 
@@ -135,9 +135,8 @@ export default function TestimonialsAndFaqSection() {
                     >
                       <span className="pr-4">{faq.q}</span>
                       <ChevronDown
-                        className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${
-                          isOpen ? 'rotate-180 text-emerald-700' : ''
-                        }`}
+                        className={`w-5 h-5 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-emerald-700' : ''
+                          }`}
                       />
                     </button>
 

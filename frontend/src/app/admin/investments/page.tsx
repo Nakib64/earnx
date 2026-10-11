@@ -246,7 +246,7 @@ export default function AdminInvestmentsPage() {
             <TrendingUp className="w-6 h-6 text-[#f3ba2f]" />
           </div>
           <div className="space-y-1 flex-1">
-            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">Investment Plans & Returns</h1>
+            <h1 className="text-lg sm:text-xl font-black  text-white">Investment Plans & Returns</h1>
             <p className="text-xs text-slate-300 font-semibold">Configure dividend packages, assign to users, and process returns.</p>
           </div>
           <span className="text-xs font-black px-3.5 py-1.5 rounded-xl bg-[#03442e] text-amber-200 border border-[#d4af37]/40  shrink-0 hidden sm:inline-flex">

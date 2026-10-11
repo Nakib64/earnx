@@ -82,12 +82,10 @@ export function SettingsSecurityForm({
         >
           {savingProfile ? (
             <>
-              <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" />
               <span>Saving Changes...</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4 text-emerald-200" />
               <span>Save Profile &amp; Security Settings</span>
             </>
           )}

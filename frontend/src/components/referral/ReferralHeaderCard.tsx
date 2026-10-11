@@ -45,7 +45,7 @@ export function ReferralHeaderCard({
             <Sparkles className="w-3.5 h-3.5" />
             Affiliate Partner Profile
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-4xl font-black text-slate-900 ">
             {user?.full_name || user?.phone || 'Partner Member'}
           </h2>
         </div>

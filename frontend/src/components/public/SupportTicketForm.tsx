@@ -44,7 +44,7 @@ export default function SupportTicketForm() {
               <MessageSquare className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-black text-slate-900 text-lg tracking-tight">Open Support Desk Ticket</h3>
+              <h3 className="font-black text-slate-900 text-lg ">Open Support Desk Ticket</h3>
               <p className="text-xs text-slate-500 font-medium">Direct inquiry to our 24/7 technical and compliance team</p>
             </div>
           </div>

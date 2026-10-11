@@ -204,21 +204,21 @@ export default function AdminAdsAnalyticsPage() {
           },
           ...(activeMetric === 'both'
             ? {
-                yEarned: {
-                  type: 'linear',
-                  display: true,
-                  position: 'right',
-                  beginAtZero: true,
-                  grid: {
-                    drawOnChartArea: false,
-                  },
-                  ticks: {
-                    color: '#d97706',
-                    font: { family: 'Montserrat, sans-serif', size: 11 },
-                    callback: (value) => `৳${value}`,
-                  },
+              yEarned: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                grid: {
+                  drawOnChartArea: false,
                 },
-              }
+                ticks: {
+                  color: '#d97706',
+                  font: { family: 'Montserrat, sans-serif', size: 11 },
+                  callback: (value) => `৳${value}`,
+                },
+              },
+            }
             : {}),
         },
       },
@@ -240,7 +240,7 @@ export default function AdminAdsAnalyticsPage() {
               <Sparkles className="w-3.5 h-3.5" />
               Watch-to-Earn Revenue & Consumption Intelligence
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-black  text-white">
               Ads Analytics & User Earnings
             </h1>
             <p className="text-slate-300 text-xs sm:text-sm font-medium max-w-2xl">
@@ -289,8 +289,8 @@ export default function AdminAdsAnalyticsPage() {
                 key={tf.key}
                 onClick={() => setTimeframe(tf.key)}
                 className={`px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer shrink-0 ${isActive
-                    ? 'bg-[#005A36] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ? 'bg-[#005A36] text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
               >
                 {tf.label}
@@ -313,7 +313,7 @@ export default function AdminAdsAnalyticsPage() {
             </div>
           </div>
           <div>
-            <div className="text-3xl font-black text-slate-900  tracking-tight">
+            <div className="text-3xl font-black text-slate-900  ">
               {loading ? '...' : (data?.summary.total_ads_watched ?? 0).toLocaleString()}
             </div>
             <div className="text-[11px] font-semibold text-emerald-700 mt-1 flex items-center gap-1">
@@ -337,7 +337,7 @@ export default function AdminAdsAnalyticsPage() {
             </div>
           </div>
           <div>
-            <div className="text-3xl font-black text-slate-900  tracking-tight">
+            <div className="text-3xl font-black text-slate-900  ">
               ৳{loading ? '...' : (data?.summary.total_earned_bdt ?? 0).toLocaleString()}
             </div>
             <div className="text-[11px] font-semibold text-amber-700 mt-1 flex items-center gap-1">
@@ -361,7 +361,7 @@ export default function AdminAdsAnalyticsPage() {
             </div>
           </div>
           <div>
-            <div className="text-3xl font-black text-slate-900  tracking-tight">
+            <div className="text-3xl font-black text-slate-900  ">
               {loading ? '...' : (data?.summary.active_users ?? 0).toLocaleString()}
             </div>
             <div className="text-[11px] font-semibold text-sky-700 mt-1">
@@ -384,7 +384,7 @@ export default function AdminAdsAnalyticsPage() {
             </div>
           </div>
           <div>
-            <div className="text-3xl font-black text-slate-900  tracking-tight">
+            <div className="text-3xl font-black text-slate-900  ">
               {loading ? '...' : (data?.summary.avg_ads_per_user ?? 0)}
             </div>
             <div className="text-[11px] font-semibold text-purple-700 mt-1">
@@ -421,33 +421,30 @@ export default function AdminAdsAnalyticsPage() {
               <button
                 type="button"
                 onClick={() => setInterpolationMode('monotone')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  interpolationMode === 'monotone'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${interpolationMode === 'monotone'
                     ? 'bg-emerald-800 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Monotone
               </button>
               <button
                 type="button"
                 onClick={() => setInterpolationMode('default')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  interpolationMode === 'default'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${interpolationMode === 'default'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Cubic
               </button>
               <button
                 type="button"
                 onClick={() => setInterpolationMode('linear')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  interpolationMode === 'linear'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${interpolationMode === 'linear'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Linear
               </button>
@@ -458,33 +455,30 @@ export default function AdminAdsAnalyticsPage() {
               <button
                 type="button"
                 onClick={() => setActiveMetric('both')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeMetric === 'both'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeMetric === 'both'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Both Metrics
               </button>
               <button
                 type="button"
                 onClick={() => setActiveMetric('ads')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeMetric === 'ads'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeMetric === 'ads'
                     ? 'bg-[#005A36] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Ads Watched
               </button>
               <button
                 type="button"
                 onClick={() => setActiveMetric('earnings')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  activeMetric === 'earnings'
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${activeMetric === 'earnings'
                     ? 'bg-amber-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-950'
-                }`}
+                  }`}
               >
                 Payouts (৳)
               </button>

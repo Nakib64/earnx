@@ -78,7 +78,7 @@ export default function MarketOverviewChart() {
     <GlassCard variant="standard" className="p-5 sm:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">
+        <h3 className="text-base sm:text-lg font-extrabold text-slate-900 ">
           Market Overview
         </h3>
 

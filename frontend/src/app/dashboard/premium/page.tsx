@@ -29,6 +29,7 @@ export default function PremiumDashboardPage() {
       recordingAd,
       claiming,
       selectedPkgForModal,
+      subscribeError,
     },
     computed: { user },
     actions: {
@@ -67,7 +68,7 @@ export default function PremiumDashboardPage() {
             </div>
 
             {/* Prominent main heading (~30-32px on desktop) */}
-            <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
               Premium Memberships &amp; Daily Ad Rewards
             </h1>
 
@@ -80,9 +81,8 @@ export default function PremiumDashboardPage() {
             <div className="pt-1 flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 font-medium">
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isUserPremium ? 'bg-[#009F6B]' : 'bg-slate-400'
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isUserPremium ? 'bg-[#009F6B]' : 'bg-slate-400'
+                    }`}
                 />
                 Status:{' '}
                 <strong className="text-slate-900 font-semibold">
@@ -146,6 +146,7 @@ export default function PremiumDashboardPage() {
           isOpen={!!selectedPkgForModal}
           pkg={selectedPkgForModal}
           subscribing={!!subscribingId}
+          error={subscribeError}
           onClose={handleCloseSubscribeModal}
           onConfirm={handleConfirmSubscribe}
         />
@@ -167,7 +168,7 @@ export default function PremiumDashboardPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between border-b border-[#E5EBE7] pb-3">
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                <h3 className="text-base font-bold text-slate-900 ">
                   VIP Membership &amp; Reward Rules
                 </h3>
                 <button

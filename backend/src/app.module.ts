@@ -21,10 +21,21 @@ import { OtpModule } from './otp/otp.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { DepositsModule } from './deposits/deposits.module';
 import { MarketplaceModule } from './marketplace/marketplace.module';
+import { AdsModule } from './ads/ads.module';
+
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'default',
+        ttl: 60000,
+        limit: 100, // 100 requests per minute general limit per IP
+      },
+    ]),
     PrismaModule,
     SmsModule,
     EmailModule,
@@ -46,6 +57,14 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
     CoinsModule,
     NoticesModule,
     PurchasesModule,
+    AdsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}
+

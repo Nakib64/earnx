@@ -68,7 +68,7 @@ export default function UserLeaderboardPage() {
             Hall of Fame &amp; Leaders
           </div>
 
-          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-[32px] font-bold text-slate-900  leading-tight">
             Community Hall of Fame &amp; Rankings
           </h1>
 

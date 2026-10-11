@@ -69,7 +69,7 @@ export default function AgencyServicesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight"
+            className="text-3xl sm:text-5xl font-black text-slate-950  leading-tight"
           >
             Grow Your Business With EarnX
           </motion.h2>
@@ -115,9 +115,8 @@ export default function AgencyServicesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`p-7 rounded-3xl bg-gradient-to-br from-[#FAFBF9] to-[#F1F6F3] border border-slate-200 hover:border-[#d4af37]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group ${
-                  idx === 4 ? 'md:col-span-2 lg:col-span-1' : ''
-                }`}
+                className={`p-7 rounded-3xl bg-gradient-to-br from-[#FAFBF9] to-[#F1F6F3] border border-slate-200 hover:border-[#d4af37]/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between group ${idx === 4 ? 'md:col-span-2 lg:col-span-1' : ''
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">

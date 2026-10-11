@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import Providers from '../context/Providers';
 import Navbar from '../components/Navbar';
@@ -29,6 +30,13 @@ export default function RootLayout({
       lang="en"
       className={`${montserrat.variable} h-full antialiased font-sans`}
     >
+      {/* Monetag Rewarded Interstitial SDK — loads after page is interactive, non-blocking */}
+      <Script
+        src="https://cdn.monetag.com/tag.min.js"
+        strategy="afterInteractive"
+        data-cfasync="false"
+        id="monetag-sdk"
+      />
       <body className="min-h-screen flex flex-col bg-[#F8FAFC] text-[#111827] overflow-x-hidden font-sans font-semibold relative">
         <AmbientCanvas />
         <Providers>

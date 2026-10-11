@@ -36,7 +36,7 @@ export default function CtaBanner({
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            <h3 className="text-xl sm:text-2xl font-black  text-white">
               {title}
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 font-semibold">

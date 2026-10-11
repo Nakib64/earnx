@@ -27,7 +27,7 @@ export function CoinHistoryTab({
             <History className="w-5 h-5 text-emerald-700" />
           </div>
           <div>
-            <h3 className="text-base font-black text-slate-900 tracking-tight">Coin Transfer History</h3>
+            <h3 className="text-base font-black text-slate-900 ">Coin Transfer History</h3>
             <p className="text-xs font-semibold text-slate-500">
               Complete  of sent and received Solana escrow transfers
             </p>

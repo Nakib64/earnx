@@ -45,9 +45,9 @@ export default function AgencyAndInvestmentSection() {
             <Briefcase className="absolute -top-4 -right-4 w-32 h-32 text-emerald-900/[0.05] group-hover:opacity-15 group-hover:scale-105 transition-all pointer-events-none" />
 
             <div className="relative z-10">
-             
 
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight mb-2">
+
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-950  mb-2">
                 Our Agency Services
               </h2>
               <p className="text-sm text-slate-600 font-medium mb-8">
@@ -99,9 +99,9 @@ export default function AgencyAndInvestmentSection() {
             <ShieldCheck className="absolute -top-4 -right-4 w-32 h-32 text-amber-900/[0.05] group-hover:opacity-15 group-hover:scale-105 transition-all pointer-events-none" />
 
             <div className="relative z-10">
-             
 
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight mb-2">
+
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-950  mb-2">
                 Investment Opportunities
               </h2>
 

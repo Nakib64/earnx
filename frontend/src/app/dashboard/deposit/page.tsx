@@ -62,7 +62,7 @@ export default function UserDepositPage() {
               Instant Manual Deposit
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 ">
             Deposit Funds
           </h1>
           <p className="text-slate-500 text-xs sm:text-sm font-semibold">

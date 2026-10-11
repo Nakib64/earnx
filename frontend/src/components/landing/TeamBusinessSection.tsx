@@ -60,9 +60,9 @@ export default function TeamBusinessSection() {
             transition={{ duration: 0.7 }}
             className="lg:col-span-6 space-y-6"
           >
-          
+
             {/* Title */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950  leading-tight">
               Build Your Team.{' '}
               <span className="bg-gradient-to-r from-[#01281a] via-[#025a3a] to-[#d4af37] bg-clip-text text-transparent block sm:inline">
                 Grow Together.

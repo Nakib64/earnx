@@ -68,7 +68,7 @@ export function MarketplacePostCard({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-slate-900 tracking-tight">
+              <span className="text-sm font-black text-slate-900 ">
                 {post.user?.full_name || 'EarnX Member'}
               </span>
               {post.user?.designation?.title && (
@@ -131,8 +131,8 @@ export function MarketplacePostCard({
           type="button"
           onClick={() => onToggleLike(post.id)}
           className={`flex-1 py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer ${post.is_liked_by_me
-              ? 'text-rose-600 hover:bg-rose-50/80 font-black'
-              : 'hover:bg-slate-100/60 text-slate-600'
+            ? 'text-rose-600 hover:bg-rose-50/80 font-black'
+            : 'hover:bg-slate-100/60 text-slate-600'
             }`}
         >
           <Heart

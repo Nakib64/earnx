@@ -24,7 +24,7 @@ export function WalletWithdrawModal({
   return (
     <GlassCard variant="standard" className="p-5 sm:p-7 space-y-4">
       <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 className="font-black text-slate-900 text-base tracking-tight truncate">
+        <h3 className="font-black text-slate-900 text-base  truncate">
           Submit Direct Withdrawal
         </h3>
         <button

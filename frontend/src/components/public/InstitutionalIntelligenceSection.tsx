@@ -87,7 +87,7 @@ export default function InstitutionalIntelligenceSection() {
             <Shield className="w-3.5 h-3.5 text-emerald-600" />
             <span>Institutional Asset Framework</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 ">
             Algorithmic Asset Strategy & <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-[#01281a] via-[#005A36] to-[#d4af37] bg-clip-text text-transparent">
               Global Market Intelligence

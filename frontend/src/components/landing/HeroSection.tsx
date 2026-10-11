@@ -42,7 +42,7 @@ export default function HeroSection() {
             className="order-2 lg:order-1 lg:col-span-7 space-y-6 text-left"
           >
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.08]">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black  text-white leading-[1.08]">
               EarnX Capital{' '}
               <span className="block text-2xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-400 drop-shadow-sm">
                 One Platform. Multiple Opportunities.

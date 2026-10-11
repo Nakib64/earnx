@@ -36,7 +36,7 @@ export default function FinalCtaSection() {
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Get Started Now</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white ">
                 Your Opportunity Starts Here!
               </h2>
               <p className="mt-2 text-sm sm:text-base text-emerald-100/90 max-w-xl font-medium">

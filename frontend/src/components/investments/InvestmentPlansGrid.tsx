@@ -81,7 +81,7 @@ export function InvestmentPlansGrid({
                 <div className="space-y-4 min-w-0">
                   {/* Title & Subtitle */}
                   <div className="min-w-0 space-y-0.5">
-                    <h3 className="text-lg sm:text-xl font-black tracking-tight text-slate-900 truncate">
+                    <h3 className="text-lg sm:text-xl font-black  text-slate-900 truncate">
                       {plan.title}
                     </h3>
                     <p className="text-xs font-semibold text-slate-500 truncate">

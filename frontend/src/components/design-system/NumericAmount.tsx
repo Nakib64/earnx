@@ -54,7 +54,7 @@ export function NumericAmount({
     lg: 'text-lg',
     xl: 'text-xl sm:text-2xl',
     '2xl': 'text-2xl sm:text-3xl',
-    '3xl': 'text-3xl sm:text-4xl tracking-tight',
+    '3xl': 'text-3xl sm:text-4xl ',
   }[size];
 
   const formattedNumber = isNumber
@@ -66,7 +66,7 @@ export function NumericAmount({
 
   return (
     <span
-      className={`inline-flex items-baseline  tabular-nums tracking-tight ${colorStyles} ${sizeStyles} ${className}`}
+      className={`inline-flex items-baseline  tabular-nums  ${colorStyles} ${sizeStyles} ${className}`}
     >
       {prefix && (
         <span className="opacity-80 font-sans mr-0.5 select-none">{prefix}</span>

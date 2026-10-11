@@ -30,7 +30,7 @@ export default function CryptoTickerCard() {
                 <span className="text-xs font-bold text-slate-400 ">(EXC)</span>
               </div>
               <div className="flex items-baseline space-x-2 mt-0.5">
-                <span className="text-2xl sm:text-3xl font-black  tracking-tight text-white">
+                <span className="text-2xl sm:text-3xl font-black   text-white">
                   $184.56
                 </span>
                 <span className="text-xs font-black text-[#10b981] ">

@@ -230,21 +230,21 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
           },
           ...(activeMetric === 'both'
             ? {
-                yEarned: {
-                  type: 'linear',
-                  display: true,
-                  position: 'right',
-                  beginAtZero: true,
-                  grid: {
-                    drawOnChartArea: false,
-                  },
-                  ticks: {
-                    color: '#d97706',
-                    font: { family: 'var(--font-montserrat), Montserrat, sans-serif', size: 11 },
-                    callback: (value) => `৳${value}`,
-                  },
+              yEarned: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                beginAtZero: true,
+                grid: {
+                  drawOnChartArea: false,
                 },
-              }
+                ticks: {
+                  color: '#d97706',
+                  font: { family: 'var(--font-montserrat), Montserrat, sans-serif', size: 11 },
+                  callback: (value) => `৳${value}`,
+                },
+              },
+            }
             : {}),
         },
       },
@@ -273,10 +273,10 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
   const dailyRewardRate = pkg?.daily_reward_amount !== undefined ? Number(pkg.daily_reward_amount).toFixed(2) : '100.00';
   const expiresFormatted = currentUser?.premium_expires_at
     ? new Date(currentUser.premium_expires_at).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
     : null;
 
   return (
@@ -290,7 +290,7 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
         {/* Content 1: Header Row with Title & Filter Controls */}
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100/80 pb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+            <h2 className="text-base sm:text-lg font-bold text-slate-900 ">
               Ads Views &amp; Earnings
             </h2>
             <span className="px-2 py-0.5 rounded-full bg-emerald-50/90 text-emerald-800 text-[10px] font-bold border border-emerald-200/80">
@@ -307,11 +307,10 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
                   key={t.key}
                   type="button"
                   onClick={() => setTimeframe(t.key)}
-                  className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                    timeframe === t.key
+                  className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${timeframe === t.key
                       ? 'bg-white text-slate-900 shadow-2xs font-extrabold'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {t.label}
                 </button>
@@ -323,33 +322,30 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
               <button
                 type="button"
                 onClick={() => setActiveMetric('both')}
-                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                  activeMetric === 'both'
+                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'both'
                     ? 'bg-slate-900 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Both
               </button>
               <button
                 type="button"
                 onClick={() => setActiveMetric('ads')}
-                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                  activeMetric === 'ads'
+                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'ads'
                     ? 'bg-[#009F6B] text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Ads
               </button>
               <button
                 type="button"
                 onClick={() => setActiveMetric('earnings')}
-                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${
-                  activeMetric === 'earnings'
+                className={`min-h-[32px] px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-[0.98] ${activeMetric === 'earnings'
                     ? 'bg-amber-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
-                }`}
+                  }`}
               >
                 Payouts
               </button>
@@ -418,7 +414,7 @@ export function UserAdsAnalyticsChart({ user: propUser }: UserAdsAnalyticsChartP
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 ">
                     {pkgTitle}
                   </h3>
                   <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold border border-emerald-200/80">

@@ -64,7 +64,7 @@ export default function FaqAccordion({
       className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8"
     >
       <div className="text-center space-y-2">
-        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 ">
           {title}
         </h2>
         {subtitle && (

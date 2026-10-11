@@ -39,7 +39,7 @@ export function LeaderboardPodium({
           </div>
 
           <div className="space-y-1">
-            <h3 className="font-bold text-slate-900 text-base truncate tracking-tight">{top2.name}</h3>
+            <h3 className="font-bold text-slate-900 text-base truncate ">{top2.name}</h3>
             <span className="text-[10px] font-bold text-slate-700 bg-slate-100/90 px-2.5 py-0.5 rounded-full border border-slate-200 inline-block truncate">
               {top2.badge || 'Silver Leader'}
             </span>
@@ -76,7 +76,7 @@ export function LeaderboardPodium({
           </div>
 
           <div className="space-y-1">
-            <h3 className="font-extrabold text-slate-900 text-lg truncate tracking-tight">{top1.name}</h3>
+            <h3 className="font-extrabold text-slate-900 text-lg truncate ">{top1.name}</h3>
             <span className="text-xs font-bold text-amber-800 bg-amber-500/15 px-3 py-1 rounded-full border border-amber-500/30 inline-block truncate shadow-2xs">
               {top1.badge || 'VIP Diamond Champion'}
             </span>
@@ -113,7 +113,7 @@ export function LeaderboardPodium({
           </div>
 
           <div className="space-y-1">
-            <h3 className="font-bold text-slate-900 text-base truncate tracking-tight">{top3.name}</h3>
+            <h3 className="font-bold text-slate-900 text-base truncate ">{top3.name}</h3>
             <span className="text-[10px] font-bold text-amber-900 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20 inline-block truncate">
               {top3.badge || 'Bronze Leader'}
             </span>

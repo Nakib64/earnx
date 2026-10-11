@@ -65,7 +65,7 @@ export function CoinOverviewTab({
               <SolanaCoinBadge size={46} className="shadow-md shadow-emerald-500/20" />
               <div>
                 <div className="flex items-center space-x-2">
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 ">
                     Solana
                   </h2>
                   <span className="text-xs  font-black px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
@@ -77,7 +77,7 @@ export function CoinOverviewTab({
             </div>
 
             <div className="flex items-baseline space-x-2">
-              <span className="text-3xl sm:text-4xl font-black  tracking-tight text-slate-900 tabular-nums">
+              <span className="text-3xl sm:text-4xl font-black   text-slate-900 tabular-nums">
                 {coinBalance.toLocaleString()}
               </span>
               <span className="text-sm font-black text-emerald-700 ">SOL</span>

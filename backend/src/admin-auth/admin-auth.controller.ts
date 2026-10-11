@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Get, Patch, Query, UseGuards, Request } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AdminAuthService } from './admin-auth.service';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { AdminJwtGuard } from './guards/admin-jwt.guard';
@@ -7,6 +8,7 @@ import { AdminJwtGuard } from './guards/admin-jwt.guard';
 export class AdminAuthController {
   constructor(private readonly adminAuthService: AdminAuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000, blockDuration: 60000 } })
   @Post('login')
   async login(@Body() dto: AdminLoginDto, @Request() req: any) {
     const forwarded = req.headers['x-forwarded-for'];

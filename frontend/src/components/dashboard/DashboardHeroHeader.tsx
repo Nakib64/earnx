@@ -35,7 +35,7 @@ export function DashboardHeroHeader({
                 Welcome Back
               </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900  flex items-center gap-2">
               <span>{firstName || 'Valued Member'}</span>
               <span className="text-xl sm:text-2xl">👋</span>
             </h1>
@@ -74,7 +74,7 @@ export function DashboardHeroHeader({
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
                 <span>24H Yield:</span>
               </div>
-              <span className="text-sm font-black text-emerald-700  tabular-nums tracking-tight">
+              <span className="text-sm font-black text-emerald-700  tabular-nums ">
                 +12.48%
               </span>
               <span className="inline-flex items-center text-[10px] font-black bg-emerald-600 text-white px-1.5 py-0.2 rounded-full">

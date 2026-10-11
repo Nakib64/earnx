@@ -63,7 +63,7 @@ export function AdaptiveGlassModal({
             {/* Header */}
             <div className="px-6 py-4 border-b border-slate-100/80 flex items-center justify-between">
               <div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 ">
                   {title}
                 </h3>
                 {subtitle && (

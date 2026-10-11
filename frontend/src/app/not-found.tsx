@@ -20,7 +20,7 @@ export default function NotFound() {
 
         {/* Error Code */}
         <div>
-          <h1 className="text-8xl sm:text-9xl font-black tracking-tighter bg-gradient-to-r from-[#005A36] via-[#D4AF37] to-[#005A36] bg-clip-text text-transparent select-none">
+          <h1 className="text-8xl sm:text-9xl font-black er bg-gradient-to-r from-[#005A36] via-[#D4AF37] to-[#005A36] bg-clip-text text-transparent select-none">
             404
           </h1>
           <div className="mt-2 h-1 w-20 mx-auto rounded-full bg-gradient-to-r from-[#005A36] to-[#D4AF37]" />
@@ -32,7 +32,7 @@ export default function NotFound() {
             Page Not Found
           </h2>
           <p className="text-sm text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">
-            The page you&apos;re looking for doesn&apos;t exist or has been moved. 
+            The page you&apos;re looking for doesn&apos;t exist or has been moved.
             Let&apos;s get you back on track.
           </p>
         </div>
