@@ -105,7 +105,7 @@ export default function Navbar() {
     { href: '/products', label: 'Products', icon: ShoppingBag },
     { href: '/about', label: 'About Us', icon: Info },
     { href: '/contact', label: 'Contact', icon: Headset },
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ...(user ? [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard }] : []),
   ];
 
   const getInitials = (name?: string) => {
@@ -131,7 +131,7 @@ export default function Navbar() {
 
   const drawerContent = (
     <div
-      className={`lg:hidden fixed inset-0 z-[100] transition-all duration-300 ease-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      className={`md:hidden fixed inset-0 z-[100] transition-all duration-300 ease-out ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
     >
       {/* Soft atmospheric luminous backdrop */}
@@ -331,33 +331,23 @@ export default function Navbar() {
               </button>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               <Link
-                href="/dashboard"
+                href="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-colors"
+                className="flex items-center justify-center space-x-1.5 py-2.5 bg-white/80 hover:bg-white text-slate-800 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 shadow-xs"
               >
-                <LayoutDashboard className="w-4 h-4 text-emerald-100" />
-                <span>Dashboard</span>
+                <LogIn className="w-4 h-4 text-slate-600" />
+                <span>Login</span>
               </Link>
-              <div className="grid grid-cols-2 gap-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center space-x-1.5 py-2.5 bg-white/80 hover:bg-white text-slate-800 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 shadow-xs"
-                >
-                  <LogIn className="w-4 h-4 text-slate-600" />
-                  <span>Login</span>
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-center space-x-1.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
-                >
-                  <UserPlus className="w-4 h-4 text-slate-200" />
-                  <span>Sign Up</span>
-                </Link>
-              </div>
+              <Link
+                href="/register"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center space-x-1.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+              >
+                <UserPlus className="w-4 h-4 text-emerald-100" />
+                <span>Join Now</span>
+              </Link>
             </div>
           )}
         </div>
@@ -545,11 +535,11 @@ export default function Navbar() {
                     Login
                   </Link>
                   <Link
-                    href="/dashboard"
-                    className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all"
+                    href="/register"
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all"
                   >
-                    <LayoutDashboard className="w-3.5 h-3.5 text-emerald-100" />
-                    <span>Dashboard</span>
+                    <UserPlus className="w-3.5 h-3.5 text-emerald-100" />
+                    <span>Join Now</span>
                   </Link>
                 </div>
               )}
@@ -557,7 +547,7 @@ export default function Navbar() {
               {/* Mobile Menu Toggle Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2.5 rounded-xl text-slate-700 hover:text-slate-900 bg-white/80 hover:bg-white border border-white/90 shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+                className="md:hidden p-2.5 rounded-xl text-slate-700 hover:text-slate-900 bg-white/80 hover:bg-white border border-white/90 shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer"
                 title="Toggle Menu"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
