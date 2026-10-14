@@ -24,7 +24,7 @@ export function GlassButton({
   ...props
 }: GlassButtonProps) {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-bold transition-all duration-200 select-none cursor-pointer overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none';
+    'relative inline-flex items-center justify-center font-bold transition-all duration-200 select-none cursor-pointer overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none whitespace-nowrap';
 
   const sizeStyles = {
     sm: 'text-xs min-h-[38px] px-3.5 py-1.5 rounded-xl gap-1.5',
@@ -55,9 +55,9 @@ export function GlassButton({
       {...props}
     >
       {isLoading ? (
-        <span className="flex items-center gap-2">
+        <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
           <svg
-            className="animate-spin h-4 w-4 text-current"
+            className="animate-spin h-4 w-4 text-current shrink-0"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -79,10 +79,10 @@ export function GlassButton({
           <span>Loading...</span>
         </span>
       ) : (
-        <>
-          {icon && <span className="shrink-0">{icon}</span>}
-          <span>{children}</span>
-        </>
+        <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+          {icon && <span className="shrink-0 inline-flex items-center">{icon}</span>}
+          {children}
+        </span>
       )}
     </motion.button>
   );

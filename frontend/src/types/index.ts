@@ -204,6 +204,20 @@ export interface MarketplacePost {
   comments: MarketplaceComment[];
 }
 
+export interface MarketplaceNotification {
+  id: string;
+  user_id: string;
+  actor_id: string;
+  type: 'MARKETPLACE_LIKE' | 'MARKETPLACE_COMMENT' | 'MARKETPLACE_REPLY' | string;
+  title: string;
+  message: string;
+  entity_id?: string | null;
+  is_read: boolean;
+  created_at: string;
+  updated_at?: string;
+  actor?: UserSummary;
+}
+
 export interface User {
   id: string;
   phone?: string | null;

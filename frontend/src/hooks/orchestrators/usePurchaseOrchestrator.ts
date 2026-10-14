@@ -31,6 +31,20 @@ export interface InvestmentPlan {
   is_lifetime: boolean;
 }
 
+export interface MemberPackage {
+  id: string;
+  title: string;
+  description?: string | null;
+  original_price?: number | string | null;
+  discount_percent?: number | null;
+  price: number | string;
+  daily_ads_count: number;
+  daily_reward_amount: number | string;
+  duration_days: number;
+  is_active: boolean;
+  direct_referral_commission?: number | string | null;
+}
+
 export interface PurchaseModalState {
   isOpen: boolean;
   type: 'CONFIRM' | 'DUPLICATE_ERROR' | 'BALANCE_ERROR' | 'SUCCESS';
@@ -42,8 +56,11 @@ export interface PurchaseModalState {
 export function usePurchaseOrchestrator() {
   const { user, refreshUserProfile } = useAuth();
 
-  // Package Type & Investment Plans
+  // Package Type, Member Packages & Investment Plans
   const [packageType, setPackageType] = useState<'PREMIUM' | 'INVESTMENT'>('PREMIUM');
+  const [memberPackages, setMemberPackages] = useState<MemberPackage[]>([]);
+  const [selectedPackageId, setSelectedPackageId] = useState<string>('');
+  const [loadingPackages, setLoadingPackages] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>('');
   const [activePlans, setActivePlans] = useState<InvestmentPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(false);
@@ -75,6 +92,20 @@ export function usePurchaseOrchestrator() {
 
   const [premiumFee, setPremiumFee] = useState<number>(1000);
 
+  // Fetch active member/premium packages
+  const fetchMemberPackages = useCallback(async () => {
+    setLoadingPackages(true);
+    const res = await apiFetch<MemberPackage[]>('/premium/packages');
+    if (res.success && res.data && Array.isArray(res.data)) {
+      setMemberPackages(res.data);
+      if (res.data.length > 0) {
+        const firstId = res.data[0].id;
+        setSelectedPackageId((prev) => (prev ? prev : firstId));
+      }
+    }
+    setLoadingPackages(false);
+  }, []);
+
   // Fetch global system config fees
   const fetchSystemConfigs = useCallback(async () => {
     const res = await apiFetch<SystemConfigMap>('/system-config/public');
@@ -100,9 +131,10 @@ export function usePurchaseOrchestrator() {
   }, [selectedPlanId]);
 
   useEffect(() => {
+    fetchMemberPackages();
     fetchSystemConfigs();
     fetchInvestmentPlans();
-  }, [fetchSystemConfigs, fetchInvestmentPlans]);
+  }, [fetchMemberPackages, fetchSystemConfigs, fetchInvestmentPlans]);
 
   // Target User Search API query
   useEffect(() => {
@@ -225,7 +257,10 @@ export function usePurchaseOrchestrator() {
 
   // Price Calculation
   const getPackagePrice = (): number => {
-    if (packageType === 'PREMIUM') return premiumFee;
+    if (packageType === 'PREMIUM') {
+      const pkg = memberPackages.find((p) => p.id === selectedPackageId);
+      return pkg ? Number(pkg.price) : premiumFee;
+    }
     if (packageType === 'INVESTMENT') {
       const plan = activePlans.find((p) => p.id === selectedPlanId);
       return plan ? Number(plan.amount) : 0;
@@ -308,11 +343,16 @@ export function usePurchaseOrchestrator() {
       return;
     }
 
+    const pkgTitle =
+      packageType === 'PREMIUM'
+        ? memberPackages.find((p) => p.id === selectedPackageId)?.title || 'Premium VIP Membership'
+        : activePlans.find((p) => p.id === selectedPlanId)?.title || 'Investment Plan';
+
     setModalState({
       isOpen: true,
       type: 'CONFIRM',
       title: 'Confirm Purchase',
-      message: `You are about to purchase the ${packageType} Package for user "${
+      message: `You are about to purchase ${pkgTitle} for user "${
         selectedTargetUser.full_name || selectedTargetUser.phone
       }" (${selectedTargetUser.referral_code}) for ৳${currentPrice.toFixed(
         2
@@ -332,6 +372,7 @@ export function usePurchaseOrchestrator() {
         body: JSON.stringify({
           target_user_code: selectedTargetUser.referral_code,
           package_type: 'PREMIUM',
+          package_id: selectedPackageId || undefined,
           referrer_code: selectedReferrerUser?.referral_code || undefined,
         }),
       });
@@ -393,6 +434,9 @@ export function usePurchaseOrchestrator() {
   return {
     state: {
       packageType,
+      memberPackages,
+      selectedPackageId,
+      loadingPackages,
       selectedPlanId,
       activePlans,
       loadingPlans,
@@ -414,9 +458,12 @@ export function usePurchaseOrchestrator() {
       user,
       currentPrice,
       payerBalance,
+      selectedMemberPackage: memberPackages.find((p) => p.id === selectedPackageId) || null,
+      selectedInvestmentPlan: activePlans.find((p) => p.id === selectedPlanId) || null,
     },
     actions: {
       setPackageType,
+      setSelectedPackageId,
       setSelectedPlanId,
       setTargetQuery,
       setSelectedTargetUser,

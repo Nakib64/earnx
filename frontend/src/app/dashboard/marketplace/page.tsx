@@ -89,15 +89,17 @@ export default function MarketplacePage() {
           </div>
         </div>
 
-        <GlassButton
-          variant="secondary"
-          size="sm"
-          onClick={() => fetchPosts()}
-          className="p-2.5 h-auto min-h-0 rounded-xl"
-          title="Refresh Feed"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </GlassButton>
+        <div className="flex items-center space-x-2">
+          <GlassButton
+            variant="secondary"
+            size="sm"
+            onClick={() => fetchPosts()}
+            className="p-2.5 h-auto min-h-0 rounded-xl"
+            title="Refresh Feed"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </GlassButton>
+        </div>
       </GlassCard>
 
       {alertMsg && (
@@ -119,8 +121,10 @@ export default function MarketplacePage() {
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
           }`}
         >
+
+          
           <Globe className={`w-4 h-4 ${feedTab === 'all' ? 'text-[#009F6B]' : 'text-slate-400'}`} />
-          <span>All Community Posts</span>
+          <span>Community Posts</span>
         </button>
 
         <button

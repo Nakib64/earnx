@@ -27,6 +27,7 @@ jobs:
             npm install
             npx prisma generate
             npx prisma db push
+            node prisma/seed-live-packages.js
             npm run build
             pm2 restart earnx-backend
 

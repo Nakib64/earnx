@@ -9,6 +9,7 @@ import { Toaster } from 'sonner';
 import { AmbientCanvas } from '../components/design-system/AmbientCanvas';
 
 import { CartDrawer, LoginPromptModal } from '../components/ecommerce';
+import FloatingWhatsApp from '../components/FloatingWhatsApp';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -52,6 +53,7 @@ export default function RootLayout({
           <BottomNav />
           <CartDrawer />
           <LoginPromptModal />
+          <FloatingWhatsApp />
         </Providers>
       </body>
     </html>

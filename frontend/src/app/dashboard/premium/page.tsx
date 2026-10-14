@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { RefreshCw, HelpCircle, X, Check } from 'lucide-react';
+import { RefreshCw, HelpCircle, X, Check, Loader2 } from 'lucide-react';
 import { AlertBanner } from '../../../components/common/AlertBanner';
 import { usePremiumOrchestrator } from '../../../hooks/orchestrators';
 import { useDesignSystem } from '../../../context/DesignSystemContext';
@@ -27,6 +27,7 @@ export default function PremiumDashboardPage() {
       adCountdown,
       adCompleted,
       recordingAd,
+      adRewardEarned,
       claiming,
       selectedPkgForModal,
       subscribeError,
@@ -107,7 +108,7 @@ export default function PremiumDashboardPage() {
 
             <button
               type="button"
-              onClick={fetchPackagesAndTask}
+              onClick={() => fetchPackagesAndTask({ forceRefresh: true, skipCache: true })}
               disabled={loading}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[8px] bg-white border border-[#E5EBE7] text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
               title="Refresh package data"
@@ -159,10 +160,30 @@ export default function PremiumDashboardPage() {
           adCompleted={adCompleted}
           recordingAd={recordingAd}
           rewardPerAd={dailyTask?.reward_per_ad}
+          rewardEarned={adRewardEarned}
+          adsWatched={dailyTask?.ads_watched}
+          adsRequired={dailyTask?.daily_ads_required}
           onFinishAd={handleFinishAd}
           onCompleteAd={handleCompleteVideoAd}
           onCancelAd={handleCancelVideoAd}
         />
+
+        {/* Full-Screen Blocking Loading State (Safety fallback if modal closed prematurely) */}
+        {recordingAd && !adModalOpen && (
+          <div className="fixed inset-0 z-[9999999] flex items-center justify-center bg-slate-950/90 backdrop-blur-2xl animate-fade-in p-4 select-none pointer-events-auto">
+            <div className="relative z-10 w-full max-w-sm bg-slate-900/90 backdrop-blur-2xl text-white p-8 rounded-3xl border border-white/10 shadow-2xl flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center animate-pulse">
+                <Loader2 className="w-8 h-8 text-[#009F6B] animate-spin" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-xl font-bold text-white tracking-tight">Verifying Ad View...</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Crediting reward to your wallet and updating progress...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Restrained Reward Rules Modal */}
         {showRulesModal && (

@@ -28,6 +28,9 @@ interface PremiumAdModalProps {
   adCompleted: boolean;
   recordingAd: boolean;
   rewardPerAd?: number;
+  rewardEarned?: number;
+  adsWatched?: number;
+  adsRequired?: number;
   onFinishAd?: () => void;
   onCompleteAd?: () => void;
   onCancelAd?: () => void;
@@ -38,6 +41,9 @@ export function PremiumAdModal({
   adCompleted,
   recordingAd,
   rewardPerAd,
+  rewardEarned,
+  adsWatched,
+  adsRequired,
   onFinishAd,
   onCompleteAd,
   onCancelAd,
@@ -59,11 +65,28 @@ export function PremiumAdModal({
   const videoRef = useRef<HTMLVideoElement>(null);
   const hasRewardedRef = useRef(false);
 
+  // Immediately pause video playback whenever reward verification starts
+  useEffect(() => {
+    if (recordingAd || adCompleted) {
+      if (videoRef.current) {
+        try {
+          videoRef.current.pause();
+        } catch {}
+      }
+    }
+  }, [recordingAd, adCompleted]);
+
   // Trigger reward completion once per ad session (when ad ends)
   const grantReward = useCallback(() => {
     if (hasRewardedRef.current) return;
     hasRewardedRef.current = true;
     setCanClaim(true);
+
+    if (videoRef.current) {
+      try {
+        videoRef.current.pause();
+      } catch {}
+    }
 
     if (onCompleteAd) {
       onCompleteAd();
@@ -313,40 +336,109 @@ export function PremiumAdModal({
         </>
       )}
 
-      {/* ── 4. REWARD CLAIM VERIFICATION OVERLAY ── */}
-      {(recordingAd || adCompleted) && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900/95 text-white p-8 rounded-2xl border border-slate-700/80 shadow-2xl flex flex-col items-center text-center space-y-4 max-w-sm mx-4">
-            {recordingAd ? (
-              <>
-                <Loader2 className="w-10 h-10 text-[#009F6B] animate-spin" />
-                <div className="space-y-1">
-                  <p className="text-base font-bold">Verifying Ad View</p>
-                  <p className="text-xs text-slate-400">
-                    Crediting reward to your wallet balance...
-                  </p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-base font-bold text-emerald-400">
-                    Reward Credited!
-                  </p>
-                  <p className="text-xs text-slate-300">
-                    {rewardPerAd
-                      ? `৳${rewardPerAd.toFixed(2)} added to your wallet.`
-                      : 'Daily task progress updated.'}
-                  </p>
-                </div>
-              </>
-            )}
+      {/* ── 4. REWARD CLAIM VERIFICATION OVERLAY (SCREEN-BLOCKING LOADING & CELEBRATION) ── */}
+      {(recordingAd || adCompleted) && (() => {
+        const displayReward = (rewardEarned !== undefined && rewardEarned > 0) ? rewardEarned : (rewardPerAd || 0);
+        const progressPercent = (adsRequired && adsRequired > 0 && adsWatched !== undefined)
+          ? Math.min(100, Math.round((adsWatched / adsRequired) * 100))
+          : null;
+
+        return (
+          <div className="fixed inset-0 z-[9999999] flex items-center justify-center bg-slate-950/90 backdrop-blur-2xl animate-fade-in p-4 select-none pointer-events-auto">
+            {/* Ambient luminous glow halos */}
+            <div className="pointer-events-none absolute w-[400px] h-[400px] rounded-full bg-emerald-500/15 blur-3xl -top-24 -left-24 animate-pulse" />
+            <div className="pointer-events-none absolute w-[400px] h-[400px] rounded-full bg-cyan-500/10 blur-3xl -bottom-24 -right-24 animate-pulse" />
+
+            {/* Liquid Glassmorphic Modal Card */}
+            <div className="relative z-10 w-full max-w-sm sm:max-w-md bg-slate-900/90 backdrop-blur-2xl text-white p-7 sm:p-9 rounded-[28px] sm:rounded-[32px] border border-white/10 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-col items-center text-center space-y-6 overflow-hidden">
+              {recordingAd ? (
+                <>
+                  {/* Dual-Ring Emerald Loader */}
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center animate-pulse shadow-[0_0_30px_rgba(0,159,107,0.25)]" />
+                    <Loader2 className="w-10 h-10 text-[#009F6B] animate-spin absolute" />
+                    <Sparkles className="w-4 h-4 text-emerald-300 absolute -top-1 -right-1 animate-ping" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[#05DF96] text-[11px] font-bold uppercase tracking-wider">
+                      <span className="w-2 h-2 rounded-full bg-[#05DF96] animate-pulse" />
+                      <span>Synchronizing Ledger</span>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                      Verifying Ad View...
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-xs mx-auto">
+                      Recording your ad completion and crediting cash reward directly to your wallet balance.
+                    </p>
+                  </div>
+
+                  {/* Animated Liquid Shimmer Loading Bar */}
+                  <div className="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-white/5 relative">
+                    <div
+                      className="h-full bg-gradient-to-r from-emerald-500 via-[#05DF96] to-teal-400 rounded-full"
+                      style={{
+                        width: '100%',
+                        backgroundSize: '200% 100%',
+                        animation: 'waterFlow 1.8s ease infinite',
+                      }}
+                    />
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    Please hold on, screen is updating...
+                  </span>
+                </>
+              ) : (
+                <>
+                  {/* Celebratory Checkmark */}
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/25 to-teal-500/10 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_35px_rgba(16,185,129,0.4)] animate-in zoom-in-75 duration-300">
+                      <CheckCircle2 className="w-10 h-10 text-emerald-400 animate-in zoom-in-50 duration-300" />
+                    </div>
+                    <Sparkles className="w-5 h-5 text-amber-300 absolute -top-2 -right-2 animate-bounce" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-[11px] font-bold uppercase tracking-wider">
+                      <span>Cash Credited</span>
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 tracking-tight">
+                      Reward Credited!
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-300 font-normal">
+                      ৳{displayReward.toFixed(2)} added to your wallet balance.
+                    </p>
+                  </div>
+
+                  {/* Updated Task Progress Pill */}
+                  {adsWatched !== undefined && adsRequired !== undefined && (
+                    <div className="w-full bg-slate-800/60 rounded-2xl p-3.5 border border-white/10 space-y-2">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                        <span className="text-slate-300">Daily Task Progress</span>
+                        <span className="text-emerald-400 font-bold">
+                          {adsWatched} / {adsRequired} Ads
+                        </span>
+                      </div>
+                      {progressPercent !== null && (
+                        <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-white/5">
+                          <div
+                            className="h-full bg-gradient-to-r from-emerald-500 to-[#009F6B] rounded-full transition-all duration-500"
+                            style={{ width: `${Math.max(3, progressPercent)}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="text-[11px] font-medium text-emerald-400 flex items-center justify-center gap-1.5 animate-pulse">
+                    <span>Updating dashboard now...</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>,
     document.body
   );

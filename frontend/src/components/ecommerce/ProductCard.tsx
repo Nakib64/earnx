@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ShoppingBag, Zap, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { Product } from '../../types';
 import { useCart } from '../../context/CartContext';
@@ -11,6 +12,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetails }) => {
+  const router = useRouter();
   const { addToCart, buyNow } = useCart();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
@@ -29,8 +31,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetails
   };
 
   const handleCardClick = () => {
+    router.push(`/products/${product.id}`);
+  };
+
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (onOpenDetails) {
       onOpenDetails(product);
+    } else {
+      router.push(`/products/${product.id}`);
     }
   };
 
@@ -60,13 +69,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetails
             {product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock'}
           </span>
 
-          {/* Quick View Floating Hint */}
-          <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 text-slate-900 text-xs font-bold shadow-md">
-              <Eye className="w-3.5 h-3.5 text-[#009F6B]" />
-              Quick View
-            </span>
-          </div>
+          {/* Quick View Floating Button */}
+          {onOpenDetails && (
+            <div className="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+              <button
+                type="button"
+                onClick={handleQuickView}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-900 text-xs font-bold shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Eye className="w-3.5 h-3.5 text-[#009F6B]" />
+                Quick View
+              </button>
+            </div>
+          )}
 
           {/* Multi-image navigation arrows (if > 1 image) */}
           {images.length > 1 && (

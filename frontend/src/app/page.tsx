@@ -8,49 +8,41 @@ import LatestProductsSection from '../components/landing/LatestProductsSection';
 import MetricsStrip from '../components/landing/MetricsStrip';
 import HowItWorksSection from '../components/landing/HowItWorksSection';
 import AgencyAndInvestmentSection from '../components/landing/AgencyAndInvestmentSection';
-import MarketplaceSection from '../components/landing/MarketplaceSection';
-import TeamBusinessSection from '../components/landing/TeamBusinessSection';
 import WhyEarnXSection from '../components/landing/WhyEarnXSection';
 import FinalCtaSection from '../components/landing/FinalCtaSection';
 import Footer from '../components/Footer';
 
 export default function Homepage() {
   return (
-    <div className="bg-white text-slate-900 flex flex-col min-h-screen">
+    <div className="bg-[#FBFDFD] text-slate-800 antialiased selection:bg-emerald-500 selection:text-white flex flex-col min-h-screen">
       {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. WHAT IS EARNX CAPITAL? */}
+      {/* 2. CORE ECOSYSTEM ARCHITECTURE */}
       <AboutSection />
 
-      {/* 3. MULTIPLE WAYS TO EARN (3 Tinted Cards) */}
+      {/* 3. TAILORED EARNING PATHWAYS */}
       <WaysToEarnSection />
 
-      {/* 4. LATEST PRODUCTS SHOWCASE (10 Latest Items) */}
+      {/* 4. OFFICIAL EARNX SHOP / MARKETPLACE */}
       <LatestProductsSection />
 
-      {/* 5. METRICS / STATS STRIP */}
+      {/* 5. MOBILE BANKING PAYOUTS */}
       <MetricsStrip />
 
-      {/* 5. HOW EARNX CAPITAL WORKS? (4 Horizontal Connected Steps) */}
+      {/* 6. HOW EARNX CAPITAL WORKS (4-STEP PROGRESSION) */}
       <HowItWorksSection />
 
-      {/* 6. AGENCY SERVICES & INVESTMENT SPLIT SECTION */}
+      {/* 7. ENTERPRISE AGENCY & STRUCTURED INVESTMENTS */}
       <AgencyAndInvestmentSection />
 
-      {/* 7. MARKETPLACE (Shop & Sell Ecosystem) */}
-      <MarketplaceSection />
-
-      {/* 8. TEAM BUSINESS (Collaborative Leadership) */}
-      <TeamBusinessSection />
-
-      {/* 9. WHY CHOOSE EARNX? (5 Value Proposition Cards) */}
+      {/* 8. DISTINCT VALUE PROPOSITIONS (WHY EARNX) */}
       <WhyEarnXSection />
 
-      {/* 10. FINAL CTA (Dark Green Banner with Gold Action) */}
+      {/* 9. FINAL CALL TO ACTION BANNER */}
       <FinalCtaSection />
 
-      {/* 11. CLEAN WHITE FOOTER */}
+      {/* 10. SITE FOOTER */}
       <Footer />
     </div>
   );

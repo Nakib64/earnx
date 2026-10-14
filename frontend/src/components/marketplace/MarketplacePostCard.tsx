@@ -53,7 +53,10 @@ export function MarketplacePostCard({
   const commentsCount = post.comments?.length || 0;
 
   return (
-    <GlassCard className="specular-rim overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <GlassCard
+      id={`post-${post.id}`}
+      className="specular-rim overflow-hidden transition-all duration-300 hover:shadow-lg scroll-mt-24"
+    >
       {/* Post Header */}
       <div className="p-4 sm:p-5 flex items-center justify-between">
         <div className="flex items-center space-x-3">

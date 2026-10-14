@@ -16,6 +16,10 @@ export class CreatePurchaseDto {
 
   @IsString()
   @IsOptional()
+  package_id?: string;
+
+  @IsString()
+  @IsOptional()
   investment_plan_id?: string;
 
   @IsString()

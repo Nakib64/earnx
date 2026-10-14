@@ -20,6 +20,9 @@ export default function PurchasePage() {
   const {
     state: {
       packageType,
+      memberPackages,
+      selectedPackageId,
+      loadingPackages,
       selectedPlanId,
       activePlans,
       loadingPlans,
@@ -40,9 +43,12 @@ export default function PurchasePage() {
     computed: {
       currentPrice,
       payerBalance,
+      selectedMemberPackage,
+      selectedInvestmentPlan,
     },
     actions: {
       setPackageType,
+      setSelectedPackageId,
       setSelectedPlanId,
       setTargetQuery,
       setSelectedTargetUser,
@@ -115,6 +121,11 @@ export default function PurchasePage() {
           <PurchasePackageSection
             packageType={packageType}
             setPackageType={setPackageType}
+            memberPackages={memberPackages}
+            selectedPackageId={selectedPackageId}
+            setSelectedPackageId={setSelectedPackageId}
+            loadingPackages={loadingPackages}
+            selectedMemberPackage={selectedMemberPackage}
             premiumFee={premiumFee}
             selectedPlanId={selectedPlanId}
             setSelectedPlanId={setSelectedPlanId}

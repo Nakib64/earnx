@@ -3,149 +3,127 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  Megaphone,
-  Palette,
-  Code2,
-  Search,
-  Share2,
-  Briefcase,
-  ArrowRight,
-  ShieldCheck,
-  Coins,
-  Lock,
-  Building2,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
-const agencyItems = [
-  { label: 'Digital Marketing', icon: Megaphone },
-  { label: 'Branding & Design', icon: Palette },
-  { label: 'Web Development', icon: Code2 },
-  { label: 'SEO & Content', icon: Search },
-  { label: 'Social Media Management', icon: Share2 },
-  { label: 'Business Solutions', icon: Briefcase },
+const agencyServices = [
+  'Digital Marketing',
+  'Branding & Design',
+  'Web Development',
+  'SEO & Content',
+  'Social Media Ops',
+  'Business Solutions',
+];
+
+const investmentPerks = [
+  { id: '01', title: 'Formal Agreement & Signing with Official Notary' },
+  { id: '02', title: 'Clear Schedules & Monthly Disbursed Returns' },
+  { id: '03', title: 'Audited Capital Security with Asset Allocations' },
 ];
 
 export default function AgencyAndInvestmentSection() {
   return (
-    <section className="py-16 sm:py-24 bg-white text-slate-900 relative">
+    <section
+      className="py-20 bg-slate-50/70 border-t border-slate-200/70"
+      data-purpose="agency-services-dual"
+      id="services"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Card 1: Our Agency Services */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+          {/* Box 1: Agency Services */}
           <motion.div
-            id="agency"
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#f8fbf9] to-[#edf6f1] border border-slate-200/90 p-8 sm:p-10 flex flex-col justify-between hover:shadow-xl hover:border-emerald-300 transition-all duration-300 group"
+            className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
           >
-            {/* Top-Right Watermark Icon */}
-            <Briefcase className="absolute -top-4 -right-4 w-32 h-32 text-emerald-900/[0.05] group-hover:opacity-15 group-hover:scale-105 transition-all pointer-events-none" />
-
-            <div className="relative z-10">
-
-
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950  mb-2">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-4">
+                <span>ENTERPRISE AGENCY UNIT</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                 Our Agency Services
-              </h2>
-              <p className="text-sm text-slate-600 font-medium mb-8">
-                We provide professional digital &amp; business solutions to help your brand grow.
+              </h3>
+              <p className="text-slate-600 text-sm mt-3 leading-relaxed">
+                We provide high-impact creative, technology, and marketing services to scale brands, products, and online ventures.
               </p>
 
-              {/* 6 Grid Service Badges with Transparent Icons */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 mb-8">
-                {agencyItems.map((item, idx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-2xl bg-white/80 backdrop-blur-xs border border-slate-200/80 flex flex-col items-center text-center group/item hover:border-emerald-500/50 hover:shadow-sm transition-all"
-                    >
-                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 flex items-center justify-center mb-2.5 group-hover/item:bg-[#01281a] group-hover/item:text-white transition-colors">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-xs font-bold text-slate-800 leading-snug">
-                        {item.label}
-                      </span>
-                    </div>
-                  );
-                })}
+              {/* Services Chips Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-8">
+                {agencyServices.map((service, idx) => (
+                  <motion.div
+                    key={service}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.35, delay: 0.1 + idx * 0.05 }}
+                    whileHover={{ scale: 1.04, y: -2, transition: { duration: 0.15 } }}
+                    className="p-3 bg-slate-50 rounded-xl text-center border border-slate-100 hover:border-slate-300 hover:bg-slate-100/70 transition-colors cursor-default"
+                  >
+                    <p className="text-xs font-bold text-slate-800">{service}</p>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
-            <div className="relative z-10">
+            <div className="pt-8">
               <Link
-                href="/contact"
-                className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 font-extrabold text-sm shadow-xs transition-all group"
+                href="/services"
+                className="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 group transition-colors"
               >
                 <span>Explore All Services</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </motion.div>
 
-          {/* Card 2: Investment Opportunities */}
+          {/* Box 2: Investment Opportunities Overview */}
           <motion.div
-            id="investment"
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.6 }}
-            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#fbf9f4] to-[#f4eee2] border border-amber-200/80 p-8 sm:p-10 flex flex-col justify-between hover:shadow-xl hover:border-amber-300 transition-all duration-300 group"
+            className="bg-white rounded-3xl p-8 sm:p-10 border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
           >
-            {/* Top-Right Watermark Icon */}
-            <ShieldCheck className="absolute -top-4 -right-4 w-32 h-32 text-amber-900/[0.05] group-hover:opacity-15 group-hover:scale-105 transition-all pointer-events-none" />
-
-            <div className="relative z-10">
-
-
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950  mb-2">
-                Investment Opportunities
-              </h2>
-
-              <p className="text-sm text-slate-600 font-medium leading-relaxed mb-6">
-                Explore structured investment opportunities with clear terms and a formal agreement process and earn attractive returns.
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-4">
+                <span>CAPITAL GROWTH PROGRAMS</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Structured Investments
+              </h3>
+              <p className="text-slate-600 text-sm mt-3 leading-relaxed">
+                Explore structured investment programs with predictable monthly returns, formal legal agreements, and complete institutional transparency.
               </p>
 
-              {/* Visual Box: Formal Security & Capital Assurance */}
-              <div className="p-6 rounded-2xl bg-white/80 backdrop-blur-xs border border-amber-200/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-                <div className="space-y-2.5">
-                  <div className="flex items-center space-x-2.5 text-xs font-bold text-slate-800">
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-700 flex items-center justify-center shrink-0">
-                      <ShieldCheck className="w-3.5 h-3.5" />
+              {/* Investment Perks */}
+              <div className="space-y-4 mt-8">
+                {investmentPerks.map((perk, idx) => (
+                  <motion.div
+                    key={perk.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: 0.15 + idx * 0.1 }}
+                    whileHover={{ x: 4, transition: { duration: 0.2 } }}
+                    className="flex items-center gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100/60 transition-colors"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">
+                      {perk.id}
                     </div>
-                    <span>Formal Agreement &amp; Bilateral Signing</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 text-xs font-bold text-slate-800">
-                    <div className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-700 flex items-center justify-center shrink-0">
-                      <Coins className="w-3.5 h-3.5" />
-                    </div>
-                    <span>Clear Timelines &amp; Scheduled Disbursements</span>
-                  </div>
-                  <div className="flex items-center space-x-2.5 text-xs font-bold text-slate-800">
-                    <div className="w-6 h-6 rounded-lg bg-blue-500/15 text-blue-700 flex items-center justify-center shrink-0">
-                      <Lock className="w-3.5 h-3.5" />
-                    </div>
-                    <span>Regulated Institutional Governance</span>
-                  </div>
-                </div>
-
-                <div className="w-20 h-20 rounded-2xl bg-[#01281a] text-white flex flex-col items-center justify-center text-center shadow-md border border-[#d4af37]/40 shrink-0">
-                  <Building2 className="w-7 h-7 text-[#f3ba2f] mb-1" />
-                  <span className="text-[9px] font-black uppercase tracking-wider text-amber-200">Capital</span>
-                </div>
+                    <p className="text-xs font-bold text-slate-800">{perk.title}</p>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
-            <div className="relative z-10">
+            <div className="pt-8">
               <Link
-                href="/dashboard/investments"
-                className="inline-flex items-center space-x-2 px-6 py-3.5 rounded-xl bg-[#01281a] hover:bg-[#023c28] text-white font-extrabold text-sm shadow-md transition-all group"
+                href="/investments"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 hover:shadow-lg hover:shadow-emerald-600/30 transition-all transform hover:-translate-y-0.5"
               >
-                <span>Explore Investment</span>
-                <ArrowRight className="w-4 h-4 text-[#f3ba2f] group-hover:translate-x-1 transition-transform" />
+                <span>Explore Investments</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </motion.div>

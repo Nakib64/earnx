@@ -58,4 +58,19 @@ export class MarketplaceService {
   async deleteComment(userId: string, commentId: string, isAdmin = false) {
     return this.interactionSubService.deleteComment(userId, commentId, isAdmin);
   }
+
+  // ==========================================
+  // NOTIFICATIONS
+  // ==========================================
+  async getNotifications(userId: string, limit = 30) {
+    return this.interactionSubService.getNotifications(userId, limit);
+  }
+
+  async markAllNotificationsRead(userId: string) {
+    return this.interactionSubService.markAllNotificationsRead(userId);
+  }
+
+  async markNotificationRead(userId: string, notificationId: string) {
+    return this.interactionSubService.markNotificationRead(userId, notificationId);
+  }
 }

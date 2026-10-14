@@ -62,6 +62,42 @@ export class MarketplaceInteractionSubService {
       where: { post_id: postId },
     });
 
+    // Notification handling for Like / Unlike
+    if (isLiked) {
+      if (post.user_id !== userId) {
+        try {
+          const actor = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { full_name: true, phone: true },
+          });
+          const actorName = actor?.full_name || actor?.phone || 'Someone';
+
+          await this.prisma.notification.create({
+            data: {
+              user_id: post.user_id,
+              actor_id: userId,
+              type: 'MARKETPLACE_LIKE',
+              title: 'New Like',
+              message: `${actorName} liked your post.`,
+              entity_id: postId,
+            },
+          });
+        } catch {}
+      }
+    } else {
+      // Clean up previous like notification if unliked
+      try {
+        await this.prisma.notification.deleteMany({
+          where: {
+            user_id: post.user_id,
+            actor_id: userId,
+            type: 'MARKETPLACE_LIKE',
+            entity_id: postId,
+          },
+        });
+      } catch {}
+    }
+
     return {
       success: true,
       is_liked: isLiked,
@@ -119,6 +155,61 @@ export class MarketplaceInteractionSubService {
       },
     });
 
+    // Notification handling for Comments and Replies
+    try {
+      const actorName = comment.user?.full_name || comment.user?.phone || 'Someone';
+      const snippet = cleanContent.length > 55 ? `${cleanContent.slice(0, 52)}...` : cleanContent;
+
+      if (data.parent_id) {
+        // 1. Reply: Notify author of the parent comment
+        const parentComment = await this.prisma.marketplaceComment.findUnique({
+          where: { id: data.parent_id },
+          select: { user_id: true },
+        });
+
+        if (parentComment && parentComment.user_id !== userId) {
+          await this.prisma.notification.create({
+            data: {
+              user_id: parentComment.user_id,
+              actor_id: userId,
+              type: 'MARKETPLACE_REPLY',
+              title: 'New Reply',
+              message: `${actorName} replied: "${snippet}"`,
+              entity_id: postId,
+            },
+          });
+        }
+
+        // 2. Also notify the post author if different from commenter and parent author
+        if (post.user_id !== userId && post.user_id !== parentComment?.user_id) {
+          await this.prisma.notification.create({
+            data: {
+              user_id: post.user_id,
+              actor_id: userId,
+              type: 'MARKETPLACE_COMMENT',
+              title: 'New Comment',
+              message: `${actorName} commented on your post: "${snippet}"`,
+              entity_id: postId,
+            },
+          });
+        }
+      } else {
+        // Top-level comment: Notify the post author
+        if (post.user_id !== userId) {
+          await this.prisma.notification.create({
+            data: {
+              user_id: post.user_id,
+              actor_id: userId,
+              type: 'MARKETPLACE_COMMENT',
+              title: 'New Comment',
+              message: `${actorName} commented on your post: "${snippet}"`,
+              entity_id: postId,
+            },
+          });
+        }
+      }
+    } catch {}
+
     return {
       success: true,
       message: 'Comment added successfully',
@@ -147,5 +238,72 @@ export class MarketplaceInteractionSubService {
     }
 
     return { success: true, message: 'Comment deleted successfully' };
+  }
+
+  // ==========================================
+  // NOTIFICATIONS
+  // ==========================================
+
+  /**
+   * Get user's notifications
+   */
+  async getNotifications(userId: string, limit = 30) {
+    const [notifications, unreadCount] = await Promise.all([
+      this.prisma.notification.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+        include: {
+          actor: {
+            select: {
+              id: true,
+              full_name: true,
+              phone: true,
+              avatar_url: true,
+              is_premium: true,
+            },
+          },
+        },
+      }),
+      this.prisma.notification.count({
+        where: { user_id: userId, is_read: false },
+      }),
+    ]);
+
+    return {
+      success: true,
+      notifications,
+      unread_count: unreadCount,
+    };
+  }
+
+  /**
+   * Mark all notifications as read for a user
+   */
+  async markAllNotificationsRead(userId: string) {
+    await this.prisma.notification.updateMany({
+      where: { user_id: userId, is_read: false },
+      data: { is_read: true },
+    });
+
+    return {
+      success: true,
+      message: 'All notifications marked as read',
+    };
+  }
+
+  /**
+   * Mark a single notification as read
+   */
+  async markNotificationRead(userId: string, notificationId: string) {
+    await this.prisma.notification.updateMany({
+      where: { id: notificationId, user_id: userId },
+      data: { is_read: true },
+    });
+
+    return {
+      success: true,
+      message: 'Notification marked as read',
+    };
   }
 }

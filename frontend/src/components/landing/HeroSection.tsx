@@ -3,171 +3,179 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import {
-  ArrowRight,
-  ShoppingBag,
-  TrendingUp,
-  Users,
-  ShieldCheck,
-  CheckCircle2,
-  Sparkles,
-  BarChart3,
-  Layers,
-  Building2,
-  Globe,
-} from 'lucide-react';
+import { ArrowRight, ShoppingBag, CheckCircle2, ShieldCheck, Award } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden min-h-[88vh] flex items-center bg-[#011a11] text-white">
-      {/* Background Banner Image with Premium Gradient Overlays */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/hero-banner-ecosystem.jpg"
-          alt="EarnX Capital Ecosystem"
-          className="w-full h-full object-cover object-center opacity-45 scale-105 transform duration-1000 ease-out"
-        />
-        {/* Deep Emerald & Vignette Overlays for Crisp Text Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#011f15] via-[#01281a]/90 to-[#00170f]/75" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#011a11] via-transparent to-[#011f15]/80" />
-      </div>
+    <section className="relative pt-12 pb-20 overflow-hidden grid-bg-pattern border-b border-slate-200/60" data-purpose="hero-section">
+      {/* Ambient Gradient Glows */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 z-10 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left Column: Copy & Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: 'easeOut' }}
-            className="order-2 lg:order-1 lg:col-span-7 space-y-6 text-left"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Top Pill Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-center mb-6"
+        >
+          <div className="md:inline-flex hidden items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs sm:text-sm font-semibold shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>VERIFIED DIGITAL BUSINESS &amp; EARNING ECOSYSTEM</span>
+          </div>
+        </motion.div>
+
+        {/* Main Headline */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-center max-w-4xl mx-auto space-y-4"
+        >
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+            EARNX CAPITAL<span className="text-emerald-600">.</span>
+          </h1>
+
+          <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+            <span className="text-slate-800">One Platform. </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500">
+              Multiple Opportunities!
+            </span>
+          </p>
+
+          <p className="text-slate-600 text-base sm:text-lg max-w-2xl mx-auto font-normal leading-relaxed pt-2">
+            A digital business ecosystem where marketplace commerce, performance marketing, team-based business, and structured investment opportunities come together.
+          </p>
+        </motion.div>
+
+        {/* Call to Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-8 flex flex-wrap items-center justify-center gap-4"
+        >
+          <Link
+            href="/register"
+            className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/30 transition-all transform hover:-translate-y-0.5 active:scale-95"
           >
-            {/* Main Headline */}
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black  text-white leading-[1.08]">
-              EarnX Capital{' '}
-              <span className="block text-2xl text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-[#f3ba2f] to-amber-400 drop-shadow-sm">
-                One Platform. Multiple Opportunities.
-              </span>
-            </h1>
+            <span>JOIN EARNX NOW</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
+          </Link>
 
-            {/* Description */}
-            <p className="text-base sm:text-lg text-slate-200 font-medium max-w-xl leading-relaxed">
-              A digital business ecosystem where marketplace, sales &amp; marketing, team-based business and investment opportunities come together.
-            </p>
-
-            {/* Action Buttons */}
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center space-x-2 px-8 py-4 rounded-xl bg-gradient-to-r from-[#f3ba2f] via-[#e5c158] to-[#d4af37] hover:brightness-110 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-amber-500/20 transition-all duration-200 group"
-              >
-                <span>Join EarnX Now</span>
-                <ArrowRight className="w-4 h-4 text-slate-950 group-hover:translate-x-1 transition-transform" />
-              </Link>
-
-              <Link
-                href="/#marketplace"
-                className="inline-flex items-center justify-center space-x-2 px-8 py-4 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-amber-300/60 font-bold text-sm sm:text-base backdrop-blur-md transition-all duration-200 group"
-              >
-                <ShoppingBag className="w-4 h-4 text-amber-300" />
-                <span>Explore Marketplace</span>
-                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:translate-x-1 transition-all" />
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Right Column: High-Tech Ecosystem Holographic Glass Card (First on Mobile) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
-            className="order-1 lg:order-2 lg:col-span-5 relative"
+          <Link
+            href="/products"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-base border border-slate-300 shadow-sm transition-all hover:border-slate-400 active:scale-95"
           >
-            <div className="relative p-7 sm:p-8 rounded-3xl bg-white/[0.07] border border-white/20 backdrop-blur-xl shadow-2xl shadow-black/40 overflow-hidden">
-              {/* Subtle top watermark */}
-              <Building2 className="absolute -top-6 -right-6 w-36 h-36 text-white/[0.04] pointer-events-none" />
+            <ShoppingBag className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>EXPLORE MARKETPLACE</span>
+          </Link>
 
-              {/* Card Header */}
-              <div className="flex items-center justify-between pb-5 border-b border-white/10">
-                <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
-                    <Layers className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-extrabold text-white text-base">EarnX Unified Core</h3>
-                    <p className="text-xs text-slate-300 font-medium">Live Business Operations</p>
-                  </div>
-                </div>
-                <span className="text-[11px] font-bold px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-400/30">
-                  Active
+          <Link
+            href="/contact"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-base shadow-md transition-all active:scale-95"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span>NEED HELP? TALK TO US</span>
+          </Link>
+        </motion.div>
+
+        {/* Trust Badges Line */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm font-semibold text-slate-500"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>Instant Mobile Payouts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>100% Escrow Protection</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-emerald-600 shrink-0" />
+            <span>Official VIP Membership</span>
+          </div>
+        </motion.div>
+
+        {/* Hero Glassmorphic Interactive Dashboard Preview Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 35, scale: 0.98 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-12 max-w-4xl mx-auto rounded-2xl p-1 bg-gradient-to-b from-emerald-300 via-slate-200 to-transparent shadow-2xl"
+        >
+          <div className="bg-white rounded-[14px] p-6 sm:p-8 border border-slate-100">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+              <div>
+                <span className="text-xs uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md">
+                  Live Account Preview
                 </span>
+                <h3 className="text-lg font-bold text-slate-800 mt-2">
+                  Unified Multi-Stream Balance
+                </h3>
               </div>
-
-              {/* 4 Ecosystem Pillars Live Pulse */}
-              <div className="space-y-3.5 py-6">
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-amber-400/40 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-                      <ShoppingBag className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">Marketplace Engine</div>
-                      <div className="text-[11px] text-slate-400">Products &amp; Verified Vendors</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-amber-300">E-Commerce</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-amber-400/40 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">Sales &amp; Marketing</div>
-                      <div className="text-[11px] text-slate-400">Affiliate Commission Routing</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-emerald-300">Instant</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-amber-400/40 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center">
-                      <Users className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">Team-Based Network</div>
-                      <div className="text-[11px] text-slate-400">Mentorship &amp; Overrides</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-blue-300">Collaborative</span>
-                </div>
-
-                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/[0.05] border border-white/10 hover:border-amber-400/40 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-xs font-bold text-white">Structured Investment</div>
-                      <div className="text-[11px] text-slate-400">Formal Legal Agreements</div>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-amber-300">Protected</span>
-                </div>
-              </div>
-
-              {/* Bottom Quick Metrics Line */}
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between text-xs text-slate-300 font-semibold">
-                <span className="flex items-center space-x-1.5">
-                  <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Global Reach</span>
+              <div className="flex items-center gap-3">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Escrow Verified
                 </span>
-                <span className="text-amber-200">Zero Speculation • Real Business</span>
+                <span className="text-xs text-slate-400 font-mono">ID: EX-89241</span>
               </div>
             </div>
-          </motion.div>
-        </div>
+
+            {/* Dashboard Stats Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-6">
+              <motion.div
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
+              >
+                <p className="text-xs font-medium text-slate-500">Marketplace Sales</p>
+                <p className="text-xl font-extrabold text-slate-900 mt-1">৳142,500.00</p>
+                <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center">
+                  ↑ 18.4% this week
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
+              >
+                <p className="text-xs font-medium text-slate-500">Direct Commission</p>
+                <p className="text-xl font-extrabold text-slate-900 mt-1">৳38,200.00</p>
+                <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                  Automated payout
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors"
+              >
+                <p className="text-xs font-medium text-slate-500">Team Overrides</p>
+                <p className="text-xl font-extrabold text-slate-900 mt-1">৳84,910.00</p>
+                <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                  Tier 3 Rank Active
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-100 hover:border-emerald-200 transition-colors"
+              >
+                <p className="text-xs font-medium text-emerald-800">Monthly Capital Yield</p>
+                <p className="text-xl font-extrabold text-emerald-700 mt-1">৳22,500.00</p>
+                <p className="text-[11px] text-emerald-600 font-semibold mt-1">
+                  Disbursed on 1st
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );

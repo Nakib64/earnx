@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Patch,
   Body,
   Param,
   Query,
@@ -135,6 +136,40 @@ export class MarketplaceController {
   @Delete('comments/:id')
   async deleteComment(@Request() req: any, @Param('id') id: string) {
     return this.marketplaceService.deleteComment(req.user.id, id, req.user?.role === 'admin');
+  }
+
+  // ==========================================
+  // NOTIFICATIONS (MARKETPLACE LIKES, COMMENTS, REPLIES)
+  // ==========================================
+
+  /**
+   * Get current user's marketplace notifications
+   */
+  @UseGuards(UserJwtGuard)
+  @Get('notifications')
+  async getNotifications(@Request() req: any, @Query('limit') limit = '30') {
+    return this.marketplaceService.getNotifications(
+      req.user.id,
+      parseInt(limit, 10) || 30,
+    );
+  }
+
+  /**
+   * Mark all notifications as read for current user
+   */
+  @UseGuards(UserJwtGuard)
+  @Post('notifications/mark-all-read')
+  async markAllNotificationsRead(@Request() req: any) {
+    return this.marketplaceService.markAllNotificationsRead(req.user.id);
+  }
+
+  /**
+   * Mark single notification as read
+   */
+  @UseGuards(UserJwtGuard)
+  @Patch('notifications/:id/read')
+  async markNotificationRead(@Request() req: any, @Param('id') id: string) {
+    return this.marketplaceService.markNotificationRead(req.user.id, id);
   }
 
   // ==========================================

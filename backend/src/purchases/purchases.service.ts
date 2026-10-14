@@ -93,6 +93,7 @@ export class PurchasesService {
     // 3. Package Validation & Duplicate Package Checks
     let packageCost = 0;
     let investmentPlan: any = null;
+    let premiumPackage: any = null;
 
     if (dto.package_type === PackageType.PREMIUM) {
       if (payer.id !== targetUser.id && !payer.is_premium) {
@@ -110,8 +111,18 @@ export class PurchasesService {
           `User "${targetUser.full_name || targetUser.phone}" (User Code: ${targetUser.referral_code}) is already a Premium Member. Premium subscription cannot be purchased again.`
         );
       }
-      const feeVal = await this.systemConfigService.getValue('PREMIUM_FEE', '1000');
-      packageCost = parseFloat(feeVal) || 1000;
+      if (dto.package_id) {
+        premiumPackage = await this.prisma.premiumPackage.findUnique({
+          where: { id: dto.package_id },
+        });
+        if (!premiumPackage || !premiumPackage.is_active) {
+          throw new BadRequestException('Selected premium package is invalid or inactive.');
+        }
+        packageCost = Number(premiumPackage.price);
+      } else {
+        const feeVal = await this.systemConfigService.getValue('PREMIUM_FEE', '1000');
+        packageCost = parseFloat(feeVal) || 1000;
+      }
     } else if (dto.package_type === PackageType.INVESTMENT) {
       if (!dto.investment_plan_id) {
         throw new BadRequestException('Investment plan selection is required for investment package.');
@@ -140,20 +151,30 @@ export class PurchasesService {
     // 5. Execute DB Transaction (timeout extended to 30s for multi-level commission chain)
     return this.prisma.$transaction(async (tx) => {
       // A. Deduct Payer Balance using WalletService
+      const packageTitle = premiumPackage?.title || investmentPlan?.title || dto.package_type;
       await this.walletService.processTransaction(
         payer.id,
         TransactionType.BALANCE_TRANSFER,
         -packageCost,
-        `Purchased ${dto.package_type} package for User Code ${targetUser.referral_code} (${targetUser.phone})`,
+        `Purchased ${packageTitle} for User Code ${targetUser.referral_code} (${targetUser.phone})`,
         tx
       );
 
       // B. Process Package Specific Logic for Target User
       if (dto.package_type === PackageType.PREMIUM) {
+        const now = new Date();
+        const durationDays = premiumPackage?.duration_days || 365;
+        const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
         const updateData: any = {
           is_premium: true,
-          premium_started_at: new Date(),
+          premium_started_at: now,
+          premium_expires_at: expiresAt,
         };
+
+        if (premiumPackage) {
+          updateData.premium_package_id = premiumPackage.id;
+        }
 
         if (referrerUser) {
           updateData.referred_by_id = referrerUser.id;
@@ -168,7 +189,8 @@ export class PurchasesService {
         await this.commissionService.distributeCommissions(
           targetUser.id,
           CommissionType.PREMIUM,
-          tx
+          tx,
+          premiumPackage
         );
 
         // Grant locked premium bonus coins (same as approval flow)

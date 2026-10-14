@@ -81,6 +81,29 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         `ALTER TABLE "UserInvestment" ADD COLUMN IF NOT EXISTS "is_principal_returned" BOOLEAN DEFAULT false;`,
       );
     } catch (err) {}
+
+    try {
+      await this.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "Notification" (
+          "id" TEXT NOT NULL PRIMARY KEY,
+          "user_id" TEXT NOT NULL,
+          "actor_id" TEXT NOT NULL,
+          "type" TEXT NOT NULL,
+          "title" TEXT NOT NULL,
+          "message" TEXT NOT NULL,
+          "entity_id" TEXT,
+          "is_read" BOOLEAN NOT NULL DEFAULT false,
+          "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      await this.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "Notification_user_id_is_read_idx" ON "Notification"("user_id", "is_read");`,
+      );
+      await this.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "Notification_created_at_idx" ON "Notification"("created_at");`,
+      );
+    } catch (err) {}
   }
 
   async onModuleDestroy() {

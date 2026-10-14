@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { MarketplaceNotificationDropdown } from './marketplace';
 import {
   Wallet,
   LogOut,
@@ -334,7 +335,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 bg-white/75 backdrop-blur-xl border-b border-white/80 shadow-[0_4px_20px_rgb(0,0,0,0.03)] w-full text-slate-800 transition-all specular-rim ${isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
+        className={`sticky top-0 z-50 bg-white/75 backdrop-blur-xl border-b border-white/80 shadow-[0_4px_20px_rgb(0,0,0,0.03)] w-full text-slate-800 transition-all specular-rim ${isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -393,12 +394,15 @@ export default function Navbar() {
             )}
 
             {/* Right Controls */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-2.5">
+              {/* Marketplace Notification Dropdown (Mounted client-side in the same line as Cart) */}
+              {mounted && !isLoading && user && <MarketplaceNotificationDropdown />}
+
               {/* Shopping Cart Button */}
               <button
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200/80 bg-white/80 hover:bg-white text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                className="relative p-2 sm:p-2.5 rounded-xl border border-slate-200/80 bg-white/80 hover:bg-white text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center justify-center"
                 title="View Shopping Cart"
               >
                 <ShoppingBag className="w-5 h-5 text-slate-700" />
@@ -409,7 +413,7 @@ export default function Navbar() {
                 )}
               </button>
 
-              {(!mounted || isLoading) ? (
+              {/* {(!mounted || isLoading) ? (
                 <div className="h-10 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (
                 <div className="flex items-center space-x-2">
@@ -450,7 +454,7 @@ export default function Navbar() {
                     Join
                   </Link>
                 </div>
-              )}
+              )} */}
 
               {/* Mobile Menu Toggle */}
               <button

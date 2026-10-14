@@ -2,170 +2,166 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ul } from 'framer-motion/client';
 
 export default function Footer() {
   return (
-    <footer className="bg-white text-slate-600 border-t border-slate-200 pt-16 pb-12 overflow-hidden">
+    <footer className="bg-white border-t border-slate-200 pt-16 pb-12" data-purpose="site-footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-12 pb-12 border-b border-slate-100">
-          {/* Brand & Socials */}
-          <div className="md:col-span-4 space-y-4">
-            <Link href="/" className="inline-block">
-              <img
-                src="/logo.png"
-                alt="EarnX Capital"
-                className="h-10 w-auto object-contain"
-              />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-100">
+          {/* Brand Info */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link className="flex items-center gap-2 group" href="/">
+              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-white font-bold shadow-sm group-hover:scale-105 transition-transform">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2.5"
+                  />
+                </svg>
+              </div>
+              <span className="text-lg font-extrabold tracking-tight text-slate-900">
+                earn<span className="text-emerald-600">x</span>{' '}
+                <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Capital</span>
+              </span>
             </Link>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-medium max-w-sm">
-              EarnX Capital is a digital business platform with multiple earning opportunities for everyone.
+            <p className="text-slate-500 text-xs sm:text-sm max-w-sm leading-relaxed">
+              EarnX Capital is a modern digital platform unifying verified marketplace merchandise, performance marketing, team entrepreneurship, and structured investments.
             </p>
-
-            {/* Social Icons with SVG */}
-            <div className="flex items-center space-x-3 pt-2">
-              {/* Facebook */}
+            <div className="flex items-center gap-3 pt-2 text-slate-400">
               <a
+                className="hover:text-emerald-600 transition-colors"
                 href="#"
                 aria-label="Facebook"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                 </svg>
               </a>
-
-              {/* Instagram */}
               <a
+                className="hover:text-emerald-600 transition-colors"
                 href="#"
-                aria-label="Instagram"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
+                aria-label="Telegram"
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
                 </svg>
               </a>
-
-              {/* YouTube */}
               <a
-                href="#"
-                aria-label="YouTube"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
-              >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                </svg>
-              </a>
-
-              {/* LinkedIn */}
-              <a
+                className="hover:text-emerald-600 transition-colors"
                 href="#"
                 aria-label="LinkedIn"
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-[#01281a] text-slate-600 hover:text-white flex items-center justify-center transition-colors shadow-2xs"
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
                 </svg>
               </a>
             </div>
           </div>
 
-
-        <div className='w-full grid grid-cols-2 md:grid-cols-4 gap-8'>
-  {/* Company Links */}
-          <div className="md:col-span-2 space-y-3">
-            <h4 className="font-extrabold text-slate-900 text-sm">Company</h4>
-            <ul className="space-y-2 text-xs font-semibold">
+          {/* Col 2: Company */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4">Company</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 font-medium">
               <li>
-                <Link href="/about" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/about">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-[#01281a] transition-colors">
-                  Careers
+                <Link className="hover:text-emerald-600 transition-colors" href="/about">
+                  Our Mission
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/contact">
                   Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-emerald-600 transition-colors" href="/contact">
+                  Press &amp; Media
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Marketplace Links */}
-          <div className="md:col-span-2 space-y-3">
-            <h4 className="font-extrabold text-slate-900 text-sm">Marketplace</h4>
-            <ul className="space-y-2 text-xs font-semibold">
+          {/* Col 3: Marketplace */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4">Marketplace</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 font-medium">
               <li>
-                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/products">
                   All Products
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/products">
                   Categories
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/purchase" className="hover:text-[#01281a] transition-colors">
-                  Top Sellers
+                <Link className="hover:text-emerald-600 transition-colors" href="/dashboard/purchase">
+                  VIP Packages
+                </Link>
+              </li>
+              <li>
+                <Link className="hover:text-emerald-600 transition-colors" href="/dashboard">
+                  Merchant Portal
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Opportunities Links */}
-          <div className="md:col-span-2 space-y-3">
-            <h4 className="font-extrabold text-slate-900 text-sm">Opportunities</h4>
-            <ul className="space-y-2 text-xs font-semibold">
+          {/* Col 4: Opportunities */}
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4">Opportunities</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-600 font-medium">
               <li>
-                <Link href="/#opportunities" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/register">
                   Sales &amp; Marketing
                 </Link>
               </li>
               <li>
-                <Link href="/#team-business" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/register">
                   Team-Based Business
                 </Link>
               </li>
               <li>
-                <Link href="/#investment" className="hover:text-[#01281a] transition-colors">
-                  Investment Opportunities
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support Links */}
-          <div className="md:col-span-2 space-y-3">
-            <h4 className="font-extrabold text-slate-900 text-sm">Support</h4>
-            <ul className="space-y-2 text-xs font-semibold">
-              <li>
-                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
-                  Help Center
+                <Link className="hover:text-emerald-600 transition-colors" href="/investments">
+                  Investments
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
-                  Terms &amp; Conditions
+                <Link className="hover:text-emerald-600 transition-colors" href="/terms">
+                  Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-[#01281a] transition-colors">
+                <Link className="hover:text-emerald-600 transition-colors" href="/privacy">
                   Privacy Policy
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-        
-        </div>
 
         {/* Bottom Copyright */}
-        <div className="pt-8 text-center text-xs text-slate-400 font-medium">
-          © 2026 EarnX Capital. All rights reserved.
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>© 2026 EarnX Capital. All rights reserved.</p>
+          <div className="flex items-center gap-6">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              All Systems Operational
+            </span>
+            <Link className="hover:underline hover:text-slate-700" href="/terms">
+              Security Audit
+            </Link>
+            <Link className="hover:underline hover:text-slate-700" href="/privacy">
+              Legal Framework
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -125,6 +125,8 @@ model User {
   marketplace_likes          MarketplaceLike[]
   daily_ad_claims            DailyAdClaim[]
   orders                     Order[]
+  notifications              Notification[]       @relation("UserNotifications")
+  triggered_notifications    Notification[]       @relation("ActorNotifications")
   created_at                 DateTime            @default(now())
   updated_at                 DateTime            @updatedAt
 
@@ -250,6 +252,25 @@ model MarketplaceComment {
 
   @@index([post_id])
   @@index([parent_id])
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  actor_id   String
+  type       String   // "MARKETPLACE_LIKE", "MARKETPLACE_COMMENT", "MARKETPLACE_REPLY"
+  title      String
+  message    String
+  entity_id  String?  // postId
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user       User     @relation("UserNotifications", fields: [user_id], references: [id], onDelete: Cascade)
+  actor      User     @relation("ActorNotifications", fields: [actor_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_read])
+  @@index([created_at])
 }
 
 model CoinTransaction {
