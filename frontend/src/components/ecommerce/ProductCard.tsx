@@ -130,7 +130,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onOpenDetails
 
           <div className="pt-2 flex items-baseline gap-2">
             <span className="text-xl font-extrabold text-[#009F6B]">
-              ৳{Number(product.price).toFixed(2)}
+              ৳{(() => {
+                const val = product.price;
+                if (val === null || val === undefined) return '0.00';
+                if (typeof val === 'number') return isNaN(val) ? '0.00' : val.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const cleaned = String(val).replace(/[^0-9.-]/g, '');
+                const num = parseFloat(cleaned);
+                return isNaN(num) ? '0.00' : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              })()}
             </span>
           </div>
         </div>

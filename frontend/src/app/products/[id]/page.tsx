@@ -29,6 +29,37 @@ import { useCart } from '../../../context/CartContext';
 import { ProductCard } from '../../../components/ecommerce';
 import { toast } from 'sonner';
 
+export function parsePrice(val: any): number {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  if (typeof val === 'string') {
+    const cleaned = val.replace(/[^0-9.-]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  }
+  if (typeof val === 'object') {
+    if (typeof val.toNumber === 'function') {
+      try {
+        const n = val.toNumber();
+        if (!isNaN(n)) return n;
+      } catch (e) {}
+    }
+    if (typeof val.toString === 'function') {
+      const cleaned = val.toString().replace(/[^0-9.-]/g, '');
+      const num = parseFloat(cleaned);
+      if (!isNaN(num)) return num;
+    }
+    if ('amount' in val) return parsePrice(val.amount);
+    if ('price' in val) return parsePrice(val.price);
+  }
+  return 0;
+}
+
+export function formatPriceBDT(val: any): string {
+  const num = parsePrice(val);
+  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export default function DedicatedProductPage() {
   const params = useParams();
   const router = useRouter();
@@ -54,18 +85,23 @@ export default function DedicatedProductPage() {
       setLoading(true);
       try {
         const res = await apiFetch<any>(`/ecommerce/products/${productId}`);
-        if (res.success && res.data) {
-          setProduct(res.data);
+        const productData =
+          res.data?.data && typeof res.data.data === 'object' && !Array.isArray(res.data.data)
+            ? res.data.data
+            : res.data;
+
+        if (res.success && productData && productData.id) {
+          setProduct(productData);
           setSelectedImage(0);
           setQuantity(1);
 
           // Fetch related products from same category or latest
-          loadRelatedProducts(res.data.category, res.data.id);
+          loadRelatedProducts(productData.category, productData.id);
         } else {
           setProduct(null);
         }
       } catch (err) {
-        console.error('Failed to load product details:', err);
+        console.error('Failed to load product details from API:', err);
         setProduct(null);
       } finally {
         setLoading(false);
@@ -365,7 +401,7 @@ export default function DedicatedProductPage() {
                     </span>
                     <div className="flex items-baseline space-x-2">
                       <span className="text-3xl sm:text-4xl font-black text-[#009F6B] tracking-tight">
-                        ৳{Number(product.price).toFixed(2)}
+                        ৳{formatPriceBDT(product.price)}
                       </span>
                       <span className="text-xs font-semibold text-slate-400">BDT</span>
                     </div>
@@ -449,7 +485,7 @@ export default function DedicatedProductPage() {
                     className="flex items-center justify-center gap-2.5 py-4 px-6 rounded-2xl bg-[#009F6B] hover:bg-[#008C5F] active:bg-[#007A53] text-white text-sm font-black shadow-[0_4px_16px_rgba(0,159,107,0.35)] hover:shadow-[0_6px_20px_rgba(0,159,107,0.45)] transition-all disabled:opacity-40 cursor-pointer active:scale-[0.98]"
                   >
                     <Zap className="w-4 h-4 fill-white text-white" />
-                    <span>Buy Now (৳{(Number(product.price) * quantity).toFixed(2)})</span>
+                    <span>Buy Now (৳{(parsePrice(product.price) * quantity).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
                   </button>
                 </div>
 
@@ -539,7 +575,7 @@ export default function DedicatedProductPage() {
                 </div>
                 <div className="py-2.5 flex justify-between">
                   <span className="text-slate-400 font-medium">Price</span>
-                  <span className="text-[#009F6B] font-extrabold">৳{Number(product.price).toFixed(2)} BDT</span>
+                  <span className="text-[#009F6B] font-extrabold">৳{formatPriceBDT(product.price)} BDT</span>
                 </div>
                 <div className="py-2.5 flex justify-between">
                   <span className="text-slate-400 font-medium">Stock Status</span>

@@ -73,7 +73,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
 
-    const priceNum = Number(product.price) || 0;
+    const priceNum = (() => {
+      const p = product.price;
+      if (typeof p === 'number') return isNaN(p) ? 0 : p;
+      const num = parseFloat(String(p).replace(/[^0-9.-]/g, ''));
+      return isNaN(num) ? 0 : num;
+    })();
     const firstImg = product.images && product.images.length > 0 ? product.images[0] : '';
 
     setCart((prevCart) => {

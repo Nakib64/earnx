@@ -192,7 +192,7 @@ export default function Sidebar() {
   const initials = getInitials(displayName);
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 shrink-0 bg-white/70 backdrop-blur-2xl border-r border-white/80 p-3.5 space-y-3 overflow-y-auto z-20 h-screen sticky top-0 shadow-[0_8px_30px_rgb(0,0,0,0.03)] no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden specular-rim select-none">
+    <aside className="hidden lg:flex flex-col w-72 shrink-0 bg-white/70 backdrop-blur-2xl border-r border-white/80 p-3.5 space-y-3 overflow-y-auto z-20 h-[calc(100vh-4rem)] sticky top-16 shadow-[0_8px_30px_rgb(0,0,0,0.03)] no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden specular-rim select-none">
       {/* Brand Header Logo */}
       <Link href={isAdminRoute ? '/admin/dashboard' : '/dashboard'} className="flex items-center justify-center pt-1 pb-2 shrink-0 group">
         <img

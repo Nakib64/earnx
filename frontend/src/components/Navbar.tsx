@@ -124,7 +124,7 @@ export default function Navbar() {
 
   const drawerNavItems = isAdminRoute
     ? adminItems
-    : (isDashboardRoute || user)
+    : isDashboardRoute
       ? userItems
       : publicItems;
 
@@ -335,8 +335,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 bg-white/75 backdrop-blur-xl border-b border-white/80 shadow-[0_4px_20px_rgb(0,0,0,0.03)] w-full text-slate-800 transition-all specular-rim ${isAdminRoute || isDashboardRoute ? 'lg:hidden' : ''
-          }`}
+        className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/80 shadow-[0_4px_20px_rgb(0,0,0,0.03)] w-full text-slate-800 transition-all specular-rim"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-18">
@@ -393,6 +392,78 @@ export default function Navbar() {
               </nav>
             )}
 
+            {/* Desktop Navigation Links for Dashboard Route */}
+            {isDashboardRoute && (
+              <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
+                <Link
+                  href="/dashboard"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Overview
+                </Link>
+                <Link
+                  href="/dashboard/purchase"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/purchase'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Packages
+                </Link>
+                <Link
+                  href="/dashboard/orders"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/orders'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Orders
+                </Link>
+                <Link
+                  href="/dashboard/wallet"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/wallet'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Wallet
+                </Link>
+                <Link
+                  href="/dashboard/investments"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/investments'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Investments
+                </Link>
+                <Link
+                  href="/dashboard/marketplace"
+                  className={`text-xs lg:text-sm font-bold transition-colors ${
+                    pathname === '/dashboard/marketplace'
+                      ? 'text-emerald-700 border-b-2 border-emerald-600 pb-1'
+                      : 'text-slate-600 hover:text-emerald-700'
+                  }`}
+                >
+                  Feed
+                </Link>
+                <Link
+                  href="/"
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200"
+                >
+                  Public Site
+                </Link>
+              </nav>
+            )}
+
             {/* Right Controls */}
             <div className="flex items-center space-x-2 sm:space-x-2.5">
               {/* Marketplace Notification Dropdown (Mounted client-side in the same line as Cart) */}
@@ -413,50 +484,44 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* {(!mounted || isLoading) ? (
-                <div className="h-10 w-24 bg-slate-100 animate-pulse rounded-xl" />
+              {/* Laptop / Desktop Dashboard Action Buttons */}
+              {(!mounted || isLoading) ? (
+                <div className="hidden md:block h-9 w-24 bg-slate-100 animate-pulse rounded-xl" />
               ) : user ? (
-                <div className="flex items-center space-x-2">
-                  {isPublicRoute && (
-                    <Link
-                      href="/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-emerald-100" />
-                      <span>Dashboard</span>
-                    </Link>
-                  )}
-                </div>
+                <Link
+                  href="/dashboard"
+                  className="hidden md:inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                  <span>Dashboard</span>
+                </Link>
               ) : admin ? (
-                <div className="flex items-center space-x-2">
-                  {isPublicRoute && (
-                    <Link
-                      href="/admin/dashboard"
-                      className="inline-flex items-center space-x-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-sm transition-colors"
-                    >
-                      <LayoutDashboard className="w-4 h-4 text-emerald-100" />
-                      <span>Admin Panel</span>
-                    </Link>
-                  )}
-                </div>
+                <Link
+                  href="/admin/dashboard"
+                  className="hidden md:inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                  <span>Admin Panel</span>
+                </Link>
               ) : (
-                <div className="flex items-center space-x-3">
+                <div className="hidden md:flex items-center space-x-2">
                   <Link
                     href="/login"
-                    className="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-emerald-700 border border-slate-200 hover:border-slate-300 transition-colors bg-white/60"
+                    className="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-emerald-700 border border-slate-200/90 hover:border-slate-300 transition-colors bg-white/70 shadow-2xs"
                   >
                     Login
                   </Link>
                   <Link
-                    href="/register"
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm hover:shadow-md transition-all"
+                    href="/dashboard"
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all"
                   >
-                    Join
+                    <LayoutDashboard className="w-3.5 h-3.5 text-emerald-100" />
+                    <span>Dashboard</span>
                   </Link>
                 </div>
-              )} */}
+              )}
 
-              {/* Mobile Menu Toggle */}
+              {/* Mobile Menu Toggle Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden p-2.5 rounded-xl text-slate-700 hover:text-slate-900 bg-white/80 hover:bg-white border border-white/90 shadow-xs backdrop-blur-md transition-all active:scale-95 cursor-pointer"
