@@ -102,9 +102,10 @@ export default function Navbar() {
 
   const publicItems = [
     { href: '/', label: 'Home', icon: Home },
-    { href: '/products', label: 'Shop / Products', icon: ShoppingBag },
+    { href: '/products', label: 'Products', icon: ShoppingBag },
     { href: '/about', label: 'About Us', icon: Info },
     { href: '/contact', label: 'Contact', icon: Headset },
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   ];
 
   const getInitials = (name?: string) => {
@@ -286,45 +287,77 @@ export default function Navbar() {
         {/* Drawer Footer Actions */}
         <div className="relative z-10 pt-3 border-t border-slate-200/60 shrink-0 space-y-2">
           {user ? (
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                logoutUser();
-              }}
-              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-white/70 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 cursor-pointer shadow-xs"
-            >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span>Log Out</span>
-            </button>
+            <div className="space-y-2">
+              {isPublicRoute && (
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full flex items-center justify-center space-x-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-colors"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                  <span>Go to Dashboard</span>
+                </Link>
+              )}
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logoutUser();
+                }}
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-white/70 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 cursor-pointer shadow-xs"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>Log Out</span>
+              </button>
+            </div>
           ) : admin ? (
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                logoutAdmin();
-              }}
-              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-white/70 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 cursor-pointer shadow-xs"
-            >
-              <LogOut className="w-4 h-4 shrink-0" />
-              <span>Log Out Admin</span>
-            </button>
+            <div className="space-y-2">
+              <Link
+                href="/admin/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-colors"
+              >
+                <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                <span>Admin Panel</span>
+              </Link>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  logoutAdmin();
+                }}
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-white/70 hover:bg-rose-50 text-slate-600 hover:text-rose-600 hover:border-rose-200 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 cursor-pointer shadow-xs"
+              >
+                <LogOut className="w-4 h-4 shrink-0" />
+                <span>Log Out Admin</span>
+              </button>
+            </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
               <Link
-                href="/login"
+                href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 bg-white/80 hover:bg-white text-slate-800 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 shadow-xs"
+                className="w-full flex items-center justify-center space-x-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-colors"
               >
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
+                <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                <span>Dashboard</span>
               </Link>
-              <Link
-                href="/register"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-1.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
-              >
-                <UserPlus className="w-4 h-4 text-emerald-100" />
-                <span>Join Now</span>
-              </Link>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center space-x-1.5 py-2.5 bg-white/80 hover:bg-white text-slate-800 rounded-xl font-bold text-xs transition-colors border border-slate-200/80 shadow-xs"
+                >
+                  <LogIn className="w-4 h-4 text-slate-600" />
+                  <span>Login</span>
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center space-x-1.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                >
+                  <UserPlus className="w-4 h-4 text-slate-200" />
+                  <span>Sign Up</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -369,7 +402,7 @@ export default function Navbar() {
                     : 'text-slate-600 hover:text-emerald-700'
                     }`}
                 >
-                  Shop
+                  Products
                 </Link>
                 <Link
                   href="/about"

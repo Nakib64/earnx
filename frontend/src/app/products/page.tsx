@@ -172,6 +172,7 @@ export default function ProductsPage() {
               >
                 {cat}
               </button>
+              
             ))}
             <button
               type="button"
