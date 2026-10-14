@@ -18,15 +18,19 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
-            echo "🚀 Pulling latest changes from git..."
+            echo "🚀 Syncing latest changes from git..."
             cd /var/www/earnx
-            git pull origin main
+            git reset --hard HEAD
+            git clean -fd -e .env -e .env.* -e backend/.env -e frontend/.env.local -e backend/uploads -e uploads
+            rm -f frontend/public/5133fba3230587ae6186.txt
+            git fetch origin main
+            git reset --hard origin/main
 
             echo "📦 Updating Backend..."
             cd /var/www/earnx/backend
             npm install
             npx prisma generate
-            npx prisma db push
+            npx prisma db push --accept-data-loss
             node prisma/seed-live-packages.js
             npm run build
             pm2 restart earnx-backend
