@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 // WhatsApp Configuration
 // TODO: Replace with your actual WhatsApp business number (e.g. '8801700000000')
 // =========================================================================
-const WHATSAPP_PHONE_NUMBER = '8801700000000'; // Placeholder number
+const WHATSAPP_PHONE_NUMBER = '+60102224257'; // Placeholder number
 const DEFAULT_MESSAGE = 'Hello EarnX Capital Support, I need assistance with my account.';
 
 export default function FloatingWhatsApp() {
